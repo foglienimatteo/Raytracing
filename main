@@ -1,8 +1,10 @@
-#!/usr/bin/env julia
+#!/usr/bin/env julia.exe
 
 using Pkg
 Pkg.activate(normpath(@__DIR__))
 
+using Colors
+using ColorTypes
 using Raytracing
 
 function main()
@@ -19,5 +21,3 @@ function main()
 end
 
 main()
-
-
