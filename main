@@ -1,0 +1,15 @@
+#!/usr/bin/env julia
+
+using Pkg
+Pkg.activate(normpath(@__DIR__))
+
+using Raytracing
+
+
+function main()
+	Raytracing.greet()
+end
+
+main()
+
+
