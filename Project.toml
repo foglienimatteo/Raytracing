@@ -1,0 +1,4 @@
+name = "Raytracing"
+uuid = "38da103c-6e39-4dd2-83ef-ac48b06f016c"
+authors = ["Matteo Foglieni <matteo.foglieni16@gmail.com>"]
+version = "0.1.0"
