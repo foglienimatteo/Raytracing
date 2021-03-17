@@ -21,9 +21,16 @@ are_close(x,y,epsilon=1e-10) = abs(x-y) < epsilon
 
 struct HDRimage
     width::Int
-    heigth::Int
+    height::Int
     rgb_m::Array{RGB{Float32}}
 
 end
+
+set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{T}) where {T}
+    hdr.rgb_m[pixel_offset(hdr, x,y)] = c
+    nothing
+end
+
+
 
 end # module
