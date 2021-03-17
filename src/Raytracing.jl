@@ -20,19 +20,16 @@ Base.:≈(a::RGB{T}, b::RGB{T}) where {T} = are_close(a.r,b.r) && are_close(a.g,
 
 are_close(x,y,epsilon=1e-10) = abs(x-y) < epsilon
 
-function valid_coordinates(hdr::HDRimage, x::Int, y::Int)
-    x>=0 && y>=0 && x<hdr.width && y<hdr.height
-end
-
-pixel_offset(hdr::HDRimage, x::Int, y::Int) = (y+1)*hdr.height + (x+1)
-get_pixel(hdr::HDRimage, x::Int, y::Int) = img.rgb_m[pixel_offset(hdr, x, y)]
-
-struct HDRimage
+struct HDRimage begin
     width::Int
     height::Int
     rgb_m::Array{RGB{Float32}}
 end
 
+valid_coordinates(hdr::HDRimage, x::Int, y::Int) = x>=0 && y>=0 && x<hdr.width && y<hdr.height
+pixel_offset(hdr::HDRimage, x::Int, y::Int) = (y+1)*hdr.height + (x+1)
+
+get_pixel(hdr::HDRimage, x::Int, y::Int) = hdr.rgb_m[pixel_offset(hdr, x, y)]
 set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{T}) where {T}
     hdr.rgb_m[pixel_offset(hdr, x,y)] = c
     nothing
