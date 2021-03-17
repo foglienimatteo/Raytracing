@@ -2,7 +2,7 @@ module Raytracing
 
 using Colors  #generico
 import ColorTypes:RGB  #specificare sempre cosa si importa. In questo caso posso evitare di secificare nella funzione "x::ColorTypes.RGB{T}"
-import Base.:+, Base.:*, Base.:-, Base.:≈
+import Base.:+; import Base.:-; import Base.:≈; import Base.:*
 
 #=
 #T = Float64 errato
@@ -28,10 +28,9 @@ pixel_offset(hdr::HDRimage, x::Int, y::Int) = (y+1)*hdr.height + (x+1)
 get_pixel(hdr::HDRimage, x::Int, y::Int) = img.rgb_m[pixel_offset(hdr, x, y)]
 
 struct HDRimage
-    width
-    height
-    Color_matrix::RGB{T}[] where {T}
-
+    width::Int
+    height::Int
+    rgb_m::Array{RGB{Float32}}
 end
 
 end # module
