@@ -12,7 +12,6 @@ function main()
 	a = RGB{Float64}(0.1, 0.2, 0.3)
 	b = RGB{Float64}(0.5, 0.6, 0.7)
 
-	Raytracing.greet()
 
 end
 

@@ -21,3 +21,13 @@ import ColorTypes:RGB
 	@test b*0.5 ≈ RGB(0.25 + err, 0.3, 0.35)
 
 end
+
+@testset "test_coordinates" begin
+	img = HDRimage(7, 4)
+
+	@test valid_coordinates(img, 0, 0)
+    	@test valid_coordinates(img, 6, 3)
+    	@test not valid_coordinates(img, -1, 0)
+    	@test not img.valid_coordinates(img, 0, -1)
+end
+
