@@ -22,15 +22,13 @@ import ColorTypes:RGB
 end
 
 @testset "test_coordinates" begin
-	println("1")
-	@test 1+1==2
-	img = HDRimage(7, 4)
-	@test 1+2==3
-	#=@test valid_coordinates(img, 0, 0)
-    	@test valid_coordinates(img, 6, 3)
-    	@test !valid_coordinates(img, -1, 0)
-	println("4")
-    	@test !valid_coordinates(img, 0, -1)
-	    =#
+	rgb_matrix=fill(RGB(0.6, 0.8, 1.0), (28,))
+	img = Raytracing.HDRimage(7, 4, rgb_matrix)
+
+	@test Raytracing.valid_coordinates(img, 0, 0)
+    	@test Raytracing.valid_coordinates(img, 6, 3)
+    	@test !Raytracing.valid_coordinates(img, -1, 0)
+    	@test !Raytracing.valid_coordinates(img, 0, -1)
+	
 end
 

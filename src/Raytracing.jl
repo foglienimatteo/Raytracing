@@ -3,6 +3,7 @@ module Raytracing
 using Colors  #generico
 import ColorTypes:RGB  #specificare sempre cosa si importa. In questo caso posso evitare di secificare nella funzione "x::ColorTypes.RGB{T}"
 import Base.:+; import Base.:-; import Base.:≈; import Base.:*
+#export HDRimage
 
 #=
 #T = Float64 errato
@@ -24,6 +25,8 @@ struct HDRimage
     width::Int
     height::Int
     rgb_m::Array{RGB{Float32}}
+    HDRimage(w,h) = new(w,h, fill(RGB(0.0, 0.0, 0.0), (w*h,)) )
+    HDRimage(w,h, img) = new(w,h, img)
 end
 
 function valid_coordinates(hdr::HDRimage, x::Int, y::Int)
