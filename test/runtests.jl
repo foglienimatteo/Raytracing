@@ -3,7 +3,6 @@ using Test
 
 import ColorTypes:RGB
 
-
 @testset "Colors" begin
 	@test 1+1==2
 	@test Raytracing.are_close(1.00000000001, 1)

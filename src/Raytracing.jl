@@ -17,11 +17,19 @@ Base.:-(a::RGB{T}, b::RGB{T}) where {T} = RGB(a.r - b.r, a.g - b.g, a.b - b.b)
 Base.:*(scalar, c::RGB{T}) where {T} = RGB(scalar*c.r , scalar*c.g, scalar*c.b)
 Base.:*(c::RGB{T}, scalar) where {T} = scalar * c
 Base.:≈(a::RGB{T}, b::RGB{T}) where {T} = are_close(a.r,b.r) && are_close(a.g,b.g) && are_close(a.b, b.b)
+
 are_close(x,y,epsilon=1e-10) = abs(x-y) < epsilon
+
+function valid_coordinates(hdr::HDRimage, x::Int, y::Int)
+    x>=0 && y>=0 && x<hdr.width && y<hdr.height
+end
+
+pixel_offset(hdr::HDRimage, x::Int, y::Int) = (y+1)*hdr.height + (x+1)
+get_pixel(hdr::HDRimage, x::Int, y::Int) = img.rgb_m[pixel_offset(hdr, x, y)]
 
 struct HDRimage
     width
-    heigth
+    height
     Color_matrix::RGB{T}[] where {T}
 
 end
