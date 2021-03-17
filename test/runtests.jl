@@ -21,14 +21,34 @@ import ColorTypes:RGB
 
 end
 
+@testset "HDRimage_constructors" begin
+	rgb_matrix=fill(RGB(0., 0., 0.0), (6,))
+	img_1 = Raytracing.HDRimage(3, 2, rgb_matrix)
+	img_2 = Raytracing.HDRimage(3, 2)
+	@test img_1.rgb_m==img_2.rgb_m
+end
+
 @testset "test_coordinates" begin
-	rgb_matrix=fill(RGB(0.6, 0.8, 1.0), (28,))
-	img = Raytracing.HDRimage(7, 4, rgb_matrix)
+	img = Raytracing.HDRimage(7, 4)
 
 	@test Raytracing.valid_coordinates(img, 0, 0)
+	@test Raytracing.valid_coordinates(img, 3, 2)
     	@test Raytracing.valid_coordinates(img, 6, 3)
+
+	@test !Raytracing.valid_coordinates(img, 6, 4)
+	@test !Raytracing.valid_coordinates(img, 7, 3)
     	@test !Raytracing.valid_coordinates(img, -1, 0)
     	@test !Raytracing.valid_coordinates(img, 0, -1)
 	
+end
+
+@testset "test_pixel_offset" begin
+	rgb_matrix= [ RGB( 3i/255, (3i+1)/255, (3i+2)/255 ) for i in 0:5]
+	img = Raytracing.HDRimage(3, 2, rgb_matrix)
+
+	@test img.rgb_m[Raytracing.pixel_offset(img, 0, 0)] ≈ RGB(0/255, 1/255, 2/255)
+	@test img.rgb_m[Raytracing.pixel_offset(img, 2, 0)] ≈ RGB(6/255, 7/255, 8/255)
+	@test img.rgb_m[Raytracing.pixel_offset(img, 2, 1)] ≈ RGB(15/255, 16/255, 17/255)
+
 end
 

@@ -26,13 +26,17 @@ struct HDRimage
     height::Int
     rgb_m::Array{RGB{Float32}}
     HDRimage(w,h) = new(w,h, fill(RGB(0.0, 0.0, 0.0), (w*h,)) )
-    HDRimage(w,h, img) = new(w,h, img)
+    function HDRimage(w,h, rgb_m) 
+        @assert size(rgb_m) == (w*h,)
+        new(w,h, rgb_m)
+    end
 end
 
-function valid_coordinates(hdr::HDRimage, x::Int, y::Int)
-    x>=0 && y>=0 && x<hdr.width && y<hdr.height
+valid_coordinates(hdr::HDRimage, x::Int, y::Int) = x>=0 && y>=0 && x<hdr.width && y<hdr.height
+function pixel_offset(hdr::HDRimage, x::Int, y::Int)
+    @assert valid_coordinates(hdr, x, y)
+    y*hdr.width + (x+1)
 end
-pixel_offset(hdr::HDRimage, x::Int, y::Int) = (y+1)*hdr.height + (x+1)
 
 get_pixel(hdr::HDRimage, x::Int, y::Int) = hdr.rgb_m[pixel_offset(hdr, x, y)]
 function set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{T}) where {T}
