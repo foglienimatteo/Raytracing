@@ -41,7 +41,7 @@ end
 get_pixel(hdr::HDRimage, x::Int, y::Int) = hdr.rgb_m[pixel_offset(hdr, x, y)]
 function set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{T}) where {T}
     hdr.rgb_m[pixel_offset(hdr, x,y)] = c
-    nothing
+    return nothing
 end
 
 
