@@ -1,9 +1,10 @@
 module Raytracing
 
 using Colors  #generico
+#using IOStream
 import ColorTypes:RGB  #specificare sempre cosa si importa. In questo caso posso evitare di secificare nella funzione "x::ColorTypes.RGB{T}"
 import Base.:+; import Base.:-; import Base.:≈; import Base.:*
-#export HDRimage
+export HDRimage
 
 #=
 #T = Float64 errato
@@ -46,5 +47,34 @@ function set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{T}) where {T}
     return nothing
 end
 
+
+function write(io::IO, img::HDRimage)
+    endianness=-1.0
+    w = img.width
+    h = img.height
+    # The PFM header, as a Julia string (UTF-8)
+    header = "PF\n$w $h\n$endianness\n"
+
+    # Convert the header into a sequence of bytes
+    bytebuf = transcode(UInt8, header)
+
+    #write on io the header in binary code
+    println(bytebuf)
+    write(io, reinterpret(UInt8, bytebuf))
+
+    println("ciaociaooooo")
+
+    # Write the image (bottom-to-up, left-to-right)
+    for y in h:-1:0, x in 0:w
+        color = get_pixel(img, x, y)
+
+        println(reinterpret(UInt8,  color.r))
+        write(io, reinterpret(UInt8,  color.r))
+        write(io, reinterpret(UInt8,  color.g))
+        write(io, reinterpret(UInt8,  color.b))
+    end
+
+
+end
 
 end # module
