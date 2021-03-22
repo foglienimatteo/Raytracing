@@ -56,7 +56,7 @@ function write(io::IO, img::HDRimage)
     header = "PF\n$w $h\n$endianness\n"
 
     # Convert the header into a sequence of bytes
-    bytebuf = transcode(UInt8, header)
+    bytebuf = transcode(UInt8, header) # transcode scrive UInt8 in sequenza grezza di byte (8bit)
 
     #write on io the header in binary code
     println(bytebuf)
