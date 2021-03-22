@@ -4,7 +4,7 @@ using Colors  #generico
 #using IOStream
 import ColorTypes:RGB  #specificare sempre cosa si importa. In questo caso posso evitare di secificare nella funzione "x::ColorTypes.RGB{T}"
 import Base.:+; import Base.:-; import Base.:≈; import Base.:*
-export HDRimage
+import Base.write
 
 #=
 #T = Float64 errato
@@ -47,6 +47,10 @@ function set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{T}) where {T}
     return nothing
 end
 
+function print_rgb(c::RGB{T}) where {T}
+    println("RGB component of this color: \t$(c.r) \t$(c.g) \t$(c.b)")
+end
+
 
 function write(io::IO, img::HDRimage)
     endianness=-1.0
@@ -59,19 +63,17 @@ function write(io::IO, img::HDRimage)
     bytebuf = transcode(UInt8, header) # transcode scrive UInt8 in sequenza grezza di byte (8bit)
 
     #write on io the header in binary code
-    println(bytebuf)
     write(io, reinterpret(UInt8, bytebuf))
 
-    println("ciaociaooooo")
-
     # Write the image (bottom-to-up, left-to-right)
-    for y in h:-1:0, x in 0:w
+    for y in h-1:-1:0, x in 0:w-1
+        println(x," ", y)
         color = get_pixel(img, x, y)
-
-        println(reinterpret(UInt8,  color.r))
-        write(io, reinterpret(UInt8,  color.r))
-        write(io, reinterpret(UInt8,  color.g))
-        write(io, reinterpret(UInt8,  color.b))
+        print_rgb(color)
+        println(reinterpret(UInt8,  [color.r]))
+        write(io, reinterpret(UInt8,  [color.r]))
+        write(io, reinterpret(UInt8,  [color.g]))
+        write(io, reinterpret(UInt8,  [color.b]))
     end
 
 
