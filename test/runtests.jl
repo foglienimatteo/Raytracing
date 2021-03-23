@@ -11,9 +11,11 @@ import ColorTypes:RGB
 	b = RGB{Float64}(0.5, 0.6, 0.7)
 	err = 1e-11
 
+	# Controllo della inizializzazione
 	@test a ≈ RGB{Float64}(0.1 + err, 0.2, 0.3 - 2*err)
 	@test b ≈ RGB{Float64}(0.5, 0.6 + err, 0.7 + 2*err)
 
+	# Controllo nuove operazioni
 	@test a+b ≈ RGB(0.6, 0.8+err, 1.0)
 	@test b-a ≈ RGB(0.4, 0.4-2err, 0.4)
 	@test 2.0*a ≈ RGB(0.2 + err, 0.4, 0.6)
@@ -29,6 +31,8 @@ end
 	@test img_1.width == 3
 	@test img_1.height == 2
 	@test img_1.rgb_m==img_2.rgb_m
+
+	# Controllo della scrittura errata nell'assert
 	@test_throws AssertionError img = Raytracing.HDRimage(3, 3, rgb_matrix)
 	@test_throws AssertionError img = Raytracing.HDRimage(1, 3, rgb_matrix)
 
@@ -39,12 +43,12 @@ end
 
 	@test Raytracing.valid_coordinates(img, 0, 0)
 	@test Raytracing.valid_coordinates(img, 3, 2)
-    	@test Raytracing.valid_coordinates(img, 6, 3)
+    @test Raytracing.valid_coordinates(img, 6, 3)
 
 	@test !Raytracing.valid_coordinates(img, 6, 4)
 	@test !Raytracing.valid_coordinates(img, 7, 3)
-    	@test !Raytracing.valid_coordinates(img, -1, 0)
-    	@test !Raytracing.valid_coordinates(img, 0, -1)
+    @test !Raytracing.valid_coordinates(img, -1, 0)
+    @test !Raytracing.valid_coordinates(img, 0, -1)
 	
 end
 
@@ -91,7 +95,7 @@ end
 end
 
 @testset "test_write_pfm" begin
-
+	# Inizializzo e definisco una HDRimage
 	img = Raytracing.HDRimage(3, 2)
 	Raytracing.set_pixel(img, 0, 0, RGB(1.0e1, 2.0e1, 3.0e1)) # Each component is
 	Raytracing.set_pixel(img, 1, 0, RGB(4.0e1, 5.0e1, 6.0e1)) # different from any
@@ -100,14 +104,16 @@ end
 	Raytracing.set_pixel(img, 1, 1, RGB(4.0e2, 5.0e2, 6.0e2))
 	Raytracing.set_pixel(img, 2, 1, RGB(7.0e2, 8.0e2, 9.0e2))
 
-
-	inpf = open("reference_le.pfm", "r") do file
-    			read(file)
+	# Leggo file di rifeirmento
+	inpf = open("reference_le.pfm", "r") do file	# read( ) legge già di base i bytes grezzi,
+    			read(file)							# opzioni da poter decidere sono solo "r" e "w" - specificando UInt8 legge solo il primo carattere
 		end
 
-	io = IOBuffer(UInt8[], read=true, write=true)
+	# Variabile stream
+	io = IOBuffer(UInt8[], read=true, write=true)	# read, write = true opzionali, lo sono già di default
 	Raytracing.write(io, img)
 
+	# Stesso array del file, controllo sulla corretta lettura
 	reference_bytes = [
   		0x50, 0x46, 0x0a, 0x33, 0x20, 0x32, 0x0a, 0x2d, 0x31, 0x2e, 0x30, 0x0a,
   		0x00, 0x00, 0xc8, 0x42, 0x00, 0x00, 0x48, 0x43, 0x00, 0x00, 0x96, 0x43,
@@ -118,10 +124,13 @@ end
   		0x00, 0x00, 0x8c, 0x42, 0x00, 0x00, 0xa0, 0x42, 0x00, 0x00, 0xb4, 0x42
 	]
 
-
-
-	value = take!(io)
-	@test value == inpf
+	# Si salva il contenuto di io: se c'è bisogno di accedere al contenuto più di una volta
+	# la seconda lettura fallisce poiché operazione stream (il puntatore non torna al principio)
+	value = take!(io)		# sbagliato usare read(io): è già inizializzato come IOBuffer()
+	
+	# Si controlla che il contenuto di io, quello del file letto e dell'array inizializzato
+	# corrispondano tra loro
+	@test value == inpf					
 	@test value == reference_bytes
 	@test reference_bytes == inpf
 

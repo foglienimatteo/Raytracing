@@ -14,19 +14,24 @@ function Base.:+(x::RGB{T}, y::RGB{T}) where{T} #in questo modo tipo qualsiasi, 
 end
 =#
 
+# Definizione nuove operazioni con oggetti RGB
 Base.:+(a::RGB{T}, b::RGB{T}) where {T} = RGB(a.r + b.r, a.g + b.g, a.b + b.b)
 Base.:-(a::RGB{T}, b::RGB{T}) where {T} = RGB(a.r - b.r, a.g - b.g, a.b - b.b)
 Base.:*(scalar, c::RGB{T}) where {T} = RGB(scalar*c.r , scalar*c.g, scalar*c.b)
 Base.:*(c::RGB{T}, scalar) where {T} = scalar * c
 Base.:≈(a::RGB{T}, b::RGB{T}) where {T} = are_close(a.r,b.r) && are_close(a.g,b.g) && are_close(a.b, b.b)
 
+# Funzione di approssimazione
 are_close(x,y,epsilon=1e-10) = abs(x-y) < epsilon
 
 struct HDRimage
     width::Int
     height::Int
     rgb_m::Array{RGB{Float32}}
+
+    # Costrutti
     HDRimage(w,h) = new(w,h, fill(RGB(0.0, 0.0, 0.0), (w*h,)) )
+    
     function HDRimage(w,h, rgb_m) 
         @assert size(rgb_m) == (w*h,)
         new(w,h, rgb_m)
@@ -60,23 +65,22 @@ function write(io::IO, img::HDRimage)
     header = "PF\n$w $h\n$endianness\n"
 
     # Convert the header into a sequence of bytes
-    bytebuf = transcode(UInt8, header) # transcode scrive UInt8 in sequenza grezza di byte (8bit)
+    bytebuf = transcode(UInt8, header) # transcode scrive in sequenza grezza di byte (8bit)
 
-    #write on io the header in binary code
-    write(io, reinterpret(UInt8, bytebuf))
+    # Write on io the header in binary code
+    write(io, reinterpret(UInt8, bytebuf))  # reinterpret scrive in sequenza grezza di byte (8bit)
 
     # Write the image (bottom-to-up, left-to-right)
-    for y in h-1:-1:0, x in 0:w-1
+    for y in h-1:-1:0, x in 0:w-1                   # !!! Julia conta sempre partendo da 1; prende gli estremi
         println(x," ", y)
         color = get_pixel(img, x, y)
         print_rgb(color)
-        println(reinterpret(UInt8,  [color.r]))
-        write(io, reinterpret(UInt8,  [color.r]))
-        write(io, reinterpret(UInt8,  [color.g]))
+        println(reinterpret(UInt8,  [color.r]))     #!!! reinterpret(UInt8, [...]) bisogna specificare il tipo
+        write(io, reinterpret(UInt8,  [color.r]))   # e passargli il vettore [] da cambiare, anche se contiene
+        write(io, reinterpret(UInt8,  [color.g]))   # un solo elemento
         write(io, reinterpret(UInt8,  [color.b]))
     end
 
-
-end
+end # write(::IO, ::HDRimage)
 
 end # module
