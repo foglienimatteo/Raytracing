@@ -3,7 +3,7 @@ using Test
 
 import ColorTypes:RGB
 
-@testset "Colors" begin
+@testset "test_RGB" begin
 	@test 1+1==2
 	@test Raytracing.are_close(1.00000000001, 1)
 
@@ -23,7 +23,7 @@ import ColorTypes:RGB
 
 end
 
-@testset "HDRimage_constructors" begin
+@testset "test_HDRimage_constr" begin
 	rgb_matrix=fill(RGB(0., 0., 0.0), (6,))
 	img_1 = Raytracing.HDRimage(3, 2, rgb_matrix)
 	img_2 = Raytracing.HDRimage(3, 2)
@@ -43,12 +43,12 @@ end
 
 	@test Raytracing.valid_coordinates(img, 0, 0)
 	@test Raytracing.valid_coordinates(img, 3, 2)
-    @test Raytracing.valid_coordinates(img, 6, 3)
+    	@test Raytracing.valid_coordinates(img, 6, 3)
 
 	@test !Raytracing.valid_coordinates(img, 6, 4)
 	@test !Raytracing.valid_coordinates(img, 7, 3)
-    @test !Raytracing.valid_coordinates(img, -1, 0)
-    @test !Raytracing.valid_coordinates(img, 0, -1)
+    	@test !Raytracing.valid_coordinates(img, -1, 0)
+    	@test !Raytracing.valid_coordinates(img, 0, -1)
 	
 end
 
@@ -77,7 +77,6 @@ end
 	@test Raytracing.get_pixel(img, 2, 1) ≈ RGB(15/255, 16/255, 17/255)
 
 end
-
 
 @testset "test_set_pixel" begin
 	rgb_matrix= [ RGB( 3i/255, (3i+1)/255, (3i+2)/255 ) for i in 0:5]
@@ -135,3 +134,19 @@ end
 	@test reference_bytes == inpf
 
 end
+
+@testset "test_read_line" begin
+	line = IOBuffer(b"hello\nworld   again \n ...")
+	@test Raytracing.read_line(line) == "hello"
+	@test Raytracing.read_line(line) == "world   again "
+	@test Raytracing.read_line(line) == " ..."
+end
+
+@testset "test_parse_img_size" begin
+	@test Raytracing.parse_img_size("3 2") == (3, 2)
+	@test Raytracing.parse_img_size("1. 2.") == (1,2)
+	@test_throws Raytracing.InvalidPfmFileFormat var = Raytracing.parse_img_size("3")
+	@test_throws Raytracing.InvalidPfmFileFormat var = Raytracing.parse_img_size("3.14 4")
+	@test_throws Raytracing.InvalidPfmFileFormat var = Raytracing.parse_img_size("2 -1")
+end
+

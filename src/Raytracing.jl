@@ -56,11 +56,9 @@ function print_rgb(c::RGB{T}) where {T}
     println("RGB component of this color: \t$(c.r) \t$(c.g) \t$(c.b)")
 end
 
-
 struct InvalidPfmFileFormat <: Exception
-    var::Symbol
+    var::String
 end #InvalidPfmFileFormat
-
 
 function write(io::IO, img::HDRimage)
     endianness=-1.0
@@ -77,17 +75,40 @@ function write(io::IO, img::HDRimage)
 
     # Write the image (bottom-to-up, left-to-right)
     for y in h-1:-1:0, x in 0:w-1                   # !!! Julia conta sempre partendo da 1; prende gli estremi
-        println(x," ", y)
         color = get_pixel(img, x, y)
-        print_rgb(color)
-        println(reinterpret(UInt8,  [color.r]))     #!!! reinterpret(UInt8, [...]) bisogna specificare il tipo
-        write(io, reinterpret(UInt8,  [color.r]))   # e passargli il vettore [] da cambiare, anche se contiene
-        write(io, reinterpret(UInt8,  [color.g]))   # un solo elemento
-        write(io, reinterpret(UInt8,  [color.b]))
+        write(io, reinterpret(UInt8,  [color.r]))   #!!! reinterpret(UInt8, [...]) bisogna specificare il tipo
+        write(io, reinterpret(UInt8,  [color.g]))   # e passargli il vettore [] da cambiare, anche se contiene
+        write(io, reinterpret(UInt8,  [color.b]))   # un solo elemento
     end
 
 end # write(::IO, ::HDRimage)
 
+function read_line(io::IO)
+    result = b""
+    while eof(io)==false
+        cur_byte = read(io,UInt8)
+        if [cur_byte] in [b"", b"\n"]
+            return String(result)
+        end
+
+        result = vcat(result, cur_byte)  
+    end
+    return String(result)
+end
+
+function parse_img_size(line::String)
+    elements = split(line, " ")
+    length(elements) == 2 || throw(InvalidPfmFileFormat("invalid image size specification: $(length(elements)) instead of 2"))
+
+    try
+        width, height = convert.(Int, parse.(Float64, elements))
+        (width > 0 && height > 0) || throw(ErrorException)
+        return width, height
+    catch e
+        isa(e, InexactError) || throw(InvalidPfmFileFormat("cannot convert width/heigth $(elements) to Tuple{Int, Int}"))
+        isa(e, ErrorException) || throw(InvalidPfmFileFormat("width/heigth cannot be negative, but in $(elements) at least one of them is <0."))
+    end
+end
 
 function read(io::IO, HDRimage)
     magic = read_line(io)
@@ -106,31 +127,9 @@ function read(io::IO, HDRimage)
     for y in height-1:-1:0, x in 0:width-1
         (r,g,b) = [read_float(io, endianness) for i in 0:2]
         result.set_pixel(x,y,RGB(r,g,b))
+        return result
+    end
 
-    return result
+end # read_pfm_image(::IO)
 
-end #read_pfm_image(::IO)
-
-
-#=
-def read_pfm_image(stream):
-    # The first bytes in a binary file are usually called «magic bytes»
-    magic = _read_line(stream)
-    if magic != "PF":
-        raise InvalidPfmFileFormat("invalid magic in PFM file")
-
-    img_size = _read_line(stream)
-    (width, height) = _parse_img_size(img_size)
-
-    endianness_line = _read_line(stream)
-    endianness = _parse_endianness(endianness_line)
-
-    result = HdrImage(width=width, height=height)
-    for y in range(height - 1, -1, -1):
-        for x in range(width):
-            (r, g, b) = [_read_float(stream, endianness) for i in range(3)]
-            result.set_pixel(x, y, Color(r, g, b))
-
-    return result
-=#
 end # module
