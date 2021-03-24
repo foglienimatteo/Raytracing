@@ -151,9 +151,39 @@ end
 end
 
 @testset "test_parse_endianness" begin
-	@test parse_endianness("1.0") == 1.0
-	@test parse_endianness("+1.0") == 1.0
-	@test parse_endianness("-1.0") == -1.0
-	@test_throws InvalidPfmFileFormat parse_endianness(10)
-	@test_throws InvalidPfmFileFormat parse_endianness("2")
+	@test Raytracing.parse_endianness("1.0") == 1.0
+	@test Raytracing.parse_endianness("+1.0") == 1.0
+	@test Raytracing.parse_endianness("-1.0") == -1.0
+	@test_throws Raytracing.InvalidPfmFileFormat var = Raytracing.parse_endianness("1.5")
+	@test_throws Raytracing.InvalidPfmFileFormat var = Raytracing.parse_endianness("2")
 end
+
+@testset "test_read_pfm" begin
+	img_le = open("reference_le.pfm", "r") do file
+    			Raytracing.read(file, Raytracing.HDRimage)
+		end
+	img_be = open("reference_be.pfm", "r") do file
+    			Raytracing.read(file, Raytracing.HDRimage)
+		end 
+
+	@test img_le.width == 3
+	@test img_le.height == 2
+	@test Raytracing.get_pixel(img_le, 0, 0) == RGB(1.0e1, 2.0e1, 3.0e1)
+	@test Raytracing.get_pixel(img_le, 1, 0) == RGB(4.0e1, 5.0e1, 6.0e1)
+	@test Raytracing.get_pixel(img_le, 2, 0) == RGB(7.0e1, 8.0e1, 9.0e1)
+	@test Raytracing.get_pixel(img_le, 0, 1) == RGB(1.0e2, 2.0e2, 3.0e2)
+	@test Raytracing.get_pixel(img_le, 1, 1) == RGB(4.0e2, 5.0e2, 6.0e2)
+	@test Raytracing.get_pixel(img_le, 2, 1) == RGB(7.0e2, 8.0e2, 9.0e2)
+
+	@test img_be.width == 3
+	@test img_be.height == 2
+	@test Raytracing.get_pixel(img_be, 0, 0) == RGB(1.0e1, 2.0e1, 3.0e1)
+	@test Raytracing.get_pixel(img_be, 1, 0) == RGB(4.0e1, 5.0e1, 6.0e1)
+	@test Raytracing.get_pixel(img_be, 2, 0) == RGB(7.0e1, 8.0e1, 9.0e1)
+	@test Raytracing.get_pixel(img_be, 0, 1) == RGB(1.0e2, 2.0e2, 3.0e2)
+	@test Raytracing.get_pixel(img_be, 1, 1) == RGB(4.0e2, 5.0e2, 6.0e2)
+	@test Raytracing.get_pixel(img_be, 2, 1) == RGB(7.0e2, 8.0e2, 9.0e2)
+
+end
+
+
