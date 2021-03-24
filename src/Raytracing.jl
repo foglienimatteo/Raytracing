@@ -108,28 +108,59 @@ function parse_img_size(line::String)
         isa(e, InexactError) || throw(InvalidPfmFileFormat("cannot convert width/heigth $(elements) to Tuple{Int, Int}"))
         isa(e, ErrorException) || throw(InvalidPfmFileFormat("width/heigth cannot be negative, but in $(elements) at least one of them is <0."))
     end
+
+end
+#
+function parse_endianness(es::String)
+    try
+        val = parse(Float32, ess)
+    catch TypeError
+        throw(InvalidPfmFileFormat("missing endianness in PFM file: $es instead of ±1.0"))
+   #= if val == 1.0
+        return 1.0
+    elseif val == -1.0
+        return -1.0
+    else
+        throw(InvalidPfmFileFormat("invalid endianness in PFM file: $(parse_endianness(es)) instead of +1.0 or -1.0.\n"))
+    =#
+    #    val == 1.0 ? 1.0 : val == -1.0 ? -1.0 : throw(InvalidPfmFileFormat("invalid endianness in PFM file: $(parse_endianness(endianness_line)) instead of +1.0 or -1.0.\n"))
+        return val
+    end
+end
+
+function read_float(io::IO, ess::Float32)
+    # controllo che in ingresso abbia una stringa che sia cnovertibile in Float32 
+    try
+        A = read(io, Float32)   # con Float32 leggo già i 4 bit del colore
+    catch
+        InvalidPfmFileFormat("not Float32, it's a $(typeof(ess))")
+    end
+    ess > 0 ? ntoh(A) : ltoh(A) # converto nell'endianness utilizzata dalla macchina
 end
 
 function read(io::IO, HDRimage)
+    # lettura numero magico
     magic = read_line(io)
     magic == "PF" || throw(InvalidPfmFileFormat("invalid magic number in PFM file: $(magic) instead of 'PF'.\n"))
 
+    # lettura dimensioni immagine
     img_size = read_line(io)
     typeof(parse_img_size(img_size)) == Tuple{UInt,UInt} || throw(InvalidPfmFileFormat("invalid img size in PFM file: $(parse_img_size(img_size)) instead of 'Tuple{UInt,UInt}'.\n"))
     (width, height) = parse_img_size(img_size)
 
+    #lettura endianness
     endianness_line = read_line(io)
     parse_endianness(endianness_line) == 1.0 || parse_endianness(endianness_line)== -1.0 || throw(InvalidPfmFileFormat("invalid endianness in PFM file: $(parse_endianness(endianness_line)) instead of +1.0 or -1.0.\n"))
     endianness = parse_endianness(endianness_line)
 
-
+    # lettura e assegnazione matrice coloti
     result = HDRimage(width, height)
     for y in height-1:-1:0, x in 0:width-1
         (r,g,b) = [read_float(io, endianness) for i in 0:2]
         result.set_pixel(x,y,RGB(r,g,b))
-        return result
     end
 
+    return result
 end # read_pfm_image(::IO)
 
 end # module

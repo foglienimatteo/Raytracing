@@ -150,3 +150,10 @@ end
 	@test_throws Raytracing.InvalidPfmFileFormat var = Raytracing.parse_img_size("2 -1")
 end
 
+@testset "test_parse_endianness" begin
+	@test parse_endianness("1.0") == 1.0
+	@test parse_endianness("+1.0") == 1.0
+	@test parse_endianness("-1.0") == -1.0
+	@test_throws InvalidPfmFileFormat parse_endianness(10)
+	@test_throws InvalidPfmFileFormat parse_endianness(10)
+end
