@@ -77,9 +77,9 @@ function write(io::IO, img::HDRimage)
 
     # Write the image (bottom-to-up, left-to-right)
     for y in h-1:-1:0, x in 0:w-1                   # !!! Julia conta sempre partendo da 1; prende gli estremi
-        println(x," ", y)
+        # println(x," ", y) # debugging
         color = get_pixel(img, x, y)
-        print_rgb(color)
+        # print_rgb(color)  # debugging
         println(reinterpret(UInt8,  [color.r]))     #!!! reinterpret(UInt8, [...]) bisogna specificare il tipo
         write(io, reinterpret(UInt8,  [color.r]))   # e passargli il vettore [] da cambiare, anche se contiene
         write(io, reinterpret(UInt8,  [color.g]))   # un solo elemento
@@ -89,10 +89,23 @@ function write(io::IO, img::HDRimage)
 end # write(::IO, ::HDRimage)
 
 function parse_endianness(es::String)
-    try
-        val = parse(Float32, ess)
-    catch TypeError
-        throw(InvalidPfmFileFormat("missing endianness in PFM file: $es instead of ±1.0"))
+    # try
+        val = parse(Float64, es) # Float32 -> Float64
+        if val == 1.0
+            return 1.0
+        elseif val == -1.0
+            return -1.0
+        else
+            # throw(InvalidPfmFileFormat("invalid endianness in PFM file: $(parse_endianness(es)) instead of +1.0 or -1.0.\n"))
+            throw(InvalidPfmFileFormat("invalid endianness in PFM file: needed +1.0 or -1.0.\n"))
+        end
+#=    catch UndefVarError
+        throw(InvalidPfmFileFormat("invalid endianness in PFM file: $(parse_endianness(es)) instead of +1.0 or -1.0.\n"))
+    end
+=#
+  #  catch ArgumentError
+   #     throw(InvalidPfmFileFormat("missing endianness in PFM file: $es instead of ±1.0"))
+   # end
    #= if val == 1.0
         return 1.0
     elseif val == -1.0
@@ -100,8 +113,8 @@ function parse_endianness(es::String)
     else
         throw(InvalidPfmFileFormat("invalid endianness in PFM file: $(parse_endianness(es)) instead of +1.0 or -1.0.\n"))
     =#
-    #    val == 1.0 ? 1.0 : val == -1.0 ? -1.0 : throw(InvalidPfmFileFormat("invalid endianness in PFM file: $(parse_endianness(endianness_line)) instead of +1.0 or -1.0.\n"))
-    return val
+    # val == 1.0 ? return 1.0 : (val == -1.0 ? return -1.0 : throw(InvalidPfmFileFormat("invalid endianness in PFM file: $(parse_endianness(endianness_line)) instead of +1.0 or -1.0.\n")))
+
 end
 
 function read_float(io::IO, ess::Float32)
@@ -109,7 +122,7 @@ function read_float(io::IO, ess::Float32)
     try
         A = read(io, Float32)   # con Float32 leggo già i 4 bit del colore
     catch
-        InvalidPfmFileFormat("not Float32, it's a $typeof(ess)")
+        throw(InvalidPfmFileFormat("not Float32, it's a $typeof(ess)"))
     end
     ess > 0 ? ntoh(A) : ltoh(A) # converto nell'endianness utilizzata dalla macchina
 end

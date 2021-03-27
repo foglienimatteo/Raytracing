@@ -137,9 +137,10 @@ end
 end
 
 @testset "endianness" begin
-	@test parse_endianness("1.0") == 1.0
-	@test parse_endianness("+1.0") == 1.0
-	@test parse_endianness("-1.0") == -1.0
-	@test_throws InvalidPfmFileFormat parse_endianness(10)
-	@test_throws InvalidPfmFileFormat parse_endianness("2")
+	@test Raytracing.parse_endianness("1.0") == 1.0
+	@test Raytracing.parse_endianness("+1.0") == 1.0
+	@test Raytracing.parse_endianness("-1.0") == -1.0
+	# @test_throws InvalidPfmFileFormat Raytracing.parse_endianness(10) # non è definita la funzione parse_endianness(::Int)
+	@test_throws Raytracing.InvalidPfmFileFormat Raytracing.parse_endianness("2")
+	@test_throws Raytracing.InvalidPfmFileFormat Raytracing.parse_endianness("abc")
 end
