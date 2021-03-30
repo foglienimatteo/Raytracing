@@ -56,11 +56,9 @@ function print_rgb(c::RGB{T}) where {T}
     println("RGB component of this color: \t$(c.r) \t$(c.g) \t$(c.b)")
 end
 
-
 struct InvalidPfmFileFormat <: Exception
-    var::Symbol
+    var::String
 end #InvalidPfmFileFormat
-
 
 function write(io::IO, img::HDRimage)
     endianness=-1.0
@@ -77,80 +75,86 @@ function write(io::IO, img::HDRimage)
 
     # Write the image (bottom-to-up, left-to-right)
     for y in h-1:-1:0, x in 0:w-1                   # !!! Julia conta sempre partendo da 1; prende gli estremi
-        # println(x," ", y) # debugging
         color = get_pixel(img, x, y)
-        # print_rgb(color)  # debugging
-        println(reinterpret(UInt8,  [color.r]))     #!!! reinterpret(UInt8, [...]) bisogna specificare il tipo
-        write(io, reinterpret(UInt8,  [color.r]))   # e passargli il vettore [] da cambiare, anche se contiene
-        write(io, reinterpret(UInt8,  [color.g]))   # un solo elemento
-        write(io, reinterpret(UInt8,  [color.b]))
+        write(io, reinterpret(UInt8,  [color.r]))   #!!! reinterpret(UInt8, [...]) bisogna specificare il tipo
+        write(io, reinterpret(UInt8,  [color.g]))   # e passargli il vettore [] da cambiare, anche se contiene
+        write(io, reinterpret(UInt8,  [color.b]))   # un solo elemento
     end
 
 end # write(::IO, ::HDRimage)
 
-function parse_endianness(es::String)
-    # try
-        val = parse(Float64, es) # Float32 -> Float64
-        if val == 1.0
-            return 1.0
-        elseif val == -1.0
-            return -1.0
-        else
-            # throw(InvalidPfmFileFormat("invalid endianness in PFM file: $(parse_endianness(es)) instead of +1.0 or -1.0.\n"))
-            throw(InvalidPfmFileFormat("invalid endianness in PFM file: needed +1.0 or -1.0.\n"))
-        end
-#=    catch UndefVarError
-        throw(InvalidPfmFileFormat("invalid endianness in PFM file: $(parse_endianness(es)) instead of +1.0 or -1.0.\n"))
-    end
-=#
-  #  catch ArgumentError
-   #     throw(InvalidPfmFileFormat("missing endianness in PFM file: $es instead of ±1.0"))
-   # end
-   #= if val == 1.0
-        return 1.0
-    elseif val == -1.0
-        return -1.0
-    else
-        throw(InvalidPfmFileFormat("invalid endianness in PFM file: $(parse_endianness(es)) instead of +1.0 or -1.0.\n"))
-    =#
-    # val == 1.0 ? return 1.0 : (val == -1.0 ? return -1.0 : throw(InvalidPfmFileFormat("invalid endianness in PFM file: $(parse_endianness(endianness_line)) instead of +1.0 or -1.0.\n")))
+function parse_img_size(line::String)
+    elements = split(line, " ")
+    length(elements) == 2 || throw(InvalidPfmFileFormat("invalid image size specification: $(length(elements)) instead of 2"))
 
-end
-
-function read_float(io::IO, ess::Float32)
-    # controllo che in ingresso abbia una stringa che sia cnovertibile in Float32 
     try
-        A = read(io, Float32)   # con Float32 leggo già i 4 bit del colore
-    catch
-        throw(InvalidPfmFileFormat("not Float32, it's a $typeof(ess)"))
+        width, height = convert.(Int, parse.(Float64, elements))
+        (width > 0 && height > 0) || throw(ErrorException)
+        return width, height
+    catch e
+        isa(e, InexactError) || throw(InvalidPfmFileFormat("cannot convert width/heigth $(elements) to Tuple{Int, Int}"))
+        isa(e, ErrorException) || throw(InvalidPfmFileFormat("width/heigth cannot be negative, but in $(elements) at least one of them is <0."))
     end
-    ess > 0 ? ntoh(A) : ltoh(A) # converto nell'endianness utilizzata dalla macchina
+
 end
 
-function read(io::IO, HDRimage)
+function parse_endianness(es::String)
+    try
+        val = parse(Float64, es)
+        (val == 1.0 || val == -1.0) || throw(InvalidPfmFileFormat("invalid endianness in PFM file: $(parse(Float64, es)) instead of +1.0 or -1.0.\n"))
+        return val
+    catch e
+        throw(InvalidPfmFileFormat("missing endianness in PFM file: $es instead of ±1.0"))
+    end
+end
+
+function read_float(io::IO, ess::Float64)
+    # controllo che in ingresso abbia una stringa che sia cnovertibile in Float32
+    @assert ess == 1.0 || ess == -1.0
+    try
+        value = read(io, Float32)   # con Float32 leggo già i 4 byte del colore
+        ess == 1.0 ? value = ntoh(value) : value = ltoh(value) # converto nell'endianness utilizzata dalla macchina
+        return value
+    catch e
+        throw(InvalidPfmFileFormat("not Float32, it's a $(typeof(io))"))   # ess → io
+    end
+end
+
+function read_line(io::IO)
+    result = b""
+    while eof(io) == false
+        cur_byte = read(io, UInt8)
+        if [cur_byte] in [b"", b"\n"]
+            return String(result)
+        end
+        result = vcat(result, cur_byte)  
+    end
+    return String(result)
+end
+
+function read(io::IO, ::Type{HDRimage})
     # lettura numero magico
     magic = read_line(io)
     magic == "PF" || throw(InvalidPfmFileFormat("invalid magic number in PFM file: $(magic) instead of 'PF'.\n"))
 
     # lettura dimensioni immagine
     img_size = read_line(io)
-    typeof(parse_img_size(img_size)) == Tuple{UInt,UInt} || throw(InvalidPfmFileFormat("invalid img size in PFM file: $(parse_img_size(img_size)) instead of 'Tuple{UInt,UInt}'.\n"))
+    typeof(parse_img_size(img_size)) == Tuple{Int,Int} || throw(InvalidPfmFileFormat("invalid img size in PFM file: $(parse_img_size(img_size)) is $( typeof(parse_img_size(img_size)) ) instead of 'Tuple{UInt,UInt}'.\n"))
     (width, height) = parse_img_size(img_size)
 
     #lettura endianness
-    endianness_line = read_line(io)
-    parse_endianness(endianness_line) == 1.0 || parse_endianness(endianness_line)== -1.0 || throw(InvalidPfmFileFormat("invalid endianness in PFM file: $(parse_endianness(endianness_line)) instead of +1.0 or -1.0.\n"))
-    endianness = parse_endianness(endianness_line)
+    ess_line = read_line(io)
+    parse_endianness(ess_line) == 1.0 || parse_endianness(ess_line)== -1.0 || throw(InvalidPfmFileFormat("invalid endianness in PFM file: $(parse_endianness(ess_line)) instead of +1.0 or -1.0.\n"))
+    endianness = parse_endianness(ess_line)
 
     # lettura e assegnazione matrice coloti
     result = HDRimage(width, height)
     for y in height-1:-1:0, x in 0:width-1
-        (r,g,b) = (read_float(io, endianness) for i in 0:2) # (read_float(io, endianness), read_float(io, endianness), read_float(io, endianness))
-        result.set_pixel(x, y, RGB(r,g,b))
-    end # X MATTEO: QUI MANCAVA, NO?
+        (r,g,b) = [read_float(io, endianness) for i in 0:2]
+        set_pixel(result, x, y, RGB(r,g,b) )
+    end
 
     return result
-
 end # read_pfm_image(::IO)
 
 end # module
