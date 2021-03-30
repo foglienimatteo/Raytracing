@@ -226,6 +226,9 @@ end
 	@test Raytracing.read_float(reference_bytes2, -1.0) == 7.0e1
 	@test Raytracing.read_float(reference_bytes2, -1.0) == 8.0e1
 	@test Raytracing.read_float(reference_bytes2, -1.0) == 9.0e1
+#=	for i in 1:18
+		Raytracing.read_float(reference_bytes2, -1.0)
+	end=#
 	# errore nella lettura dell'ultimo byte: ne mancano 3 per fare un Float32
 	@test_throws Raytracing.InvalidPfmFileFormat var = Raytracing.read_float(reference_bytes2, -1.0)
 end
