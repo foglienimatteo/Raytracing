@@ -39,6 +39,13 @@ struct HDRimage
     end
 end
 
+struct Parameters
+    input_pfm_file_name = ""
+    a = 0.18
+    γ = 1.0
+    output_png_file_name = ""
+end
+
 valid_coordinates(hdr::HDRimage, x::Int, y::Int) = x>=0 && y>=0 && x<hdr.width && y<hdr.height
 
 function pixel_offset(hdr::HDRimage, x::Int, y::Int)
@@ -192,7 +199,7 @@ function normalize_image(img::HDRimage, a::Number=0.18, lum::Union{Number, Nothi
     img.rgb_m .= img.rgb_m .* a ./lum
 
     nothing
-end # module
+end
 
 _clamp(x::Number) = x/(x+1)
 function clamp_image(img::HDRimage)
@@ -204,5 +211,25 @@ function clamp_image(img::HDRimage)
     nothing
 end
 
+function parse_command_line(parm::Parameters, argv)
+    if length(argv) != 5
+        throw(RuntimeError("usage: main.py INPUT_PFM_FILE FACTOR GAMMA OUTPUT_PNG_FILE"))
+    end
 
+    parm.input_pfm_file_name = argv[1]
+    
+    try
+        parm.factor = argv[2]
+    catch e
+        throw(RuntimeError("invalid factor $argv[2], it must be a floating-point number"))
+    end
 
+    try
+        parm.γ = argv[3]
+    catch ValueError
+        throw(RuntimeError("invalid γ $argv[2], it must be a floating-point number"))
+    end
+    param.output_png_file_name = argv[4]
+end
+
+end  # module

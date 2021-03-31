@@ -7,12 +7,28 @@ using Colors
 import ColorTypes:RGB
 using Raytracing
 
-function main()
+function main(args)
+	parameters = Raytracing.Parameters()
+	
+	try
+		Raytracing.parse_command_line(args)
+	catch e
+		println("Error: ", e)
+		return nothing
+	end
 
-	a = RGB{Float64}(0.1, 0.2, 0.3)
-	b = RGB{Float64}(0.5, 0.6, 0.7)
+	open(parameters.input_pfm_file_name, "r") do inpf
+		img = Raytracing.read(inpf, HDRimages)
+	end
 
+	println("File $(parameters.input_pfm_file_name) has been read from disk.")
 
+	img = Raytracing.normalize_image(img, a = parameters.a)
+	img = Raytracing.clamp_image(img)
+
+	save(parameters.output_png_file_name, img.rgb_m)
+
+	println("File $(parameters.output_png_file_name) has been written to disk.")
 end
 
 main()
