@@ -20,7 +20,7 @@ import ColorTypes:RGB
 	@test b-a ≈ RGB(0.4, 0.4-2err, 0.4)
 	@test 2.0*a ≈ RGB(0.2 + err, 0.4, 0.6)
 	@test b*0.5 ≈ RGB(0.25 + err, 0.3, 0.35)
-
+	@test a/2. ≈ RGB(0.05, 0.1, 0.15 + 3*err)
 end
 
 @testset "test_HDRimage_constr" begin
@@ -280,19 +280,24 @@ end
 @testset "test_avg_lum" begin
 	rgb_matrix = [RGB(5.0, 10.0, 15.0), RGB(500.0, 1000.0, 1500.0)]
 	img = Raytracing.HDRimage(2, 1, rgb_matrix)
-	@test Raytracing.avg_lum(img, δ = 0.0) ≈ 100.0
+	@test Raytracing.avg_lum(img, 0.0) ≈ 100.0
 end
 
 @testset "normalize_image" begin
-	img = HDRimage(2, 1, [RGB(5.0, 10.0, 15.0), RGB(500.0, 1000.0, 1500.0)])
-	Raytracing.normalize_image(img, a=1000.0, lum=100.0)
+	img = Raytracing.HDRimage(2, 1, [RGB(5.0, 10.0, 15.0), RGB(500.0, 1000.0, 1500.0)])
+	Raytracing.normalize_image(img, 1000.0, 100.0)
+	@test Raytracing.get_pixel(img, 0, 0) ≈ RGB(0.5e2, 1.0e2, 1.5e2)
+	@test Raytracing.get_pixel(img, 1, 0) ≈ RGB(0.5e4, 1.0e4, 1.5e4)
+
+	img = Raytracing.HDRimage(2, 1, [RGB(5.0, 10.0, 15.0), RGB(500.0, 1000.0, 1500.0)])	
+	Raytracing.normalize_image(img, 1000.0)
 	@test Raytracing.get_pixel(img, 0, 0) ≈ RGB(0.5e2, 1.0e2, 1.5e2)
 	@test Raytracing.get_pixel(img, 1, 0) ≈ RGB(0.5e4, 1.0e4, 1.5e4)
 end
 
 @testset "test_clamp_image" begin
-	img = HDRimage(2, 1, [RGB(5.0, 10.0, 15.0), RGB(500.0, 1000.0, 1500.0)])
-	clamp_image(img)
+	img = Raytracing.HDRimage(2, 1, [RGB(5.0, 10.0, 15.0), RGB(500.0, 1000.0, 1500.0)])
+	Raytracing.clamp_image(img)
 	@test Raytracing.get_pixel(img, 0, 0).r >= 0 && Raytracing.get_pixel(img, 0, 0).r <= 1
 	@test Raytracing.get_pixel(img, 0, 0).g >= 0 && Raytracing.get_pixel(img, 0, 0).g <= 1
 	@test Raytracing.get_pixel(img, 0, 0).b >= 0 && Raytracing.get_pixel(img, 0, 0).b <= 1

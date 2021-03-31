@@ -1,10 +1,10 @@
 module Raytracing
 
 using Colors  #generico
-using Images; using ImageIO
+#using Images; using ImageIO
 #using IOStream
 import ColorTypes:RGB  #specificare sempre cosa si importa. In questo caso posso evitare di secificare nella funzione "x::ColorTypes.RGB{T}"
-import Base.:+; import Base.:-; import Base.:≈; import Base.:*
+import Base.:+; import Base.:-; import Base.:≈; import Base.:/; import Base.:*
 import Base.write; import Base.read
 
 #=
@@ -20,6 +20,7 @@ Base.:+(a::RGB{T}, b::RGB{T}) where {T} = RGB(a.r + b.r, a.g + b.g, a.b + b.b)
 Base.:-(a::RGB{T}, b::RGB{T}) where {T} = RGB(a.r - b.r, a.g - b.g, a.b - b.b)
 Base.:*(scalar, c::RGB{T}) where {T} = RGB(scalar*c.r , scalar*c.g, scalar*c.b)
 Base.:*(c::RGB{T}, scalar) where {T} = scalar * c
+Base.:/(c::RGB{T}, scalar) where {T} = RGB(c.r/scalar , c.g/scalar, c.b/scalar)
 Base.:≈(a::RGB{T}, b::RGB{T}) where {T} = are_close(a.r,b.r) && are_close(a.g,b.g) && are_close(a.b, b.b)
 
 # Funzione di approssimazione
@@ -37,25 +38,25 @@ struct HDRimage
         @assert size(rgb_m) == (w*h,)
         new(w,h, rgb_m)
     end
-end
+end # HDRimage
 
 valid_coordinates(hdr::HDRimage, x::Int, y::Int) = x>=0 && y>=0 && x<hdr.width && y<hdr.height
 
 function pixel_offset(hdr::HDRimage, x::Int, y::Int)
     @assert valid_coordinates(hdr, x, y)
     y*hdr.width + (x+1)
-end
+end # pixel_offset
 
 get_pixel(hdr::HDRimage, x::Int, y::Int) = hdr.rgb_m[pixel_offset(hdr, x, y)]
 
 function set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{T}) where {T}
     hdr.rgb_m[pixel_offset(hdr, x,y)] = c
     return nothing
-end
+end # set_pixel
 
 function print_rgb(c::RGB{T}) where {T}
     println("RGB component of this color: \t$(c.r) \t$(c.g) \t$(c.b)")
-end
+end # print_rgb
 
 struct InvalidPfmFileFormat <: Exception
     var::String
@@ -97,7 +98,7 @@ function parse_img_size(line::String)
         isa(e, ErrorException) || throw(InvalidPfmFileFormat("width/heigth cannot be negative, but in $(elements) at least one of them is <0."))
     end
 
-end
+end # parse_img_size
 
 function parse_endianness(es::String)
     try
@@ -107,7 +108,7 @@ function parse_endianness(es::String)
     catch e
         throw(InvalidPfmFileFormat("missing endianness in PFM file: $es instead of ±1.0"))
     end
-end
+end # parse_endianness
 
 function read_float(io::IO, ess::Float64)
     # controllo che in ingresso abbia una stringa che sia cnovertibile in Float32
@@ -119,7 +120,7 @@ function read_float(io::IO, ess::Float64)
     catch e
         throw(InvalidPfmFileFormat("color is not Float32, it's a $(typeof(io))"))   # ess → io
     end
-end
+end # read_float
 
 function read_line(io::IO)
     result = b""
@@ -131,7 +132,7 @@ function read_line(io::IO)
         result = vcat(result, cur_byte)  
     end
     return String(result)
-end
+end # read_line
 
 function read(io::IO, ::Type{HDRimage})
     magic = read_line(io)
@@ -151,20 +152,7 @@ function read(io::IO, ::Type{HDRimage})
     # lettura e assegnazione matrice coloti
     result = HDRimage(width, height)
     for y in height-1:-1:0, x in 0:width-1
-#=        rgb = Float32[0, 0, 0]
-        try
-            for i in 1:3
-                try
-                    rgb[i] = read_float(io, endianness)
-                catch e
-                    throw(InvalidPfmFileFormat("color type is not Float32.\n"))
-                end
-            end
-        catch e
-            throw(InvalidPfmFileFormat("invalid sequence RGB.\n"))
-        end
-        set_pixel(result, x, y, RGB(rgb[1], rgb[2], rgb[3]))
-=#
+
         (r,g,b) = [read_float(io, endianness) for i in 0:2]
         set_pixel(result, x, y, RGB(r,g,b) )
     end
@@ -172,10 +160,9 @@ function read(io::IO, ::Type{HDRimage})
     return result
 end # read_pfm_image(::IO)
 
-
 function luminosity(c::RGB{T}) where {T}
     (max(c.r, c.g, c.b) + min(c.r, c.g, c.b))/2.
-end
+end # luminosity
 
 function avg_lum(img::HDRimage, δ::Number=1e-10)
     cumsum=0.0
@@ -187,22 +174,32 @@ function avg_lum(img::HDRimage, δ::Number=1e-10)
 end # avg_lum
 
 function normalize_image(img::HDRimage, a::Number=0.18, lum::Union{Number, Nothing}=nothing, δ::Number=1e-10)
-    !isnothing(lum) || lum = avg_lum(img, δ)
-
+    #isnothing(lum) || lum = avg_lum(img, δ)
+    #isnothing(lum)==false || lum = avg_lum(img, δ)
+    isnothing(lum) ? lum = avg_lum(img, δ) : nothing
+    #=
+    if isnothing(lum)
+        lum = avg_lum(img, δ)
+    end
+    =#
     img.rgb_m .= img.rgb_m .* a ./lum
 
     nothing
-end # module
+end # normalize_image
 
 _clamp(x::Number) = x/(x+1)
 function clamp_image(img::HDRimage)
-    for pix in img.rgb_m
-        pix.r = _clamp(pix.r)
-        pix.g = _clamp(pix.g)
-        pix.b = _clamp(pix.b)
+    h=img.height
+    w=img.width
+    for y in h-1:-1:0, x in 0:w-1
+        col = get_pixel(img, x, y)
+        T = typeof(col).parameters[1]
+        new_col = RGB{T}( _clamp(col.r), _clamp(col.g), _clamp(col.b) )
+        set_pixel(img, x,y, new_col)
     end
     nothing
-end
+end # clamp_image
 
+end # MODULE
 
 
