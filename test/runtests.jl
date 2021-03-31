@@ -24,13 +24,13 @@ import ColorTypes:RGB
 end
 
 @testset "test_HDRimage_constr" begin
-	rgb_matrix=fill(RGB(0., 0., 0.0), (6,))
+	rgb_matrix = fill(RGB(0., 0., 0.0), (6,))
 	img_1 = Raytracing.HDRimage(3, 2, rgb_matrix)
 	img_2 = Raytracing.HDRimage(3, 2)
 
 	@test img_1.width == 3
 	@test img_1.height == 2
-	@test img_1.rgb_m==img_2.rgb_m
+	@test img_1.rgb_m == img_2.rgb_m
 
 	# Controllo della scrittura errata nell'assert
 	@test_throws AssertionError img = Raytracing.HDRimage(3, 3, rgb_matrix)
@@ -43,12 +43,12 @@ end
 
 	@test Raytracing.valid_coordinates(img, 0, 0)
 	@test Raytracing.valid_coordinates(img, 3, 2)
-    	@test Raytracing.valid_coordinates(img, 6, 3)
+    @test Raytracing.valid_coordinates(img, 6, 3)
 
 	@test !Raytracing.valid_coordinates(img, 6, 4)
 	@test !Raytracing.valid_coordinates(img, 7, 3)
-    	@test !Raytracing.valid_coordinates(img, -1, 0)
-    	@test !Raytracing.valid_coordinates(img, 0, -1)
+    @test !Raytracing.valid_coordinates(img, -1, 0)
+    @test !Raytracing.valid_coordinates(img, 0, -1)
 	
 end
 
@@ -208,7 +208,7 @@ end
 	end
 
 	# testo la lettura corretta di tutti i colori (ordine basso → alto nella scrittura)
-	@test Raytracing.read_float(reference_bytes2, -1.0) == 1.0e2	# Qui magari possiamo anche far leggere
+#=	@test Raytracing.read_float(reference_bytes2, -1.0) == 1.0e2	# Qui magari possiamo anche far leggere
 	@test Raytracing.read_float(reference_bytes2, -1.0) == 2.0e2	# reference_bytes2 senza altre operazioni
 	@test Raytracing.read_float(reference_bytes2, -1.0) == 3.0e2	# visto che controlla già prima.
 	@test Raytracing.read_float(reference_bytes2, -1.0) == 4.0e2
@@ -226,13 +226,13 @@ end
 	@test Raytracing.read_float(reference_bytes2, -1.0) == 7.0e1
 	@test Raytracing.read_float(reference_bytes2, -1.0) == 8.0e1
 	@test Raytracing.read_float(reference_bytes2, -1.0) == 9.0e1
-#=	for i in 1:18
+	=#
+	for i in 1:18
 		Raytracing.read_float(reference_bytes2, -1.0)
-	end=#
+	end
 	# errore nella lettura dell'ultimo byte: ne mancano 3 per fare un Float32
 	@test_throws Raytracing.InvalidPfmFileFormat var = Raytracing.read_float(reference_bytes2, -1.0)
 end
-
 
 @testset "test_parse_endianness" begin
 	@test Raytracing.parse_endianness("1.0") == 1.0
@@ -268,4 +268,32 @@ end
 	@test Raytracing.get_pixel(img_be, 0, 1) == RGB(1.0e2, 2.0e2, 3.0e2)
 	@test Raytracing.get_pixel(img_be, 1, 1) == RGB(4.0e2, 5.0e2, 6.0e2)
 	@test Raytracing.get_pixel(img_be, 2, 1) == RGB(7.0e2, 8.0e2, 9.0e2)
+end
+
+@testset "test_luminosity" begin
+	a = RGB{Float32}(8.0, 10.0, 22.0)
+	b = RGB{Float32}(1.0, 100.0, 221.0)
+	@test Raytracing.luminosity(a) ≈ 15.0
+	@test Raytracing.luminosity(b) ≈ 111.0
+end
+
+@testset "test_avg_lum" begin
+	rgb_matrix = [RGB(5.0, 10.0, 15.0), RGB(500.0, 1000.0, 1500.0)]
+	img = Raytracing.HDRimage(2, 1, rgb_matrix)
+	@test Raytracing.avg_lum(img, δ = 0.0) ≈ 100.0
+end
+
+@testset "normalize_image" begin
+	img = HDRimage(2, 1, [RGB(5.0, 10.0, 15.0), RGB(500.0, 1000.0, 1500.0)])
+	Raytracing.normalize_image(img, a=1000.0, lum=100.0)
+	@test Raytracing.get_pixel(img, 0, 0) ≈ RGB(0.5e2, 1.0e2, 1.5e2)
+	@test Raytracing.get_pixel(img, 1, 0) ≈ RGB(0.5e4, 1.0e4, 1.5e4)
+end
+
+@testset "test_clamp_image" begin
+	img = HDRimage(2, 1, [RGB(5.0, 10.0, 15.0), RGB(500.0, 1000.0, 1500.0)])
+	clamp_image(img)
+	@test Raytracing.get_pixel(img, 0, 0).r >= 0 && Raytracing.get_pixel(img, 0, 0).r <= 1
+	@test Raytracing.get_pixel(img, 0, 0).g >= 0 && Raytracing.get_pixel(img, 0, 0).g <= 1
+	@test Raytracing.get_pixel(img, 0, 0).b >= 0 && Raytracing.get_pixel(img, 0, 0).b <= 1
 end
