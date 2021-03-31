@@ -8,7 +8,6 @@ import Base.:+; import Base.:-; import Base.:≈; import Base.:/; import Base.:*
 import Base.write; import Base.read
 
 #=
-#T = Float64 errato
 
 function Base.:+(x::RGB{T}, y::RGB{T}) where{T} #in questo modo tipo qualsiasi, per specificare: where{T<:real}
      RGB(x.r + y.r, x.g + y.g, x.b + y.b)
@@ -39,6 +38,13 @@ struct HDRimage
         new(w,h, rgb_m)
     end
 end # HDRimage
+
+struct Parameters
+    input_pfm_file_name = ""
+    a = 0.18
+    γ = 1.0
+    output_png_file_name = ""
+end
 
 valid_coordinates(hdr::HDRimage, x::Int, y::Int) = x>=0 && y>=0 && x<hdr.width && y<hdr.height
 
@@ -200,6 +206,25 @@ function clamp_image(img::HDRimage)
     nothing
 end # clamp_image
 
-end # MODULE
+function parse_command_line(parm::Parameters, argv)
+    if length(argv) != 5
+        throw(RuntimeError("usage: main.py INPUT_PFM_FILE FACTOR GAMMA OUTPUT_PNG_FILE"))
+    end
 
+    parm.input_pfm_file_name = argv[1]
+    
+    try
+        parm.factor = argv[2]
+    catch e
+        throw(RuntimeError("invalid factor $argv[2], it must be a floating-point number"))
+    end
 
+    try
+        parm.γ = argv[3]
+    catch ValueError
+        throw(RuntimeError("invalid γ $argv[2], it must be a floating-point number"))
+    end
+    param.output_png_file_name = argv[4]
+end
+
+end  # module
