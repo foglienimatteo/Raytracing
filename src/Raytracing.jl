@@ -1,6 +1,7 @@
 module Raytracing
 
 using Colors  #generico
+using Images; using ImageIO
 #using IOStream
 import ColorTypes:RGB  #specificare sempre cosa si importa. In questo caso posso evitare di secificare nella funzione "x::ColorTypes.RGB{T}"
 import Base.:+; import Base.:-; import Base.:≈; import Base.:*
@@ -133,15 +134,15 @@ function read_line(io::IO)
 end
 
 function read(io::IO, ::Type{HDRimage})
-    # lettura numero magico
     magic = read_line(io)
+    # lettura numero magico
     magic == "PF" || throw(InvalidPfmFileFormat("invalid magic number in PFM file: $(magic) instead of 'PF'.\n"))
-
+    
     # lettura dimensioni immagine
     img_size = read_line(io)
     typeof(parse_img_size(img_size)) == Tuple{Int,Int} || throw(InvalidPfmFileFormat("invalid img size in PFM file: $(parse_img_size(img_size)) is $( typeof(parse_img_size(img_size)) ) instead of 'Tuple{UInt,UInt}'.\n"))
     (width, height) = parse_img_size(img_size)
-
+    
     #lettura endianness
     ess_line = read_line(io)
     parse_endianness(ess_line) == 1.0 || parse_endianness(ess_line)== -1.0 || throw(InvalidPfmFileFormat("invalid endianness in PFM file: $(parse_endianness(ess_line)) instead of +1.0 or -1.0.\n"))
@@ -157,4 +158,37 @@ function read(io::IO, ::Type{HDRimage})
     return result
 end # read_pfm_image(::IO)
 
+
+function luminosity(c::RGB{T}) where {T}
+    (max(c.r, c.g, c.b) + min(c.r, c.g, c.b))/2.
+end
+
+function avg_lum(img::HDRimage, δ::Number=1e-10)
+    cumsum=0.0
+    for pix in img.rgb_m
+        cumsum += log10(δ + luminosity(pix))
+    end
+
+    10^(cumsum/(img.width*img.height))
+end # avg_lum
+
+function normalize_image(img::HDRimage, a::Number=0.18, lum::Union{Number, Nothing}=nothing, δ::Number=1e-10)
+    !isnothing(lum) || lum = avg_lum(img, δ)
+
+    img.rgb_m .= img.rgb_m .* a ./lum
+
+    nothing
 end # module
+
+_clamp(x::Number) = x/(x+1)
+function clamp_image(img::HDRimage)
+    for pix in img.rgb_m
+        pix.r = _clamp(pix.r)
+        pix.g = _clamp(pix.g)
+        pix.b = _clamp(pix.b)
+    end
+    nothing
+end
+
+
+
