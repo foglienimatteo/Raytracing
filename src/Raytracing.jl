@@ -116,7 +116,7 @@ function read_float(io::IO, ess::Float64)
         ess == 1.0 ? value = ntoh(value) : value = ltoh(value) # converto nell'endianness utilizzata dalla macchina
         return value
     catch e
-        throw(InvalidPfmFileFormat("not Float32, it's a $(typeof(io))"))   # ess → io
+        throw(InvalidPfmFileFormat("color is not Float32, it's a $(typeof(io))"))   # ess → io
     end
 end
 
@@ -150,6 +150,20 @@ function read(io::IO, ::Type{HDRimage})
     # lettura e assegnazione matrice coloti
     result = HDRimage(width, height)
     for y in height-1:-1:0, x in 0:width-1
+#=        rgb = Float32[0, 0, 0]
+        try
+            for i in 1:3
+                try
+                    rgb[i] = read_float(io, endianness)
+                catch e
+                    throw(InvalidPfmFileFormat("color type is not Float32.\n"))
+                end
+            end
+        catch e
+            throw(InvalidPfmFileFormat("invalid sequence RGB.\n"))
+        end
+        set_pixel(result, x, y, RGB(rgb[1], rgb[2], rgb[3]))
+=#
         (r,g,b) = [read_float(io, endianness) for i in 0:2]
         set_pixel(result, x, y, RGB(r,g,b) )
     end
