@@ -8,7 +8,7 @@ import ColorTypes:RGB
 using Raytracing
 
 function main(args)
-	parameters = Raytracing.Parameters()
+#=	parameters = Raytracing.Parameters()
 	
 	try
 		Raytracing.parse_command_line(args)
@@ -29,6 +29,8 @@ function main(args)
 	save(parameters.output_png_file_name, img.rgb_m)
 
 	println("File $(parameters.output_png_file_name) has been written to disk.")
+=#
+	println("ciao")
 end
 
 main()

@@ -38,14 +38,14 @@ struct HDRimage
         new(w,h, rgb_m)
     end
 end # HDRimage
-
+#=
 struct Parameters
     input_pfm_file_name = ""
     a = 0.18
     γ = 1.0
     output_png_file_name = ""
 end
-
+=#
 valid_coordinates(hdr::HDRimage, x::Int, y::Int) = x>=0 && y>=0 && x<hdr.width && y<hdr.height
 
 function pixel_offset(hdr::HDRimage, x::Int, y::Int)
