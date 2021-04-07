@@ -246,4 +246,14 @@ function parse_command_line(args)
     return infile, outfile, a, γ
 end
 
+function ribaltare(img::HDRimage)
+    w = img.width
+    h = img.height
+    IMG = reshape(img.rgb_m, (w,h))
+    IMG = permutedims(IMG)
+    #IMG = reverse(IMG, dims=1)
+
+    return IMG
+end
+
 end  # module
