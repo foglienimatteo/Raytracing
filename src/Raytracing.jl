@@ -19,11 +19,9 @@ end
 # Definizione nuove operazioni con oggetti RGB
 Base.:+(a::RGB{T}, b::RGB{T}) where {T} = RGB(a.r + b.r, a.g + b.g, a.b + b.b)
 Base.:-(a::RGB{T}, b::RGB{T}) where {T} = RGB(a.r - b.r, a.g - b.g, a.b - b.b)
-function Base.:*(scalar, c::RGB{T}) where {T}
-    RGB(scalar*c.r , scalar*c.g, scalar*c.b)
-end
-Base.:*(c::RGB{T}, scalar) where {T} = scalar * c
-Base.:/(c::RGB{T}, scalar) where {T} = RGB(c.r/scalar , c.g/scalar, c.b/scalar)
+Base.:*(scalar::Real, c::RGB{T}) where {T} = RGB(scalar*c.r , scalar*c.g, scalar*c.b)
+Base.:*(c::RGB{T}, scalar::Real) where {T} = scalar * c
+Base.:/(c::RGB{T}, scalar::Real) where {T} = RGB(c.r/scalar , c.g/scalar, c.b/scalar)
 Base.:≈(a::RGB{T}, b::RGB{T}) where {T} = are_close(a.r,b.r) && are_close(a.g,b.g) && are_close(a.b, b.b)
 
 # Funzione di approssimazione
@@ -42,7 +40,7 @@ struct HDRimage
         new(w,h, rgb_m)
     end
 end # HDRimage
-#=
+
 struct Parameters
     infile::String
     outfile::String
@@ -52,7 +50,7 @@ struct Parameters
     Parameters(in, out, a) = new(in, out, a, 1.0)
     Parameters(in, out) = new(in, out, 0.18, 1.0)
 end
-=#
+
 valid_coordinates(hdr::HDRimage, x::Int, y::Int) = x>=0 && y>=0 && x<hdr.width && y<hdr.height
 
 function pixel_offset(hdr::HDRimage, x::Int, y::Int)
@@ -212,14 +210,17 @@ function clamp_image(img::HDRimage)
 end # clamp_image
 
 function parse_command_line(args)
-    if isempty(args) || length(args) == 1 || length(args)>4
+    if isempty(args) || length(args) == 1 || length(args) > 4
 	    throw(Exception)
     end  
-    infile = nothing; outfile = nothing; a = nothing; γ = nothing
+    infile = nothing; outfile = nothing; a = 0.18; γ = 1.0
 
     try
         infile = args[1]
         outfile = args[2]
+        open(infile, "r") do io
+            read(io, UInt8)
+        end
     catch e
         throw(RuntimeError("invalid input file: $(args[1]) does not exist"))
     end
@@ -228,7 +229,6 @@ function parse_command_line(args)
         try
             a = parse(Float64, args[3])
             a > 0. || throw(Exception)
-            # prova che esiste il file su disco
         catch e
             throw(InvalidArgumentError("invalid value for a: $(args[3])  must be a positive number"))
         end
@@ -240,13 +240,7 @@ function parse_command_line(args)
             catch e
                 throw(InvalidArgumentError("invalid value for γ: $(args[4])  must be a positive number"))
             end
-        else
-            γ = 1.0
         end
-
-    else
-        a = 0.18
-        γ = 1.0
     end
 
     return infile, outfile, a, γ
