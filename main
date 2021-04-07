@@ -2,11 +2,12 @@
 
 using Pkg
 Pkg.activate(normpath(@__DIR__))
+Pkg.instantiate()
 
 using Colors
 import ColorTypes:RGB
 using Raytracing
-using Images
+using Images, ImageIO
 
 #=
 function main() 
@@ -39,8 +40,9 @@ function main(args)
 	Raytracing.normalize_image(img, parameters.a)
 	Raytracing.clamp_image(img)
 
-	#Images.save(File{format"PNG"}(parameters.outfile), img.rgb_m)
-	Images.save(File("PNG", parameters.outfile), img.rgb_m)
+	Images.save(parameters.outfile, img.rgb_m)
+	#Images.save(Images.File(PNG,parameters.outfile), img.rgb_m)
+	#Images.save(File("PNG", parameters.outfile), img.rgb_m)
 
 	println("\nFile $(parameters.outfile) has been written into the disk.\n")
 end

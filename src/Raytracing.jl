@@ -19,11 +19,9 @@ end
 # Definizione nuove operazioni con oggetti RGB
 Base.:+(a::RGB{T}, b::RGB{T}) where {T} = RGB(a.r + b.r, a.g + b.g, a.b + b.b)
 Base.:-(a::RGB{T}, b::RGB{T}) where {T} = RGB(a.r - b.r, a.g - b.g, a.b - b.b)
-function Base.:*(scalar, c::RGB{T}) where {T}
-    RGB(scalar*c.r , scalar*c.g, scalar*c.b)
-end
-Base.:*(c::RGB{T}, scalar) where {T} = scalar * c
-Base.:/(c::RGB{T}, scalar) where {T} = RGB(c.r/scalar , c.g/scalar, c.b/scalar)
+Base.:*(scalar::Real, c::RGB{T}) where {T} = RGB(scalar*c.r , scalar*c.g, scalar*c.b)
+Base.:*(c::RGB{T}, scalar::Real) where {T} = scalar * c
+Base.:/(c::RGB{T}, scalar::Real) where {T} = RGB(c.r/scalar , c.g/scalar, c.b/scalar)
 Base.:≈(a::RGB{T}, b::RGB{T}) where {T} = are_close(a.r,b.r) && are_close(a.g,b.g) && are_close(a.b, b.b)
 
 # Funzione di approssimazione
@@ -213,12 +211,16 @@ end # clamp_image
 
 function parse_command_line(args)
     if isempty(args) || length(args)==1 || length(args)>4
-	    throw	end  
-    infile = nothing; outfile = nothing; a=nothing; γ=nothing
+	    throw(Exception)	
+    end  
+    
+    infile = nothing; outfile = nothing; a=0.18; γ=1.0
     try
         infile = args[1]
         outfile = args[2]
-
+        open(infile, "r") do io
+            read(io, UInt8)
+        end
     catch e
         throw(RuntimeError("invalid input file: $(args[1]) does not exist"))
     end
@@ -226,7 +228,7 @@ function parse_command_line(args)
 
     if length(args)>2
         try
-            a = parse( args[3] )
+            a = parse(Float64, args[3] )
             a>0. || throw(Exception)
         catch e
             throw(InvalidArgumentError("invalid value for a: $(args[3])  must be a positive number"))
@@ -234,17 +236,12 @@ function parse_command_line(args)
 
         if length(args)==4
             try
-                γ = parse( args[4] )
+                γ = parse(Float64, args[4] )
                 γ>0. || throw(Exception)
             catch e
                 throw(InvalidArgumentError("invalid value for γ: $(args[4])  must be a positive number"))
             end
-        else
-            γ = 1.0
         end
-    else
-        a = 0.18
-        γ = 1.0
     end
 
     return infile, outfile, a, γ
