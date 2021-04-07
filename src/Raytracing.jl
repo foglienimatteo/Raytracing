@@ -7,6 +7,8 @@ import ColorTypes:RGB  #specificare sempre cosa si importa. In questo caso posso
 import Base.:+; import Base.:-; import Base.:≈; import Base.:/; import Base.:*
 import Base.write; import Base.read
 
+export HDRimage, Parameters
+
 #=
 
 function Base.:+(x::RGB{T}, y::RGB{T}) where{T} #in questo modo tipo qualsiasi, per specificare: where{T<:real}
@@ -17,7 +19,9 @@ end
 # Definizione nuove operazioni con oggetti RGB
 Base.:+(a::RGB{T}, b::RGB{T}) where {T} = RGB(a.r + b.r, a.g + b.g, a.b + b.b)
 Base.:-(a::RGB{T}, b::RGB{T}) where {T} = RGB(a.r - b.r, a.g - b.g, a.b - b.b)
-Base.:*(scalar, c::RGB{T}) where {T} = RGB(scalar*c.r , scalar*c.g, scalar*c.b)
+function Base.:*(scalar, c::RGB{T}) where {T}
+    RGB(scalar*c.r , scalar*c.g, scalar*c.b)
+end
 Base.:*(c::RGB{T}, scalar) where {T} = scalar * c
 Base.:/(c::RGB{T}, scalar) where {T} = RGB(c.r/scalar , c.g/scalar, c.b/scalar)
 Base.:≈(a::RGB{T}, b::RGB{T}) where {T} = are_close(a.r,b.r) && are_close(a.g,b.g) && are_close(a.b, b.b)
@@ -40,10 +44,13 @@ struct HDRimage
 end # HDRimage
 #=
 struct Parameters
-    input_pfm_file_name = ""
-    a = 0.18
-    γ = 1.0
-    output_png_file_name = ""
+    infile::String
+    outfile::String
+    a::Real
+    γ::Real
+    Parameters(in, out, a, γ) = new(in, out, a, γ)
+    Parameters(in, out, a) = new(in, out, a, 1.0)
+    Parameters(in, out) = new(in, out, 0.18, 1.0)
 end
 =#
 valid_coordinates(hdr::HDRimage, x::Int, y::Int) = x>=0 && y>=0 && x<hdr.width && y<hdr.height
@@ -116,9 +123,9 @@ function parse_endianness(es::String)
     end
 end # parse_endianness
 
-function read_float(io::IO, ess::Float64)
+function read_float(io::IO, ess::Real)
     # controllo che in ingresso abbia una stringa che sia cnovertibile in Float32
-    @assert ess == 1.0 || ess == -1.0
+    ess == 1.0 || ess == -1.0 || throw(InvalidPfmFileFormat("endianness $ess not acceptable."))
     try
         value = read(io, Float32)   # con Float32 leggo già i 4 byte del colore
         ess == 1.0 ? value = ntoh(value) : value = ltoh(value) # converto nell'endianness utilizzata dalla macchina
@@ -182,12 +189,10 @@ end # avg_lum
 function normalize_image(img::HDRimage, a::Number=0.18, lum::Union{Number, Nothing}=nothing, δ::Number=1e-10)
     #isnothing(lum) || lum = avg_lum(img, δ)
     #isnothing(lum)==false || lum = avg_lum(img, δ)
-    isnothing(lum) ? lum = avg_lum(img, δ) : nothing
-    #=
+    #isnothing(lum) ? lum = avg_lum(img, δ) : nothing
     if isnothing(lum)
         lum = avg_lum(img, δ)
     end
-    =#
     img.rgb_m .= img.rgb_m .* a ./lum
 
     nothing
@@ -206,25 +211,45 @@ function clamp_image(img::HDRimage)
     nothing
 end # clamp_image
 
-function parse_command_line(parm::Parameters, argv)
-    if length(argv) != 5
-        throw(RuntimeError("usage: main.py INPUT_PFM_FILE FACTOR GAMMA OUTPUT_PNG_FILE"))
-    end
+function parse_command_line(args)
+    if isempty(args) || length(args) == 1 || length(args)>4
+	    throw(Exception)
+    end  
+    infile = nothing; outfile = nothing; a = nothing; γ = nothing
 
-    parm.input_pfm_file_name = argv[1]
-    
     try
-        parm.factor = argv[2]
+        infile = args[1]
+        outfile = args[2]
     catch e
-        throw(RuntimeError("invalid factor $argv[2], it must be a floating-point number"))
+        throw(RuntimeError("invalid input file: $(args[1]) does not exist"))
     end
 
-    try
-        parm.γ = argv[3]
-    catch ValueError
-        throw(RuntimeError("invalid γ $argv[2], it must be a floating-point number"))
+    if length(args)>2
+        try
+            a = parse(Float64, args[3])
+            a > 0. || throw(Exception)
+            # prova che esiste il file su disco
+        catch e
+            throw(InvalidArgumentError("invalid value for a: $(args[3])  must be a positive number"))
+        end
+
+        if length(args) == 4
+            try
+                γ = parse(Float64, args[4])
+                γ > 0. || throw(Exception)
+            catch e
+                throw(InvalidArgumentError("invalid value for γ: $(args[4])  must be a positive number"))
+            end
+        else
+            γ = 1.0
+        end
+
+    else
+        a = 0.18
+        γ = 1.0
     end
-    param.output_png_file_name = argv[4]
+
+    return infile, outfile, a, γ
 end
 
 end  # module

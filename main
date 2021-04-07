@@ -6,31 +6,44 @@ Pkg.activate(normpath(@__DIR__))
 using Colors
 import ColorTypes:RGB
 using Raytracing
+using Images
+
+#=
+function main() 
+		println("\nusage: ./main input_pfm_filename output_png_filename")
+		return nothing
+end
+=#
 
 function main(args)
-#=	parameters = Raytracing.Parameters()
-	
+	if isempty(args) || length(args)==1 || length(args)>4
+        println("\ncorrect usage: ./main input_pfm_filename output_png_filename [a , [γ]]")
+	   return nothing
+	end  
+
+	parameters = nothing
+
 	try
-		Raytracing.parse_command_line(args)
+		parameters =  Raytracing.Parameters(Raytracing.parse_command_line(args)...)
 	catch e
 		println("Error: ", e)
 		return nothing
 	end
 
-	open(parameters.input_pfm_file_name, "r") do inpf
-		img = Raytracing.read(inpf, HDRimages)
+	img = nothing
+	open(parameters.infile, "r") do inpf
+		img = Raytracing.read(inpf, HDRimage)
 	end
 
-	println("File $(parameters.input_pfm_file_name) has been read from disk.")
+	println("\nfile $(parameters.infile) has been read from disk.\n")
 
-	img = Raytracing.normalize_image(img, a = parameters.a)
-	img = Raytracing.clamp_image(img)
+	Raytracing.normalize_image(img, parameters.a)
+	Raytracing.clamp_image(img)
 
-	save(parameters.output_png_file_name, img.rgb_m)
+	#Images.save(File{format"PNG"}(parameters.outfile), img.rgb_m)
+	Images.save(File("PNG", parameters.outfile), img.rgb_m)
 
-	println("File $(parameters.output_png_file_name) has been written to disk.")
-=#
-	println("ciao")
+	println("\nFile $(parameters.outfile) has been written into the disk.\n")
 end
 
-main()
+main(ARGS)
