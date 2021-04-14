@@ -302,3 +302,11 @@ end
 	@test Raytracing.get_pixel(img, 0, 0).g >= 0 && Raytracing.get_pixel(img, 0, 0).g <= 1
 	@test Raytracing.get_pixel(img, 0, 0).b >= 0 && Raytracing.get_pixel(img, 0, 0).b <= 1
 end
+
+@testset "test_Geometry" begin
+	a = Vec(1.0, 2.0, 3.0)
+    b = Vec(4.0, 6.0, 8.0)
+	@test (a + b) ≈ Vec(5.0, 8.0, 11.0)
+    @test (b - a) ≈ Vec(3.0, 4.0, 5.0)
+    @test (a * 2) ≈ Vec(2.0, 4.0, 6.0)
+end
