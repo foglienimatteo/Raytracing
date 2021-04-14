@@ -51,6 +51,14 @@ struct Parameters
     Parameters(in, out) = new(in, out, 0.18, 1.0)
 end
 
+struct Point
+    x::Float64
+    y::Float64
+    z::Float64
+    Point(x, y, z) = new(x, y, z)
+    Point() = new(0., 0. ,0.)
+end
+
 struct Vec
     x::Float64
     y::Float64
