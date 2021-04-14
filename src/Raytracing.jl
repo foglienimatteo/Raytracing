@@ -10,7 +10,7 @@ import Base.:+; import Base.:-; import Base.:≈; import Base.:/; import Base.:*
 import Base: write, read, print, println;
 import LinearAlgebra.:⋅; import LinearAlgebra.:×
 
-export HDRimage, Parameters, ribaltare
+export HDRimage, Parameters, ribaltare, Vec, Point
 
 #=
 
@@ -77,6 +77,7 @@ Base.:+(a::Vec, b::Vec) = Vec(a.x+b.x, a.y+b.y, a.z+b.z)
 Base.:-(a::Vec, b::Vec) = Vec(a.x-b.x, a.y-b.y, a.z-b.z)
 Base.:*(s::Real, a::Vec) = Vec(s*a.x, s*a.y, s*a.z)
 Base.:*(a::Vec, s::Real) = Vec(s*a.x, s*a.y, s*a.z)
+Base.:/(a::Vec, s::Real) = Vec(a.x/s, a.y/s, a.z/s)
 LinearAlgebra.:⋅(a::Vec, b::Vec) = a.x*b.x + a.y*b.y + a.z*b.z
 LinearAlgebra.:×(a::Vec, b::Vec) = Vec(a.y*b.z-a.z*b.y, b.x*a.z-a.x*b.z, a.x*b.y-a.y*b.x)
 
@@ -309,6 +310,14 @@ println(p::Point)=println(stdout,p)
 function println(io::IO,p::Point)
     print(io, p)
     print("\n")
+end
+
+squared_norm(v::Union{Vec,Point}) = v.x^2 + v.y^2 + v.z^2
+norm(v::Union{Vec,Point}) = √squared_norm(v)
+function normalize!(v::Vec)
+    a = norm(v)
+    v.x += a
+    nothing
 end
 
 end  # module
