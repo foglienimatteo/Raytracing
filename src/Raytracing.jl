@@ -10,7 +10,7 @@ import Base.:+; import Base.:-; import Base.:≈; import Base.:/; import Base.:*
 import Base: write, read, print, println;
 import LinearAlgebra.:⋅; import LinearAlgebra.:×
 
-export HDRimage, Parameters, ribaltare
+export HDRimage, Parameters, ribaltare, Vec, Point
 
 #=
 
@@ -310,6 +310,14 @@ println(p::Point)=println(stdout,p)
 function println(io::IO,p::Point)
     print(io, p)
     print("\n")
+end
+
+squared_norm(v::Union{Vec,Point}) = v.x^2 + v.y^2 + v.z^2
+norm(v::Union{Vec,Point}) = √squared_norm(v)
+function normalize!(v::Vec)
+    a = norm(v)
+    v.x += a
+    nothing
 end
 
 end  # module
