@@ -1,6 +1,7 @@
 module Raytracing
 
 using Colors  #generico
+using LinearAlgebra
 #using Images; using ImageIO
 #using IOStream
 import ColorTypes:RGB  #specificare sempre cosa si importa. In questo caso posso evitare di secificare nella funzione "x::ColorTypes.RGB{T}"
