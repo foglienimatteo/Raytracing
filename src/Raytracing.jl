@@ -5,7 +5,8 @@ using Colors  #generico
 #using IOStream
 import ColorTypes:RGB  #specificare sempre cosa si importa. In questo caso posso evitare di secificare nella funzione "x::ColorTypes.RGB{T}"
 import Base.:+; import Base.:-; import Base.:≈; import Base.:/; import Base.:*
-import Base.write; import Base.read
+#import Base.write; import Base.read; import Base.print; 
+import Base: write, read, print, println;
 
 export HDRimage, Parameters, ribaltare
 
@@ -272,6 +273,14 @@ function ribaltare(img::HDRimage)
     #IMG = reverse(IMG, dims=1)
 
     return IMG
+end
+
+print(io::IO, v::Vec) = print("Vec:\t ", v.x, "\t", v.y, "\t", v.z)
+print(v::Vec)=print(stdout, v)
+println(v::Vec)=println(stdout,v)
+function println(io::IO,v::Vec)
+    print(io, v)
+    print("\n")
 end
 
 end  # module
