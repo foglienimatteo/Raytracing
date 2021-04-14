@@ -5,8 +5,9 @@ using Colors  #generico
 #using IOStream
 import ColorTypes:RGB  #specificare sempre cosa si importa. In questo caso posso evitare di secificare nella funzione "x::ColorTypes.RGB{T}"
 import Base.:+; import Base.:-; import Base.:≈; import Base.:/; import Base.:*
+#import Base.write; import Base.read; import Base.print; 
+import Base: write, read, print, println;
 import LinearAlgebra.:⋅; import LinearAlgebra.:×
-import Base.write; import Base.read
 
 export HDRimage, Parameters, ribaltare
 
@@ -17,13 +18,18 @@ function Base.:+(x::RGB{T}, y::RGB{T}) where{T} #in questo modo tipo qualsiasi, 
 end
 =#
 
+# Definitions of approx functions
+are_close(x,y,epsilon=1e-10) = abs(x-y) < epsilon
+Base.:≈(a::RGB{T}, b::RGB{T}) where {T} = are_close(a.r,b.r) && are_close(a.g,b.g) && are_close(a.b, b.b)
+Base.:≈(a::Vec, b::Vec) = are_close(a.x, b.x) && are_close(a.y, b.y) && are_close(a.z, b.z)
+Base.:≈(a::Point, b::Point) = are_close(a.x, b.x) && are_close(a.y, b.y) && are_close(a.z,b.z)
+
 # Definizione nuove operazioni con oggetti RGB
 Base.:+(a::RGB{T}, b::RGB{T}) where {T} = RGB(a.r + b.r, a.g + b.g, a.b + b.b)
 Base.:-(a::RGB{T}, b::RGB{T}) where {T} = RGB(a.r - b.r, a.g - b.g, a.b - b.b)
 Base.:*(scalar::Real, c::RGB{T}) where {T} = RGB(scalar*c.r , scalar*c.g, scalar*c.b)
 Base.:*(c::RGB{T}, scalar::Real) where {T} = scalar * c
 Base.:/(c::RGB{T}, scalar::Real) where {T} = RGB(c.r/scalar , c.g/scalar, c.b/scalar)
-Base.:≈(a::RGB{T}, b::RGB{T}) where {T} = are_close(a.r,b.r) && are_close(a.g,b.g) && are_close(a.b, b.b)
 
 # Definizione nuove operazini con oggetti Vec
 Base.:+(a::Vec, b::Vec) = Vec(a.x+b.x, a.y+b.y, a.z+b.z)
@@ -40,9 +46,6 @@ Base.:-(p::Point, v::Vec) = Point(p.x-v.x, p.y-v.y, p.z-v.z)
 Base.:*(s::Real, a::Point) = Point(s*a.x, s*a.y, s*a.z)
 Base.:*(a::Point, s::Real) = Point(s*a.x, s*a.y, s*a.z)
 Base.:-(a::Point, b::Point) = Vec(b.x-a.x, b.y-a.y, b.z-a.z)
-
-# Funzione di approssimazione
-are_close(x,y,epsilon=1e-10) = abs(x-y) < epsilon
 
 struct HDRimage
     width::Int
@@ -289,6 +292,14 @@ function ribaltare(img::HDRimage)
     #IMG = reverse(IMG, dims=1)
 
     return IMG
+end
+
+print(io::IO, v::Vec) = print("Vec:\t ", v.x, "\t", v.y, "\t", v.z)
+print(v::Vec)=print(stdout, v)
+println(v::Vec)=println(stdout,v)
+function println(io::IO,v::Vec)
+    print(io, v)
+    print("\n")
 end
 
 end  # module
