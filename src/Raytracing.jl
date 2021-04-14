@@ -7,7 +7,7 @@ import ColorTypes:RGB  #specificare sempre cosa si importa. In questo caso posso
 import Base.:+; import Base.:-; import Base.:≈; import Base.:/; import Base.:*
 import Base.write; import Base.read
 
-export HDRimage, Parameters
+export HDRimage, Parameters, ribaltare
 
 #=
 
@@ -185,12 +185,13 @@ function avg_lum(img::HDRimage, δ::Number=1e-10)
 end # avg_lum
 
 function normalize_image(img::HDRimage, a::Number=0.18, lum::Union{Number, Nothing}=nothing, δ::Number=1e-10)
-    #isnothing(lum) || lum = avg_lum(img, δ)
-    #isnothing(lum)==false || lum = avg_lum(img, δ)
+    (!isnothing(lum)) || (lum = avg_lum(img, δ))
+    #isnothing(lum)==false || (lum = avg_lum(img, δ))
     #isnothing(lum) ? lum = avg_lum(img, δ) : nothing
-    if isnothing(lum)
+    #=if isnothing(lum)
         lum = avg_lum(img, δ)
     end
+    =#
     img.rgb_m .= img.rgb_m .* a ./lum
 
     nothing
