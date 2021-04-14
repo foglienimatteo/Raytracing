@@ -320,8 +320,7 @@ end
     q = Point(4.0, 6.0, 8.0)
 	@test (p * 2) ≈ Point(2.0, 4.0, 6.0)
 	@test (2 * p) ≈ Point(2.0, 4.0, 6.0)
-	@test (p + q) ≈ Point(5.0, 8.0, 11.0)
-	@test (q - p) ≈ Point(3.0, 4.0, 5.0)
+	@test (p - q) ≈ Vec(3.0, 4.0, 5.0)
 
 	@test (q - a) ≈ Point(3.0, 4.0, 5.0)
 	@test (q + a) ≈ Point(5.0, 8.0, 11.0)

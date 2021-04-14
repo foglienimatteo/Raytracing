@@ -77,6 +77,7 @@ Base.:+(a::Vec, b::Vec) = Vec(a.x+b.x, a.y+b.y, a.z+b.z)
 Base.:-(a::Vec, b::Vec) = Vec(a.x-b.x, a.y-b.y, a.z-b.z)
 Base.:*(s::Real, a::Vec) = Vec(s*a.x, s*a.y, s*a.z)
 Base.:*(a::Vec, s::Real) = Vec(s*a.x, s*a.y, s*a.z)
+Base.:/(a::Vec, s::Real) = Vec(a.x/s, a.y/s, a.z/s)
 LinearAlgebra.:⋅(a::Vec, b::Vec) = a.x*b.x + a.y*b.y + a.z*b.z
 LinearAlgebra.:×(a::Vec, b::Vec) = Vec(a.y*b.z-a.z*b.y, b.x*a.z-a.x*b.z, a.x*b.y-a.y*b.x)
 
