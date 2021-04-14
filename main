@@ -30,10 +30,9 @@ function main(args)
 		return nothing
 	end
 
-	img=nothing
-	open(parameters.infile, "r") do inpf
-		img = Raytracing.read(inpf, HDRimage)
-	end
+	img=open(parameters.infile, "r") do inpf
+			Raytracing.read(inpf, HDRimage)
+		end
 
 	println("\nfile $(parameters.infile) has been read from disk.\n")
 
