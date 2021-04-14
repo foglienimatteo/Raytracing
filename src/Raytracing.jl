@@ -51,6 +51,14 @@ struct Parameters
     Parameters(in, out) = new(in, out, 0.18, 1.0)
 end
 
+struct Vec
+    x::Float64
+    y::Float64
+    z::Float64
+    Vec(x,y,z) = new(x,y,z)
+    Vec()=new(0.0, 0.0, 0.0)
+end
+
 valid_coordinates(hdr::HDRimage, x::Int, y::Int) = x>=0 && y>=0 && x<hdr.width && y<hdr.height
 
 function pixel_offset(hdr::HDRimage, x::Int, y::Int)
