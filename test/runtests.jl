@@ -306,7 +306,23 @@ end
 @testset "test_Geometry" begin
 	a = Vec(1.0, 2.0, 3.0)
     b = Vec(4.0, 6.0, 8.0)
+	@test a ≈ Vec(1.0, 2.0, 3.0)
 	@test (a + b) ≈ Vec(5.0, 8.0, 11.0)
     @test (b - a) ≈ Vec(3.0, 4.0, 5.0)
     @test (a * 2) ≈ Vec(2.0, 4.0, 6.0)
+	@test (2 * a) ≈ Vec(2.0, 4.0, 6.0)
+	@test (a ⋅ b) ≈ 40.0
+	@test (a × b) ≈ Vec(-2.0, 4.0, -2.0)
+	@test (b × a) ≈ Vec(2.0, -4.0, 2.0)
+	# mancano norma e norma^2
+
+	p = Point(1.0, 2.0, 3.0)
+    q = Point(4.0, 6.0, 8.0)
+	@test (p * 2) ≈ Point(2.0, 4.0, 6.0)
+	@test (2 * p) ≈ Point(2.0, 4.0, 6.0)
+	@test (p + q) ≈ Point(5.0, 8.0, 11.0)
+	@test (q - p) ≈ Point(3.0, 4.0, 5.0)
+
+	@test (q - a) ≈ Point(3.0, 4.0, 5.0)
+	@test (q + a) ≈ Point(5.0, 8.0, 11.0)
 end
