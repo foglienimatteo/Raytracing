@@ -2,6 +2,7 @@ using Raytracing
 using Test
 
 import ColorTypes:RGB
+using LinearAlgebra
 
 @testset "test_RGB" begin
 	@test 1+1==2
@@ -285,20 +286,55 @@ end
 
 @testset "normalize_image" begin
 	img = Raytracing.HDRimage(2, 1, [RGB(5.0, 10.0, 15.0), RGB(500.0, 1000.0, 1500.0)])
-	Raytracing.normalize_image(img, 1000.0, 100.0)
+	Raytracing.normalize_image!(img, 1000.0, 100.0)
 	@test Raytracing.get_pixel(img, 0, 0) ≈ RGB(0.5e2, 1.0e2, 1.5e2)
 	@test Raytracing.get_pixel(img, 1, 0) ≈ RGB(0.5e4, 1.0e4, 1.5e4)
 
 	img = Raytracing.HDRimage(2, 1, [RGB(5.0, 10.0, 15.0), RGB(500.0, 1000.0, 1500.0)])	
-	Raytracing.normalize_image(img, 1000.0)
+	Raytracing.normalize_image!(img, 1000.0)
 	@test Raytracing.get_pixel(img, 0, 0) ≈ RGB(0.5e2, 1.0e2, 1.5e2)
 	@test Raytracing.get_pixel(img, 1, 0) ≈ RGB(0.5e4, 1.0e4, 1.5e4)
 end
 
 @testset "test_clamp_image" begin
 	img = Raytracing.HDRimage(2, 1, [RGB(5.0, 10.0, 15.0), RGB(500.0, 1000.0, 1500.0)])
-	Raytracing.clamp_image(img)
+	Raytracing.clamp_image!(img)
 	@test Raytracing.get_pixel(img, 0, 0).r >= 0 && Raytracing.get_pixel(img, 0, 0).r <= 1
 	@test Raytracing.get_pixel(img, 0, 0).g >= 0 && Raytracing.get_pixel(img, 0, 0).g <= 1
 	@test Raytracing.get_pixel(img, 0, 0).b >= 0 && Raytracing.get_pixel(img, 0, 0).b <= 1
+end
+
+@testset "test_Geometry" begin
+	err = 1e-11
+	a = Vec(1.0, 2.0, 3.0)
+	b = Vec(4.0, 6.0, 8.0)
+	@test a ≈ Vec(1.0, 2.0, 3.0 + err)
+	@test (a + b) ≈ Vec(5.0, 8.0 + 3*err, 11.0)
+     @test (b - a) ≈ Vec(3.0, 4.0 - 2*err, 5.0)
+     @test (a * 2) ≈ Vec(2.0, 4.0 + 2*err, 6.0 - err)
+	@test (2 * a) ≈ Vec(2.0, 4.0 - err, 6.0)
+	@test ( a/2 ) ≈ Vec(0.5, 1.0, 1.5 + 3*err)
+	@test (a ⋅ b) ≈ 40.0 - 9.5*err
+	@test (a × b) ≈ Vec(-2.0, 4.0 - err, -2.0)
+	@test (b × a) ≈ Vec(2.0, -4.0, 2.0 - err)
+
+	p = Point(1.0, 2.0, 3.0)
+	q = Point(4.0, 6.0, 8.0)
+	@test (p * 2) ≈ Point(2.0, 4.0 - err, 6.0)
+	@test (2 * p) ≈ Point(2.0, 4.0 + 8.5*err, 6.0)
+	#@test (p + q) ≈ Point(5.0, 8.0 - err, 11.0)
+	@test (p - q) ≈ Vec(3.0, 4.0 - 2 * err, 5.0)
+
+	@test (q - a) ≈ Point(3.0, 4.0, 5.0 - err)
+	@test (q + a) ≈ Point(5.0, 8.0, 11.0 - 5*err)
+
+	@test Raytracing.squared_norm(a) ≈ 14 - 3*err
+	@test Raytracing.squared_norm(b) ≈ 116 + 3*err
+	@test Raytracing.norm(a) ≈ √14 - 3*err
+	@test Raytracing.norm(b) ≈ √116 + 3*err
+	a = Raytracing.normalize(a)
+	b = Raytracing.normalize(b)
+	@test a ≈ Vec(1.0, 2.0, 3.0)/√14
+	@test b ≈ Vec(4.0, 6.0, 8.0)/√116
+
 end
