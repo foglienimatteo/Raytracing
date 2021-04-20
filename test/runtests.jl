@@ -286,19 +286,19 @@ end
 
 @testset "normalize_image" begin
 	img = Raytracing.HDRimage(2, 1, [RGB(5.0, 10.0, 15.0), RGB(500.0, 1000.0, 1500.0)])
-	Raytracing.normalize_image(img, 1000.0, 100.0)
+	Raytracing.normalize_image!(img, 1000.0, 100.0)
 	@test Raytracing.get_pixel(img, 0, 0) ≈ RGB(0.5e2, 1.0e2, 1.5e2)
 	@test Raytracing.get_pixel(img, 1, 0) ≈ RGB(0.5e4, 1.0e4, 1.5e4)
 
 	img = Raytracing.HDRimage(2, 1, [RGB(5.0, 10.0, 15.0), RGB(500.0, 1000.0, 1500.0)])	
-	Raytracing.normalize_image(img, 1000.0)
+	Raytracing.normalize_image!(img, 1000.0)
 	@test Raytracing.get_pixel(img, 0, 0) ≈ RGB(0.5e2, 1.0e2, 1.5e2)
 	@test Raytracing.get_pixel(img, 1, 0) ≈ RGB(0.5e4, 1.0e4, 1.5e4)
 end
 
 @testset "test_clamp_image" begin
 	img = Raytracing.HDRimage(2, 1, [RGB(5.0, 10.0, 15.0), RGB(500.0, 1000.0, 1500.0)])
-	Raytracing.clamp_image(img)
+	Raytracing.clamp_image!(img)
 	@test Raytracing.get_pixel(img, 0, 0).r >= 0 && Raytracing.get_pixel(img, 0, 0).r <= 1
 	@test Raytracing.get_pixel(img, 0, 0).g >= 0 && Raytracing.get_pixel(img, 0, 0).g <= 1
 	@test Raytracing.get_pixel(img, 0, 0).b >= 0 && Raytracing.get_pixel(img, 0, 0).b <= 1
@@ -332,8 +332,8 @@ end
 	@test Raytracing.squared_norm(b) ≈ 116 + 3*err
 	@test Raytracing.norm(a) ≈ √14 - 3*err
 	@test Raytracing.norm(b) ≈ √116 + 3*err
-	Raytracing.normalize!(a)
-	Raytracing.normalize!(b)
+	a = Raytracing.normalize(a)
+	b = Raytracing.normalize(b)
 	@test a ≈ Vec(1.0, 2.0, 3.0)/√14
 	@test b ≈ Vec(4.0, 6.0, 8.0)/√116
 end
