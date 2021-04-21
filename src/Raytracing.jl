@@ -105,21 +105,23 @@ Base.:-(a::Point, b::Point) = Vec(b.x-a.x, b.y-a.y, b.z-a.z)
 # Definitions of operations for Transformations
 Base.:*(s::Trasformation, t::Trasformation) = Trasformation(s.M*t.M, t.invM*s.invM)
 function Base.:*(t::Trasformation, p::Point)
-    q = Point(t.M[1] * p.x + t.M[2] *p.y +t.M[3] *p.z +t.M[4],
-              t.M[5] * p.x + t.M[6] *p.y +t.M[7] *p.z +t.M[8],
-              t.M[9] * p.x + t.M[10]*p.y +t.M[11]*p.z +t.M[12]
+    q = Point(t.M[1] * p.x + t.M[5] *p.y +t.M[9] *p.z +t.M[13],
+              t.M[2] * p.x + t.M[6] *p.y +t.M[10] *p.z +t.M[14],
+              t.M[3] * p.x + t.M[7]*p.y +t.M[11]*p.z +t.M[15]
     )
-    λ = t.M[13] * p.x + t.M[14]*p.y +t.M[15]*p.z +t.M[16]
-    λ == 1.0 ? (return q) : (return p/q)
+    λ = t.M[4] * p.x + t.M[8]*p.y +t.M[12]*p.z +t.M[16]
+    λ == 1.0 ? (return q) : (return q/λ)
 end
-function Base.:*(t::Trasformation, v::Vec)
-    Vec(t.M[1] * p.x + t.M[2] *p.y +t.M[3] *p.z +t.M[4], t.M[5] * p.x + t.M[6] *p.y +t.M[7] *p.z +t.M[8], t.M[9] * p.x + t.M[10]*p.y +t.M[11]*p.z +t.M[12])
+function Base.:*(t::Trasformation, p::Vec)
+    Vec(t.M[1] * p.x + t.M[5] *p.y +t.M[9] *p.z +t.M[13], 
+        t.M[2] * p.x + t.M[6] *p.y +t.M[10] *p.z +t.M[14], 
+        t.M[3] * p.x + t.M[7]*p.y +t.M[11]*p.z +t.M[15])
 end
 function Base.:*(t::Trasformation, n::Normal)
     Mat = transpose(t.invM)
-    l = Point(Mat.M[1] * n.x + Mat.M[2] *n.y +Mat.M[3] *n.z +Mat.M[4],
-              Mat.M[5] * n.x + Mat.M[6] *n.y +Mat.M[7] *n.z +Mat.M[8],
-              Mat.M[9] * n.x + Mat.M[10]*n.y +Mat.M[11]*n.z +Mat.M[12]
+    l = Point(Mat[1] * n.x + Mat[5] *n.y + Mat[9]  *n.z + Mat[13],
+              Mat[2] * n.x + Mat[6] *n.y + Mat[10] *n.z + Mat[14],
+              Mat[3] * n.x + Mat[7] *n.y + Mat[11] *n.z + Mat[15]
     )
     return l
 end
