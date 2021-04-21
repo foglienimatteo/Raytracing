@@ -333,7 +333,7 @@ end
 	@test Raytracing.is_consistent(m)
     @test exp_v ≈ (m * Vec(1.0, 2.0, 3.0))
     @test exp_p ≈ (m * Point(1.0, 2.0, 3.0))
-	@test expected_n ≈ (m * Normal(3.0, 2.0, 4.0))
+	@test exp_n ≈ (m * Normal(3.0, 2.0, 4.0))
 
 	# rotation
 	@test Raytracing.is_consistent(Raytracing.rotation_x(0.1))
