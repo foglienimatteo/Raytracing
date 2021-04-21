@@ -207,27 +207,6 @@ end
 	for i in 0:2
 		Raytracing.read_line(reference_bytes2)
 	end
-
-	# testo la lettura corretta di tutti i colori (ordine basso → alto nella scrittura)
-#=	@test Raytracing.read_float(reference_bytes2, -1.0) == 1.0e2	# Qui magari possiamo anche far leggere
-	@test Raytracing.read_float(reference_bytes2, -1.0) == 2.0e2	# reference_bytes2 senza altre operazioni
-	@test Raytracing.read_float(reference_bytes2, -1.0) == 3.0e2	# visto che controlla già prima.
-	@test Raytracing.read_float(reference_bytes2, -1.0) == 4.0e2
-	@test Raytracing.read_float(reference_bytes2, -1.0) == 5.0e2
-	@test Raytracing.read_float(reference_bytes2, -1.0) == 6.0e2
-	@test Raytracing.read_float(reference_bytes2, -1.0) == 7.0e2
-	@test Raytracing.read_float(reference_bytes2, -1.0) == 8.0e2
-	@test Raytracing.read_float(reference_bytes2, -1.0) == 9.0e2
-	@test Raytracing.read_float(reference_bytes2, -1.0) == 1.0e1
-	@test Raytracing.read_float(reference_bytes2, -1.0) == 2.0e1
-	@test Raytracing.read_float(reference_bytes2, -1.0) == 3.0e1
-	@test Raytracing.read_float(reference_bytes2, -1.0) == 4.0e1
-	@test Raytracing.read_float(reference_bytes2, -1.0) == 5.0e1
-	@test Raytracing.read_float(reference_bytes2, -1.0) == 6.0e1
-	@test Raytracing.read_float(reference_bytes2, -1.0) == 7.0e1
-	@test Raytracing.read_float(reference_bytes2, -1.0) == 8.0e1
-	@test Raytracing.read_float(reference_bytes2, -1.0) == 9.0e1
-	=#
 	for i in 1:18
 		Raytracing.read_float(reference_bytes2, -1.0)
 	end
@@ -336,4 +315,33 @@ end
 	b = Raytracing.normalize(b)
 	@test a ≈ Vec(1.0, 2.0, 3.0)/√14
 	@test b ≈ Vec(4.0, 6.0, 8.0)/√116
+end
+
+@testset "test_trasformation" begin
+	# rotation
+	@test Raytracing.is_consistent(Raytracing.rotation_x(0.1))
+	@test Raytracing.is_consistent(Raytracing.rotation_y(0.1))
+	@test Raytracing.is_consistent(Raytracing.rotation_z(0.1))
+	@test (Raytracing.rotation_x(θ=pi/2) * Vec(0.0, 1.0, 0.0)) ≈ (Vec(0.0, 0.0, 1.0))
+	@test (Raytracing.rotation_y(θ=pi/2) * Vec(0.0, 0.0, 1.0)) ≈ (Vec(1.0, 0.0, 0.0))
+	@test (Raytracing.rotation_z(θ=pi/2) * Vec(1.0, 0.0, 0.0)) ≈ (Vec(0.0, 1.0, 0.0))
+
+	# scaling
+	tr1 = Raytracing.scaling(Vec(2.0, 5.0, 10.0))
+    tr2 = Raytracing.scaling(Vec(3.0, 2.0, 4.0))
+    @test Raytracing.is_consistent(tr1)
+	@test Raytracing.is_consistent(tr2)
+    exp = Raytracing.scaling(Vec(6.0, 10.0, 40.0))
+    @test exp ≈ (tr1 * tr2)
+
+	# traslation
+	tr1 = translation(Vec(1.0, 2.0, 3.0))
+	tr2 = translation(Vec(4.0, 6.0, 8.0))
+	exp = translation(Vec(5.0, 8.0, 11.0))
+	@test Raytracing.is_consistent(tr1)
+	@test Raytracing.is_consistent(tr2)
+	@test Raytracing.is_consistent(prd)
+	prd = tr1 * tr2
+	@test Raytracing.is_consistent(prd)
+	@test prd ≈ exp
 end

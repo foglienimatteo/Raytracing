@@ -9,6 +9,9 @@ import LinearAlgebra.:⋅; import LinearAlgebra.:×
 
 export HDRimage, Parameters, Vec, Point
 
+
+# STRUCTs
+
 struct HDRimage
     width::Int64
     height::Int64
@@ -46,18 +49,20 @@ struct Normal
 
     function Normal(x, y, z)
         m = √(x^2+y^2+z^2)
-        new(x/m,y/m,z/m)
+        new(x/m, y/m, z/m)
     end
-    Normal()=new(0.0, 0.0, 0.0)
 end
 
 struct Vec
     x::Float64
     y::Float64
     z::Float64
-    Vec(x,y,z) = new(x, y, z)
+    Vec(x, y, z) = new(x, y, z)
     Vec()=new(0.0, 0.0, 0.0)
 end
+
+# ----------------------------------------------------------------------------------------------------------------------------------------
+# NEW OPERATIONS
 
 # Definitions of approx functions
 are_close(x,y,epsilon=1e-10) = abs(x-y) < epsilon
@@ -88,6 +93,12 @@ Base.:-(p::Point, v::Vec) = Point(p.x-v.x, p.y-v.y, p.z-v.z)
 Base.:*(s::Real, a::Point) = Point(s*a.x, s*a.y, s*a.z)
 Base.:*(a::Point, s::Real) = Point(s*a.x, s*a.y, s*a.z)
 Base.:-(a::Point, b::Point) = Vec(b.x-a.x, b.y-a.y, b.z-a.z)
+
+# New operations with Trasformation
+Base.:*(s::Trasformation, t::Trasformation) = Trasformation(s.M+t.M, s.invM+t.invM)
+
+# ----------------------------------------------------------------------------------------------------------------------------------------
+# READING & WRITING FILE
 
 valid_coordinates(hdr::HDRimage, x::Int, y::Int) = x>=0 && y>=0 && x<hdr.width && y<hdr.height
 pixel_offset(hdr::HDRimage, x::Int, y::Int) = (@assert valid_coordinates(hdr, x, y); y*hdr.width + (x+1) )
@@ -197,6 +208,9 @@ function read(io::IO, ::Type{HDRimage})
     return result
 end # read_pfm_image(::IO)
 
+# ----------------------------------------------------------------------------------------------------------------------------------------
+# IMAGE
+
 luminosity(c::RGB{T}) where {T} = (max(c.r, c.g, c.b) + min(c.r, c.g, c.b))/2.
 function avg_lum(img::HDRimage, δ::Number=1e-10)
     cumsum=0.0
@@ -268,6 +282,89 @@ function overturn(img::HDRimage)
     #IMG = reverse(IMG, dims=1)
 
     return IMG
+end
+
+
+# ----------------------------------------------------------------------------------------------------------------------------------------
+# TRASFORMATION FUNCTIONS
+
+function rotation_x(θ::Float64)
+    Trasformation(
+        [[1.0,  0.0,    0.0,    0.0],
+         [0.0, cos(θ), -sin(θ), 0.0],
+         [0.0, sin(θ), cos(θ),  0.0],
+         [0.0,  0.0,    0.0,    1.0]],
+
+        [[1.0,  0.0,    0.0,    0.0],
+         [0.0, cos(θ), sin(θ),  0.0],
+         [0.0, -sin(θ), cos(θ), 0.0],
+         [0.0,  0.0,    0.0,    1.0]]
+    )
+end
+
+function rotation_y(θ::Float64)
+    Trasformation(
+        [[cos(θ),  0.0, sin(θ),  0.0],
+         [0.0,     1.0,  0.0,    0.0],
+         [-sin(θ), 0.0, cos(θ),  0.0],
+         [0.0,     0.0,  0.0,    1.0]],
+
+        [[cos(θ), 0.0, -sin(θ), 0.0],
+         [ 0.0,   1.0,   0.0,   0.0],
+         [sin(θ), 0.0,  cos(θ), 0.0],
+         [ 0.0,   0.0,   0.0,   1.0]]
+    )
+end
+
+function rotation_z(θ::Float64)
+    Trasformation(
+        [[cos(θ), -sin(θ), 0.0, 0.0],
+         [sin(θ), cos(θ),  0.0, 0.0],
+         [0.0,     0.0,    1.0, 0.0],
+         [0.0,     0.0,    0.0, 1.0]],
+
+        [[cos(θ),  sin(θ), 0.0, 0.0],
+         [-sin(θ), cos(θ), 0.0, 0.0],
+         [  0.0,     0.0,  1.0, 0.0],
+         [  0.0,     0.0,  0.0, 1.0]]
+    )
+end
+
+function scaling(v::Vec)
+    Transformation(
+        [[v.x, 0.0, 0.0, 0.0],
+         [0.0, v.y, 0.0, 0.0],
+         [0.0, 0.0, v.z, 0.0],
+         [0.0, 0.0, 0.0, 1.0]],
+
+        [[1/v.x,  0.0, 0.0, 0.0],
+         [ 0.0,  1/v.y,  0.0,  0.0],
+         [ 0.0,   0.0,  1/v.z, 0.0],
+         [ 0.0,   0.0,   0.0,  1.0]]
+    )
+end
+
+function traslation(v::Vec)
+   Transformation(
+        [[1.0, 0.0, 0.0, vec.x],
+         [0.0, 1.0, 0.0, vec.y],
+         [0.0, 0.0, 1.0, vec.z],
+         [0.0, 0.0, 0.0, 1.0]],
+        [[1.0, 0.0, 0.0, -vec.x],
+         [0.0, 1.0, 0.0, -vec.y],
+         [0.0, 0.0, 1.0, -vec.z],
+         [0.0, 0.0, 0.0, 1.0]]
+    )
+end
+
+function is_consistent(T::Trasformation)
+    p = T.M * T.invM
+    i = [[1.0, 0.0, 0.0, 0.0],
+         [0.0, 1.0, 0.0, 0.0],
+         [0.0, 0.0, 1.0, 0.0],
+         [0.0, 0.0, 0.0 ,1.0]
+         ]
+    return p ≈ i
 end
 
 print(io::IO, v::Vec) = (print("Vec:\t ", v.x, "\t", v.y, "\t", v.z); nothing)
