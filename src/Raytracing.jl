@@ -39,11 +39,23 @@ struct Point
     Point() = new(0., 0. ,0.)
 end
 
+struct Normal
+    x::Float64
+    y::Float64
+    z::Float64
+
+    function Normal(x, y, z)
+        m = √(x^2+y^2+z^2)
+        new(x/m,y/m,z/m)
+    end
+    Normal()=new(0.0, 0.0, 0.0)
+end
+
 struct Vec
     x::Float64
     y::Float64
     z::Float64
-    Vec(x,y,z) = new(x,y,z)
+    Vec(x,y,z) = new(x, y, z)
     Vec()=new(0.0, 0.0, 0.0)
 end
 
