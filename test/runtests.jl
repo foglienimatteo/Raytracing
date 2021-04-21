@@ -1,8 +1,5 @@
-using Raytracing
-using Test
-
+using Raytracing, Test, LinearAlgebra, StaticArrays
 import ColorTypes:RGB
-using LinearAlgebra
 
 @testset "test_RGB" begin
 	@test 1+1==2
@@ -283,81 +280,122 @@ end
 	@test Raytracing.get_pixel(img, 0, 0).b >= 0 && Raytracing.get_pixel(img, 0, 0).b <= 1
 end
 
-@testset "test_Geometry" begin
-	err = 1e-11
-	a = Vec(1.0, 2.0, 3.0)
-	b = Vec(4.0, 6.0, 8.0)
-	@test a ≈ Vec(1.0, 2.0, 3.0 + err)
-	@test (a + b) ≈ Vec(5.0, 8.0 + 3*err, 11.0)
-    @test (b - a) ≈ Vec(3.0, 4.0 - 2*err, 5.0)
-    @test (a * 2) ≈ Vec(2.0, 4.0 + 2*err, 6.0 - err)
-	@test (2 * a) ≈ Vec(2.0, 4.0 - err, 6.0)
-	@test ( a/2 ) ≈ Vec(0.5, 1.0, 1.5 + 3*err)
-	@test (a ⋅ b) ≈ 40.0 - 9.5*err
-	@test (a × b) ≈ Vec(-2.0, 4.0 - err, -2.0)
-	@test (b × a) ≈ Vec(2.0, -4.0, 2.0 - err)
+@testset "test_geometry" begin
 
-	p = Point(1.0, 2.0, 3.0)
-	q = Point(4.0, 6.0, 8.0)
-	@test (p * 2) ≈ Point(2.0, 4.0 - err, 6.0)
-	@test (2 * p) ≈ Point(2.0, 4.0 + 8.5*err, 6.0)
-	# @test (p + q) ≈ Point(5.0, 8.0 - err, 11.0)
-	@test (p - q) ≈ Vec(3.0, 4.0 - 2 * err, 5.0)
+	@testset "test_geometry_Vec" begin
+		err = 1e-11
+		a = Vec(1.0, 2.0, 3.0)
+		b = Vec(4.0, 6.0, 8.0)
 
-	@test (q - a) ≈ Point(3.0, 4.0, 5.0 - err)
-	@test (q + a) ≈ Point(5.0, 8.0, 11.0 - 5*err)
+		@test a ≈ Vec(1.0, 2.0, 3.0 + err)
+		@test (a + b) ≈ Vec(5.0, 8.0 + 3*err, 11.0)
+    		@test (b - a) ≈ Vec(3.0, 4.0 - 2*err, 5.0)
+    		@test (a * 2) ≈ Vec(2.0, 4.0 + 2*err, 6.0 - err)
+		@test (2 * a) ≈ Vec(2.0, 4.0 - err, 6.0)
+		@test ( a/2 ) ≈ Vec(0.5, 1.0, 1.5 + 3*err)
+		@test (a ⋅ b) ≈ 40.0 - 9.5*err
+		@test (a × b) ≈ Vec(-2.0, 4.0 - err, -2.0)
+		@test (b × a) ≈ Vec(2.0, -4.0, 2.0 - err)
+	end
 
-	@test Raytracing.squared_norm(a) ≈ 14 - 3*err
-	@test Raytracing.squared_norm(b) ≈ 116 + 3*err
-	@test Raytracing.norm(a) ≈ √14 - 3*err
-	@test Raytracing.norm(b) ≈ √116 + 3*err
-	a = Raytracing.normalize(a)
-	b = Raytracing.normalize(b)
-	@test a ≈ Vec(1.0, 2.0, 3.0)/√14
-	@test b ≈ Vec(4.0, 6.0, 8.0)/√116
+	@testset "test_geometry_Point" begin
+		err = 1e-11
+		p = Point(1.0, 2.0, 3.0)
+		q = Point(4.0, 6.0, 8.0)
+		a = Vec(1.0, 2.0, 3.0)
+		
+		@test (p * 2) ≈ Point(2.0, 4.0 - err, 6.0)
+		@test (2 * p) ≈ Point(2.0, 4.0 + 8.5*err, 6.0)
+		# @test (p + q) ≈ Point(5.0, 8.0 - err, 11.0)
+		@test (p - q) ≈ Vec(3.0, 4.0 - 2 * err, 5.0)
+		@test (q - a) ≈ Point(3.0, 4.0, 5.0 - err)
+		@test (q + a) ≈ Point(5.0, 8.0, 11.0 - 5*err)
+	end
+
+	@testset "test_geometry_normalizations" begin
+		err = 1e-11
+		a = Vec(1.0, 2.0, 3.0)
+		b = Vec(4.0, 6.0, 8.0)
+
+		@test Raytracing.squared_norm(a) ≈ 14 - 3*err
+		@test Raytracing.squared_norm(b) ≈ 116 + 3*err
+		@test Raytracing.norm(a) ≈ √14 - 3*err
+		@test Raytracing.norm(b) ≈ √116 + 3*err
+		a = Raytracing.normalize(a)
+		b = Raytracing.normalize(b)
+		@test a ≈ Vec(1.0, 2.0, 3.0)/√14
+		@test b ≈ Vec(4.0, 6.0, 8.0)/√116
+	end
 end
 
-@testset "test_transformation" begin
-	# operatoins
-    m1 = Transformation([1.0 2.0 3.0 4.0; 5.0 6.0 7.0 8.0; 9.0 9.0 8.0 7.0; 6.0 5.0 4.0 1.0], [-3.75  2.75   -1.0 0.0; 4.375  -3.875 2.0  -0.5; 0.5    0.5    -1.0 1.0; -1.375 0.875   0.0 -0.5])
-	m2 = Transformation([3.0 5.0 2.0 4.0; 4.0 1.0 0.0 5.0; 6.0 3.0 2.0 0.0; 1.0 4.0 2.0 1.0], [0.4 -0.2 0.2 -0.6; 2.9 -1.7 0.2 -3.1; -5.55 3.15 -0.4 6.45; -0.9 0.7 -0.2 1.1])
-	m = Transformation([1.0 2.0 3.0 4.0; 5.0 6.0 7.0 8.0; 9.0 9.0 8.0 7.0; 0.0 0.0 0.0 1.0], [-3.75 2.75 -1 0; 5.75 -4.75 2.0 1.0; -2.25 2.25 -1.0 -2.0; 0.0 0.0 0.0 1.0])
-	exp = Transformation([33.0 32.0 16.0 18.0; 89.0 84.0 40.0 58.0; 118.0 106.0 48.0 88.0; 63.0 51.0 22.0 50.0], [-1.45 1.45 -1.0 0.6; -13.95 11.95 -6.5 2.6; 25.525 -22.025 12.25 -5.2; 4.825 -4.325 2.5 -1.1])
-	exp_v = Vec(14.0, 38.0, 51.0)
-	exp_p = Point(18.0, 46.0, 58.0)
-	exp_n = Normal(-8.75, 7.75, -3.0)
-    @test Raytracing.is_consistent(m1)
-    @test Raytracing.is_consistent(m2)
-	@test Raytracing.is_consistent(exp)
-	@test exp ≈ (m1 * m2)
-	@test Raytracing.is_consistent(m)
-    @test exp_v ≈ (m * Vec(1.0, 2.0, 3.0))
-    @test exp_p ≈ (m * Point(1.0, 2.0, 3.0))
-	@test exp_n ≈ (m * Normal(3.0, 2.0, 4.0))
+@testset "test_transformations" begin
 
-	# rotation
-	@test Raytracing.is_consistent(Raytracing.rotation_x(0.1))
-	@test Raytracing.is_consistent(Raytracing.rotation_y(0.1))
-	@test Raytracing.is_consistent(Raytracing.rotation_z(0.1))
-	@test (Raytracing.rotation_x(pi/2) * Vec(0.0, 1.0, 0.0)) ≈ (Vec(0.0, 0.0, 1.0))
-	@test (Raytracing.rotation_y(pi/2) * Vec(0.0, 0.0, 1.0)) ≈ (Vec(1.0, 0.0, 0.0))
-	@test (Raytracing.rotation_z(pi/2) * Vec(1.0, 0.0, 0.0)) ≈ (Vec(0.0, 1.0, 0.0))
+	@testset "test_transformations_basic" begin
+		err=1e-11
+		A = SMatrix{4,4,Float64}([1.0 2.0 3.0 4.0; 5.0 6.0 7.0 8.0; 9.0 9.0 8.0 7.0; 6.0 5.0 4.0 1.0])
+		invA = SMatrix{4,4,Float64}([-3.75  2.75   -1.0 0.0; 4.375  -3.875 2.0  -0.5; 0.5    0.5    -1.0 1.0; -1.375 0.875   0.0 -0.5])
+		B = SMatrix{4,4,Float64}([3.0 5.0 2.0 4.0; 4.0 1.0 0.0 5.0; 6.0 3.0 2.0 0.0; 1.0 4.0 2.0 1.0])
+		invB = SMatrix{4,4,Float64}([0.4 -0.2 0.2 -0.6; 2.9 -1.7 0.2 -3.1; -5.55 3.15 -0.4 6.45; -0.9 0.7 -0.2 1.1])
+		C = SMatrix{4,4,Float64}([1.0 2.0 3.0 4.0; 5.0 6.0 7.0 8.0; 9.0 9.0 8.0 7.0; 0.0 0.0 0.0 1.0])
+		invC = SMatrix{4,4,Float64}([-3.75 2.75 -1 0; 5.75 -4.75 2.0 1.0; -2.25 2.25 -1.0 -2.0; 0.0 0.0 0.0 1.0])
+		D = SMatrix{4,4,Float64}([33.0 32.0 16.0 18.0; 89.0 84.0 40.0 58.0; 118.0 106.0 48.0 88.0; 63.0 51.0 22.0 50.0])
+		invD = SMatrix{4,4,Float64}([-1.45 1.45 -1.0 0.6; -13.95 11.95 -6.5 2.6; 25.525 -22.025 12.25 -5.2; 4.825 -4.325 2.5 -1.1])
+		
+		m1 = Transformation(A, invA)
+		m2 = Transformation(B, invB)
+		m = Transformation(C, invC)
+		exp = Transformation(D, invD)
 
-	# scaling
-	tr1 = Raytracing.scaling(Vec(2.0, 5.0, 10.0))
-    tr2 = Raytracing.scaling(Vec(3.0, 2.0, 4.0))
-    @test Raytracing.is_consistent(tr1)
-	@test Raytracing.is_consistent(tr2)
-    exp = Raytracing.scaling(Vec(6.0, 10.0, 40.0))
-    @test exp ≈ (tr1 * tr2)
+		exp_v = Vec(14.0, 38.0, 51.0+err)
+		exp_p = Point(18.0, 46.0, 58.0-2*err)
+		exp_n = Normal(-8.75, 7.75+6*err, -3.0)
 
-	# translation
-	tr1 = Raytracing.translation(Vec(1.0, 2.0, 3.0))
-	tr2 = Raytracing.translation(Vec(4.0, 6.0, 8.0))
-	exp = Raytracing.translation(Vec(5.0, 8.0, 11.0))
-	@test Raytracing.is_consistent(tr1)
-	@test Raytracing.is_consistent(tr2)
-	prd = tr1 * tr2
-	@test Raytracing.is_consistent(prd)
-	@test prd ≈ exp
+		# is_consistent for manual definition of Transformation
+		@test Raytracing.is_consistent(m1)
+		@test Raytracing.is_consistent(m2)
+		@test Raytracing.is_consistent(m)
+		@test Raytracing.is_consistent(exp)
+
+		# approx for multiplications with Transformation
+		@test exp ≈ (m1 * m2)
+		@test exp_v ≈ (m * Vec(1.0, 2.0, 3.0))
+		@test exp_p ≈ (m * Point(1.0, 2.0, 3.0))
+		@test exp_n ≈ (m * Normal(3.0, 2.0, 4.0))
+	
+	end
+
+	@testset "test_transformations_rotations" begin
+		err = 1e-11
+		@test Raytracing.is_consistent(rotation_x(0.1))
+		@test Raytracing.is_consistent(rotation_y(0.1))
+		@test Raytracing.is_consistent(rotation_z(0.1))
+		@test (rotation_x(π/2) * Vec(0.0, 1.0, 0.0+3*err)) ≈ (Vec(0.0, 0.0, 1.0))
+		@test (rotation_y(π/2) * Vec(0.0, 0.0-2*err, 1.0)) ≈ (Vec(1.0, 0.0, 0.0))
+		@test (rotation_z(π/2) * Vec(1.0+err, 0.0, 0.0)) ≈ (Vec(0.0, 1.0, 0.0))
+	end
+
+	@testset "test_transformations_scaling" begin
+		err = 1e-11
+		tr1 = scaling(Vec(2.0, 5.0, 10.0+err))
+		tr2 = scaling(Vec(3.0, 2.0, 4.0))
+		exp = scaling(Vec(6.0, 10.0, 40.0))
+
+		@test Raytracing.is_consistent(tr1)
+		@test Raytracing.is_consistent(tr2)
+		@test exp ≈ (tr1 * tr2)
+	end
+
+	@testset "test_transformations_translation" begin
+		err=1e-11
+		tr1 = translation(Vec(1.0, 2.0, 3.0))
+		tr2 = translation(Vec(4.0, 6.0, 8.0))
+		prd = tr1 * tr2
+		exp = translation(Vec(5.0, 8.0, 11.0-7*err))
+		
+		@test Raytracing.is_consistent(tr1)
+		@test Raytracing.is_consistent(tr2)
+		@test Raytracing.is_consistent(prd)
+		@test prd ≈ exp
+	end
+
 end
