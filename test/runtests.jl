@@ -318,6 +318,23 @@ end
 end
 
 @testset "test_trasformation" begin
+	# operatoins
+    m1 = Transformation([1.0 2.0 3.0 4.0; 5.0 6.0 7.0 8.0; 9.0 9.0 8.0 7.0; 6.0 5.0 4.0 1.0], [-3.75  2.75   -1.0 0.0; 4.375  -3.875 2.0  -0.5; 0.5    0.5    -1.0 1.0; -1.375 0.875   0.0 -0.5])
+	m2 = Transformation([3.0 5.0 2.0 4.0; 4.0 1.0 0.0 5.0; 6.0 3.0 2.0 0.0; 1.0 4.0 2.0 1.0], [0.4 -0.2 0.2 -0.6; 2.9 -1.7 0.2 -3.1; -5.55 3.15 -0.4 6.45; -0.9 0.7 -0.2 1.1])
+	m = Transformation([1.0 2.0 3.0 4.0; 5.0 6.0 7.0 8.0; 9.0 9.0 8.0 7.0; 0.0 0.0 0.0 1.0], [-3.75 2.75 -1 0; 5.75 -4.75 2.0 1.0; -2.25 2.25 -1.0 -2.0; 0.0 0.0 0.0 1.0])
+	exp = Transformation([33.0 32.0 16.0 18.0; 89.0 84.0 40.0 58.0; 118.0 106.0 48.0 88.0; 63.0 51.0 22.0 50.0], [-1.45 1.45 -1.0 0.6; -13.95 11.95 -6.5 2.6; 25.525 -22.025 12.25 -5.2; 4.825 -4.325 2.5 -1.1])
+	exp_v = Vec(14.0, 38.0, 51.0)
+	exp_p = Point(18.0, 46.0, 58.0)
+	exp_n = Normal(-8.75, 7.75, -3.0)
+    @test Raytracing.is_consistent(m1)
+    @test Raytracing.is_consistent(m2)
+	@test Raytracing.is_consistent(exp)
+	@test exp ≈ (m1 * m2)
+	@test Raytracing.is_consistent(m)
+    @test exp_v ≈ (m * Vec(1.0, 2.0, 3.0))
+    @test exp_p ≈ (m * Point(1.0, 2.0, 3.0))
+	@test expected_n ≈ (m * Normal(3.0, 2.0, 4.0))
+
 	# rotation
 	@test Raytracing.is_consistent(Raytracing.rotation_x(0.1))
 	@test Raytracing.is_consistent(Raytracing.rotation_y(0.1))
