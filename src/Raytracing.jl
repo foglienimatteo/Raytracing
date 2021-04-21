@@ -311,95 +311,15 @@ function overturn(img::HDRimage)
     return IMG
 end
 
-
 # ----------------------------------------------------------------------------------------------------------------------------------------
-# TRASFORMATION FUNCTIONS
+# PRINT VEC, PRINT POINT AND NORM FUNCTIONS
 
-function rotation_x(θ::Float64)
-    Trasformation(
-        [[1.0,  0.0,    0.0,    0.0],
-         [0.0, cos(θ), -sin(θ), 0.0],
-         [0.0, sin(θ), cos(θ),  0.0],
-         [0.0,  0.0,    0.0,    1.0]],
-
-        [[1.0,  0.0,    0.0,    0.0],
-         [0.0, cos(θ), sin(θ),  0.0],
-         [0.0, -sin(θ), cos(θ), 0.0],
-         [0.0,  0.0,    0.0,    1.0]]
-    )
-end
-
-function rotation_y(θ::Float64)
-    Trasformation(
-        [[cos(θ),  0.0, sin(θ),  0.0],
-         [0.0,     1.0,  0.0,    0.0],
-         [-sin(θ), 0.0, cos(θ),  0.0],
-         [0.0,     0.0,  0.0,    1.0]],
-
-        [[cos(θ), 0.0, -sin(θ), 0.0],
-         [ 0.0,   1.0,   0.0,   0.0],
-         [sin(θ), 0.0,  cos(θ), 0.0],
-         [ 0.0,   0.0,   0.0,   1.0]]
-    )
-end
-
-function rotation_z(θ::Float64)
-    Trasformation(
-        [[cos(θ), -sin(θ), 0.0, 0.0],
-         [sin(θ), cos(θ),  0.0, 0.0],
-         [0.0,     0.0,    1.0, 0.0],
-         [0.0,     0.0,    0.0, 1.0]],
-
-        [[cos(θ),  sin(θ), 0.0, 0.0],
-         [-sin(θ), cos(θ), 0.0, 0.0],
-         [  0.0,     0.0,  1.0, 0.0],
-         [  0.0,     0.0,  0.0, 1.0]]
-    )
-end
-
-function scaling(v::Vec)
-    Transformation(
-        [[v.x, 0.0, 0.0, 0.0],
-         [0.0, v.y, 0.0, 0.0],
-         [0.0, 0.0, v.z, 0.0],
-         [0.0, 0.0, 0.0, 1.0]],
-
-        [[1/v.x,  0.0, 0.0, 0.0],
-         [ 0.0,  1/v.y,  0.0,  0.0],
-         [ 0.0,   0.0,  1/v.z, 0.0],
-         [ 0.0,   0.0,   0.0,  1.0]]
-    )
-end
-
-function traslation(v::Vec)
-   Transformation(
-        [[1.0, 0.0, 0.0, v.x],
-         [0.0, 1.0, 0.0, v.y],
-         [0.0, 0.0, 1.0, v.z],
-         [0.0, 0.0, 0.0, 1.0]],
-        [[1.0, 0.0, 0.0, -v.x],
-         [0.0, 1.0, 0.0, -v.y],
-         [0.0, 0.0, 1.0, -v.z],
-         [0.0, 0.0, 0.0, 1.0]]
-    )
-end
-
-function is_consistent(T::Trasformation)
-    p = T.M * T.invM
-    i = [[1.0, 0.0, 0.0, 0.0],
-         [0.0, 1.0, 0.0, 0.0],
-         [0.0, 0.0, 1.0, 0.0],
-         [0.0, 0.0, 0.0 ,1.0]
-         ]
-    return p ≈ i
-end
-
-print(io::IO, v::Vec) = (print("Vec:\t ", v.x, "\t", v.y, "\t", v.z); nothing)
+print(io::IO, v::Vec) = (print(io, "Vec:\t ", v.x, "\t", v.y, "\t", v.z); nothing)
 print(v::Vec) = (print(stdout, v); nothing)
 println(v::Vec) = (println(stdout,v); nothing)
 println(io::IO,v::Vec) = (print(io, v); print("\n"); nothing)
 
-print(io::IO, p::Point) = (print("Point:\t ", p.x, "\t", p.y, "\t", p.z); nothing)
+print(io::IO, p::Point) = (print(io, "Point:\t ", p.x, "\t", p.y, "\t", p.z); nothing)
 print(p::Point) = (print(stdout, p); nothing)
 println(p::Point) = (println(stdout,p); nothing)
 println(io::IO,p::Point) = (print(io, p); print("\n"); nothing)
@@ -407,5 +327,84 @@ println(io::IO,p::Point) = (print(io, p); print("\n"); nothing)
 squared_norm(v::Union{Vec,Point}) = v.x^2 + v.y^2 + v.z^2
 norm(v::Union{Vec,Point}) = √squared_norm(v)
 normalize(v::Vec) = v/norm(v)
+
+# ----------------------------------------------------------------------------------------------------------------------------------------
+# TRASFORMATION FUNCTIONS
+
+function rotation_x(ϑ::Float64)
+    Trasformation(
+        [1.0    0.0     0.0     0.0 ;   
+         0.0    cos(ϑ)  -sin(ϑ) 0.0 ;
+         0.0    sin(ϑ)  cos(ϑ)  0.0 ;
+         0.0    0.0     0.0     1.0]
+         ,
+        [1.0    0.0     0.0     0.0 ;   
+         0.0    cos(ϑ)  sin(ϑ)  0.0 ;
+         0.0    -sin(ϑ) cos(ϑ)  0.0 ;
+         0.0    0.0     0.0     1.0]
+    )
+end
+
+function rotation_y(ϑ::Float64)
+    Trasformation(
+        [cos(ϑ)     0.0     sin(ϑ)  0.0 ;
+         0.0        1.0     0.0,    0.0 ;
+         -sin(ϑ)    0.0     cos(ϑ)  0.0 ;
+         0.0        0.0     0.0     1.0  ]
+         ,
+         [cos(ϑ)    0.0     -sin(ϑ) 0.0 ;
+         0.0        1.0     0.0,    0.0 ;
+         sin(ϑ)     0.0     cos(ϑ)  0.0 ;
+         0.0        0.0     0.0     1.0  ]
+    )
+end
+
+function rotation_z(ϑ::Float64)
+    Trasformation(
+        [cos(ϑ) -sin(ϑ) 0.0     0.0 ;
+         sin(ϑ) cos(ϑ)  0.0     0.0 ;
+         0.0    0.0     1.0     0.0 ;
+         0.0    0.0     0.0     1.0]
+         ,
+        [cos(ϑ) sin(ϑ)  0.0     0.0 ;
+         -sin(ϑ) cos(ϑ) 0.0     0.0 ;
+         0.0    0.0     1.0     0.0 ;
+         0.0    0.0     0.0     1.0]
+    )
+end
+
+function scaling(v::Vec)
+    Transformation(
+        [v.x    0.0     0.0     0.0 ;
+         0.0    v.y     0.0     0.0 ;
+         0.0    0.0     v.z     0.0 ;
+         0.0    0.0     0.0     1.0]
+         ,
+        [1/v.x  0.0     0.0     0.0 ;
+         0.0    1/v.y   0.0     0.0 ;
+         0.0    0.0     1/v.z   0.0 ;
+         0.0    0.0     0.0     1.0]
+    )
+end
+
+function traslation(v::Vec)
+   Transformation(
+        [1.0    0.0     0.0     v.x ;
+         0.0    1.0     0.0     v.y ;
+         0.0    0.0     1.0     v.z ;
+         0.0    0.0     0.0     1.0]
+         ,
+        [1.0    0.0     0.0     -v.x ;
+         0.0    1.0     0.0     -v.y ;
+         0.0    0.0     1.0     -v.z ;
+         0.0    0.0     0.0     1.0]
+    )
+end
+
+function is_consistent(T::Trasformation)
+    p = T.M * T.invM
+    I = SMatrix{4,4}( Diagonal(ones(4)) )
+    return p ≈ I
+end
 
 end  # module
