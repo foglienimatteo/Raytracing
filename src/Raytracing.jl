@@ -103,7 +103,26 @@ Base.:*(a::Point, s::Real) = Point(s*a.x, s*a.y, s*a.z)
 Base.:-(a::Point, b::Point) = Vec(b.x-a.x, b.y-a.y, b.z-a.z)
 
 # Definitions of operations for Transformations
-Base.:*(s::Trasformation, t::Trasformation) = Trasformation(s.M+t.M, s.invM+t.invM)
+Base.:*(s::Trasformation, t::Trasformation) = Trasformation(s.M*t.M, t.invM*s.invM)
+function Base.:*(t::Trasformation, p::Point)
+    q = Point(t.M[1] * p.x + t.M[2] *p.y +t.M[3] *p.z +t.M[4],
+              t.M[5] * p.x + t.M[6] *p.y +t.M[7] *p.z +t.M[8],
+              t.M[9] * p.x + t.M[10]*p.y +t.M[11]*p.z +t.M[12]
+    )
+    λ = t.M[13] * p.x + t.M[14]*p.y +t.M[15]*p.z +t.M[16]
+    λ == 1.0 ? (return q) : (return p/q)
+end
+function Base.:*(t::Trasformation, v::Vec)
+    Vec(t.M[1] * p.x + t.M[2] *p.y +t.M[3] *p.z +t.M[4], t.M[5] * p.x + t.M[6] *p.y +t.M[7] *p.z +t.M[8], t.M[9] * p.x + t.M[10]*p.y +t.M[11]*p.z +t.M[12])
+end
+function Base.:*(t::Trasformation, n::Normal)
+    Mat = transpose(t.invM)
+    l = Point(Mat.M[1] * n.x + Mat.M[2] *n.y +Mat.M[3] *n.z +Mat.M[4],
+              Mat.M[5] * n.x + Mat.M[6] *n.y +Mat.M[7] *n.z +Mat.M[8],
+              Mat.M[9] * n.x + Mat.M[10]*n.y +Mat.M[11]*n.z +Mat.M[12]
+    )
+    return l
+end
 
 
 # ----------------------------------------------------------------------------------------------------------------------------------------
@@ -388,8 +407,5 @@ function is_consistent(T::Trasformation)
     I = SMatrix{4,4}( Diagonal(ones(4)) )
     return p ≈ I
 end
-
-
-
 
 end  # module
