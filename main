@@ -1,4 +1,4 @@
-#!/usr/bin/env julia
+#!/usr/bin/env julia.exe
 
 using Pkg
 Pkg.activate(normpath(@__DIR__))
@@ -25,7 +25,7 @@ function main(args)
 	img=open(parameters.infile, "r") do inpf
 			Raytracing.read(inpf, HDRimage)
 		end
-
+	
 	println("\nfile $(parameters.infile) has been read from disk.\n")
 
 	Raytracing.normalize_image!(img, parameters.a)
