@@ -7,7 +7,7 @@ import Base.:+; import Base.:-; import Base.:≈; import Base.:/; import Base.:*
 import Base: write, read, print, println;
 import LinearAlgebra.:⋅; import LinearAlgebra.:×
 
-export HDRimage, Parameters, Vec, Point, Transformation
+export HDRimage, Parameters, Vec, Point, Transformation, Normal
 
 
 # ----------------------------------------------------------------------------------------------------------------------------------------
@@ -103,8 +103,8 @@ Base.:*(a::Point, s::Real) = Point(s*a.x, s*a.y, s*a.z)
 Base.:-(a::Point, b::Point) = Vec(b.x-a.x, b.y-a.y, b.z-a.z)
 
 # Definitions of operations for Transformations
-Base.:*(s::Trasformation, t::Trasformation) = Trasformation(s.M*t.M, t.invM*s.invM)
-function Base.:*(t::Trasformation, p::Point)
+Base.:*(s::Transformation, t::Transformation) = Transformation(s.M*t.M, t.invM*s.invM)
+function Base.:*(t::Transformation, p::Point)
     q = Point(t.M[1] * p.x + t.M[5] *p.y +t.M[9] *p.z +t.M[13],
               t.M[2] * p.x + t.M[6] *p.y +t.M[10] *p.z +t.M[14],
               t.M[3] * p.x + t.M[7]*p.y +t.M[11]*p.z +t.M[15]
@@ -112,16 +112,16 @@ function Base.:*(t::Trasformation, p::Point)
     λ = t.M[4] * p.x + t.M[8]*p.y +t.M[12]*p.z +t.M[16]
     λ == 1.0 ? (return q) : (return q/λ)
 end
-function Base.:*(t::Trasformation, p::Vec)
-    Vec(t.M[1] * p.x + t.M[5] *p.y +t.M[9] *p.z +t.M[13], 
-        t.M[2] * p.x + t.M[6] *p.y +t.M[10] *p.z +t.M[14], 
-        t.M[3] * p.x + t.M[7]*p.y +t.M[11]*p.z +t.M[15])
+function Base.:*(t::Transformation, p::Vec)
+    Vec(t.M[1] * p.x + t.M[5] *p.y +t.M[9] *p.z, 
+        t.M[2] * p.x + t.M[6] *p.y +t.M[10] *p.z, 
+        t.M[3] * p.x + t.M[7]*p.y +t.M[11]*p.z)
 end
-function Base.:*(t::Trasformation, n::Normal)
+function Base.:*(t::Transformation, n::Normal)
     Mat = transpose(t.invM)
-    l = Point(Mat[1] * n.x + Mat[5] *n.y + Mat[9]  *n.z + Mat[13],
-              Mat[2] * n.x + Mat[6] *n.y + Mat[10] *n.z + Mat[14],
-              Mat[3] * n.x + Mat[7] *n.y + Mat[11] *n.z + Mat[15]
+    l = Normal(Mat[1] * n.x + Mat[5] *n.y + Mat[9]  *n.z,
+              Mat[2] * n.x + Mat[6] *n.y + Mat[10] *n.z,
+              Mat[3] * n.x + Mat[7] *n.y + Mat[11] *n.z
     )
     return l
 end
@@ -332,10 +332,10 @@ norm(v::Union{Vec,Point}) = √squared_norm(v)
 normalize(v::Vec) = v/norm(v)
 
 # ----------------------------------------------------------------------------------------------------------------------------------------
-# TRASFORMATION FUNCTIONS
+# TRANSFORMATION FUNCTIONS
 
 function rotation_x(ϑ::Float64)
-    Trasformation(
+    Transformation(
         [1.0    0.0     0.0     0.0 ;   
          0.0    cos(ϑ)  -sin(ϑ) 0.0 ;
          0.0    sin(ϑ)  cos(ϑ)  0.0 ;
@@ -349,21 +349,21 @@ function rotation_x(ϑ::Float64)
 end
 
 function rotation_y(ϑ::Float64)
-    Trasformation(
+    Transformation(
         [cos(ϑ)     0.0     sin(ϑ)  0.0 ;
-         0.0        1.0     0.0,    0.0 ;
+         0.0        1.0     0.0    0.0 ;
          -sin(ϑ)    0.0     cos(ϑ)  0.0 ;
          0.0        0.0     0.0     1.0  ]
          ,
         [cos(ϑ)     0.0     -sin(ϑ) 0.0 ;
-         0.0        1.0     0.0,    0.0 ;
+         0.0        1.0     0.0    0.0 ;
          sin(ϑ)     0.0     cos(ϑ)  0.0 ;
          0.0        0.0     0.0     1.0  ]
     )
 end
 
 function rotation_z(ϑ::Float64)
-    Trasformation(
+    Transformation(
         [cos(ϑ) -sin(ϑ) 0.0     0.0 ;
          sin(ϑ) cos(ϑ)  0.0     0.0 ;
          0.0    0.0     1.0     0.0 ;
@@ -404,7 +404,7 @@ function traslation(v::Vec)
     )
 end
 
-function is_consistent(T::Trasformation)
+function is_consistent(T::Transformation)
     p = T.M * T.invM
     I = SMatrix{4,4}( Diagonal(ones(4)) )
     return p ≈ I

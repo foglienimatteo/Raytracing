@@ -317,7 +317,7 @@ end
 	@test b ≈ Vec(4.0, 6.0, 8.0)/√116
 end
 
-@testset "test_trasformation" begin
+@testset "test_transformation" begin
 	# operatoins
     m1 = Transformation([1.0 2.0 3.0 4.0; 5.0 6.0 7.0 8.0; 9.0 9.0 8.0 7.0; 6.0 5.0 4.0 1.0], [-3.75  2.75   -1.0 0.0; 4.375  -3.875 2.0  -0.5; 0.5    0.5    -1.0 1.0; -1.375 0.875   0.0 -0.5])
 	m2 = Transformation([3.0 5.0 2.0 4.0; 4.0 1.0 0.0 5.0; 6.0 3.0 2.0 0.0; 1.0 4.0 2.0 1.0], [0.4 -0.2 0.2 -0.6; 2.9 -1.7 0.2 -3.1; -5.55 3.15 -0.4 6.45; -0.9 0.7 -0.2 1.1])
@@ -333,7 +333,7 @@ end
 	@test Raytracing.is_consistent(m)
     @test exp_v ≈ (m * Vec(1.0, 2.0, 3.0))
     @test exp_p ≈ (m * Point(1.0, 2.0, 3.0))
-	@test expected_n ≈ (m * Normal(3.0, 2.0, 4.0))
+	@test exp_n ≈ (m * Normal(3.0, 2.0, 4.0))
 
 	# rotation
 	@test Raytracing.is_consistent(Raytracing.rotation_x(0.1))
