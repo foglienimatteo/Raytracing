@@ -339,9 +339,9 @@ end
 	@test Raytracing.is_consistent(Raytracing.rotation_x(0.1))
 	@test Raytracing.is_consistent(Raytracing.rotation_y(0.1))
 	@test Raytracing.is_consistent(Raytracing.rotation_z(0.1))
-	@test (Raytracing.rotation_x(θ=pi/2) * Vec(0.0, 1.0, 0.0)) ≈ (Vec(0.0, 0.0, 1.0))
-	@test (Raytracing.rotation_y(θ=pi/2) * Vec(0.0, 0.0, 1.0)) ≈ (Vec(1.0, 0.0, 0.0))
-	@test (Raytracing.rotation_z(θ=pi/2) * Vec(1.0, 0.0, 0.0)) ≈ (Vec(0.0, 1.0, 0.0))
+	@test (Raytracing.rotation_x(pi/2) * Vec(0.0, 1.0, 0.0)) ≈ (Vec(0.0, 0.0, 1.0))
+	@test (Raytracing.rotation_y(pi/2) * Vec(0.0, 0.0, 1.0)) ≈ (Vec(1.0, 0.0, 0.0))
+	@test (Raytracing.rotation_z(pi/2) * Vec(1.0, 0.0, 0.0)) ≈ (Vec(0.0, 1.0, 0.0))
 
 	# scaling
 	tr1 = Raytracing.scaling(Vec(2.0, 5.0, 10.0))
@@ -351,13 +351,12 @@ end
     exp = Raytracing.scaling(Vec(6.0, 10.0, 40.0))
     @test exp ≈ (tr1 * tr2)
 
-	# traslation
-	tr1 = translation(Vec(1.0, 2.0, 3.0))
-	tr2 = translation(Vec(4.0, 6.0, 8.0))
-	exp = translation(Vec(5.0, 8.0, 11.0))
+	# translation
+	tr1 = Raytracing.translation(Vec(1.0, 2.0, 3.0))
+	tr2 = Raytracing.translation(Vec(4.0, 6.0, 8.0))
+	exp = Raytracing.translation(Vec(5.0, 8.0, 11.0))
 	@test Raytracing.is_consistent(tr1)
 	@test Raytracing.is_consistent(tr2)
-	@test Raytracing.is_consistent(prd)
 	prd = tr1 * tr2
 	@test Raytracing.is_consistent(prd)
 	@test prd ≈ exp

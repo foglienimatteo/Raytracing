@@ -7,7 +7,7 @@ import Base.:+; import Base.:-; import Base.:≈; import Base.:/; import Base.:*
 import Base: write, read, print, println;
 import LinearAlgebra.:⋅; import LinearAlgebra.:×
 
-export HDRimage, Parameters, Vec, Point, Transformation, Normal
+export HDRimage, Parameters, Vec, Point, Normal, Transformation
 
 
 # ----------------------------------------------------------------------------------------------------------------------------------------
@@ -75,8 +75,10 @@ end
 are_close(x,y,epsilon=1e-10) = abs(x-y) < epsilon
 Base.:≈(a::RGB{T}, b::RGB{T}) where {T} = are_close(a.r,b.r) && are_close(a.g,b.g) && are_close(a.b, b.b)
 Base.:≈(a::Vec, b::Vec) = are_close(a.x, b.x) && are_close(a.y, b.y) && are_close(a.z, b.z)
+Base.:≈(a::Normal, b::Normal) = are_close(a.x, b.x) && are_close(a.y, b.y) && are_close(a.z, b.z)
 Base.:≈(a::Point, b::Point) = are_close(a.x, b.x) && are_close(a.y, b.y) && are_close(a.z,b.z)
 Base.:≈(m1::SMatrix{4,4,Float64}, m2::SMatrix{4,4,Float64}) = (B = [are_close(m,n) for (m,n) in zip(m1,m2)] ; all(i->(i==true) , B) )
+Base.:≈(t1::Transformation, t2::Transformation) = (t1.M ≈ t2.M) && ( t1.invM ≈ t2.invM )
 
 # Definitions of operations for RGB objects
 Base.:+(a::RGB{T}, b::RGB{T}) where {T} = RGB(a.r + b.r, a.g + b.g, a.b + b.b)
@@ -113,15 +115,15 @@ function Base.:*(t::Transformation, p::Point)
     λ == 1.0 ? (return q) : (return q/λ)
 end
 function Base.:*(t::Transformation, p::Vec)
-    Vec(t.M[1] * p.x + t.M[5] *p.y +t.M[9] *p.z, 
-        t.M[2] * p.x + t.M[6] *p.y +t.M[10] *p.z, 
-        t.M[3] * p.x + t.M[7]*p.y +t.M[11]*p.z)
+    Vec(t.M[1] * p.x + t.M[5] * p.y + t.M[9]  * p.z, 
+        t.M[2] * p.x + t.M[6] * p.y + t.M[10] * p.z, 
+        t.M[3] * p.x + t.M[7] * p.y + t.M[11] * p.z)
 end
 function Base.:*(t::Transformation, n::Normal)
     Mat = transpose(t.invM)
-    l = Normal(Mat[1] * n.x + Mat[5] *n.y + Mat[9]  *n.z,
-              Mat[2] * n.x + Mat[6] *n.y + Mat[10] *n.z,
-              Mat[3] * n.x + Mat[7] *n.y + Mat[11] *n.z
+    l = Normal(Mat[1] * n.x + Mat[5] * n.y + Mat[9]  *n.z,
+               Mat[2] * n.x + Mat[6] * n.y + Mat[10] *n.z,
+               Mat[3] * n.x + Mat[7] * n.y + Mat[11] *n.z
     )
     return l
 end
@@ -332,7 +334,7 @@ norm(v::Union{Vec,Point}) = √squared_norm(v)
 normalize(v::Vec) = v/norm(v)
 
 # ----------------------------------------------------------------------------------------------------------------------------------------
-# TRANSFORMATION FUNCTIONS
+# Transformation FUNCTIONS
 
 function rotation_x(ϑ::Float64)
     Transformation(
@@ -351,12 +353,12 @@ end
 function rotation_y(ϑ::Float64)
     Transformation(
         [cos(ϑ)     0.0     sin(ϑ)  0.0 ;
-         0.0        1.0     0.0    0.0 ;
+         0.0        1.0     0.0     0.0 ;
          -sin(ϑ)    0.0     cos(ϑ)  0.0 ;
          0.0        0.0     0.0     1.0  ]
          ,
         [cos(ϑ)     0.0     -sin(ϑ) 0.0 ;
-         0.0        1.0     0.0    0.0 ;
+         0.0        1.0     0.0     0.0 ;
          sin(ϑ)     0.0     cos(ϑ)  0.0 ;
          0.0        0.0     0.0     1.0  ]
     )
@@ -390,7 +392,7 @@ function scaling(v::Vec)
     )
 end
 
-function traslation(v::Vec)
+function translation(v::Vec)
    Transformation(
         [1.0    0.0     0.0     v.x ;
          0.0    1.0     0.0     v.y ;
