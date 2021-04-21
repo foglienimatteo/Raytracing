@@ -10,6 +10,7 @@ import LinearAlgebra.:⋅; import LinearAlgebra.:×
 export HDRimage, Parameters, Vec, Point, Transformation
 
 
+# ----------------------------------------------------------------------------------------------------------------------------------------
 # STRUCTs
 
 struct HDRimage
@@ -333,7 +334,7 @@ function rotation_y(ϑ::Float64)
          -sin(ϑ)    0.0     cos(ϑ)  0.0 ;
          0.0        0.0     0.0     1.0  ]
          ,
-         [cos(ϑ)    0.0     -sin(ϑ) 0.0 ;
+        [cos(ϑ)     0.0     -sin(ϑ) 0.0 ;
          0.0        1.0     0.0,    0.0 ;
          sin(ϑ)     0.0     cos(ϑ)  0.0 ;
          0.0        0.0     0.0     1.0  ]
@@ -347,10 +348,10 @@ function rotation_z(ϑ::Float64)
          0.0    0.0     1.0     0.0 ;
          0.0    0.0     0.0     1.0]
          ,
-        [cos(ϑ) sin(ϑ)  0.0     0.0 ;
-         -sin(ϑ) cos(ϑ) 0.0     0.0 ;
-         0.0    0.0     1.0     0.0 ;
-         0.0    0.0     0.0     1.0]
+        [cos(ϑ)     sin(ϑ)  0.0     0.0 ;
+         -sin(ϑ)    cos(ϑ)  0.0     0.0 ;
+         0.0        0.0     1.0     0.0 ;
+         0.0        0.0     0.0     1.0]
     )
 end
 
