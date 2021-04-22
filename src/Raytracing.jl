@@ -8,7 +8,7 @@ import Base: write, read, print, println;
 import LinearAlgebra.:⋅; import LinearAlgebra.:×
 
 export HDRimage, Parameters, Vec, Point, Normal, Transformation
-export translation, scaling, rotation_x, rotation_y, rotation_z
+export translation, scaling, rotation_x, rotation_y, rotation_z, inverse
 
 
 # ----------------------------------------------------------------------------------------------------------------------------------------
@@ -67,6 +67,7 @@ struct Transformation
     M::SMatrix{4,4,Float64}
     invM::SMatrix{4,4,Float64}
     Transformation(m, invm) = new(m, invm)
+    Transformation() = new( SMatrix{4,4}( Diagonal(ones(4)) ),  SMatrix{4,4}( Diagonal(ones(4)) ) )
 end
 
 
@@ -405,6 +406,10 @@ function translation(v::Vec)
          0.0    0.0     1.0     -v.z ;
          0.0    0.0     0.0     1.0]
     )
+end
+
+function inverse(T::Transformation)
+    return Transformation(T.invM, T.M)
 end
 
 function is_consistent(T::Transformation)

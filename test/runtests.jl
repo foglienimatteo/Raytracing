@@ -398,4 +398,16 @@ end
 		@test prd ≈ exp
 	end
 
+	@testset "test_transformations_inverse" begin
+		A = SMatrix{4,4,Float64}([1.0 2.0 3.0 4.0 ; 5.0 6.0 7.0 8.0 ; 9.0 9.0 8.0 7.0 ; 6.0 5.0 4.0 1.0])
+		invA = SMatrix{4,4,Float64}([-3.75 2.75 -1 0 ; 4.375 -3.875 2.0 -0.5 ; 0.5 0.5 -1.0 1.0 ; -1.375 0.875 0.0 -0.5])
+		m1 = Transformation(A, invA)
+		m2 = inverse(m1)
+
+		@test Raytracing.is_consistent(m2)
+		@test Raytracing.is_consistent(m1*m2)
+		@test m1*m2 ≈ Transformation()
+
+	end
+
 end
