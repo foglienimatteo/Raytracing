@@ -441,6 +441,7 @@ end
 end
 
 @testset "test_Camera" begin
+
 	@testset "test_OrthogonalCamera" begin
     		cam = OrthogonalCamera(2.0)
 		ray1 = fire_ray(cam, 0.0, 0.0)
@@ -478,5 +479,20 @@ end
 		@test at(ray4, 1.0) ≈ Point(0.0, -2.0, 1.0)
 	end
 
+end
 
+@testset "test_ImageTracer" begin
+	img = HDRimage(4, 2)
+	Pcam = PerspectiveCamera(2)
+	tracer = ImageTracer(img, Pcam)
+
+	r1 = fire_ray(tracer, 0, 0, 2.5, 1.5)
+	r2 = fire_ray(tracer, 2, 1)
+	@test r1 ≈ r2
+
+	fire_all_rays(tracer, x->RGB{Float32}(1.0, 2.0, 3.0))
+
+	for row in ImTr.img.height-1:-1:0, col in 0:ImTr.img.width-1
+		@test Raytracing.get_pixel(img, col, row) == RGB{Float32}(1.0, 2.0, 3.0)
+	end
 end

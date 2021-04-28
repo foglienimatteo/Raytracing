@@ -7,12 +7,11 @@ import Base.:+; import Base.:-; import Base.:≈; import Base.:/; import Base.:*
 import Base: write, read, print, println;
 import LinearAlgebra.:⋅; import LinearAlgebra.:×
 
-export HDRimage, Parameters, Vec, Point, Normal, Transformation, Ray
+export HDRimage, Parameters, Vec, Point, Normal, Transformation, Ray, ImageTracer
 export squared_norm, norm
 export translation, scaling, rotation_x, rotation_y, rotation_z, inverse
-
-export OrthogonalCamera, PerspectiveCamera
-export fire_ray, at
+export OrthogonalCamera, PerspectiveCamera #, Camera
+export fire_ray, fire_all_rays, at
 
 include("Structs.jl")
 include("Operations.jl")
