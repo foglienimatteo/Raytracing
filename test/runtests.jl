@@ -414,12 +414,12 @@ end
 
 @testset "test_Rays" begin
     @testset "test_is_close" begin
-        ray1 = Ray(Point(1.0, 2.0, 3.0), Vec(5.0, 4.0, -1.0))
-        ray2 = Ray(Point(1.0, 2.0, 3.0), Vec(5.0, 4.0, -1.0))
-        ray3 = Ray(Point(5.0, 1.0, 4.0), Vec(3.0, 9.0, 4.0))
+        	ray1 = Ray(Point(1.0, 2.0, 3.0), Vec(5.0, 4.0, -1.0))
+        	ray2 = Ray(Point(1.0, 2.0, 3.0), Vec(5.0, 4.0, -1.0))
+        	ray3 = Ray(Point(5.0, 1.0, 4.0), Vec(3.0, 9.0, 4.0))
 
-        @test ray1 ≈ ray2
-        @test !( ray1 ≈ ray3 )
+        	@test ray1 ≈ ray2
+        	@test !( ray1 ≈ ray3 )
     end
 
     @testset "test_at" begin
@@ -431,11 +431,33 @@ end
     end
 
     @testset "test_transform" begin
-        ray = Ray(Point(1.0, 2.0, 3.0), Vec(6.0, 5.0, 4.0))
-        T = translation(Vec(10.0, 11.0, 12.0)) * rotation_x(π/2)
-        transformed = T*ray
+        	ray = Ray(Point(1.0, 2.0, 3.0), Vec(6.0, 5.0, 4.0))
+        	T = translation(Vec(10.0, 11.0, 12.0)) * rotation_x(π/2)
+        	transformed = T*ray
 
-        @test transformed.origin ≈ Point(11.0, 8.0, 14.0)
-        @test transformed.dir ≈ Vec(6.0, -4.0, 5.0)
+     	@test transformed.origin ≈ Point(11.0, 8.0, 14.0)
+        	@test transformed.dir ≈ Vec(6.0, -4.0, 5.0)
     end
+end
+
+@testset "test_Camera" begin
+	@testset "test_OrthogonalCamera" begin
+    		cam = OrthogonalCamera(2.0)
+		ray1 = fire_ray(cam, 0.0, 0.0)
+		ray2 = fire_ray(cam, 1.0, 0.0)
+		ray3 = fire_ray(cam, 0.0, 1.0)
+		ray4 = fire_ray(cam, 1.0, 1.0)
+
+    		# Verify that the rays are parallel by verifying that cross-products vanish
+		@test 0.0 ≈ squared_norm(ray1.dir × ray2.dir)
+    		@test 0.0 ≈ squared_norm(ray1.dir × ray3.dir)
+    		@test 0.0 ≈ squared_norm(ray1.dir × ray4.dir)
+
+    		# Verify that the ray hitting the corners have the right coordinates
+		@test at(ray1, 1.0) ≈ Point(0.0, 2.0, -1.0)
+		@test at(ray2, 1.0) ≈ Point(0.0, -2.0, -1.0)
+		@test at(ray3, 1.0) ≈ Point(0.0, 2.0, 1.0)
+	end
+
+
 end

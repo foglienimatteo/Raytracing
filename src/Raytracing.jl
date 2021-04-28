@@ -8,7 +8,11 @@ import Base: write, read, print, println;
 import LinearAlgebra.:⋅; import LinearAlgebra.:×
 
 export HDRimage, Parameters, Vec, Point, Normal, Transformation, Ray
-export translation, scaling, rotation_x, rotation_y, rotation_z, inverse, at
+export squared_norm, norm
+export translation, scaling, rotation_x, rotation_y, rotation_z, inverse
+
+export OrthogonalCamera, PerspectiveCamera
+export fire_ray, at
 
 include("Structs.jl")
 include("Operations.jl")

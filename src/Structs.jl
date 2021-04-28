@@ -84,6 +84,9 @@ abstract type Camera end
 struct OrthogonalCamera <: Camera
     a::Float64 # aspect ratio
     T::Transformation
+    OrthogonalCamera(a, T) = new(a, T)
+    OrthogonalCamera(a) = new(a, Transformation())
+    OrthogonalCamera() = new(1., Transformation())
 end 
 
 struct PerspectiveCamera <: Camera
