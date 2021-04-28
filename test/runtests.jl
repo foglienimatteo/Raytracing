@@ -412,11 +412,11 @@ end
 
 end
 
-@testes "test_Rays" begin
+@testset "test_Rays" begin
 	r1 = Ray(Point(1.0, 2.0, 3.0), Vec(5.0, 4.0, -1.0))
 	r2 = Ray(Point(1.0, 2.0, 3.0), Vec(5.0, 4.0, -1.0))
 	r3 = Ray(Point(5.0, 1.0, 3.0), Vec(3.0, 9.0, -1.0))
-	r4 = Ray(Point(1.0, 2.0, 4.0), Vec(4.0, 2.0, 1.0))
+	r4 = Ray(Point(1.0, 2.0, 3.0), Vec(6.0, 5.0, 4.0))
 	T = Raytracing.translation(Vec(10.0, 11.0, 12.0)) * Raytracing.rotation_x(pi/2)
 	r4_tr = T * r4
 

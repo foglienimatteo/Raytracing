@@ -12,6 +12,7 @@ function rotation_x(ϑ::Float64) # ϑ is in radiant
          0.0    0.0     0.0     1.0]
     )
 end # rotation_x
+
 """transformation type, creates two SMatrix{4,4,Float64}, corresponding to rotation around y-axis anticlockwise and clockwise (ϑ[rad]>0)."""
 function rotation_y(ϑ::Float64) # ϑ is in radiant
     Transformation(
@@ -26,6 +27,7 @@ function rotation_y(ϑ::Float64) # ϑ is in radiant
          0.0        0.0     0.0     1.0  ]
     )
 end # rotation_y
+
 """transformation type, creates two SMatrix{4,4,Float64}, corresponding to rotation around z-axis anticlockwise and clockwise (ϑ[rad]>0)."""
 function rotation_z(ϑ::Float64) # ϑ is in radiant
     Transformation(
@@ -72,6 +74,7 @@ end # translation
 function inverse(T::Transformation)
     return Transformation(T.invM, T.M)
 end # inverse
+
 """Returns true if the two matrices of a Transformation type are one the inverse of the other."""
 function is_consistent(T::Transformation)
     p = T.M * T.invM

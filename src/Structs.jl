@@ -82,8 +82,8 @@ end
 abstract type Camera end
 
 struct OrthogonalCamera <: Camera
-    d::Float64 # dstance from the screen
     a::Float64 # aspect ratio
+    T::Transformation
 end 
 
 struct PerspectiveCamera <: Camera
