@@ -439,3 +439,13 @@ end
         @test transformed.dir ≈ Vec(6.0, -4.0, 5.0)
     end
 end
+
+@testset "test_ImageTracer" begin
+	img = ImageTracer(4, 2)
+	cam = PerspectiveCamera(2)
+	tracer = ImageTracer(img, cam)
+
+	r1 = fire_ray(tracer, 0, 0, 2.5, 1.5)
+	r2 = fire_ray(tracer, 2, 1)
+	@test r1 ≈ r2
+end
