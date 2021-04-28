@@ -441,8 +441,7 @@ end # is_consistent
 
 at(r::Ray, t::Float64) = r.origin + r.dir * t
 
-function fire_ray(ImTr::ImageTracer, img::HDRimage, cam::Camera)
-
-end # fire_ray
+# function fire_ray(ImTr::ImageTracer, img::HDRimage, cam::Camera)
+# end # fire_ray
 
 end  # module
