@@ -15,6 +15,7 @@ function normalize_image!(img::HDRimage, a::Number=0.18, lum::Union{Number, Noth
 end # normalize_image
 
 _clamp(x::Number) = x/(x+1)
+
 function clamp_image!(img::HDRimage)
     h=img.height
     w=img.width
