@@ -37,9 +37,18 @@ function fire_ray(Pcam::PerspectiveCamera, u, v)
     return Pcam.T*Ray(origin, direction, 1.0)
 end
 
-"""Set a ::Ray"""
+"""Give a ::Ray that goes through a pixel (you can set a position "inside" the pixel, as default it's in its center)"""
 function fire_ray(ImTr::ImageTracer, col::Int64, row::Int64, u_px::Float64=0.5, v_px::Float64=0.5)
     u = (col + u_px) / (ImTr.img.width - 1)
     v = (row + v_px) / (ImTr.img.height - 1)
     return fire_ray(ImTr.cam, u, v)
 end # fire_ray
+
+
+function fire_all_rays(ImTr::ImageTracer, func)
+    for row in ImTr.img.height-1:-1:0, col in 0:ImTr.img.width-1
+        ray = fire_ray(ImTr, col, row)
+        color = fnuc(ray)
+        set_pixel(ImTr, col, row, color)
+    end
+end
