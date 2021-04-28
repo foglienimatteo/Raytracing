@@ -29,10 +29,6 @@ print(p::Point) = (print(stdout, p); nothing)
 println(p::Point) = (println(stdout,p); nothing)
 println(io::IO,p::Point) = (print(io, p); print("\n"); nothing)
 
-squared_norm(v::Union{Vec,Point}) = v.x^2 + v.y^2 + v.z^2
-norm(v::Union{Vec,Point}) = √squared_norm(v)
-normalize(v::Vec) = v/norm(v)
-
 # ----------------------------------------------------------------------------------------------------------------------------------------
 # base rendering FUNCTIONS
 
