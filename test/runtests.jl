@@ -413,18 +413,29 @@ end
 end
 
 @testset "test_Rays" begin
-	r1 = Ray(Point(1.0, 2.0, 3.0), Vec(5.0, 4.0, -1.0))
-	r2 = Ray(Point(1.0, 2.0, 3.0), Vec(5.0, 4.0, -1.0))
-	r3 = Ray(Point(5.0, 1.0, 3.0), Vec(3.0, 9.0, -1.0))
-	r4 = Ray(Point(1.0, 2.0, 3.0), Vec(6.0, 5.0, 4.0))
-	T = Raytracing.translation(Vec(10.0, 11.0, 12.0)) * Raytracing.rotation_x(pi/2)
-	r4_tr = T * r4
+    @testset "test_is_close" begin
+        ray1 = Ray(Point(1.0, 2.0, 3.0), Vec(5.0, 4.0, -1.0))
+        ray2 = Ray(Point(1.0, 2.0, 3.0), Vec(5.0, 4.0, -1.0))
+        ray3 = Ray(Point(5.0, 1.0, 4.0), Vec(3.0, 9.0, 4.0))
 
-	@test r1 ≈ r2
-	@test !(r2 ≈ r3)
-	@test Raytracing.at(r4, 0.0) ≈ r4.origin
-	@test Raytracing.at(r4, 1.0) ≈ Point(5.0, 4.0, 5.0)
-	@test Raytracing.at(r4, 2.0) ≈ Point(9.0, 6.0, 6.0)
-	@test r4_tr.origin ≈ Point(11.0, 8.0, 14.0)
-	@test r4_tr.dir ≈ Vec(6.0, -4.0, 5.0)
+        @test ray1 ≈ ray2
+        @test !( ray1 ≈ ray3 )
+    end
+
+    @testset "test_at" begin
+     	ray = Ray(Point(1.0, 2.0, 4.0),Vec(4.0, 2.0, 1.0))
+
+     	@test at(ray, 0.0) ≈ ray.origin
+		@test at(ray, 1.0) ≈ Point(5.0, 4.0, 5.0)
+		@test at(ray, 2.0) ≈ Point(9.0, 6.0, 6.0)  
+    end
+
+    @testset "test_transform" begin
+        ray = Ray(Point(1.0, 2.0, 3.0), Vec(6.0, 5.0, 4.0))
+        T = translation(Vec(10.0, 11.0, 12.0)) * rotation_x(π/2)
+        transformed = T*ray
+
+        @test transformed.origin ≈ Point(11.0, 8.0, 14.0)
+        @test transformed.dir ≈ Vec(6.0, -4.0, 5.0)
+    end
 end
