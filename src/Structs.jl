@@ -29,6 +29,7 @@ struct Parameters
     a::Float64
     γ::Float64
     Parameters(in, out, a=0.18, γ=1.0) = new(in, out, a, γ)
+end
 
 struct Point
     x::Float64
