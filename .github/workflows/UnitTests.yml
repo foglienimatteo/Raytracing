@@ -3,7 +3,7 @@ name: Unit tests
 on:
   push:
     branches:
-      - geometry
+      - master
 
 jobs:
   test:
@@ -23,14 +23,14 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: "Set up Julia"
-      # install Julia 
+        # install Julia 
         uses: julia-actions/setup-julia@v1
         with:
           version: ${{ matrix.julia-version }}
           arch: ${{ matrix.arch }}
 
       - name: "Cache artifacts"
-      # avoid to re-install Julia packages every time 
+        # avoid to re-install Julia packages every time 
         uses: actions/cache@v1
         env:
           cache-name: cache-artifacts
@@ -41,11 +41,12 @@ jobs:
             ${{ runner.os }}-test-${{ env.cache-name }}-
             ${{ runner.os }}-test-
             ${{ runner.os }}-
-
+            
       - name: "Build package"
-       # compile the package
+        # compile the package
         uses: julia-actions/julia-buildpkg@latest
 
       - name: "Run unit tests"
-      # run the tests 
+        # run the tests 
         uses: julia-actions/julia-runtest@latest
+
