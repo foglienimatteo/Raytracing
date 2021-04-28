@@ -81,6 +81,18 @@ struct Ray
     Ray(o, d) = new(o, d, 1e-5, Inf, 0)
 end
 
+abstract type Camera end
+
+struct OrthogonalCamera <: Camera
+    d::Float64
+    a::Float64
+end 
+
+struct PerspectiveCamera <: Camera
+    d::Float64
+    a::Float64
+end 
+
 struct ImageTracer
     img::HDRimage
     cam::Camera

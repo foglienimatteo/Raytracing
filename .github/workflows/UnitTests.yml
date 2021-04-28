@@ -3,7 +3,7 @@ name: Unit tests
 on:
   push:
     branches:
-      - master
+      - cameras
 
 jobs:
   test:
