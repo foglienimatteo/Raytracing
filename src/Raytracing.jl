@@ -13,7 +13,14 @@ export translation, scaling, rotation_x, rotation_y, rotation_z, inverse
 
 # ----------------------------------------------------------------------------------------------------------------------------------------
 # STRUCTs
-
+"""This type defines a image in format HDR; has three members:
+- width
+- height
+- array containing RGB color, it's a 2linearized" matrix; the first element is the one in the bottom-left of the matrix, then the line is read left-to-right and going to the upper row.
+Has two constructors:
+- HDRimage(width, height)
+- HDRimage(width, height, RGB-array)
+"""
 struct HDRimage
     width::Int64
     height::Int64
@@ -26,6 +33,12 @@ struct HDRimage
     end
 end # HDRimage
 
+"""Type used to save (passed from command line):
+- input file name (must be a .pfm)
+- output file name (must be a .png)
+- parameter a for (optional)
+- parameter γ for screen correction (optional)
+"""
 struct Parameters
     infile::String
     outfile::String
@@ -84,13 +97,14 @@ end
 abstract type Camera end
 
 struct OrthogonalCamera <: Camera
-    d::Float64
-    a::Float64
+    d::Float64 # dstance from the screen
+    a::Float64 # aspect ratio
 end 
 
 struct PerspectiveCamera <: Camera
-    d::Float64
-    a::Float64
+    d::Float64 # dstance from the screen
+    a::Float64 # aspect ratio
+    T::Transformation
 end 
 
 struct ImageTracer
@@ -277,6 +291,7 @@ end # read_pfm_image(::IO)
 # IMAGE
 
 luminosity(c::RGB{T}) where {T} = (max(c.r, c.g, c.b) + min(c.r, c.g, c.b))/2.
+
 function avg_lum(img::HDRimage, δ::Number=1e-10)
     cumsum=0.0
     for pix in img.rgb_m
@@ -367,7 +382,7 @@ normalize(v::Vec) = v/norm(v)
 
 # ----------------------------------------------------------------------------------------------------------------------------------------
 # Transformation FUNCTIONS
-
+"""transformation type, creates two SMatrix{4,4,Float64}, corresponding to rotation around x-axis anticlockwise and clockwise (ϑ[rad]>0)."""
 function rotation_x(ϑ::Float64) # ϑ is in radiant
     Transformation(
         [1.0    0.0     0.0     0.0 ;   
@@ -381,7 +396,7 @@ function rotation_x(ϑ::Float64) # ϑ is in radiant
          0.0    0.0     0.0     1.0]
     )
 end # rotation_x
-
+"""transformation type, creates two SMatrix{4,4,Float64}, corresponding to rotation around y-axis anticlockwise and clockwise (ϑ[rad]>0)."""
 function rotation_y(ϑ::Float64) # ϑ is in radiant
     Transformation(
         [cos(ϑ)     0.0     sin(ϑ)  0.0 ;
@@ -395,7 +410,7 @@ function rotation_y(ϑ::Float64) # ϑ is in radiant
          0.0        0.0     0.0     1.0  ]
     )
 end # rotation_y
-
+"""transformation type, creates two SMatrix{4,4,Float64}, corresponding to rotation around z-axis anticlockwise and clockwise (ϑ[rad]>0)."""
 function rotation_z(ϑ::Float64) # ϑ is in radiant
     Transformation(
         [cos(ϑ) -sin(ϑ) 0.0     0.0 ;
@@ -441,7 +456,7 @@ end # translation
 function inverse(T::Transformation)
     return Transformation(T.invM, T.M)
 end # inverse
-
+"""Returns true if the two matrices of a Transformation type are one the inverse of the other."""
 function is_consistent(T::Transformation)
     p = T.M * T.invM
     I = SMatrix{4,4}( Diagonal(ones(4)) )
@@ -459,5 +474,23 @@ function fire_ray(ImTr::ImageTracer, col::Int64, row::Int64, u_px::Float64=0.5, 
     v = (row + v_px) / (ImTr.img.height - 1)
     return ImTr.cam.fire_ray(u, v)
 end # fire_ray
+
+function fire_ray(cam::Camera, u::Float64, v::Float64)
+    """Shoot a ray through the camera's screen
+        The coordinates (u, v) specify the point on the screen where the ray crosses it. Coordinates (0, 0) represent
+        the bottom-left corner, (0, 1) the top-left corner, (1, 0) the bottom-right corner, and (1, 1) the top-right
+        corner, as in the following diagram::
+            (0, 1)                          (1, 1)
+               +------------------------------+
+               |                              |
+               |                              |
+               |                              |
+               +------------------------------+
+            (0, 0)                          (1, 0)
+        """
+        origin = Point(-1.0, (1.0 - 2 * u) * cam.a, 2 * v - 1)
+        direction = VEC_X
+        return cam.T * Ray(origin, direction, 1.0) # OrthogonalCamera
+end
 
 end  # module
