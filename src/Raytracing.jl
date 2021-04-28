@@ -10,12 +10,12 @@ import LinearAlgebra.:⋅; import LinearAlgebra.:×
 export HDRimage, Parameters, Vec, Point, Normal, Transformation, Ray
 export translation, scaling, rotation_x, rotation_y, rotation_z, inverse
 
-include("ImageTracer.jl")
+include("Structs.jl")
 include("Operations.jl")
 include("PrintFunctions.jl")
 include("ReadingWriting.jl")
-include("Structs.jl")
 include("ToneMapping.jl")
 include("Transformations.jl")
+include("ImageTracer.jl")
 
 end  # module
