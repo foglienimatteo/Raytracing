@@ -30,8 +30,11 @@ function main(args)
 
 	Raytracing.normalize_image!(img, parameters.a)
 	Raytracing.clamp_image!(img)
+	Raytracing.γ_correction!(img, parameters.γ)
+	matrix = Raytracing.get_matrix(img)
 
-	Images.save(parameters.outfile, Raytracing.overturn(img))
+	#println(img)
+	Images.save(parameters.outfile, Raytracing.overturn(matrix))
 	#Images.save(Images.File(PNG,parameters.outfile), img.rgb_m)
 	#Images.save(File("PNG", parameters.outfile), img.rgb_m)
 

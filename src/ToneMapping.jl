@@ -28,6 +28,21 @@ function clamp_image!(img::HDRimage)
     nothing
 end # clamp_image
 
+function γ_correction!(img::HDRimage, γ::Float64=1.0, k::Float64=255.)
+    h=img.height
+    w=img.width
+    for y in h-1:-1:0, x in 0:w-1
+        cur_color = get_pixel(img, x, y)
+        T = typeof(cur_color).parameters[1]
+        new_col = RGB{T}( floor(255 * cur_color.r^(1/γ) )/k,
+                            floor(255 * cur_color.g^(1/γ))/k,
+                            floor(255 * cur_color.b^(1/γ))/k
+        )
+        set_pixel(img, x,y, new_col)
+    end
+    nothing
+end
+
 function parse_command_line(args)
     (isempty(args) || length(args)==1 || length(args)>4) && throw(Exception)	  
     infile = nothing; outfile = nothing; a=0.18; γ=1.0
@@ -62,12 +77,15 @@ function parse_command_line(args)
     return infile, outfile, a, γ
 end
 
-function overturn(img::HDRimage)
+function get_matrix(img::HDRimage)
     w = img.width
     h = img.height
-    IMG = reshape(img.rgb_m, (w,h))
-    IMG = permutedims(IMG)
-    #IMG = reverse(IMG, dims=1)
+    m = reshape(img.rgb_m, (w,h))
+    return m
+end
 
-    return IMG
+function overturn(m::Matrix{T}) where T
+    m = permutedims(m)
+    #m = reverse(m, dims=1)
+    return m
 end

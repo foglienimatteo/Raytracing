@@ -7,3 +7,11 @@ print(io::IO, p::Point) = (print(io, "Point:\t ", p.x, "\t", p.y, "\t", p.z); no
 print(p::Point) = (print(stdout, p); nothing)
 println(p::Point) = (println(stdout,p); nothing)
 println(io::IO,p::Point) = (print(io, p); print("\n"); nothing)
+
+println(c::RGB{T}) where T = println("(", c.r, ", ", c.g, ", ", c.b, ")" )
+function println(img::HDRimage)
+     println("width = ", img.width, "\t height = ", img.height)
+     for c in img.rgb_m
+          println(c)
+     end 
+end
