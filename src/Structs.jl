@@ -1,11 +1,10 @@
-"""This type defines a image in format HDR; has three members:
-- width
-- height
-- array containing RGB color, it's a 2linearized" matrix; the first element is the one in the bottom-left of the matrix, then the line is read left-to-right and going to the upper row.
-Has two constructors:
-- HDRimage(width, height)
-- HDRimage(width, height, RGB-array)
-"""
+""" This type defines a image in format HDR; has three members:
+    - width
+    - height
+    - array containing RGB color, it's a 2linearized" matrix; the first element is the one in the bottom-left of the matrix, then the line is read left-to-right and going to the upper row.
+    Has two constructors:
+    - HDRimage(width, height)
+    - HDRimage(width, height, RGB-array)"""
 struct HDRimage
     width::Int64
     height::Int64
@@ -18,12 +17,12 @@ struct HDRimage
     end
 end # HDRimage
 
-"""Type used to save (passed from command line):
-- input file name (must be a .pfm)
-- output file name (must be a .png)
-- parameter a for (optional)
-- parameter γ for screen correction (optional)
-"""
+""" Type used to save (passed from command line):
+    - input file name (must be a .pfm)
+    - output file name (must be a .png)
+    - parameter a for (optional)
+    - parameter γ for screen correction (optional)
+    """
 struct Parameters
     infile::String
     outfile::String
