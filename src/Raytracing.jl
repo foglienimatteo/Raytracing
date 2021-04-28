@@ -81,6 +81,11 @@ struct Ray
     Ray(o, d) = new(o, d, 1e-5, Inf, 0)
 end
 
+struct ImageTracer
+    img::HDRimage
+    cam::Camera
+end
+
 
 # ----------------------------------------------------------------------------------------------------------------------------------------
 # NEW OPERATIONS
@@ -350,7 +355,7 @@ normalize(v::Vec) = v/norm(v)
 # ----------------------------------------------------------------------------------------------------------------------------------------
 # Transformation FUNCTIONS
 
-function rotation_x(ϑ::Float64)
+function rotation_x(ϑ::Float64) # ϑ is in radiant
     Transformation(
         [1.0    0.0     0.0     0.0 ;   
          0.0    cos(ϑ)  -sin(ϑ) 0.0 ;
@@ -362,9 +367,9 @@ function rotation_x(ϑ::Float64)
          0.0    -sin(ϑ) cos(ϑ)  0.0 ;
          0.0    0.0     0.0     1.0]
     )
-end
+end # rotation_x
 
-function rotation_y(ϑ::Float64)
+function rotation_y(ϑ::Float64) # ϑ is in radiant
     Transformation(
         [cos(ϑ)     0.0     sin(ϑ)  0.0 ;
          0.0        1.0     0.0     0.0 ;
@@ -376,9 +381,9 @@ function rotation_y(ϑ::Float64)
          sin(ϑ)     0.0     cos(ϑ)  0.0 ;
          0.0        0.0     0.0     1.0  ]
     )
-end
+end # rotation_y
 
-function rotation_z(ϑ::Float64)
+function rotation_z(ϑ::Float64) # ϑ is in radiant
     Transformation(
         [cos(ϑ) -sin(ϑ) 0.0     0.0 ;
          sin(ϑ) cos(ϑ)  0.0     0.0 ;
@@ -390,7 +395,7 @@ function rotation_z(ϑ::Float64)
          0.0        0.0     1.0     0.0 ;
          0.0        0.0     0.0     1.0]
     )
-end
+end # rotation_z
 
 function scaling(v::Vec)
     Transformation(
@@ -404,7 +409,7 @@ function scaling(v::Vec)
          0.0    0.0     1/v.z   0.0 ;
          0.0    0.0     0.0     1.0]
     )
-end
+end # scaling
 
 function translation(v::Vec)
    Transformation(
@@ -418,22 +423,26 @@ function translation(v::Vec)
          0.0    0.0     1.0     -v.z ;
          0.0    0.0     0.0     1.0]
     )
-end
+end # translation
 
 function inverse(T::Transformation)
     return Transformation(T.invM, T.M)
-end
+end # inverse
 
 function is_consistent(T::Transformation)
     p = T.M * T.invM
     I = SMatrix{4,4}( Diagonal(ones(4)) )
     return p ≈ I
-end
+end # is_consistent
 
 
 # ----------------------------------------------------------------------------------------------------------------------------------------
 # base rendering FUNCTIONS
 
 at(r::Ray, t::Float64) = r.origin + r.dir * t
+
+function fire_ray(ImTr::ImageTracer, img::HDRimage, cam::Camera)
+
+end # fire_ray
 
 end  # module
