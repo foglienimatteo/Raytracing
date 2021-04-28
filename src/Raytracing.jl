@@ -90,7 +90,8 @@ end
 # ----------------------------------------------------------------------------------------------------------------------------------------
 # NEW OPERATIONS
 
-are_close(x,y,epsilon=1e-10) = abs(x-y) < epsilon
+"""Returns true if the difference between two numbers is smaller than 10^{-10}."""
+are_close(x, y, epsilon=1e-10) = abs(x-y) < epsilon
 Base.:≈(a::RGB{T}, b::RGB{T}) where {T} = are_close(a.r,b.r) && are_close(a.g,b.g) && are_close(a.b, b.b)
 Base.:≈(a::Vec, b::Vec) = are_close(a.x, b.x) && are_close(a.y, b.y) && are_close(a.z, b.z)
 Base.:≈(a::Normal, b::Normal) = are_close(a.x, b.x) && are_close(a.y, b.y) && are_close(a.z, b.z)
@@ -441,7 +442,10 @@ end # is_consistent
 
 at(r::Ray, t::Float64) = r.origin + r.dir * t
 
-# function fire_ray(ImTr::ImageTracer, img::HDRimage, cam::Camera)
-# end # fire_ray
+function fire_ray(ImTr::ImageTracer, col::Int64, row::Int64, u_px::Float64=0.5, v_px::Float64=0.5)
+    u = (col + u_px) / (ImTr.img.width - 1)
+    v = (row + v_px) / (ImTr.img.height - 1)
+    return ImTr.cam.fire_ray(u, v)
+end # fire_ray
 
 end  # module
