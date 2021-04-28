@@ -45,10 +45,10 @@ function fire_ray(ImTr::ImageTracer, col::Int64, row::Int64, u_px::Float64=0.5, 
 end # fire_ray
 
 
-function fire_all_rays(ImTr::ImageTracer, func)
+function fire_all_rays(ImTr::ImageTracer, func::Function)
     for row in ImTr.img.height-1:-1:0, col in 0:ImTr.img.width-1
         ray = fire_ray(ImTr, col, row)
-        color = fnuc(ray)
+        color::RGB = func(ray)
         set_pixel(ImTr, col, row, color)
     end
 end
