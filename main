@@ -3,17 +3,9 @@
 using Pkg
 Pkg.activate(normpath(@__DIR__))
 
-using Colors
-import ColorTypes:RGB
+using Colors, Images, ImageIO
+using ColorTypes:RGB
 using Raytracing
-using Images, ImageIO
-
-#=
-function main() 
-		println("\nusage: ./main input_pfm_filename output_png_filename")
-		return nothing
-end
-=#
 
 function main(args)
 	if isempty(args) || length(args)==1 || length(args)>4
@@ -33,13 +25,13 @@ function main(args)
 	img=open(parameters.infile, "r") do inpf
 			Raytracing.read(inpf, HDRimage)
 		end
-
+	
 	println("\nfile $(parameters.infile) has been read from disk.\n")
 
-	Raytracing.normalize_image(img, parameters.a)
-	Raytracing.clamp_image(img)
+	Raytracing.normalize_image!(img, parameters.a)
+	Raytracing.clamp_image!(img)
 
-	Images.save(parameters.outfile, Raytracing.ribaltare(img))
+	Images.save(parameters.outfile, Raytracing.overturn(img))
 	#Images.save(Images.File(PNG,parameters.outfile), img.rgb_m)
 	#Images.save(File("PNG", parameters.outfile), img.rgb_m)
 
