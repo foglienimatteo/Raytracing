@@ -28,10 +28,7 @@ struct Parameters
     outfile::String
     a::Float64
     γ::Float64
-    Parameters(in, out, a, γ) = new(in, out, a, γ)
-    Parameters(in, out, a) = new(in, out, a, 1.0)
-    Parameters(in, out) = new(in, out, 0.18, 1.0)
-end
+    Parameters(in, out, a=0.18, γ=1.0) = new(in, out, a, γ)
 
 struct Point
     x::Float64
@@ -72,10 +69,7 @@ struct Ray
     tmin::Float64
     tmax::Float64
     depth::Int64
-    Ray(o, d, m, M, n) = new(o, d, m, M, n)
-    Ray(o, d, m, M) = new(o, d, m, M, 0)
-    Ray(o, d, m) = new(o, d, m, Inf, 0)
-    Ray(o, d) = new(o, d, 1e-5, Inf, 0)
+    Ray(o, d, m=1e-5, M=Inf, n=0) = new(o, d, m, M, n)
 end
 
 abstract type Camera end
@@ -83,18 +77,14 @@ abstract type Camera end
 struct OrthogonalCamera <: Camera
     a::Float64 # aspect ratio
     T::Transformation
-    OrthogonalCamera(a, T) = new(a, T)
-    OrthogonalCamera(a) = new(a, Transformation())
-    OrthogonalCamera() = new(1., Transformation())
+    OrthogonalCamera(a=1., T=Transformation()) = new(a, T)
 end 
 
 struct PerspectiveCamera <: Camera
     d::Float64 # distance from the screen
     a::Float64 # aspect ratio
     T::Transformation
-    PerspectiveCamera(d, a, T) = new(d, a, T)
-    PerspectiveCamera(d, a) = new(d, a, Transformation())
-    PerspectiveCamera() = new(1., 1., Transformation())
+    PerspectiveCamera(d=1., a=1., T=Transformation()) = new(d, a, T)
 end 
 
 struct ImageTracer

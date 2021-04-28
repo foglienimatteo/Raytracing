@@ -11,7 +11,7 @@ export HDRimage, Parameters, Vec, Point, Normal, Transformation, Ray, ImageTrace
 export squared_norm, norm
 export translation, scaling, rotation_x, rotation_y, rotation_z, inverse
 export OrthogonalCamera, PerspectiveCamera #, Camera
-export fire_ray, fire_all_rays, at
+export fire_ray, fire_all_rays!, at
 
 include("Structs.jl")
 include("Operations.jl")
