@@ -96,4 +96,3 @@ struct ImageTracer
     img::HDRimage
     cam::Camera
 end
-
