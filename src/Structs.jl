@@ -94,6 +94,7 @@ struct PerspectiveCamera <: Camera
     T::Transformation
     PerspectiveCamera(d, a, T) = new(d, a, T)
     PerspectiveCamera(d, a) = new(d, a, Transformation())
+    PerspectiveCamera(d) = new(d, 1.0, Transformation())
     PerspectiveCamera() = new(1., 1., Transformation())
 end 
 
