@@ -89,9 +89,12 @@ struct OrthogonalCamera <: Camera
 end 
 
 struct PerspectiveCamera <: Camera
-    d::Float64 # dstance from the screen
+    d::Float64 # distance from the screen
     a::Float64 # aspect ratio
     T::Transformation
+    PerspectiveCamera(d, a, T) = new(d, a, T)
+    PerspectiveCamera(d, a) = new(d, a, Transformation())
+    PerspectiveCamera() = new(1., 1., Transformation())
 end 
 
 struct ImageTracer

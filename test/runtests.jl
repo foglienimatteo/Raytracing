@@ -459,5 +459,24 @@ end
 		@test at(ray3, 1.0) ≈ Point(0.0, 2.0, 1.0)
 	end
 
+	@testset "test_PerspectiveCamera" begin
+		cam = PerspectiveCamera(1.0, 2.0)
+		ray1 = fire_ray(cam, 0.0, 0.0)
+		ray2 = fire_ray(cam, 1.0, 0.0)
+		ray3 = fire_ray(cam, 0.0, 1.0)
+		ray4 = fire_ray(cam, 1.0, 1.0)
+
+		# Verify that all the rays depart from the same point
+		@test ray1.origin ≈ ray2.origin
+		@test ray1.origin ≈ ray3.origin
+		@test ray1.origin ≈ ray4.origin
+
+    		# Verify that the ray hitting the corners have the right coordinates
+		@test at(ray1, 1.0) ≈ Point(0.0, 2.0, -1.0)
+		@test at(ray2, 1.0) ≈ Point(0.0, -2.0, -1.0)
+		@test at(ray3, 1.0) ≈ Point(0.0, 2.0, 1.0)
+		@test at(ray4, 1.0) ≈ Point(0.0, -2.0, 1.0)
+	end
+
 
 end
