@@ -105,3 +105,38 @@ function read(io::IO, ::Type{HDRimage})
 
     return result
 end # read_pfm_image(::IO)
+
+
+function parse_command_line(args)
+    (isempty(args) || length(args)==1 || length(args)>4) && throw(Exception)	  
+    infile = nothing; outfile = nothing; a=0.18; γ=1.0
+    try
+        infile = args[1]
+        outfile = args[2]
+        open(infile, "r") do io
+            read(io, UInt8)
+        end
+    catch e
+        throw(RuntimeError("invalid input file: $(args[1]) does not exist"))
+    end
+
+    if length(args)>2
+        try
+            a = parse(Float64, args[3])
+            a > 0. || throw(Exception)
+        catch e
+            throw(InvalidArgumentError("invalid value for a: $(args[3])  must be a positive number"))
+        end
+
+        if length(args) == 4
+            try
+                γ = parse(Float64, args[4])
+                γ > 0. || throw(Exception)
+            catch e
+                throw(InvalidArgumentError("invalid value for γ: $(args[4])  must be a positive number"))
+            end
+        end
+    end
+
+    return infile, outfile, a, γ
+end

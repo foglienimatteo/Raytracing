@@ -14,27 +14,24 @@ function main(args)
 	end  
 
 	parameters = nothing
-
 	try
-		parameters =  Raytracing.Parameters(Raytracing.parse_command_line(args)...)
+		parameters =  Parameters(parse_command_line(args)...)
 	catch e
 		println("Error: ", e)
 		return nothing
 	end
 
-	img=open(parameters.infile, "r") do inpf
-			Raytracing.read(inpf, HDRimage)
-		end
+	img = open(parameters.infile, "r") do inpf; read(inpf, HDRimage); end
 	
 	println("\nfile $(parameters.infile) has been read from disk.\n")
 
-	Raytracing.normalize_image!(img, parameters.a)
-	Raytracing.clamp_image!(img)
-	Raytracing.γ_correction!(img, parameters.γ)
-	matrix = Raytracing.get_matrix(img)
+	normalize_image!(img, parameters.a)
+	clamp_image!(img)
+	γ_correction!(img, parameters.γ)
+	matrix = get_matrix(img)
 
 	println(img, 3)
-	Images.save(parameters.outfile, Raytracing.overturn(matrix))
+	Images.save(parameters.outfile, overturn(matrix))
 	#Images.save(Images.File(PNG,parameters.outfile), img.rgb_m)
 	#Images.save(File("PNG", parameters.outfile), img.rgb_m)
 
