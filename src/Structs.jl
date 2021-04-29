@@ -39,6 +39,7 @@ struct Point
     Point() = new(0., 0. ,0.)
 end
 
+"Is a normalized vector, you can give three unnormalized components and this struct normalize them."
 struct Normal
     x::Float64
     y::Float64
@@ -57,6 +58,8 @@ struct Vec
     Vec()=new(0.0, 0.0, 0.0)
 end
 
+"""Contains two matrices 4x4 of ::Float64, one the inverse of the other.
+    It's used to implement rotations, scaling and translations in 3D with homogenous formalism."""
 struct Transformation
     M::SMatrix{4,4,Float64}
     invM::SMatrix{4,4,Float64}
@@ -64,6 +67,7 @@ struct Transformation
     Transformation() = new( SMatrix{4,4}( Diagonal(ones(4)) ),  SMatrix{4,4}( Diagonal(ones(4)) ) )
 end
 
+"""A ::Ray creates a system along wi a direction (dir::Vec) starting from an origin (origin::Point)"""
 struct Ray
     origin::Point
     dir::Vec
@@ -75,12 +79,16 @@ end
 
 abstract type Camera end
 
+"""Implements the point of view of an observator, in the negative part of the x-axis; used for orthogonal projection.
+   Needs only the aspect ratio a (by default a=1.0) of the screen(/image) and possible transformation. """
 struct OrthogonalCamera <: Camera
     a::Float64 # aspect ratio
     T::Transformation
     OrthogonalCamera(a=1., T=Transformation()) = new(a, T)
 end 
 
+"""Implements the point of view of an observator, in the negative part of the x-axis (-d, 0, 0); used for perspective projection.
+   Needs the aspect ratio a (by default a=1.0) of the screen(/image), distance d from it and possible transformation. """
 struct PerspectiveCamera <: Camera
     d::Float64 # distance from the screen
     a::Float64 # aspect ratio
@@ -88,6 +96,7 @@ struct PerspectiveCamera <: Camera
     PerspectiveCamera(d=1., a=1., T=Transformation()) = new(d, a, T)
 end 
 
+"""Used for implement the "screen": has a ::HDRimage and a ::Camera."""
 struct ImageTracer
     img::HDRimage
     cam::Camera

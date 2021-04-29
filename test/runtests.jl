@@ -148,7 +148,6 @@ end
 	@test_throws Raytracing.InvalidPfmFileFormat var = Raytracing.parse_img_size("2 -1")
 end
 
-
 @testset "test_read_float" begin
 	# creo matrice come test precedenti, ma con 1 byte in meno per testare errore a fine lettura
 	reference_bytes2 = IOBuffer([
@@ -207,6 +206,7 @@ end
 	for i in 1:18
 		Raytracing.read_float(reference_bytes2, -1.0)
 	end
+	
 	# errore nella lettura dell'ultimo byte: ne mancano 3 per fare un Float32
 	@test_throws Raytracing.InvalidPfmFileFormat var = Raytracing.read_float(reference_bytes2, -1.0)
 end
