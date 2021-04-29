@@ -2,15 +2,18 @@ module Raytracing
 
 using Colors, LinearAlgebra, StaticArrays
 using ColorTypes:RGB
-#import ColorTypes:RGB  #specificare sempre cosa si importa. In questo caso posso evitare di secificare nella funzione "x::ColorTypes.RGB{T}"
 import Base.:+; import Base.:-; import Base.:≈; import Base.:/; import Base.:*
 import Base: write, read, print, println;
 import LinearAlgebra.:⋅; import LinearAlgebra.:×
 
-export HDRimage, Parameters, Vec, Point, Normal, Transformation, Ray, ImageTracer
+# from Structs.jl
+export HDRimage, Parameters, Vec, Point, Normal, Transformation
+export Ray, OrthogonalCamera, PerspectiveCamera, ImageTracer
+#from Operations.jl
 export squared_norm, norm
+# from Transformations.jl
 export translation, scaling, rotation_x, rotation_y, rotation_z, inverse
-export OrthogonalCamera, PerspectiveCamera #, Camera
+# from ImageTracer.jl
 export fire_ray, fire_all_rays!, at
 
 include("Structs.jl")
