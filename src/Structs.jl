@@ -1,3 +1,20 @@
+# The MIT License (MIT)
+#
+# Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+# documentation files (the “Software”), to deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+# and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+# the Software. THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+# LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+# SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+# CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+# IN THE SOFTWARE.
+
+
 """ This type defines a image in format HDR; has three members:
     - width
     - height
@@ -39,6 +56,14 @@ struct Point
     Point() = new(0., 0. ,0.)
 end
 
+struct Vec
+    x::Float64
+    y::Float64
+    z::Float64
+    Vec(x, y, z) = new(x, y, z)
+    Vec()=new(0.0, 0.0, 0.0)
+end
+
 "Is a normalized vector, you can give three unnormalized components and this struct normalize them."
 struct Normal
     x::Float64
@@ -48,14 +73,6 @@ struct Normal
         m = √(x^2+y^2+z^2)
         new(x/m, y/m, z/m)
     end
-end
-
-struct Vec
-    x::Float64
-    y::Float64
-    z::Float64
-    Vec(x, y, z) = new(x, y, z)
-    Vec()=new(0.0, 0.0, 0.0)
 end
 
 """Contains two matrices 4x4 of ::Float64, one the inverse of the other.

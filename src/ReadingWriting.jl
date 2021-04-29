@@ -1,8 +1,24 @@
+# The MIT License (MIT)
+#
+# Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+# documentation files (the “Software”), to deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+# and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+# the Software. THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+# LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+# SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+# CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+# IN THE SOFTWARE.
+
+
 valid_coordinates(hdr::HDRimage, x::Int, y::Int) = x>=0 && y>=0 && x<hdr.width && y<hdr.height
 pixel_offset(hdr::HDRimage, x::Int, y::Int) = (@assert valid_coordinates(hdr, x, y); y*hdr.width + (x+1) )
 get_pixel(hdr::HDRimage, x::Int, y::Int) = hdr.rgb_m[pixel_offset(hdr, x, y)]
 set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{T}) where {T} = (hdr.rgb_m[pixel_offset(hdr, x,y)] = c; nothing)
-print_rgb(c::RGB{T}) where {T} = println("RGB component of this color: \t$(c.r) \t$(c.g) \t$(c.b)")
 
 struct InvalidPfmFileFormat <: Exception
     var::String
@@ -120,3 +136,42 @@ function read(io::IO, ::Type{HDRimage})
 
     return result
 end # read_pfm_image(::IO)
+
+"""Can interpret the command line when the main is executed.
+   It's necessary to give the input .pfm file and the name of the .png file you want.
+   You can give also:
+   - the 'a' factor (default 0.18, used in normalize_image!(::HDRimage, ::Number, :Union{Number, Nothing}, Number)
+   - the γ factor (default 1.0, used in γ_correction!(::HDR, ::Float64, ::Float64)"""
+function parse_command_line(args)
+    (isempty(args) || length(args)==1 || length(args)>4) && throw(Exception)	  
+    infile = nothing; outfile = nothing; a=0.18; γ=1.0
+    try
+        infile = args[1]
+        outfile = args[2]
+        open(infile, "r") do io
+            read(io, UInt8)
+        end
+    catch e
+        throw(RuntimeError("invalid input file: $(args[1]) does not exist"))
+    end
+
+    if length(args)>2
+        try
+            a = parse(Float64, args[3])
+            a > 0. || throw(Exception)
+        catch e
+            throw(InvalidArgumentError("invalid value for a: $(args[3])  must be a positive number"))
+        end
+
+        if length(args) == 4
+            try
+                γ = parse(Float64, args[4])
+                γ > 0. || throw(Exception)
+            catch e
+                throw(InvalidArgumentError("invalid value for γ: $(args[4])  must be a positive number"))
+            end
+        end
+    end
+
+    return infile, outfile, a, γ
+end

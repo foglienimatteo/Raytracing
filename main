@@ -1,4 +1,21 @@
-#!/usr/bin/env julia.exe
+#!/usr/bin/env julia
+
+# The MIT License (MIT)
+#
+# Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+# documentation files (the “Software”), to deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+# and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+# the Software. THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+# LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+# SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+# CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+# IN THE SOFTWARE.
+
 
 using Pkg
 Pkg.activate(normpath(@__DIR__))
@@ -14,27 +31,24 @@ function main(args)
 	end  
 
 	parameters = nothing
-
 	try
-		parameters =  Raytracing.Parameters(Raytracing.parse_command_line(args)...)
+		parameters =  Parameters(parse_command_line(args)...)
 	catch e
 		println("Error: ", e)
 		return nothing
 	end
 
-	img=open(parameters.infile, "r") do inpf
-			Raytracing.read(inpf, HDRimage)
-		end
+	img = open(parameters.infile, "r") do inpf; read(inpf, HDRimage); end
 	
 	println("\nfile $(parameters.infile) has been read from disk.\n")
 
-	Raytracing.normalize_image!(img, parameters.a)
-	Raytracing.clamp_image!(img)
-	Raytracing.γ_correction!(img, parameters.γ)
-	matrix = Raytracing.get_matrix(img)
-
+	normalize_image!(img, parameters.a)
+	clamp_image!(img)
+	γ_correction!(img, parameters.γ)
 	println(img, 3)
-	Images.save(parameters.outfile, Raytracing.overturn(matrix))
+
+	matrix = get_matrix(img)
+	Images.save(parameters.outfile, matrix)
 	#Images.save(Images.File(PNG,parameters.outfile), img.rgb_m)
 	#Images.save(File("PNG", parameters.outfile), img.rgb_m)
 

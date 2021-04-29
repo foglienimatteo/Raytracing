@@ -1,3 +1,20 @@
+# The MIT License (MIT)
+#
+# Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+# documentation files (the “Software”), to deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+# and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+# the Software. THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+# LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+# SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+# CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+# IN THE SOFTWARE.
+
+
 """Gives the best average luminosity of a Pixel.
     As input needs a ::RGB{T} and returns a ::Float64."""
 luminosity(c::RGB{T}) where {T} = (max(c.r, c.g, c.b) + min(c.r, c.g, c.b))/2.
@@ -19,7 +36,7 @@ function normalize_image!(img::HDRimage, a::Number=0.18, lum::Union{Number, Noth
 end # normalize_image
 
 """Execute: x → x/(x+1)"""
-_clamp(x::Number) = x/(x+1)
+clamp(x::Number) = x/(x+1)
 
 """Compress the RGB components of a ::HDRimage in the range [0.0; 1.0]."""
 function clamp_image!(img::HDRimage)
@@ -28,7 +45,7 @@ function clamp_image!(img::HDRimage)
     for y in h-1:-1:0, x in 0:w-1
         col = get_pixel(img, x, y)
         T = typeof(col).parameters[1]
-        new_col = RGB{T}( _clamp(col.r), _clamp(col.g), _clamp(col.b) )
+        new_col = RGB{T}( clamp(col.r), clamp(col.g), clamp(col.b) )
         set_pixel(img, x,y, new_col)
     end
     nothing
@@ -51,51 +68,13 @@ function γ_correction!(img::HDRimage, γ::Float64=1.0, k::Float64=255.)
     nothing
 end
 
-"""Can interpret the command line when the main is executed.
-   It's necessary to give the input .pfm file and the name of the .png file you want.
-   You can give also:
-   - the 'a' factor (default 0.18, used in normalize_image!(::HDRimage, ::Number, :Union{Number, Nothing}, Number)
-   - the γ factor (default 1.0, used in γ_correction!(::HDR, ::Float64, ::Float64)"""
-function parse_command_line(args)
-    (isempty(args) || length(args)==1 || length(args)>4) && throw(Exception)	  
-    infile = nothing; outfile = nothing; a=0.18; γ=1.0
-    try
-        infile = args[1]
-        outfile = args[2]
-        open(infile, "r") do io
-            read(io, UInt8)
-        end
-    catch e
-        throw(RuntimeError("invalid input file: $(args[1]) does not exist"))
-    end
-
-    if length(args)>2
-        try
-            a = parse(Float64, args[3])
-            a > 0. || throw(Exception)
-        catch e
-            throw(InvalidArgumentError("invalid value for a: $(args[3])  must be a positive number"))
-        end
-
-        if length(args) == 4
-            try
-                γ = parse(Float64, args[4])
-                γ > 0. || throw(Exception)
-            catch e
-                throw(InvalidArgumentError("invalid value for γ: $(args[4])  must be a positive number"))
-            end
-        end
-    end
-
-    return infile, outfile, a, γ
-end
-
-function get_matrix(img::HDRimage)
-    reshape(img.rgb_m, (img.width,img.height))
-end
-
 function overturn(m::Matrix{T}) where T
     m = permutedims(m)
     #m = reverse(m, dims=1)
     return m
+end
+
+function get_matrix(img::HDRimage)
+    m = reshape(img.rgb_m, (img.width,img.height))
+    return overturn(m)
 end
