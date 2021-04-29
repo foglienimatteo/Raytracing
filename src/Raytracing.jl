@@ -26,10 +26,10 @@ import LinearAlgebra.:⋅; import LinearAlgebra.:×
 # from Structs.jl
 export HDRimage, Parameters, Point, Vec, Normal, Transformation
 export Ray, OrthogonalCamera, PerspectiveCamera, ImageTracer
-# from ReadingWriting.jl
-export parse_command_line
 # from Operations.jl
 export squared_norm, norm, normalize
+# from ReadingWriting.jl
+export parse_command_line
 # from ToneMapping.jl
 export normalize_image!,  clamp_image!, γ_correction!, get_matrix
 # from Transformations.jl

@@ -52,18 +52,16 @@ function clamp_image!(img::HDRimage)
 end # clamp_image
 
 """Corrects the image using the γ factor, assuming a potential dependence between the input and putput signals of a monitor/screen.
-   As third argument you can pass also a 'k' value if you need a different normalization than having all the RGB values in [0.0, 1.0]."""
-function γ_correction!(img::HDRimage, γ::Float64=1.0, k::Float64=255.)
+   As third optional argument, you can pass the maximum value 'k' of the range you want the RGB colors may have.
+   The default value is 'k=1.0', so the range RGB colors can span is '[0.0,1.0]' """
+function γ_correction!(img::HDRimage, γ::Float64=1.0, k::Float64=1.)
     h=img.height
     w=img.width
     for y in h-1:-1:0, x in 0:w-1
         cur_color = get_pixel(img, x, y)
         T = typeof(cur_color).parameters[1]
-        new_col = RGB{T}( floor(255 * cur_color.r^(1/γ) )/k,
-                            floor(255 * cur_color.g^(1/γ))/k,
-                            floor(255 * cur_color.b^(1/γ))/k
-        )
-        set_pixel(img, x,y, new_col)
+        new_col = RGB{T}( floor(255 * cur_color.r^(1/γ) ), floor(255 * cur_color.g^(1/γ)), floor(255 * cur_color.b^(1/γ)) )
+        set_pixel(img, x,y, k/255.0*new_col)
     end
     nothing
 end

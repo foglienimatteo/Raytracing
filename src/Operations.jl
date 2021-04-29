@@ -19,31 +19,14 @@
 are_close(x, y, epsilon=1e-10) = abs(x-y) < epsilon
 
 Base.:≈(a::RGB{T}, b::RGB{T}) where {T} = are_close(a.r,b.r) && are_close(a.g,b.g) && are_close(a.b, b.b)
-#= function Base.:≈(a::Array{RGB{Float32}}, b::Array{RGB{Float32}})
-    x = true
-    x *= (length(a) == length(b))
-    for i in 1:length(a)
-        x *= (a[i]≈b[i])
-    end
-    return x
-end
-
-function Base.:≈(a::Array{RGB{Float32}}, b::Array{RGB{Float32}})
-    for i in 1:(a.height*b.width)
-        (a.rgb_m[i] ≈ b.rgb_m[i]) || return false
-    end
+function Base.:≈(a::Array{RGB{T1}}, b::Array{RGB{T2}}) where {T1,T2}
+    for (i,j) in zip(a, b); (i≈j) || (return false); end
     return true
 end
-
-Base.:≈(a::HDRimage, b::HDRimage) = (a.height == b.height) && (a.width == b.width) && (a.rgb_m ≈ b.rgb_m)
-=#
 function Base.:≈(a::HDRimage, b::HDRimage)
     (a.height == b.height) || return false
     (a.width == b.width) || return false
-    for i in 1:(a.height*b.width)
-        (a.rgb_m[i] ≈ b.rgb_m[i]) || return false
-    end
-    return true
+    return a.rgb_m ≈ b.rgb_m
 end
 Base.:≈(a::Vec, b::Vec) = are_close(a.x, b.x) && are_close(a.y, b.y) && are_close(a.z, b.z)
 Base.:≈(a::Normal, b::Normal) = are_close(a.x, b.x) && are_close(a.y, b.y) && are_close(a.z, b.z)
