@@ -1,5 +1,8 @@
+"""Gives the best average luminosity of a Pixel.
+    As input needs a ::RGB{T} and returns a ::Float64."""
 luminosity(c::RGB{T}) where {T} = (max(c.r, c.g, c.b) + min(c.r, c.g, c.b))/2.
 
+"""Calculates the average luminosity of an ::HDRimage."""
 function avg_lum(img::HDRimage, δ::Number=1e-10)
     cumsum=0.0
     for pix in img.rgb_m
@@ -8,14 +11,17 @@ function avg_lum(img::HDRimage, δ::Number=1e-10)
     10^(cumsum/(img.width*img.height))
 end # avg_lum
 
+"""Normalize all the RGB components of a ::HDRimage with its average luminosity (given by avg_lum(::HDRimage, ::Number)) and a factor 'a' (by default a=0.18, can be changed)."""
 function normalize_image!(img::HDRimage, a::Number=0.18, lum::Union{Number, Nothing}=nothing, δ::Number=1e-10)
     (!isnothing(lum)) || (lum = avg_lum(img, δ))
     img.rgb_m .= img.rgb_m .* a ./lum
     nothing
 end # normalize_image
 
+"""Execute: x → x/(x+1)"""
 _clamp(x::Number) = x/(x+1)
 
+"""Compress the RGB components of a ::HDRimage in the range [0.0; 1.0]."""
 function clamp_image!(img::HDRimage)
     h=img.height
     w=img.width
@@ -28,6 +34,8 @@ function clamp_image!(img::HDRimage)
     nothing
 end # clamp_image
 
+"""Corrects the image using the γ factor, assuming a potential dependence between the input and putput signals of a monitor/screen.
+   As third argument you can pass also a 'k' value if you need a different normalization than having all the RGB values in [0.0, 1.0]."""
 function γ_correction!(img::HDRimage, γ::Float64=1.0, k::Float64=255.)
     h=img.height
     w=img.width
@@ -43,6 +51,11 @@ function γ_correction!(img::HDRimage, γ::Float64=1.0, k::Float64=255.)
     nothing
 end
 
+"""Can interpret the command line when the main is executed.
+   It's necessary to give the input .pfm file and the name of the .png file you want.
+   You can give also:
+   - the 'a' factor (default 0.18, used in normalize_image!(::HDRimage, ::Number, :Union{Number, Nothing}, Number)
+   - the γ factor (default 1.0, used in γ_correction!(::HDR, ::Float64, ::Float64)"""
 function parse_command_line(args)
     (isempty(args) || length(args)==1 || length(args)>4) && throw(Exception)	  
     infile = nothing; outfile = nothing; a=0.18; γ=1.0

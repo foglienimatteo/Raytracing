@@ -1,4 +1,4 @@
-"""Returns true if the difference between two numbers is smaller than 10^{-10}."""
+"""Returns true if the difference between two numbers is smaller than 1e-10."""
 are_close(x, y, epsilon=1e-10) = abs(x-y) < epsilon
 
 Base.:≈(a::RGB{T}, b::RGB{T}) where {T} = are_close(a.r,b.r) && are_close(a.g,b.g) && are_close(a.b, b.b)

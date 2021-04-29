@@ -8,6 +8,8 @@ struct InvalidPfmFileFormat <: Exception
     var::String
 end #InvalidPfmFileFormat
 
+"""This function creates an image in PFM format. The endianness is set by default equal to -1.
+    Needs a name file and a ::HDRimage as input."""
 function write(io::IO, img::HDRimage)
     endianness=-1.0
     w = img.width
@@ -16,10 +18,10 @@ function write(io::IO, img::HDRimage)
     header = "PF\n$w $h\n$endianness\n"
 
     # Convert the header into a sequence of bytes
-    bytebuf = transcode(UInt8, header) # transcode scrive in sequenza grezza di byte (8bit)
+    bytebuf = transcode(UInt8, header) # transcode writes a "raw" sequence of bytes (8bit)
 
     # Write on io the header in binary code
-    write(io, reinterpret(UInt8, bytebuf))  # reinterpret scrive in sequenza grezza di byte (8bit)
+    write(io, reinterpret(UInt8, bytebuf))  # reinterpret  writes a "raw" sequence of bytes (8bit)
 
     # Write the image (bottom-to-up, left-to-right)
     for y in h-1:-1:0, x in 0:w-1                   # !!! Julia conta sempre partendo da 1; prende gli estremi
@@ -31,6 +33,7 @@ function write(io::IO, img::HDRimage)
 
 end # write(::IO, ::HDRimage)
 
+"""Can interpret the size of an image from a PFM file. Needs a ::String, obtained from red_line(::IO)."""
 function parse_img_size(line::String)
     elements = split(line, " ")
     length(elements) == 2 || throw(InvalidPfmFileFormat("invalid image size specification: $(length(elements)) instead of 2"))
@@ -46,6 +49,8 @@ function parse_img_size(line::String)
 
 end # parse_img_size
 
+"""Can understand the endianness of a file; needs a ::String, obtained from read_line(::IO).
+   Returns error if the number is different from ±1.0."""
 function parse_endianness(ess::String)
     try
         val = parse(Float64, ess)
@@ -56,6 +61,8 @@ function parse_endianness(ess::String)
     end
 end # parse_endianness
 
+"""Can interpret numbers from a string; needs as input a ::IO and the endianness (as ±1.0).
+    Reads numbers as ::Float32; controls if there are enough bits in order to form a Float32, otherwise returns an error."""
 function read_float(io::IO, ess::Float64)
     # controllo che in ingresso abbia una stringa che sia cnovertibile in Float32
     ess == 1.0 || ess == -1.0 || throw(InvalidPfmFileFormat("endianness $ess not acceptable."))
@@ -68,6 +75,8 @@ function read_float(io::IO, ess::Float64)
     end
 end # read_float
 
+"""Reads aline from a file, given as a ::IO. Can understand when the file is ended and when a new line begins.
+    Returns a ::String."""
 function read_line(io::IO)
     result = b""
     while eof(io) == false
@@ -80,6 +89,12 @@ function read_line(io::IO)
     return String(result)
 end # read_line
 
+"""This function can trad a PFM file as input and returns a ::HDRimage.
+    Other functions used:
+    - read_line(::IO)
+    - parse_image_size(::String)
+    - parse_endianness(::String)
+    - read_float(::IO, ::Float64)"""
 function read(io::IO, ::Type{HDRimage})
     magic = read_line(io)
     # lettura numero magico
