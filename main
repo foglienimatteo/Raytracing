@@ -33,7 +33,7 @@ function main(args)
 	Raytracing.γ_correction!(img, parameters.γ)
 	matrix = Raytracing.get_matrix(img)
 
-	#println(img)
+	println(img, 3)
 	Images.save(parameters.outfile, Raytracing.overturn(matrix))
 	#Images.save(Images.File(PNG,parameters.outfile), img.rgb_m)
 	#Images.save(File("PNG", parameters.outfile), img.rgb_m)
