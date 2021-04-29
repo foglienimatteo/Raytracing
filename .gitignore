@@ -1,6 +1,7 @@
 *.o
-.vscode
+*.vscode
 *.~
-.DS_Store
+*.DS_Store
 *.code-workspace
 *.swp
+*.png

@@ -69,23 +69,6 @@ struct Transformation
     Transformation() = new( SMatrix{4,4}( Diagonal(ones(4)) ),  SMatrix{4,4}( Diagonal(ones(4)) ) )
 end
 
-struct Ray
-    origin::Point
-    dir::Vec
-    tmin::Float64
-    tmax::Float64
-    depth::Int64
-    Ray(o, d, m, M, n) = new(o, d, m, M, n)
-    Ray(o, d, m, M) = new(o, d, m, M, 0)
-    Ray(o, d, m) = new(o, d, m, Inf, 0)
-    Ray(o, d) = new(o, d, 1e-5, Inf, 0)
-end
-
-struct ImageTracer
-    img::HDRimage
-    cam::Camera
-end
-
 
 # ----------------------------------------------------------------------------------------------------------------------------------------
 # NEW OPERATIONS
@@ -97,7 +80,7 @@ Base.:≈(a::Normal, b::Normal) = are_close(a.x, b.x) && are_close(a.y, b.y) && 
 Base.:≈(a::Point, b::Point) = are_close(a.x, b.x) && are_close(a.y, b.y) && are_close(a.z,b.z)
 Base.:≈(m1::SMatrix{4,4,Float64}, m2::SMatrix{4,4,Float64}) = (B = [are_close(m,n) for (m,n) in zip(m1,m2)] ; all(i->(i==true) , B) )
 Base.:≈(t1::Transformation, t2::Transformation) = (t1.M ≈ t2.M) && ( t1.invM ≈ t2.invM )
-Base.:≈(r1::Ray, r2::Ray) = (r1.origin ≈ r2.origin) && (r1.dir ≈ r2.dir)
+
 
 # Definitions of operations for RGB objects
 Base.:+(a::RGB{T}, b::RGB{T}) where {T} = RGB(a.r + b.r, a.g + b.g, a.b + b.b)
@@ -146,8 +129,6 @@ function Base.:*(t::Transformation, n::Normal)
     )
     return l
 end
-Base.:*(t::Transformation, r::Ray) = Ray(t * r.origin, t*r.dir, r.tmin, r.tmax, r.depth)
-Base.:*(r::Ray, t::Transformation) = t*r
 
 # ----------------------------------------------------------------------------------------------------------------------------------------
 # READING & WRITING FILE
@@ -435,14 +416,5 @@ function is_consistent(T::Transformation)
     return p ≈ I
 end # is_consistent
 
-
-# ----------------------------------------------------------------------------------------------------------------------------------------
-# base rendering FUNCTIONS
-
-at(r::Ray, t::Float64) = r.origin + r.dir * t
-
-function fire_ray(ImTr::ImageTracer, img::HDRimage, cam::Camera)
-
-end # fire_ray
 
 end  # module

@@ -411,20 +411,3 @@ end
 	end
 
 end
-
-@testes "test_Rays" begin
-	r1 = Ray(Point(1.0, 2.0, 3.0), Vec(5.0, 4.0, -1.0))
-	r2 = Ray(Point(1.0, 2.0, 3.0), Vec(5.0, 4.0, -1.0))
-	r3 = Ray(Point(5.0, 1.0, 3.0), Vec(3.0, 9.0, -1.0))
-	r4 = Ray(Point(1.0, 2.0, 4.0), Vec(4.0, 2.0, 1.0))
-	T = Raytracing.translation(Vec(10.0, 11.0, 12.0)) * Raytracing.rotation_x(pi/2)
-	r4_tr = T * r4
-
-	@test r1 ≈ r2
-	@test !(r2 ≈ r3)
-	@test Raytracing.at(r4, 0.0) ≈ r4.origin
-	@test Raytracing.at(r4, 1.0) ≈ Point(5.0, 4.0, 5.0)
-	@test Raytracing.at(r4, 2.0) ≈ Point(9.0, 6.0, 6.0)
-	@test r4_tr.origin ≈ Point(11.0, 8.0, 14.0)
-	@test r4_tr.dir ≈ Vec(6.0, -4.0, 5.0)
-end
