@@ -33,7 +33,7 @@ function write(io::IO, img::HDRimage)
 
 end # write(::IO, ::HDRimage)
 
-"""Can interpret the size of an image from a PFM file. Needs a ::String, obtained from red_line(::IO)."""
+"""Can interpret the size of an image from a PFM file. Needs a ::String, obtained from read_line(::IO)."""
 function parse_img_size(line::String)
     elements = split(line, " ")
     length(elements) == 2 || throw(InvalidPfmFileFormat("invalid image size specification: $(length(elements)) instead of 2"))

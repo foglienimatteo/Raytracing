@@ -9,7 +9,7 @@ import LinearAlgebra.:⋅; import LinearAlgebra.:×
 # from Structs.jl
 export HDRimage, Parameters, Vec, Point, Normal, Transformation
 export Ray, OrthogonalCamera, PerspectiveCamera, ImageTracer
-#from Operations.jl
+# from Operations.jl
 export squared_norm, norm
 # from Transformations.jl
 export translation, scaling, rotation_x, rotation_y, rotation_z, inverse
