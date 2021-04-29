@@ -280,6 +280,18 @@ end
 	@test Raytracing.get_pixel(img, 0, 0).b >= 0 && Raytracing.get_pixel(img, 0, 0).b <= 1
 end
 
+@testset "test_γcorrection" begin
+	img = Raytracing.HDRimage(2, 3, [RGB(1.0, 2.0, 3.0), RGB(4.0, 5.0, 6.0), RGB(7.0, 8.0, 9.0), RGB(10.0, 11.0, 12.0), RGB(13.0, 14.0, 15.0), RGB(16.0, 17.0, 18.0)])
+	img2 = Raytracing.HDRimage(2, 3, [RGB(255., 360., 441.)/255., RGB(510., 570., 624.)/255., RGB(674., 721, 765.)/255., RGB(806., 845., 883.)/255., RGB(919., 954., 987.)/255., RGB(1020., 1051., 1081.)/255.])
+	Raytracing.γ_correction!(img, 2.0)
+	println("img is a ", typeof(img), "; img2 is a ", typeof(img2))
+	
+	@test img ≈ img2
+	
+	# HDRimage(2, 3, RGB{Float32}[RGB{Float32}(1.0f0,1.4117647f0,1.7294117f0), RGB{Float32}(2.0f0,2.235294f0,2.447059f0), RGB{Float32}(2.6431372f0,2.827451f0,3.0f0), RGB{Float32}(3.1607842f0,3.3137255f0,3.4627452f0), RGB{Float32}(3.6039217f0,3.7411764f0,3.8705883f0), RGB{Float32}(4.0f0,4.1215687f0,4.239216f0)])
+	# HDRimage(2, 3, RGB{Float32}[RGB{Float32}(1.0f0,1.4117647f0,1.7294117f0), RGB{Float32}(2.0f0,2.235294f0,2.447059f0), RGB{Float32}(2.6431372f0,2.827451f0,3.0f0), RGB{Float32}(3.1607842f0,3.3137255f0,3.4627452f0), RGB{Float32}(3.6039217f0,3.7411764f0,3.8705883f0), RGB{Float32}(4.0f0,4.1215687f0,4.239216f0)])
+end
+
 @testset "test_geometry" begin
 
 	@testset "test_geometry_Vec" begin

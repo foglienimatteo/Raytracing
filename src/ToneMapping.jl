@@ -78,10 +78,7 @@ function parse_command_line(args)
 end
 
 function get_matrix(img::HDRimage)
-    w = img.width
-    h = img.height
-    m = reshape(img.rgb_m, (w,h))
-    return m
+    reshape(img.rgb_m, (img.width,img.height))
 end
 
 function overturn(m::Matrix{T}) where T
