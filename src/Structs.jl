@@ -140,7 +140,7 @@ end
 A 2D vector used to represent a point on a surface
     The fields are named `u` and `v` to distinguish them from the usual 3D coordinates `x`, `y`, `z`.
 """
-struct Vec2D
+struct Vec2d
     u::Float64
     v::Float64
 end
@@ -157,7 +157,7 @@ end
 struct HitRecord
     world_point::Point # obserator frame sistem
     normal::Normal
-    surface_point::Vec2D
+    surface_point::Vec2d
     t::Float4
     ray::Ray
 end
