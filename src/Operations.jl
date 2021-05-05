@@ -36,7 +36,7 @@ Base.:≈(a::Point, b::Point) = are_close(a.x, b.x) && are_close(a.y, b.y) && ar
 Base.:≈(m1::SMatrix{4,4,Float64}, m2::SMatrix{4,4,Float64}) = (B = [are_close(m,n) for (m,n) in zip(m1,m2)] ; all(i->(i==true) , B) )
 Base.:≈(t1::Transformation, t2::Transformation) = (t1.M ≈ t2.M) && ( t1.invM ≈ t2.invM )
 Base.:≈(r1::Ray, r2::Ray) = (r1.origin ≈ r2.origin) && (r1.dir ≈ r2.dir)
-Base.:≈(v1::Vec2D, v::Vec2D) = (are_close(v1.u, v2.u)) && (are_close(v1.v, v2.v))
+Base.:≈(v1::Vec2D, v2::Vec2D) = (are_close(v1.u, v2.u)) && (are_close(v1.v, v2.v))
 Base.:≈(H1::HitRecord, H2::HitRecord) = (H1.normal ≈ H2.normal) && (H1.ray ≈ H2.ray) && (H1.surface_point ≈ H2.surface_point) && (are_close(H1.t, H2.t)) && (H1.world_point ≈ H2.world_point)
 
 # Definitions of operations for RGB objects
