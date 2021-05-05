@@ -31,8 +31,14 @@ end
 Convert a 3D point on the surface of the unit sphere into a (u, v) 2D point
 """
 function sphere_point_to_uv(point::Point)
-    u = tan(point.y/point.x) / (2.0 * π)
-    v = acos(point.z) / π,
+     u = acos(point.z) / π
+
+     if (point.y == 0.0) || (point.x == 0.)
+          v = 0.
+     else
+          v = tan(point.y/point.x) / (2.0 * π)
+     end
+
     return Vec2d(u,v)
 end
 
@@ -47,7 +53,7 @@ direction with respect to `ray_dir`.
 """
 function sphere_normal(point::Point, ray_dir::Vec)
     result = Normal(point.x, point.y, point.z)
-    Vec(point) * ray_dir < 0.0 ? nothing : result *= -1.0
+    Vec(point) ⋅ ray_dir < 0.0 ? nothing : result = -result
     return result
 end
 
@@ -59,11 +65,11 @@ Checks if a ray intersects the sphere
 Return a `HitRecord`, or `nothing` if no intersection was found.
 """
 function ray_intersection(sphere::Sphere, ray::Ray)
-     inv_ray = sphere.T.invM * ray
+     inv_ray = inverse(sphere.T) * ray
      origin_vec = Vec(inv_ray.origin)
 
      a = squared_norm(inv_ray.dir)
-     b = 2.0 * origin_vec * inv_ray.dir
+     b = 2.0 * origin_vec ⋅ inv_ray.dir
      c = squared_norm(origin_vec) - 1.0
      Δ = b * b - 4.0 * a * c
      
