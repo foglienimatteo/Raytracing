@@ -99,6 +99,25 @@ end
 """
 Append a new shape to this world"""
 function add_shape(W::World, S::Shape)
-    push!(W, S)
+    push!(W.shapes, S)
     return nothing
+end
+
+"""
+Determine whether a ray intersects any of the objects in this world
+"""
+function ray_intersection(world::World, ray::Ray)
+     closest = nothing
+
+     for shape in world.shapes
+          intersection = ray_intersection(shape, ray)
+
+          # The ray missed this shape, skip to the next one
+          !(intersection==nothing) || continue
+
+          # There was a hit, and it was closer than any other hit found before
+          ( (closest==nothing) || (intersection.t < closest.t) ) &&  (closest = intersection)
+     end
+
+     return closest
 end
