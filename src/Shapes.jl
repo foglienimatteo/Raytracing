@@ -89,3 +89,9 @@ function ray_intersection(sphere::Sphere, ray::Ray)
           ray
      )
 end
+
+"""Append a new shape to this world"""
+function add_shape(W::World, S::Shape)
+    push!(W, S)
+    return nothing
+end

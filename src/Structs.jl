@@ -131,3 +131,40 @@ struct Sphere <: Shape
     T::Transformation
     Sphere(T=Transformation()) = new(T)
 end
+
+"""
+A 2D vector used to represent a point on a surface
+    The fields are named `u` and `v` to distinguish them from the usual 3D coordinates `x`, `y`, `z`.
+"""
+struct Vec2D
+    u::Float64
+    v::Float64
+end
+
+"""
+    A struct holding information about a ray-shape intersection
+    The parameters defined in this struct are the following:
+    -   `world_point`: a :struct:`Point` object holding the world coordinates of the hit point
+    -   `normal`: a :struct:`Normal` object holding the orientation of the normal to the surface where the hit happened
+    -   `surface_point`: a :struct:`Vec2d` object holding the position of the hit point on the surface of the object
+    -   `t`: a floating-point value specifying the distance from the origin of the ray where the hit happened
+    -   `ray`: the ray that hit the surface
+    """
+struct HitRecord
+    world_point::Point # obserator frame sistem
+    normal::Normal
+    surface_point::Vec2D
+    t::Float4
+    ray::Ray
+end
+
+"""A class holding a list of shapes, which make a «world»
+    You can add shapes to a world using :meth:`.World.add`. Typically, you call
+    :meth:`.World.ray_intersection` to check whether a light ray intersects any
+    of the shapes in the world.
+    """
+struct World
+    shapes::Array{Shape}
+    World(s::Shape) = new(s)
+    World() = new(s::Array{Shape})
+end
