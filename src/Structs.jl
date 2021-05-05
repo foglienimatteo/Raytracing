@@ -158,7 +158,7 @@ struct HitRecord
     world_point::Point # obserator frame sistem
     normal::Normal
     surface_point::Vec2d
-    t::Float4
+    t::Float64
     ray::Ray
 end
 
