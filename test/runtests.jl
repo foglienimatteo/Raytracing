@@ -519,4 +519,5 @@ end
 	for row in tracer.img.height-1:-1:0, col in 0:tracer.img.width-1
 		@test Raytracing.get_pixel(img, col, row) == RGB{Float32}(1.0, 2.0, 3.0)
 	end
+
 end
