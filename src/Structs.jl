@@ -67,6 +67,10 @@ struct Vec
     Vec(P::Point) = new(P.x, P.y, P.z)
 end
 
+VEC_X = Vec(1.0, 0.0, 0.0)
+VEC_Y = Vec(0.0, 1.0, 0.0)
+VEC_Z = Vec(0.0, 0.0, 1.0)
+
 "Is a normalized vector, you can give three unnormalized components and this struct normalize them."
 struct Normal
     x::Float64

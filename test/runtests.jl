@@ -523,3 +523,82 @@ end
 	end
 
 end
+
+
+@testset "test_Sphere" begin
+
+    @testset "test_Hit" begin
+        	sphere = Sphere()
+        	ray1 = Ray(Point(0, 0, 2), -VEC_Z)
+
+        	intersection1 = ray_intersection(sphere, ray1)
+        	@test intersection1
+        	@test HitRecord(
+			Point(0.0, 0.0, 1.0), 
+			Normal(0.0, 0.0, 1.0), 
+			Vec2d(0.0, 0.0), 
+			1.0,
+			ray1
+			) ≈ intersection1
+
+        	ray2 = Ray( Point(3, 0, 0), -VEC_X )
+        	intersection2 = ray_intersection(sphere, ray2)
+        	@test intersection2
+        	@test HitRecord(
+			Point(1.0, 0.0, 0.0),
+			Normal(1.0, 0.0, 0.0),
+			Vec2d(0.0, 0.5),
+			2.0,
+			ray2
+			) ≈ intersection2
+		   
+		@test !( ray_intersection(sphere, Ray(Point(0, 10, 2), -VEC_Z ) ) )
+	end
+	
+	@testset "test_InnerHit" begin
+        	sphere = Sphere()
+
+        	ray = Ray(origin=Point(0, 0, 0), VEC_X)
+        	intersection = sphere.ray_intersection(ray)
+        	@test intersection
+	   	@test HitRecord(
+			Point(1.0, 0.0, 0.0),
+			Normal(-1.0, 0.0, 0.0),
+			Vec2d(0.0, 0.5),
+			1.0,
+			ray
+			) ≈ intersection
+	end
+
+    	@testset "test_Transformation" begin
+     	sphere = Sphere(translation(Vec(10.0, 0.0, 0.0)))
+
+     	ray1 = Ray(Point(10, 0, 2), -VEC_Z)
+		intersection1 = ray_intersection(sphere, ray1)
+		@test intersection1
+		@test HitRecord(
+			Point(10.0, 0.0, 1.0),
+			Normal(0.0, 0.0, 1.0),
+			Vec2d(0.0, 0.0),
+			1.0,
+			ray1
+        		) ≈ intersection1
+
+        	ray2 = Ray(Point(13, 0, 0), -VEC_X)
+        	intersection2 = ray_intersection(sphere, ray2)
+        	@test intersection2
+        	@test HitRecord(
+			Point(11.0, 0.0, 0.0),
+			Normal(1.0, 0.0, 0.0),
+			Vec2d(0.0, 0.5),
+			2.0,
+			ray2
+        		) ≈ intersection2
+
+        	# Check if the sphere failed to move by trying to hit the untransformed shape
+        	@test !( ray_intersection(sphere, Ray( Point(0, 0, 2), -VEC_Z ) ) )
+		   
+		# Check if the *inverse* transformation was wrongly applied
+		@test !( ray_intersection(sphere, Ray( Point(-10, 0, 0), -VEC_Z ) ) )
+	end
+end

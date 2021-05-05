@@ -26,7 +26,7 @@ import Base: write, read, print, println;
 import LinearAlgebra.:⋅; import LinearAlgebra.:×
 
 # from Structs.jl
-export HDRimage, Parameters, Point, Vec, Normal, Transformation
+export HDRimage, Parameters, Point, Vec, Normal,VEC_X, VEC_Y,VEC_Z, Transformation
 export Ray, OrthogonalCamera, PerspectiveCamera, ImageTracer
 # from Operations.jl
 export squared_norm, norm, normalize
@@ -46,6 +46,7 @@ include("ReadingWriting.jl")
 include("ToneMapping.jl")
 include("Transformations.jl")
 include("ImageTracer.jl")
+include("Shapes.jl")
 
 
 end  # module
