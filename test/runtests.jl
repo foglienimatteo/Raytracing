@@ -1,3 +1,20 @@
+# The MIT License (MIT)
+#
+# Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+# documentation files (the “Software”), to deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+# and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+# the Software. THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+# LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+# SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+# CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+# IN THE SOFTWARE.
+
+
 using Raytracing, Test, LinearAlgebra, StaticArrays
 import ColorTypes:RGB
 
@@ -148,7 +165,6 @@ end
 	@test_throws Raytracing.InvalidPfmFileFormat var = Raytracing.parse_img_size("2 -1")
 end
 
-
 @testset "test_read_float" begin
 	# creo matrice come test precedenti, ma con 1 byte in meno per testare errore a fine lettura
 	reference_bytes2 = IOBuffer([
@@ -207,6 +223,7 @@ end
 	for i in 1:18
 		Raytracing.read_float(reference_bytes2, -1.0)
 	end
+	
 	# errore nella lettura dell'ultimo byte: ne mancano 3 per fare un Float32
 	@test_throws Raytracing.InvalidPfmFileFormat var = Raytracing.read_float(reference_bytes2, -1.0)
 end
@@ -278,6 +295,13 @@ end
 	@test Raytracing.get_pixel(img, 0, 0).r >= 0 && Raytracing.get_pixel(img, 0, 0).r <= 1
 	@test Raytracing.get_pixel(img, 0, 0).g >= 0 && Raytracing.get_pixel(img, 0, 0).g <= 1
 	@test Raytracing.get_pixel(img, 0, 0).b >= 0 && Raytracing.get_pixel(img, 0, 0).b <= 1
+end
+
+@testset "test_γcorrection" begin
+	img = Raytracing.HDRimage(2, 3, [RGB(1.0, 2.0, 3.0), RGB(4.0, 5.0, 6.0), RGB(7.0, 8.0, 9.0), RGB(10.0, 11.0, 12.0), RGB(13.0, 14.0, 15.0), RGB(16.0, 17.0, 18.0)])
+	img2 = Raytracing.HDRimage(2, 3, [RGB(255., 360., 441.)/255., RGB(510., 570., 624.)/255., RGB(674., 721, 765.)/255., RGB(806., 845., 883.)/255., RGB(919., 954., 987.)/255., RGB(1020., 1051., 1081.)/255.])
+	Raytracing.γ_correction!(img, 2.0)	
+	@test img ≈ img2
 end
 
 @testset "test_geometry" begin
@@ -408,6 +432,92 @@ end
 		@test Raytracing.is_consistent(m1*m2)
 		@test m1*m2 ≈ Transformation()
 
+	end
+
+end
+
+@testset "test_Rays" begin
+    @testset "test_is_close" begin
+        	ray1 = Ray(Point(1.0, 2.0, 3.0), Vec(5.0, 4.0, -1.0))
+        	ray2 = Ray(Point(1.0, 2.0, 3.0), Vec(5.0, 4.0, -1.0))
+        	ray3 = Ray(Point(5.0, 1.0, 4.0), Vec(3.0, 9.0, 4.0))
+
+        	@test ray1 ≈ ray2
+        	@test !( ray1 ≈ ray3 )
+    end
+
+    @testset "test_at" begin
+     	ray = Ray(Point(1.0, 2.0, 4.0),Vec(4.0, 2.0, 1.0))
+
+     	@test at(ray, 0.0) ≈ ray.origin
+		@test at(ray, 1.0) ≈ Point(5.0, 4.0, 5.0)
+		@test at(ray, 2.0) ≈ Point(9.0, 6.0, 6.0)  
+    end
+
+    @testset "test_transform" begin
+        	ray = Ray(Point(1.0, 2.0, 3.0), Vec(6.0, 5.0, 4.0))
+        	T = translation(Vec(10.0, 11.0, 12.0)) * rotation_x(π/2)
+        	transformed = T*ray
+
+     	@test transformed.origin ≈ Point(11.0, 8.0, 14.0)
+        	@test transformed.dir ≈ Vec(6.0, -4.0, 5.0)
+    end
+end
+
+@testset "test_Camera" begin
+
+	@testset "test_OrthogonalCamera" begin
+    		cam = OrthogonalCamera(2.0)
+		ray1 = fire_ray(cam, 0.0, 0.0)
+		ray2 = fire_ray(cam, 1.0, 0.0)
+		ray3 = fire_ray(cam, 0.0, 1.0)
+		ray4 = fire_ray(cam, 1.0, 1.0)
+
+    		# Verify that the rays are parallel by verifying that cross-products vanish
+		@test 0.0 ≈ squared_norm(ray1.dir × ray2.dir)
+    		@test 0.0 ≈ squared_norm(ray1.dir × ray3.dir)
+    		@test 0.0 ≈ squared_norm(ray1.dir × ray4.dir)
+
+    		# Verify that the ray hitting the corners have the right coordinates
+		@test at(ray1, 1.0) ≈ Point(0.0, 2.0, -1.0)
+		@test at(ray2, 1.0) ≈ Point(0.0, -2.0, -1.0)
+		@test at(ray3, 1.0) ≈ Point(0.0, 2.0, 1.0)
+	end
+
+	@testset "test_PerspectiveCamera" begin
+		cam = PerspectiveCamera(1.0, 2.0)
+		ray1 = fire_ray(cam, 0.0, 0.0)
+		ray2 = fire_ray(cam, 1.0, 0.0)
+		ray3 = fire_ray(cam, 0.0, 1.0)
+		ray4 = fire_ray(cam, 1.0, 1.0)
+
+		# Verify that all the rays depart from the same point
+		@test ray1.origin ≈ ray2.origin
+		@test ray1.origin ≈ ray3.origin
+		@test ray1.origin ≈ ray4.origin
+
+    		# Verify that the ray hitting the corners have the right coordinates
+		@test at(ray1, 1.0) ≈ Point(0.0, 2.0, -1.0)
+		@test at(ray2, 1.0) ≈ Point(0.0, -2.0, -1.0)
+		@test at(ray3, 1.0) ≈ Point(0.0, 2.0, 1.0)
+		@test at(ray4, 1.0) ≈ Point(0.0, -2.0, 1.0)
+	end
+
+end
+
+@testset "test_ImageTracer" begin
+	img = HDRimage(4, 2)
+	Pcam = PerspectiveCamera(2)
+	tracer = ImageTracer(img, Pcam)
+
+	r1 = fire_ray(tracer, 0, 0, 2.5, 1.5)
+	r2 = fire_ray(tracer, 2, 1)
+	@test r1 ≈ r2
+
+	fire_all_rays!(tracer, x->RGB{Float32}(1.0, 2.0, 3.0))
+
+	for row in tracer.img.height-1:-1:0, col in 0:tracer.img.width-1
+		@test Raytracing.get_pixel(img, col, row) == RGB{Float32}(1.0, 2.0, 3.0)
 	end
 
 end
