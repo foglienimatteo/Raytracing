@@ -17,6 +17,9 @@
 # IN THE SOFTWARE.
 
 
+BLACK = RGB{Float32}(0.0, 0.0, 0.0)
+WHITE = RGB{Float32}(1.0, 1.0, 1.0)
+
 """ This type defines a image in format HDR; has three members:
     - width
     - height
@@ -170,5 +173,5 @@ end
 struct World
     shapes::Array{Shape}
     World(s::Shape) = new(s)
-    World() = new(s::Array{Shape})
+    World() = new( Array{Shape,1}() )
 end
