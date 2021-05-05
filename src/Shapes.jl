@@ -65,12 +65,12 @@ function ray_intersection(sphere::Sphere, ray::Ray)
      a = squared_norm(inv_ray.dir)
      b = 2.0 * origin_vec * inv_ray.dir
      c = squared_norm(origin_vec) - 1.0
-     delta = b * b - 4.0 * a * c
+     Δ = b * b - 4.0 * a * c
      
-     (delta > 0.0) || (return nothing)
+     (Δ > 0.0) || (return nothing)
 
-     tmin = (-b - √delta) / (2.0 * a)
-     tmax = (-b + √delta) / (2.0 * a)
+     tmin = (-b - √Δ) / (2.0 * a)
+     tmax = (-b + √Δ) / (2.0 * a)
 
      if (tmin > inv_ray.tmin) && (tmin < inv_ray.tmax)
           first_hit_t = tmin

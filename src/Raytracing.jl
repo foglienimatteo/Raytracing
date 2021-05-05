@@ -38,6 +38,8 @@ export normalize_image!,  clamp_image!, γ_correction!, get_matrix
 export rotation_x, rotation_y, rotation_z, scaling, translation, inverse
 # from ImageTracer.jl
 export at, fire_ray, fire_all_rays!
+# from Shapes.jl
+export ray_intersection, sphere_point_to_uv, sphere_normal, add_shape
 
 include("Structs.jl")
 include("Operations.jl")
@@ -46,6 +48,7 @@ include("ReadingWriting.jl")
 include("ToneMapping.jl")
 include("Transformations.jl")
 include("ImageTracer.jl")
+include("Shapes.jl")
 
 
 end  # module

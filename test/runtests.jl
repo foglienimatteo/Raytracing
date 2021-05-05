@@ -523,3 +523,16 @@ end
 	end
 
 end
+
+@testset "test_Vec2D" begin
+	v1 = Vec2d(5.2 + 1e-11, 6.3)
+	v2 = Vec2d(5.2, 6.3 - (2*1e-11))
+	@test v1 ≈ v2
+end
+
+@testset "test_InnerHit" begin
+	sphere = Sphere()
+	ray = Ray(Point(0, 0, 0), Vec(1., 0., 0.))
+	intersection = ray_intersection(sphere, ray)
+	@test intersection ≈ HitRecord(Point(1.0, 0.0, 0.0), Normal(-1.0, 0.0, 0.0), Vec2d(0.0, 0.5), 1.0, ray)
+end
