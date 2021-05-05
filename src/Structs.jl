@@ -64,6 +64,7 @@ struct Vec
     z::Float64
     Vec(x, y, z) = new(x, y, z)
     Vec()=new(0.0, 0.0, 0.0)
+    Vec(P::Point) = new(P.x, P.y, P.z)
 end
 
 "Is a normalized vector, you can give three unnormalized components and this struct normalize them."
@@ -119,4 +120,14 @@ end
 struct ImageTracer
     img::HDRimage
     cam::Camera
+end
+
+abstract type Shape end
+
+"""
+A 3D unit sphere centered on the origin of the axes
+"""
+struct Sphere <: Shape
+    T::Transformation
+    Sphere(T=Transformation()) = new(T)
 end
