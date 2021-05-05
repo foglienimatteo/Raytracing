@@ -16,36 +16,3 @@
 # CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
-
-module Raytracing
-
-using Colors, LinearAlgebra, StaticArrays
-using ColorTypes:RGB
-import Base.:+; import Base.:-; import Base.:≈; import Base.:/; import Base.:*
-import Base: write, read, print, println;
-import LinearAlgebra.:⋅; import LinearAlgebra.:×
-
-# from Structs.jl
-export HDRimage, Parameters, Point, Vec, Normal, Transformation
-export Ray, OrthogonalCamera, PerspectiveCamera, ImageTracer
-# from Operations.jl
-export squared_norm, norm, normalize
-# from ReadingWriting.jl
-export parse_command_line
-# from ToneMapping.jl
-export normalize_image!,  clamp_image!, γ_correction!, get_matrix
-# from Transformations.jl
-export rotation_x, rotation_y, rotation_z, scaling, translation, inverse
-# from ImageTracer.jl
-export at, fire_ray, fire_all_rays!
-
-include("Structs.jl")
-include("Operations.jl")
-include("PrintFunctions.jl")
-include("ReadingWriting.jl")
-include("ToneMapping.jl")
-include("Transformations.jl")
-include("ImageTracer.jl")
-
-
-end  # module
