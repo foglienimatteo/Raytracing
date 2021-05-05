@@ -83,7 +83,7 @@ function read_float(io::IO, ess::Float64)
     # controllo che in ingresso abbia una stringa che sia cnovertibile in Float32
     ess == 1.0 || ess == -1.0 || throw(InvalidPfmFileFormat("endianness $ess not acceptable."))
     try
-        value = read(io, Float32)   # con Float32 leggo già i 4 byte del colore
+        value = read(io, Float32)   # con Float32 leggo già i 4 byte (= 32 bits) del colore
         ess == 1.0 ? value = ntoh(value) : value = ltoh(value) # converto nell'endianness utilizzata dalla macchina
         return value
     catch e
@@ -113,25 +113,25 @@ end # read_line
     - read_float(::IO, ::Float64)"""
 function read(io::IO, ::Type{HDRimage})
     magic = read_line(io)
-    # lettura numero magico
+    # reading magic number
     magic == "PF" || throw(InvalidPfmFileFormat("invalid magic number in PFM file: $(magic) instead of 'PF'.\n"))
     
-    # lettura dimensioni immagine
+    # reading image dimension
     img_size = read_line(io)
     typeof(parse_img_size(img_size)) == Tuple{Int,Int} || throw(InvalidPfmFileFormat("invalid img size in PFM file: $(parse_img_size(img_size)) is $( typeof(parse_img_size(img_size)) ) instead of 'Tuple{UInt,UInt}'.\n"))
     (width, height) = parse_img_size(img_size)
     
-    #lettura endianness
+    # reading endianness
     ess_line = read_line(io)
     parse_endianness(ess_line) == 1.0 || parse_endianness(ess_line)== -1.0 || throw(InvalidPfmFileFormat("invalid endianness in PFM file: $(parse_endianness(ess_line)) instead of +1.0 or -1.0.\n"))
     endianness = parse_endianness(ess_line)
 
-    # lettura e assegnazione matrice coloti
+    # reading and writing color matrix (HDRimage.rgb_m)
     result = HDRimage(width, height)
     for y in height-1:-1:0, x in 0:width-1
 
-        (r,g,b) = [read_float(io, endianness) for i in 0:2]
-        set_pixel(result, x, y, RGB(r,g,b) )
+        (r, g, b) = [read_float(io, endianness) for i in 0:2]
+        set_pixel(result, x, y, RGB(r, g, b) )
     end
 
     return result
@@ -174,4 +174,4 @@ function parse_command_line(args)
     end
 
     return infile, outfile, a, γ
-end
+end # parse_command_line(ARGS)

@@ -61,18 +61,33 @@ function γ_correction!(img::HDRimage, γ::Float64=1.0, k::Float64=1.)
         cur_color = get_pixel(img, x, y)
         T = typeof(cur_color).parameters[1]
         new_col = RGB{T}( floor(255 * cur_color.r^(1/γ) ), floor(255 * cur_color.g^(1/γ)), floor(255 * cur_color.b^(1/γ)) )
+<<<<<<< HEAD
         set_pixel(img, x,y, k/255.0*new_col)
     end
     nothing
 end
+=======
+        set_pixel(img, x, y, k/255.0*new_col)
+    end
+    nothing
+end # γ_correction!
+>>>>>>> cameras
 
 function overturn(m::Matrix{T}) where T
     m = permutedims(m)
     #m = reverse(m, dims=1)
     return m
+<<<<<<< HEAD
 end
+=======
+end # overturn
+>>>>>>> cameras
 
 function get_matrix(img::HDRimage)
     m = reshape(img.rgb_m, (img.width,img.height))
     return overturn(m)
+<<<<<<< HEAD
 end
+=======
+end # get_matrix
+>>>>>>> cameras

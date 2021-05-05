@@ -34,7 +34,11 @@ function fire_ray(Ocam::OrthogonalCamera, u, v)
     origin = Point(-1.0, (1.0 - 2 * u) * Ocam.a, 2 * v - 1)
     direction = Vec(1.0, 0.0, 0.0)
     return Ocam.T*Ray(origin, direction, 1.0)
+<<<<<<< HEAD
 end
+=======
+end # fire_ray
+>>>>>>> cameras
 
 """Shoot a ray through the camera's screen
         The coordinates (u, v) specify the point on the screen where the ray crosses it. Coordinates (0, 0) represent
@@ -52,7 +56,11 @@ function fire_ray(Pcam::PerspectiveCamera, u, v)
     origin = Point(-Pcam.d, 0.0, 0.0)
     direction = Vec(Pcam.d, (1.0 - 2 * u) * Pcam.a, 2 * v - 1)
     return Pcam.T*Ray(origin, direction, 1.0)
+<<<<<<< HEAD
 end
+=======
+end # fire_ray
+>>>>>>> cameras
 
 """Give a ::Ray that goes through a pixel; you can set a position "inside" the pixel (u, v), as default it's in its center"""
 function fire_ray(ImTr::ImageTracer, col::Int64, row::Int64, u_px::Float64=0.5, v_px::Float64=0.5)
@@ -69,4 +77,8 @@ function fire_all_rays!(ImTr::ImageTracer, func::Function)
         set_pixel(ImTr.img, col, row, color)
     end
     nothing
+<<<<<<< HEAD
 end
+=======
+end # fire_all_rays!
+>>>>>>> cameras
