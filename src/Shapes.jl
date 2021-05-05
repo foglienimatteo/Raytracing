@@ -89,7 +89,7 @@ function ray_intersection(sphere::Sphere, ray::Ray)
      hit_point = at(inv_ray, first_hit_t)
      return HitRecord(
           sphere.T * hit_point,
-          sphere.T * sphere_normal(hit_point, ray.dir),
+          sphere.T * sphere_normal(hit_point, inv_ray.dir),
           sphere_point_to_uv(hit_point),
           first_hit_t,
           ray
