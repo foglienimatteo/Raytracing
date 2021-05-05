@@ -449,29 +449,28 @@ end
 
 	@testset "test_Rays" begin
 		@testset "test_is_close" begin
-				ray1 = Ray(Point(1.0, 2.0, 3.0), Vec(5.0, 4.0, -1.0))
-				ray2 = Ray(Point(1.0, 2.0, 3.0), Vec(5.0, 4.0, -1.0))
-				ray3 = Ray(Point(5.0, 1.0, 4.0), Vec(3.0, 9.0, 4.0))
+			ray1 = Ray(Point(1.0, 2.0, 3.0), Vec(5.0, 4.0, -1.0))
+			ray2 = Ray(Point(1.0, 2.0, 3.0), Vec(5.0, 4.0, -1.0))
+			ray3 = Ray(Point(5.0, 1.0, 4.0), Vec(3.0, 9.0, 4.0))
 
-				@test ray1 ≈ ray2
-				@test !( ray1 ≈ ray3 )
+			@test ray1 ≈ ray2
+			@test !( ray1 ≈ ray3 )
 		end
 
 		@testset "test_at" begin
-				ray = Ray(Point(1.0, 2.0, 4.0),Vec(4.0, 2.0, 1.0))
-
-				@test at(ray, 0.0) ≈ ray.origin
-				@test at(ray, 1.0) ≈ Point(5.0, 4.0, 5.0)
-				@test at(ray, 2.0) ≈ Point(9.0, 6.0, 6.0)  
+			ray = Ray(Point(1.0, 2.0, 4.0),Vec(4.0, 2.0, 1.0))
+			@test at(ray, 0.0) ≈ ray.origin
+			@test at(ray, 1.0) ≈ Point(5.0, 4.0, 5.0)
+			@test at(ray, 2.0) ≈ Point(9.0, 6.0, 6.0)  
 		end
 
 		@testset "test_transform" begin
-				ray = Ray(Point(1.0, 2.0, 3.0), Vec(6.0, 5.0, 4.0))
-				T = translation(Vec(10.0, 11.0, 12.0)) * rotation_x(π/2)
-				transformed = T*ray
+			ray = Ray(Point(1.0, 2.0, 3.0), Vec(6.0, 5.0, 4.0))
+			T = translation(Vec(10.0, 11.0, 12.0)) * rotation_x(π/2)
+			transformed = T*ray
 
-				@test transformed.origin ≈ Point(11.0, 8.0, 14.0)
-				@test transformed.dir ≈ Vec(6.0, -4.0, 5.0)
+			@test transformed.origin ≈ Point(11.0, 8.0, 14.0)
+			@test transformed.dir ≈ Vec(6.0, -4.0, 5.0)
 		end
 	end
 
@@ -517,18 +516,34 @@ end
 	end
 
 	@testset "test_ImageTracer" begin
-		img = HDRimage(4, 2)
-		Pcam = PerspectiveCamera(2)
-		tracer = ImageTracer(img, Pcam)
+		
+		@testset "test_uv_sub_mapping" begin
+			img = HDRimage(4, 2)
+			Pcam = PerspectiveCamera(2)
+			tracer = ImageTracer(img, Pcam)
+			r1 = fire_ray(tracer, 0, 0, 2.5, 1.5)
+			r2 = fire_ray(tracer, 2, 1)
+			@test r1 ≈ r2
+		end
 
-		r1 = fire_ray(tracer, 0, 0, 2.5, 1.5)
-		r2 = fire_ray(tracer, 2, 1)
-		@test r1 ≈ r2
+		@testset "test_orientation" begin
+			img = HDRimage(4, 2)
+			Pcam = PerspectiveCamera(2)
+			tracer = ImageTracer(img, Pcam)
+			tl_r = fire_ray(tracer, 0, 0, 0., 0.)
+			br_r = fire_ray(tracer, 3, 1, 1.0, 1.0)
+			@test Point(0., 2., 1.) ≈ at(tl_r, 1.)
+			@test Point(0., -2., -1.) ≈ at(br_r, 1.)
+		end
 
-		fire_all_rays!(tracer, x->RGB{Float32}(1.0, 2.0, 3.0))
-
-		for row in tracer.img.height-1:-1:0, col in 0:tracer.img.width-1
-			@test Raytracing.get_pixel(img, col, row) == RGB{Float32}(1.0, 2.0, 3.0)
+		@testset "test_image_coverage" begin
+			img = HDRimage(4, 2)
+			Pcam = PerspectiveCamera(2)
+			tracer = ImageTracer(img, Pcam)
+			fire_all_rays!(tracer, x->RGB{Float32}(1.0, 2.0, 3.0))
+			for row in tracer.img.height-1:-1:0, col in 0:tracer.img.width-1
+				@test Raytracing.get_pixel(img, col, row) == RGB{Float32}(1.0, 2.0, 3.0)
+			end
 		end
 
 	end
