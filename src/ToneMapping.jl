@@ -18,10 +18,10 @@
 
 
 """Gives the best average luminosity of a Pixel.
-    As input needs a ::RGB{T} and returns a ::Float64."""
+    As input needs a `::RGB{T}` and returns a `::Float64`."""
 luminosity(c::RGB{T}) where {T} = (max(c.r, c.g, c.b) + min(c.r, c.g, c.b))/2.
 
-"""Calculates the average luminosity of an ::HDRimage."""
+"""Calculates the average luminosity of an `::HDRimage`."""
 function avg_lum(img::HDRimage, δ::Number=1e-10)
     cumsum=0.0
     for pix in img.rgb_m
@@ -40,7 +40,7 @@ end # normalize_image
 """Execute: x → x/(x+1)"""
 clamp(x::Number) = x/(x+1)
 
-"""Compress the RGB components of a ::HDRimage in the range [0.0; 1.0]."""
+"""Compress the RGB components of a ::HDRimage in the range [0.0, 1.0]."""
 function clamp_image!(img::HDRimage)
     h=img.height
     w=img.width
@@ -55,7 +55,7 @@ end # clamp_image
 
 """Corrects the image using the γ factor, assuming a potential dependence between the input and putput signals of a monitor/screen.
    As third optional argument, you can pass the maximum value 'k' of the range you want the RGB colors may have.
-   The default value is 'k=1.0', so the range RGB colors can span is '[0.0,1.0]' """
+   The default value is 'k=1.0', so the range RGB colors can span is '[0.0, 1.0]' """
 function γ_correction!(img::HDRimage, γ::Float64=1.0, k::Float64=1.)
     h=img.height
     w=img.width

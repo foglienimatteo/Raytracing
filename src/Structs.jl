@@ -16,7 +16,8 @@
 # CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
-#include("src/Raytracing.jl")
+#using Raytracing
+#include("../src/Raytracing.jl")
 
 BLACK = RGB{Float32}(0.0, 0.0, 0.0)
 WHITE = RGB{Float32}(1.0, 1.0, 1.0)
@@ -35,7 +36,6 @@ struct HDRimage
     width::Int64
     height::Int64
     rgb_m::Array{RGB{Float32}}
-
     HDRimage(w,h) = new(w,h, fill(RGB(0.0, 0.0, 0.0), (w*h,)) )
     function HDRimage(w,h, rgb_m) 
         @assert size(rgb_m) == (w*h,)
@@ -104,8 +104,8 @@ struct Transformation
 end
 
 """A ::Ray creates a system along with a
-   direction (dir::Vec) starting from an
-   origin (origin::Point).
+   direction (dir`::Vec`) starting from an
+   origin (origin`::Point`).
 """
 struct Ray
     origin::Point
@@ -118,16 +118,23 @@ end
 
 abstract type Camera end
 
-"""Implements the point of view of an observator, in the negative part of the x-axis; used for orthogonal projection.
-   Needs only the aspect ratio a (by default a=1.0) of the screen(/image) and possible transformation. """
+"""Implements the point of view of an observator, in the
+   negative part of the x-axis; used for orthogonal projection.
+   Needs only the aspect ratio a (by default a=1.0) of the
+   screen(/image) and possible transformation.
+"""
 struct OrthogonalCamera <: Camera
     a::Float64 # aspect ratio
     T::Transformation
     OrthogonalCamera(a=1., T=Transformation()) = new(a, T)
 end 
 
-"""Implements the point of view of an observator, in the negative part of the x-axis (-d, 0, 0); used for perspective projection.
-   Needs the aspect ratio a (by default a=1.0) of the screen(/image), distance d from it and possible transformation. """
+"""Implements the point of view of an observator, in the
+   negative part of the x-axis (-d, 0, 0); used for perspective
+   projection.
+   Needs the aspect ratio a (by default a=1.0) of the screen(/image),
+   distance d from it and possible transformation.
+"""
 struct PerspectiveCamera <: Camera
     d::Float64 # distance from the screen
     a::Float64 # aspect ratio
@@ -135,7 +142,7 @@ struct PerspectiveCamera <: Camera
     PerspectiveCamera(d=1., a=1., T=Transformation()) = new(d, a, T)
 end 
 
-"""Used for implement the "screen": has a ::HDRimage and a ::Camera."""
+"""Used for implement the "screen": has a `HDRimage` and a `Camera`."""
 struct ImageTracer
     img::HDRimage
     cam::Camera
@@ -152,8 +159,9 @@ struct Sphere <: Shape
 end
 
 """
-A 2D vector used to represent a point on a surface
-    The fields are named `u` and `v` to distinguish them from the usual 3D coordinates `x`, `y`, `z`.
+    A 2D vector used to represent a point on a surface.
+    The fields are named `u` and `v` to distinguish them
+    from the usual 3D coordinates `x`, `y`, `z`.
 """
 struct Vec2d
     u::Float64
@@ -163,12 +171,16 @@ end
 """
     A struct holding information about a ray-shape intersection
     The parameters defined in this struct are the following:
-    -   `world_point`: a :struct:`Point` object holding the world coordinates of the hit point
-    -   `normal`: a :struct:`Normal` object holding the orientation of the normal to the surface where the hit happened
-    -   `surface_point`: a :struct:`Vec2d` object holding the position of the hit point on the surface of the object
-    -   `t`: a floating-point value specifying the distance from the origin of the ray where the hit happened
+    -   `world_point`: a :struct:`Point` object holding the world
+         coordinates of the hit point
+    -   `normal`: a :struct:`Normal` object holding the orientation
+        of the normal to the surface where the hit happened
+    -   `surface_point`: a :struct:`Vec2d` object holding the position
+        of the hit point on the surface of the object
+    -   `t`: a floating-point value specifying the distance from the
+        origin of the ray where the hit happened
     -   `ray`: the ray that hit the surface
-    """
+"""
 struct HitRecord
     world_point::Point # obserator frame sistem
     normal::Normal
@@ -178,9 +190,10 @@ struct HitRecord
 end
 
 """A class holding a list of shapes, which make a «world»
-    You can add shapes to a world using :meth:`.World.add`. Typically, you call
-    :meth:`.World.ray_intersection` to check whether a light ray intersects any
-    of the shapes in the world.
+    You can add shapes to a world using `.World.add`.
+    Typically, you call `.World.ray_intersection`
+    to check whether a light ray intersects any of the
+    shapes in the world.
     """
 struct World
     shapes::Array{Shape}

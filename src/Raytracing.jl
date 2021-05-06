@@ -43,6 +43,7 @@ export at, fire_ray, fire_all_rays!
 # from Shapes.jl
 export ray_intersection, sphere_point_to_uv, sphere_normal, add_shape
 
+
 include("Structs.jl")
 include("Operations.jl")
 include("PrintFunctions.jl")

@@ -21,9 +21,7 @@
 Compute the intersection between a ray and this shape
 """
 function ray_intersection(shape::Shape, ray::Ray)
-     return ErrorException(
-          "ray_intersection is an abstract method and cannot be called directly"
-     )
+     return ErrorException("ray_intersection is an abstract method and cannot be called directly")
 end
 
 """
@@ -31,14 +29,14 @@ end
 Convert a 3D point on the surface of the unit sphere into a (u, v) 2D point
 """
 function sphere_point_to_uv(point::Point)
-     u = acos(point.z) / π
+    u = acos(point.z) / π
 
-     if (point.y == 0.0) || (point.x == 0.)
-          v = 0.
-     else
-          v = tan(point.y/point.x) / (2.0 * π)
-     end
-
+    if (point.y == 0.0) || (point.x == 0.)
+        v = 0.
+    else
+        v = tan(point.y/point.x) / (2.0 * π)
+    end
+    
     return Vec2d(u,v)
 end
 
@@ -65,35 +63,35 @@ Checks if a ray intersects the sphere
 Return a `HitRecord`, or `nothing` if no intersection was found.
 """
 function ray_intersection(sphere::Sphere, ray::Ray)
-     inv_ray = inverse(sphere.T) * ray
-     origin_vec = Vec(inv_ray.origin)
+    inv_ray = inverse(sphere.T) * ray
+    origin_vec = Vec(inv_ray.origin)
 
-     a = squared_norm(inv_ray.dir)
-     b = 2.0 * origin_vec ⋅ inv_ray.dir
-     c = squared_norm(origin_vec) - 1.0
-     Δ = b * b - 4.0 * a * c
+    a = squared_norm(inv_ray.dir)
+    b = 2.0 * origin_vec ⋅ inv_ray.dir
+    c = squared_norm(origin_vec) - 1.0
+    Δ = b * b - 4.0 * a * c
      
-     (Δ > 0.0) || (return nothing)
+    (Δ > 0.0) || (return nothing)
 
-     tmin = (-b - √Δ) / (2.0 * a)
-     tmax = (-b + √Δ) / (2.0 * a)
+    tmin = (-b - √Δ) / (2.0 * a)
+    tmax = (-b + √Δ) / (2.0 * a)
 
-     if (tmin > inv_ray.tmin) && (tmin < inv_ray.tmax)
-          first_hit_t = tmin
-     elseif (tmax > inv_ray.tmin) && (tmax < inv_ray.tmax)
-          first_hit_t = tmax
-     else
-          return nothing
-     end
+    if (tmin > inv_ray.tmin) && (tmin < inv_ray.tmax)
+        first_hit_t = tmin
+    elseif (tmax > inv_ray.tmin) && (tmax < inv_ray.tmax)
+        first_hit_t = tmax
+    else
+        return nothing
+    end
 
-     hit_point = at(inv_ray, first_hit_t)
-     return HitRecord(
-          sphere.T * hit_point,
-          sphere.T * sphere_normal(hit_point, inv_ray.dir),
-          sphere_point_to_uv(hit_point),
-          first_hit_t,
-          ray
-     )
+    hit_point = at(inv_ray, first_hit_t)
+    return HitRecord(
+        sphere.T * hit_point,
+        sphere.T * sphere_normal(hit_point, inv_ray.dir),
+        sphere_point_to_uv(hit_point),
+        first_hit_t,
+        ray
+    )
 end
 
 """
@@ -107,17 +105,17 @@ end
 Determine whether a ray intersects any of the objects in this world
 """
 function ray_intersection(world::World, ray::Ray)
-     closest = nothing
+    closest = nothing
 
-     for shape in world.shapes
-          intersection = ray_intersection(shape, ray)
+    for shape in world.shapes
+        intersection = ray_intersection(shape, ray)
 
-          # The ray missed this shape, skip to the next one
-          !(intersection==nothing) || continue
+        # The ray missed this shape, skip to the next one
+        !(intersection==nothing) || continue
 
-          # There was a hit, and it was closer than any other hit found before
-          ( (closest==nothing) || (intersection.t < closest.t) ) &&  (closest = intersection)
-     end
-
-     return closest
+        # There was a hit, and it was closer than any other hit found before
+        ( (closest==nothing) || (intersection.t < closest.t) ) &&  (closest = intersection)
+    end
+    
+    return closest
 end

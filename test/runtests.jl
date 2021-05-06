@@ -19,6 +19,7 @@
 
 using Raytracing, Test, LinearAlgebra, StaticArrays
 import ColorTypes:RGB
+include("../src/Raytracing.jl")
 
 @testset "test_RGB" begin
 	@test 1+1==2
@@ -322,7 +323,7 @@ end
 			a = Vec(1.0, 2.0, 3.0)
 			b = Vec(4.0, 6.0, 8.0)
 
-			@test a ≈ Vec(1.0, 2.0, 3.0 + err)
+			@test a ≈ Raytracing.Vec(1.0, 2.0, 3.0 + err)
 			@test (a + b) ≈ Vec(5.0, 8.0 + 3*err, 11.0)
 			@test (b - a) ≈ Vec(3.0, 4.0 - 2*err, 5.0)
 			@test (a * 2) ≈ Vec(2.0, 4.0 + 2*err, 6.0 - err)

@@ -24,6 +24,7 @@ using Colors, Images, ImageIO
 using ColorTypes:RGB
 using Raytracing
 
+include("src/Raytracing.jl")
 
 function main(args)
 	if isempty(args) || length(args)==1 || length(args)>4
@@ -55,9 +56,9 @@ function main(args)
 
 	normalize_image!(img, parameters.a)
 	clamp_image!(img)
-	γ_correction!(img, parameters.γ)
+	Raytracing.γ_correction!(img, parameters.γ)
 	println(img, 3)
-
+	
 	matrix = get_matrix(img)
 	Images.save(parameters.outfile, matrix)
 	#Images.save(Images.File(PNG,parameters.outfile), img.rgb_m)
