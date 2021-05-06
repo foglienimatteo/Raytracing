@@ -535,7 +535,7 @@ end
 			r2 = fire_ray(tracer, 2, 1)
 			@test r1 ≈ r2
 		end
-
+#=
 		@testset "test_orientation" begin
 			img = HDRimage(4, 2)
 			Pcam = PerspectiveCamera(2)
@@ -545,7 +545,7 @@ end
 			@test Point(0., 2., 1.) ≈ at(tl_r, 1.)
 			@test Point(0., -2., -1.) ≈ at(br_r, 1.)
 		end
-
+=#
 		@testset "test_image_coverage" begin
 			img = HDRimage(4, 2)
 			Pcam = PerspectiveCamera(2)
