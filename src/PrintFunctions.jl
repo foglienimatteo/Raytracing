@@ -49,3 +49,9 @@ function println(img::HDRimage, n::Int64=5)
      end
      nothing
 end
+
+function println(io::IO, ray::Ray)
+     print("Ray with origin and direction: \t")
+     print(ray.origin)
+     print(ray.dir)
+end
