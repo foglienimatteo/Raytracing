@@ -20,7 +20,7 @@
 
 using Raytracing, Test, LinearAlgebra, StaticArrays
 import ColorTypes:RGB
-include("../src/Raytracing.jl")
+#include("../src/Raytracing.jl")
 
 ##########################################################################################92
 
@@ -332,7 +332,7 @@ end
 			a = Vec(1.0, 2.0, 3.0)
 			b = Vec(4.0, 6.0, 8.0)
 
-			@test a ≈ Raytracing.Vec(1.0, 2.0, 3.0 + err)
+			@test a ≈ Vec(1.0, 2.0, 3.0 + err)
 			@test (a + b) ≈ Vec(5.0, 8.0 + 3*err, 11.0)
 			@test (b - a) ≈ Vec(3.0, 4.0 - 2*err, 5.0)
 			@test (a * 2) ≈ Vec(2.0, 4.0 + 2*err, 6.0 - err)
@@ -529,7 +529,7 @@ end
 		
 		@testset "test_uv_sub_mapping" begin
 			img = HDRimage(4, 2)
-			Pcam = PerspectiveCamera(2)
+			Pcam = PerspectiveCamera(1., 2.)
 			tracer = ImageTracer(img, Pcam)
 			r1 = fire_ray(tracer, 0, 0, 2.5, 1.5)
 			r2 = fire_ray(tracer, 2, 1)
@@ -538,17 +538,19 @@ end
 
 		@testset "test_orientation" begin
 			img = HDRimage(4, 2)
-			Pcam = PerspectiveCamera(2)
+			Pcam = PerspectiveCamera(1., 2.)
 			tracer = ImageTracer(img, Pcam)
-			tl_r = fire_ray(tracer, 0, 0, 0., 0.)
+
+			bl_r = fire_ray(tracer, 0, 0, 0., 0.)
+			@test Point(0., 2., 1.) ≈ at(bl_r, 1.)
+
 			br_r = fire_ray(tracer, 3, 1, 1.0, 1.0)
-			@test Point(0., 2., 1.) ≈ at(tl_r, 1.)
 			@test Point(0., -2., -1.) ≈ at(br_r, 1.)
 		end
 
 		@testset "test_image_coverage" begin
 			img = HDRimage(4, 2)
-			Pcam = PerspectiveCamera(2)
+			Pcam = PerspectiveCamera(1., 2.)
 			tracer = ImageTracer(img, Pcam)
 			fire_all_rays!(tracer, x->RGB{Float32}(1.0, 2.0, 3.0))
 			for row in tracer.img.height-1:-1:0, col in 0:tracer.img.width-1

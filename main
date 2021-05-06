@@ -24,7 +24,7 @@ using Colors, Images, ImageIO
 using ColorTypes:RGB
 using Raytracing
 
-include("src/Raytracing.jl")
+# include("src/Raytracing.jl")
 
 function main(args)
 	if isempty(args) || length(args)==1 || length(args)>4
