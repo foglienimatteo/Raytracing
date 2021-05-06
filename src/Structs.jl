@@ -16,6 +16,7 @@
 # CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
+#include("src/Raytracing.jl")
 
 BLACK = RGB{Float32}(0.0, 0.0, 0.0)
 WHITE = RGB{Float32}(1.0, 1.0, 1.0)
@@ -23,10 +24,13 @@ WHITE = RGB{Float32}(1.0, 1.0, 1.0)
 """ This type defines a image in format HDR; has three members:
     - width
     - height
-    - array containing RGB color, it's a 2linearized" matrix; the first element is the one in the bottom-left of the matrix, then the line is read left-to-right and going to the upper row.
+    - array containing RGB color, it's a 2linearized" matrix; the first
+      element is the one in the bottom-left of the matrix, then the line
+      is read left-to-right and going to the upper row.
     Has two constructors:
     - HDRimage(width, height)
-    - HDRimage(width, height, RGB-array)"""
+    - HDRimage(width, height, RGB-array)
+"""
 struct HDRimage
     width::Int64
     height::Int64
@@ -44,7 +48,7 @@ end # HDRimage
     - output file name (must be a .png)
     - parameter a for (optional)
     - parameter γ for screen correction (optional)
-    """
+"""
 struct Parameters
     infile::String
     outfile::String
@@ -70,11 +74,13 @@ struct Vec
     Vec(P::Point) = new(P.x, P.y, P.z)
 end
 
-VEC_X = Vec(1.0, 0.0, 0.0)
-VEC_Y = Vec(0.0, 1.0, 0.0)
-VEC_Z = Vec(0.0, 0.0, 1.0)
+VEC_X = Vec(1.0, 0.0, 0.0) # ̂x
+VEC_Y = Vec(0.0, 1.0, 0.0) # ̂y
+VEC_Z = Vec(0.0, 0.0, 1.0) # ̂z
 
-"Is a normalized vector, you can give three unnormalized components and this struct normalize them."
+"""Is a normalized vector, you can give three unnormalized
+   components and this struct normalize them.
+"""
 struct Normal
     x::Float64
     y::Float64
@@ -85,8 +91,11 @@ struct Normal
     end
 end
 
-"""Contains two matrices 4x4 of ::Float64, one the inverse of the other.
-    It's used to implement rotations, scaling and translations in 3D with homogenous formalism."""
+"""Contains two matrices 4x4 of ::Float64, one the inverse
+   of the other.
+   It's used to implement rotations, scaling and translations
+   in 3D with homogenous formalism.
+"""
 struct Transformation
     M::SMatrix{4,4,Float64}
     invM::SMatrix{4,4,Float64}
@@ -94,7 +103,10 @@ struct Transformation
     Transformation() = new( SMatrix{4,4}( Diagonal(ones(4)) ),  SMatrix{4,4}( Diagonal(ones(4)) ) )
 end
 
-"""A ::Ray creates a system along wi a direction (dir::Vec) starting from an origin (origin::Point)"""
+"""A ::Ray creates a system along with a
+   direction (dir::Vec) starting from an
+   origin (origin::Point).
+"""
 struct Ray
     origin::Point
     dir::Vec
