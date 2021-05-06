@@ -331,7 +331,7 @@ end
 			a = Vec(1.0, 2.0, 3.0)
 			b = Vec(4.0, 6.0, 8.0)
 
-			@test a ≈ Raytracing.Vec(1.0, 2.0, 3.0 + err)
+			@test a ≈ Vec(1.0, 2.0, 3.0 + err)
 			@test (a + b) ≈ Vec(5.0, 8.0 + 3*err, 11.0)
 			@test (b - a) ≈ Vec(3.0, 4.0 - 2*err, 5.0)
 			@test (a * 2) ≈ Vec(2.0, 4.0 + 2*err, 6.0 - err)
@@ -539,11 +539,14 @@ end
 			img = HDRimage(4, 2)
 			Pcam = PerspectiveCamera(1., 2.) # PAY ATTENSTION TO POSITIONAL ARGUMENTS!!!!!!!!!!!!!!!!!
 			tracer = ImageTracer(img, Pcam)
-			tl_r = fire_ray(tracer, 0, 0, 0., 0.)
+
+			bl_r = fire_ray(tracer, 0, 0, 0., 0.)
+			@test Point(0., 2., 1.) ≈ at(bl_r, 1.)
+
 			br_r = fire_ray(tracer, 3, 1, 1.0, 1.0)
 
-			println(tl_r)
-			println(br_r)
+			#println(tl_r)
+			#println(br_r)
 
 			@test Point(0., 2., 1.) ≈ at(tl_r, 1.)
 			@test Point(0., -2., -1.) ≈ at(br_r, 1.)

@@ -51,7 +51,7 @@ at(r::Ray, t::Float64) = r.origin + r.dir * t
     ```
 """
 function fire_ray(Ocam::OrthogonalCamera, u::Float64, v::Float64)
-    origin = Point(-1.0, (1.0 - 2 * u) * Ocam.a, 2 * v - 1)
+    origin = Point(-1.0, (1.0 - 2 * u) * Ocam.a, 2 * v -1)
     direction = Vec(1.0, 0.0, 0.0)
     return Ocam.T*Ray(origin, direction, 1.0)
 end
@@ -105,7 +105,7 @@ end
         +------------------------------+
     (0, 0)                          (1, 0)
     ```
-"""       
+"""
 function fire_ray(ImTr::ImageTracer, col::Int64, row::Int64, 
                     u_px::Float64=0.5, v_px::Float64=0.5)
     u = (col + u_px) / (ImTr.img.width)

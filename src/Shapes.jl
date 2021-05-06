@@ -136,7 +136,7 @@ function ray_intersection(world::World, ray::Ray)
         !(intersection == nothing) || continue
 
         # There was a hit, and it was closer than any other hit found before
-        ( (closest==nothing) || (intersection.t < closest.t) ) &&  (closest = intersection)
+        ( (closest == nothing) || (intersection.t < closest.t) ) &&  (closest = intersection)
     end
     
     return closest
