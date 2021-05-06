@@ -182,7 +182,7 @@ struct PerspectiveCamera <: Camera
     a::Float64 # aspect ratio
     T::Transformation
     PerspectiveCamera(d=1., a=1., T=Transformation()) = new(d, a, T)
-end 
+end
 
 ##########################################################################################92
 
