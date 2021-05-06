@@ -20,7 +20,7 @@ name: Unit tests
 on:
   push:
     branches:
-      - fixissue#5
+      - demo
 
 jobs:
   test:
