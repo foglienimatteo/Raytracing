@@ -16,10 +16,13 @@
 # CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
+##########################################################################################92
 
 using Raytracing, Test, LinearAlgebra, StaticArrays
 import ColorTypes:RGB
 include("../src/Raytracing.jl")
+
+##########################################################################################92
 
 @testset "test_RGB" begin
 	@test 1+1==2
@@ -55,6 +58,8 @@ end
 	@test_throws AssertionError img = Raytracing.HDRimage(1, 3, rgb_matrix)
 
 end
+
+##########################################################################################92
 
 @testset "test_Reading_and_Writing " begin
 
@@ -271,6 +276,8 @@ end
 
 end
 
+##########################################################################################92
+
 @testset "test_Tone_Mapping" begin
 
 	@testset "test_luminosity" begin
@@ -314,6 +321,8 @@ end
 	end
 
 end
+
+##########################################################################################92
 
 @testset "test_Geometry_and_Perspective" begin
 	@testset "test_geometry" begin
@@ -550,6 +559,8 @@ end
 	end
 
 end
+
+##########################################################################################92
 
 @testset "test_Sphere" begin
 	@testset "test_Vec2D" begin

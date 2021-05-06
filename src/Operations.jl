@@ -17,7 +17,11 @@
 # IN THE SOFTWARE.
 
 
-"""Returns true if the difference between two numbers is smaller than 1e-10."""
+"""
+    are_close(x, y, epsilon=1e-10) -> Bool
+
+    Returns true if the difference between two numbers is smaller than 1e-10.
+"""
 are_close(x, y, epsilon=1e-10) = abs(x-y) < epsilon
 
 Base.:≈(a::RGB{T}, b::RGB{T}) where {T} = are_close(a.r,b.r) && are_close(a.g,b.g) && are_close(a.b, b.b)
@@ -37,7 +41,7 @@ Base.:≈(m1::SMatrix{4,4,Float64}, m2::SMatrix{4,4,Float64}) = (B = [are_close(
 Base.:≈(t1::Transformation, t2::Transformation) = (t1.M ≈ t2.M) && ( t1.invM ≈ t2.invM )
 Base.:≈(r1::Ray, r2::Ray) = (r1.origin ≈ r2.origin) && (r1.dir ≈ r2.dir)
 Base.:≈(v1::Vec2d, v2::Vec2d) = (are_close(v1.u, v2.u)) && (are_close(v1.v, v2.v))
-Base.:≈(H1::HitRecord, H2::HitRecord) = (H1.normal ≈ H2.normal) && (H1.ray ≈ H2.ray) && (H1.surface_point ≈ H2.surface_point) && (are_close(H1.t, H2.t)) && (H1.world_point ≈ H2.world_point)
+Base.:≈(H1::HitRecord, H2::HitRecord) = (H1.normal ≈ H2.normal) && (H1.ray ≈ H2.ray) && (H1.surface_point ≈ H2.surface_point)&& (are_close(H1.t, H2.t)) && (H1.world_point ≈ H2.world_point)
 
 # Definitions of operations for RGB objects
 Base.:+(a::RGB{T}, b::RGB{T}) where {T} = RGB(a.r + b.r, a.g + b.g, a.b + b.b)
@@ -58,7 +62,6 @@ LinearAlgebra.:×(a::Vec, b::Vec) = Vec(a.y*b.z-a.z*b.y, b.x*a.z-a.x*b.z, a.x*b.
 
 # Definitions of operations for Normal
 Base.:-(a::Normal) = Normal(-a.x, -a.y, -a.z)
-
 
 # Definitions of operations between Vec and Point
 Base.:+(p::Point, v::Vec) = Point(p.x+v.x, p.y+v.y, p.z+v.z)
