@@ -24,7 +24,7 @@ using Colors, Images, ImageIO
 using ColorTypes:RGB
 using Raytracing
 
-include("src/Raytracing.jl")
+#include("src/Raytracing.jl")
 
 function main(args)
 	if isempty(args) || length(args)==1 || length(args)>4
@@ -99,7 +99,7 @@ function demo(orthogonal::Bool=true, pfm_output::String="demo.pfm", png_output::
 	# Run the ray-tracer
 	tracer = ImageTracer(image, camera)
 	function compute_color(ray::Ray)
-		if ray_intersection(world,ray) != nothing
+		if ray_intersection(world,ray) ≠ nothing
 			return WHITE
 		else
 			return BLACK
@@ -108,7 +108,6 @@ function demo(orthogonal::Bool=true, pfm_output::String="demo.pfm", png_output::
 
 	fire_all_rays!(tracer, compute_color)
 	img = tracer.img
-
 
 	# Save the HDR image
 	open(pfm_output, "w") do outf

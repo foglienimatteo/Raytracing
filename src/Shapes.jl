@@ -133,7 +133,7 @@ function ray_intersection(world::World, ray::Ray)
         intersection = ray_intersection(shape, ray)
 
         # The ray missed this shape, skip to the next one
-        !(intersection==nothing) || continue
+        !(intersection == nothing) || continue
 
         # There was a hit, and it was closer than any other hit found before
         ( (closest==nothing) || (intersection.t < closest.t) ) &&  (closest = intersection)

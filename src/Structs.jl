@@ -16,9 +16,6 @@
 # CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
-#using Raytracing
-#include("../src/Raytracing.jl")
-
 ##########################################################################################92
 
 BLACK = RGB{Float32}(0.0, 0.0, 0.0)
