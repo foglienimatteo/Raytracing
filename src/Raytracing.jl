@@ -35,13 +35,15 @@ export squared_norm, norm, normalize
 # from ReadingWriting.jl
 export parse_command_line
 # from ToneMapping.jl
-export normalize_image!,  clamp_image!, γ_correction!, get_matrix
+export normalize_image!,  clamp_image!, γ_correction!, get_matrix, tone_mapping
 # from Transformations.jl
 export rotation_x, rotation_y, rotation_z, scaling, translation, inverse
 # from ImageTracer.jl
 export at, fire_ray, fire_all_rays!
 # from Shapes.jl
 export ray_intersection, sphere_point_to_uv, sphere_normal, add_shape
+# from Demo.jl
+export demo
 
 
 include("Structs.jl")
@@ -52,6 +54,7 @@ include("ToneMapping.jl")
 include("Transformations.jl")
 include("ImageTracer.jl")
 include("Shapes.jl")
+include("Demo.jl")
 
 
 end  # module

@@ -96,106 +96,21 @@ end
 
 
 function main(args)
-	if isempty(args) || length(args)==1 || length(args)>4
-        println("\n
-		correct usage: ./main [OPTIONS] COMMAND [ARGS] ...
+	parsed_arguments = ArgParse_command_line(args) # the result is a Dict{String,Any}
+	parsed_command = parsed_arguments["%COMMAND%"]
+	parsed_args = parsed_arguments[parsed_command]
 
-		OPTIONS:
-			--help	show this message and exit.
+	println("parsed_command : ", parsed_command)
+	println("parsed_arguments : ", parsed_args)
 
-		COMMANDS:
-			demo
-			pfm2ldr
-		
-		")
-		return nothing
-	end  
-
-	parameters = nothing
-	try
-		parameters =  Parameters(parse_command_line(args)...)
-	catch e
-		println("Error: ", e)
-		return nothing
+	println("typeof parsed_arguments : ", typeof(parsed_arguments))
+	println("Parsed args:")
+	for (key,val) in parsed_arguments
+		println("  $key  =>  $(repr(val))")
 	end
-
-	img = open(parameters.infile, "r") do inpf; read(inpf, HDRimage); end
-	
-	println("\nfile $(parameters.infile) has been read from disk.\n")
-
-	normalize_image!(img, parameters.a)
-	clamp_image!(img)
-	Raytracing.γ_correction!(img, parameters.γ)
-	println(img, 3)
-	
-	matrix = get_matrix(img)
-	Images.save(parameters.outfile, matrix)
-	#Images.save(Images.File(PNG,parameters.outfile), img.rgb_m)
-	#Images.save(File("PNG", parameters.outfile), img.rgb_m)
-
-	println("\nFile $(parameters.outfile) has been written into the disk.\n")
 
 	return nothing
 end
 
-
-function demo(orthogonal::Bool=true, pfm_output::String="demo.pfm", png_output::String="demo.png", width::Int64=640, height::Int64=480, α::Float64=0.)
-	image = HDRimage(width, height)
-
-	# Create a world and populate it with a few shapes
-	world = World()
-
-
-	for x in [-0.5, 0.5], y in [-0.5, 0.5], z in [-0.5, 0.5]
-		add_shape(world, Sphere( translation(Vec(x, y, z)) * scaling(Vec(0.1, 0.1, 0.1)) ))
-	end
-
-	# Place two other balls in the bottom/left part of the cube, so
-	# that we can check if there are issues with the orientation of
-	# the image
-	add_shape(world, Sphere( translation(Vec(0.0, 0.0, -0.5)) * scaling(Vec(0.1, 0.1, 0.1)) ))
-	add_shape(world, Sphere( translation(Vec(0.0, 0.5, 0.0)) * scaling(Vec(0.1, 0.1, 0.1)) ))
-
-	# Initialize a camera
-	camera_tr = rotation_z(deg2rad(α)) * translation(Vec(-1.0, 0.0, 0.0))
-	if orthogonal==true
-		camera = OrthogonalCamera(width / height, camera_tr)
-	else
-		camera = PerspectiveCamera(1., width / height, camera_tr)
-	end
-
-
-	# Run the ray-tracer
-	tracer = ImageTracer(image, camera)
-	function compute_color(ray::Ray)
-		if ray_intersection(world,ray) ≠ nothing
-			return WHITE
-		else
-			return BLACK
-		end
-	end
-
-	fire_all_rays!(tracer, compute_color)
-	img = tracer.img
-
-	# Save the HDR image
-	open(pfm_output, "w") do outf
-		write(outf, img)
-	end
-
-	println("\nHDR demo image written to $(pfm_output)\n")
-
-	# Apply tone-mapping to the image
-	normalize_image!(img, 0.18)
-	clamp_image!(img)
-	γ_correction!(img, 1.27)
-
-	#println(img, 3)
-
-	# Save the LDR image
-	Images.save(png_output, get_matrix(img))
-
-	println("\nHDR demo image written to $(png_output)\n")
-end
 
 main(ARGS)
