@@ -21,14 +21,14 @@ print(c::RGB{T}) where T = print(stdout, c)
 println(io::IO, c::RGB{T}) where T = println(io, "RGB = (", c.r, ", ", c.g, ", ", c.b, ")" )
 println(c::RGB{T}) where T = println(stdout, c)
 
-print(io::IO, v::Point) = print(io, "Point:\t ", v.x, "\t", v.y, "\t", v.z)
-print(v::Point) = print(stdout, v)
-println(io::IO,v::Point) = println(io, "Point:\t ", v.x, "\t", v.y, "\t", v.z)
-println(v::Point) = println(stdout,v)
+print(io::IO, p::Point) = print(io, "Point = (", p.x, ", ", p.y, ", ", p.z, ")" )
+print(p::Point) = print(stdout, p)
+println(io::IO, p::Point) = print(io, "Point = (", p.x, ", ", p.y, ", ", p.z, ")" )
+println(p::Point) = println(stdout, p)
 
-print(io::IO, v::Vec) = print(io, "Vec:\t ", v.x, "\t", v.y, "\t", v.z)
+print(io::IO, v::Vec) = print(io, "Vec = (", v.x, ", ", v.y, ", ", v.z, ")" )
 print(v::Vec) = print(stdout, v)
-println(io::IO,v::Vec) = println(io, "Vec:\t ", v.x, "\t", v.y, "\t", v.z)
+println(io::IO,v::Vec) = println(io, "Vec = (", v.x, ", ", v.y, ", ", v.z, ")" )
 println(v::Vec) = println(stdout,v)
 
 
@@ -52,6 +52,12 @@ end
 
 function println(io::IO, ray::Ray)
      print("Ray with origin and direction: \t")
-     print(ray.origin)
-     print(ray.dir)
+     println(ray.origin, "  ,  ", ray.dir)
 end
+function print(io::IO, ray::Ray)
+     print("Ray with origin and direction: \t")
+     print(ray.origin, "  ,  ", ray.dir)
+end
+println(ray::Ray) = println(stdout, ray)
+print(ray::Ray) = print(stdout, ray)
+
