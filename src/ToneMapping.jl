@@ -135,7 +135,7 @@ end
 
 
 function tone_mapping(infile::String, outfile::String, a::Float64=0.18, γ::Float64=1.0)
-    tone_mapping(["$(infile) $(outfile) $a $γ"])
+    tone_mapping(["$(infile)", "$(outfile)", "$a", "$γ"])
 end
 
 function tone_mapping(args::Vector{String})
@@ -148,7 +148,7 @@ function tone_mapping(args::Vector{String})
     if isempty(args) || length(args)==1 || length(args)>4
         throw(ArgumentError(correct_usage))
 		return nothing
-        
+
     end
 	parameters = nothing
 	try

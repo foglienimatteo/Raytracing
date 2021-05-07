@@ -85,7 +85,7 @@ function ArgParse_command_line(arguments)
 	@add_arg_table! s["tonemapping"] begin
 		"pfm_infile"
 			help = "path to input file, it must be a PFM file"
-			range_tester = input -> (typeof(query(input))<:File{format"PFM"})
+			#range_tester = input -> (typeof(query(input))<:File{format"PFM"})
 			required = true
 		"outfile"
 			help = "output file name"
@@ -166,8 +166,8 @@ function main(args)
 	end
 
 	if parsed_command=="tonemapping"
-		println(parse_tonemapping_settings(parsed_settings))
-		#tonemapping(parsed_args)
+		#println(parse_tonemapping_settings(parsed_settings))
+		tone_mapping(parse_tonemapping_settings(parsed_settings)...)
 	end
 
 	return nothing

@@ -297,7 +297,7 @@ end
 
 function parse_tonemapping_settings(dict::Dict{String, Any})
     a::Float64 = dict["alpha"]
-    γ::Int64 = dict["gamma"]
+    γ::Float64 = dict["gamma"]
     pfm::String = dict["pfm_infile"]
     png::String = dict["outfile"]
     return (pfm, png, a, γ)
