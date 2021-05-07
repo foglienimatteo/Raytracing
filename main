@@ -29,20 +29,24 @@ FILE_NAME = split(PROGRAM_FILE, "/")[end]
 
 function parse_commandline_error_handler(settings::ArgParseSettings, err, err_code::Int = 1)
 
-    if occursin("no command given", err.text)
+	help_string = 
+		"execute in one of the following ways to get the help instructions:\n"*
+		"\t- from the CLI: \t\tjulia $(FILE_NAME) --help\n"*
+		"\t- from the CLI: \t\t./$FILE_NAME --help\n"*
+		"\t- inside the Julia REPL: \tinclude(\"$(FILE_NAME) --help\n"
 
-        println("\nERROR: no input command were given.\n"*
-                "execute in one of the following ways to get the help instructions:\n"*
-                "\t- from the CLI: \t\tjulia $(FILE_NAME) --help\n"*
-                "\t- from the CLI: \t\t./$FILE_NAME --help\n"*
-                "\t- inside the Julia REPL: \tinclude(\"$(FILE_NAME) --help\n" 
-                )
-        
-    elseif occursin("out of range input for input_file:", err.text)
-        println(stderr, "input_file is not a PFM file")
-    else
-        println(stderr, err.text, usage_string(settings))
-    end
+    	if occursin("no command given", err.text)
+     	println("\nERROR: no input command were given.\n"*help_string)
+	elseif occursin("unknown command", err.text)
+		println(
+			"\nERROR, $(err.text)\n"*
+			usage_string(settings)*"\n\n"*
+			help_string)
+    	elseif occursin("out of range input for input_file:", err.text)
+     	println(stderr, "input_file is not a PFM file")
+    	else
+     	println(stderr, err.text, usage_string(settings))
+    	end
 
     exit(err_code)
 end

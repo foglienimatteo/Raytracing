@@ -20,7 +20,7 @@ name: Unit tests
 on:
   push:
     branches:
-      - demo
+      - CLI
 
 jobs:
   test:

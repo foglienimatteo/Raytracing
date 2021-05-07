@@ -146,10 +146,10 @@ function tone_mapping(args::Vector{String})
         "julia>  tonemapping([\"infile\",\"outfile\",  \"a\",  \"γ\" ])\n\n"*
         "default values are a=0.18 and γ=1.0\n\n"
     if isempty(args) || length(args)==1 || length(args)>4
-        println(correct_usage)
+        throw(ArgumentError(correct_usage))
 		return nothing
-	end  
-
+        
+    end
 	parameters = nothing
 	try
 		parameters =  Parameters(parse_command_line(args)...)
