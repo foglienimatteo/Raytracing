@@ -269,3 +269,36 @@ function parse_command_line(args)
 
     return infile, outfile, a, γ
 end
+
+
+##########################################################################################92
+
+
+function parse_demo_settings(dict::Dict{String, Any})
+    ort::Bool = dict["orthogonal"]
+    per::Bool = dict["perspective"]
+    α::Float64 = dict["alpha"]
+    w::Int64 = dict["width"]
+    h::Int64 = dict["heigth"]
+    pfm::String = dict["set-pfm-name"]
+    png::String = dict["set-png-name"]
+
+    if ( (ort==true) || (ort==per==false) ) 
+        view_ort=true
+    elseif ((ort==false) && (per==true))
+        view_ort=false
+    else
+        view_ort=nothing
+    end
+
+    return (view_ort, α, w, h, pfm, png)
+end
+
+
+function parse_tonemapping_settings(dict::Dict{String, Any})
+    a::Float64 = dict["alpha"]
+    γ::Int64 = dict["gamma"]
+    pfm::String = dict["pfm_infile"]
+    png::String = dict["outfile"]
+    return (pfm, png, a, γ)
+end

@@ -33,7 +33,7 @@ export Sphere, Vec2d, HitRecord, World
 # from Operations.jl
 export squared_norm, norm, normalize
 # from ReadingWriting.jl
-export parse_command_line
+export parse_command_line, parse_demo_settings, parse_tonemapping_settings
 # from ToneMapping.jl
 export normalize_image!,  clamp_image!, γ_correction!, get_matrix, tone_mapping
 # from Transformations.jl

@@ -28,7 +28,6 @@ using Raytracing
 FILE_NAME = split(PROGRAM_FILE, "/")[end]
 
 function parse_commandline_error_handler(settings::ArgParseSettings, err, err_code::Int = 1)
-
 	help_string = 
 		"execute one of the following to get the help instructions:\n"*
 		"\t- from the CLI: \t\tjulia $(FILE_NAME) --help\n"*
@@ -44,12 +43,15 @@ function parse_commandline_error_handler(settings::ArgParseSettings, err, err_co
 			help_string)
     	elseif occursin("out of range input for input_file:", err.text)
      	println(stderr, "input_file is not a PFM file")
+	elseif  occursin("too many", err.text) &&  occursin("usage: $(FILE_NAME) demo", usage_string(settings))
+		ArgParse.show_help(settings)
 	else
      	println(stderr, err.text, "\n" , usage_string(settings))
+		#ArgParse.show_help(settings)
     	end
 	    
-	#exit(err_code)
-	return err_code
+	exit(err_code)
+	#return err_code
 end
 
 function ArgParse_command_line(arguments)
@@ -73,19 +75,19 @@ function ArgParse_command_line(arguments)
 		"--alpha", "-a"
 			help = "scaling factor for the normalization process"
 			arg_type = Float64
-			default = 0.5
+			default = 0.18
 		"--gamma", "-g"
 			help = "gamma value for the tone mapping process"
 			arg_type = Float64
-			default = 1.
+			default = 1.27
 	end
 	add_arg_group!(s["tonemapping"], "filenames");
 	@add_arg_table! s["tonemapping"] begin
-		"input_file"
+		"pfm_infile"
 			help = "path to input file, it must be a PFM file"
 			range_tester = input -> (typeof(query(input))<:File{format"PFM"})
 			required = true
-		"output_file"
+		"outfile"
 			help = "output file name"
 			required = true
 	end
@@ -93,83 +95,79 @@ function ArgParse_command_line(arguments)
 	s["demo"].description = "creates a demo.png and a demo.pfm files of 10 white spheres on a dark backgroud."*
 					"8 spheres are placed at the 8 vertexes of a cube, 1 in the middle "*
 					"of the left face and the last in the lower one."*
-					"Execute it and check the correct placement of the spheres."
-	#=
-	s["demo"].usage = "usage:\n"*
-					"- from the shell: \t\t ./main demo\n"*
-					"- from the shell: \t\t julia main demo\n"*
-					"- inside the Julia REPL: \t main(\"demo\")\n\n"*
-					"no further arguments may be passed with demo command.\n"
-	=#
-	add_arg_group!(s["demo"], "demo settings");
-	@add_arg_table! s["demo"] begin
-		"--orthogonal", "--ort"
-			help = "flag for the perspective: true->Orthogonal, false->Perspective"
+					"Execute it in order to check the correct placement of the spheres."
+	add_arg_group!(s["demo"], "demo mutually exclusive flags for the viewpoint tipe", exclusive=true)
+    	@add_arg_table! s["demo"] begin
+        	"--orthogonal", "--ort"
+          	action = :store_true
+          	help = "flag for the Orthogonal projection view"
+		"--perspective", "--per"
+			help = "flag for the Perspective projection view"
 			action = :store_true
-			default = true
+    	end
+	add_arg_group!(s["demo"], "demo angle viewpoint direction and image dimensions");
+	@add_arg_table! s["demo"] begin
 		"--alpha", "-a"
 			help = "angle of view, in degrees"
 			arg_type = Float64
 			default = 0.
-	end
-	add_arg_group!(s["demo"], "demo image dimensions");
-	@add_arg_table! s["demo"] begin
-		"--width"
+		"--width", "-o"
 			help = "pixel number on the width of the resulting demo image."
 			arg_type = Int64
 			default = 640
-		"--heigth"
+		"--heigth", "-v"
 			help = "pixel number on the heigth of the resulting demo image."
 			arg_type = Int64
 			default = 480
 	end
-	add_arg_group!(s["demo"], "demo (optional) filenames");
+	add_arg_group!(s["demo"], "demo optional filenames");
 	@add_arg_table! s["demo"] begin
-		"pfm_output" 
+		"--set-pfm-name", "-A"
 			help = "name of the pfm file to be saved"
+			nargs = '?'
 			arg_type = String
 			default = "demo.pfm"
-		"png_output"
-			help = "output file name"
+			constant = "demo.pfm"
+		"--set-png-name", "-B"
+			help = "name of the png file to be saved"
+			nargs = '?'
 			arg_type = String
 			default = "demo.png"
+			constant = "demo.png"
 	end
 
 	parse_args(arguments, s)
+end
+
+function print_ArgParseSettings(vec::Dict{String,Any})
+	parsed_command = vec["%COMMAND%"]
+	parsed_args = vec[parsed_command]
+     println("\nparsed_command : ", parsed_command)
+	println("Parsed args:")
+	for (key,val) in parsed_args
+		println("  $key \t=>  $(repr(val))")
+	end
+	print("\n")
 end
 
 
 main(x::Union{String, Float64, Int64}...) = main([string(var) for var in [x...]])
 function main(args)
 	parsed_arguments = ArgParse_command_line(args) # the result is a Dict{String,Any}
-	(parsed_arguments==nothing) && (return nothing)
-	
+	#(parsed_arguments==nothing) && (exit(1))
+	#print_ArgParseSettings(parsed_arguments)
+
 	parsed_command = parsed_arguments["%COMMAND%"]
+	parsed_settings = parsed_arguments[parsed_command]
+
 	if parsed_command=="demo"
-		parsed_args = parsed_arguments[parsed_command]
-		println("parsed_command : ", parsed_command)
-		println("Parsed args:")
-		for (key,val) in parsed_args
-			println("  $key  =>  $(repr(val))")
-		end
-		ort::Bool = parsed_args["orthogonal"]
-          α::Float64 = parsed_args["alpha"]
-          w::Int64 = parsed_args["width"]
-          h::Int64 = parsed_args["heigth"]
-          pfm::String=parsed_args["pfm_output"]
-          png::String=parsed_args["png_output"]
-		demo(ort, α, w, h, pfm, png)
+		#println(parse_demo_settings(parsed_settings))
+		demo(parse_demo_settings(parsed_settings)...)
 	end
 
 	if parsed_command=="tonemapping"
-		parsed_args = parsed_arguments[parsed_command]
-		println("parsed_command : ", parsed_command)
-		println("parsed_arguments : ", parsed_args)
-		println("Parsed args:")
-		for (key,val) in parsed_arguments
-			println("  $key  =>  $(repr(val))")
-		end
-		tonemapping(parsed_args)
+		println(parse_tonemapping_settings(parsed_settings))
+		#tonemapping(parsed_args)
 	end
 
 	return nothing
