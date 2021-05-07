@@ -67,16 +67,6 @@ function ArgParse_command_line(arguments)
 			help = "apply tone mapping to a pfm image and save it to file"
 	end
 
-    	s["demo"].description = "creates a demo.png and a demo.pfm files of 10 white spheres on a dark backgroud."*
-                            "8 spheres are placed at the 8 vertexes of a cube, 1 in the middle "*
-                            "of the left face and the last in the lower one."*
-                            "Execute it and check the correct placement of the spheres."
-
-	s["demo"].usage = "usage:\n"*
-					"- from the shell: \t\t ./main demo\n"*
-					"- from the shell: \t\t julia main demo\n"*
-					"- inside the Julia REPL: \t main(\"demo\")\n\n"*
-					"no further arguments may be passed with demo command.\n"
 	s["tonemapping"].description = "Apply tone mapping to a pfm image and save it to file."
 	add_arg_group!(s["tonemapping"], "tonemapping settings");
 	@add_arg_table! s["tonemapping"] begin
@@ -89,7 +79,7 @@ function ArgParse_command_line(arguments)
 			arg_type = Float64
 			default = 1.
 	end
-	add_arg_group!(s["tonemapping"], "files");
+	add_arg_group!(s["tonemapping"], "filenames");
 	@add_arg_table! s["tonemapping"] begin
 		"input_file"
 			help = "path to input file, it must be a PFM file"
@@ -98,6 +88,51 @@ function ArgParse_command_line(arguments)
 		"output_file"
 			help = "output file name"
 			required = true
+	end
+
+	s["demo"].description = "creates a demo.png and a demo.pfm files of 10 white spheres on a dark backgroud."*
+					"8 spheres are placed at the 8 vertexes of a cube, 1 in the middle "*
+					"of the left face and the last in the lower one."*
+					"Execute it and check the correct placement of the spheres."
+	#=
+	s["demo"].usage = "usage:\n"*
+					"- from the shell: \t\t ./main demo\n"*
+					"- from the shell: \t\t julia main demo\n"*
+					"- inside the Julia REPL: \t main(\"demo\")\n\n"*
+					"no further arguments may be passed with demo command.\n"
+	=#
+	add_arg_group!(s["demo"], "demo settings");
+	@add_arg_table! s["demo"] begin
+		"--orthogonal", "--ort"
+			help = "flag for the perspective: true->Orthogonal, false->Perspective"
+			action = :store_true
+			default = true
+		"--alpha", "-a"
+			help = "angle of view, in degrees"
+			arg_type = Float64
+			default = 0.
+	end
+	add_arg_group!(s["demo"], "demo image dimensions");
+	@add_arg_table! s["demo"] begin
+		"--width"
+			help = "pixel number on the width of the resulting demo image."
+			arg_type = Int64
+			default = 640
+		"--heigth"
+			help = "pixel number on the heigth of the resulting demo image."
+			arg_type = Int64
+			default = 480
+	end
+	add_arg_group!(s["demo"], "demo (optional) filenames");
+	@add_arg_table! s["demo"] begin
+		"pfm_output" 
+			help = "name of the pfm file to be saved"
+			arg_type = String
+			default = "demo.pfm"
+		"png_output"
+			help = "output file name"
+			arg_type = String
+			default = "demo.png"
 	end
 
 	parse_args(arguments, s)
@@ -111,8 +146,19 @@ function main(args)
 	
 	parsed_command = parsed_arguments["%COMMAND%"]
 	if parsed_command=="demo"
+		parsed_args = parsed_arguments[parsed_command]
 		println("parsed_command : ", parsed_command)
-		demo()
+		println("Parsed args:")
+		for (key,val) in parsed_args
+			println("  $key  =>  $(repr(val))")
+		end
+		ort::Bool = parsed_args["orthogonal"]
+          α::Float64 = parsed_args["alpha"]
+          w::Int64 = parsed_args["width"]
+          h::Int64 = parsed_args["heigth"]
+          pfm::String=parsed_args["pfm_output"]
+          png::String=parsed_args["png_output"]
+		demo(ort, α, w, h, pfm, png)
 	end
 
 	if parsed_command=="tonemapping"

@@ -19,7 +19,7 @@
 
 module Raytracing
 
-using Colors, LinearAlgebra, StaticArrays
+using Colors, Images, ImageIO, LinearAlgebra, StaticArrays
 using ColorTypes:RGB
 import Base.:+; import Base.:-; import Base.:≈; import Base.:/; import Base.:*
 import Base: write, read, print, println;
