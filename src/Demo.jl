@@ -84,7 +84,8 @@ function demo(
 	#println(img, 3)
 
 	# Save the LDR image
-	Images.save(png_output, get_matrix(img))
+	#Images.save(png_output, get_matrix(img))
+     Images.save(File{format"PNG"}(png_output), get_matrix(img))
 
 	println("\nHDR demo image written to $(png_output)\n")
 end

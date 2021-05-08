@@ -110,10 +110,10 @@ function parse_img_size(line::String)
         (width > 0 && height > 0) || throw(ErrorException)
         return width, height
     catch e
-        isa(e, InexactError) || throw(InvalidPfmFileFormat("cannot convert width/heigth
+        isa(e, InexactError) || throw(InvalidPfmFileFormat("cannot convert width/height
                                                             $(elements) to Tuple{Int, Int}")
         )
-        isa(e, ErrorException) || throw(InvalidPfmFileFormat("width/heigth cannot be negative,
+        isa(e, ErrorException) || throw(InvalidPfmFileFormat("width/height cannot be negative,
                                                               but in $(elements) at least one
                                                               of them is <0.")
         )
@@ -279,7 +279,7 @@ function parse_demo_settings(dict::Dict{String, Any})
     per::Bool = dict["perspective"]
     α::Float64 = dict["alpha"]
     w::Int64 = dict["width"]
-    h::Int64 = dict["heigth"]
+    h::Int64 = dict["height"]
     pfm::String = dict["set-pfm-name"]
     png::String = dict["set-png-name"]
 

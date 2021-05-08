@@ -115,8 +115,8 @@ function ArgParse_command_line(arguments)
 			help = "pixel number on the width of the resulting demo image."
 			arg_type = Int64
 			default = 640
-		"--heigth", "-v"
-			help = "pixel number on the heigth of the resulting demo image."
+		"--height", "-v"
+			help = "pixel number on the height of the resulting demo image."
 			arg_type = Int64
 			default = 480
 	end
@@ -154,7 +154,7 @@ end
 main(x::Union{String, Float64, Int64}...) = main([string(var) for var in [x...]])
 function main(args)
 	parsed_arguments = ArgParse_command_line(args) # the result is a Dict{String,Any}
-	#(parsed_arguments==nothing) && (exit(1))
+	(parsed_arguments==nothing) && (return nothing)
 	#print_ArgParseSettings(parsed_arguments)
 
 	parsed_command = parsed_arguments["%COMMAND%"]
