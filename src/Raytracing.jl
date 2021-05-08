@@ -22,7 +22,7 @@ module Raytracing
 using Colors, Images, ImageIO, FileIO
 using ColorTypes:RGB
 using LinearAlgebra, StaticArrays
-using Printf, Progressbars
+using Printf, ProgressBars
 
 import Base.:+; import Base.:-; import Base.:≈; import Base.:/; import Base.:*
 import Base: write, read, print, println;

@@ -489,6 +489,12 @@ version = "1.2.1"
 deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
+[[ProgressBars]]
+deps = ["Printf"]
+git-tree-sha1 = "5a68bbc14f9699960db9d6d26d57a47814166443"
+uuid = "49802e3a-d2f1-5c88-81d8-b72133a6f568"
+version = "1.1.0"
+
 [[ProgressMeter]]
 deps = ["Distributed", "Printf"]
 git-tree-sha1 = "6e9c89cba09f6ef134b00e10625590746ba1e036"
