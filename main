@@ -64,6 +64,9 @@ function ArgParse_command_line(arguments)
 		"demo"
 			action = :command
 			help = "create a standard image that checks the correct behaviour of the program."
+		"demo-animation"
+			action = :command
+			help = "create an animation of a 360 degree rotation of demo image "
 		"tonemapping"
 			action = :command
 			help = "apply tone mapping to a pfm image and save it to file"
@@ -136,6 +139,38 @@ function ArgParse_command_line(arguments)
 			constant = "demo.png"
 	end
 
+	s["demo-animation"].description = "creates an animation of a 360 degree rotation around"*
+								"vertical axis of the demo image."
+	add_arg_group!(s["demo-animation"], "demo-animation mutually exclusive flags for the viewpoint tipe", exclusive=true)
+    	@add_arg_table! s["demo-animation"] begin
+        	"--orthogonal", "--ort"
+          	action = :store_true
+          	help = "flag for the Orthogonal projection view"
+		"--perspective", "--per"
+			help = "flag for the Perspective projection view"
+			action = :store_true
+    	end
+	add_arg_group!(s["demo-animation"], "demo-animation settings");
+	@add_arg_table! s["demo-animation"] begin
+		"--width", "-o"
+			help = "pixel number on the width of the resulting demo image animation."
+			arg_type = Int64
+			default = 200
+		"--height", "-v"
+			help = "pixel number on the height of the resulting demo image animation."
+			arg_type = Int64
+			default = 150
+	end
+	add_arg_group!(s["demo-animation"], "demo-animation optional filename");
+	@add_arg_table! s["demo-animation"] begin
+		"--set-anim-name", "-A"
+			help = "name of the animation file to be saved"
+			nargs = '?'
+			arg_type = String
+			default = "demo-animation.mp4"
+			constant = "demo-animation.mp4"
+	end
+
 	parse_args(arguments, s)
 end
 
@@ -168,6 +203,11 @@ function main(args)
 	if parsed_command=="tonemapping"
 		#println(parse_tonemapping_settings(parsed_settings))
 		tone_mapping(parse_tonemapping_settings(parsed_settings)...)
+	end
+
+	if parsed_command=="demo-animation"
+		#println(parse_tonemapping_settings(parsed_settings))
+		demo_animation(parse_demoanimation_settings(parsed_settings)...)
 	end
 
 	return nothing

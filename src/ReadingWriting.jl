@@ -274,6 +274,14 @@ end
 ##########################################################################################92
 
 
+function parse_tonemapping_settings(dict::Dict{String, Any})
+    a::Float64 = dict["alpha"]
+    γ::Float64 = dict["gamma"]
+    pfm::String = dict["pfm_infile"]
+    png::String = dict["outfile"]
+    return (pfm, png, a, γ)
+end
+
 function parse_demo_settings(dict::Dict{String, Any})
     ort::Bool = dict["orthogonal"]
     per::Bool = dict["perspective"]
@@ -295,10 +303,21 @@ function parse_demo_settings(dict::Dict{String, Any})
 end
 
 
-function parse_tonemapping_settings(dict::Dict{String, Any})
-    a::Float64 = dict["alpha"]
-    γ::Float64 = dict["gamma"]
-    pfm::String = dict["pfm_infile"]
-    png::String = dict["outfile"]
-    return (pfm, png, a, γ)
+
+function parse_demoanimation_settings(dict::Dict{String, Any})
+    ort::Bool = dict["orthogonal"]
+    per::Bool = dict["perspective"]
+    w::Int64 = dict["width"]
+    h::Int64 = dict["height"]
+    anim::String = dict["set-anim-name"]
+
+    if ( (ort==true) || (ort==per==false) ) 
+        view_ort=true
+    elseif ((ort==false) && (per==true))
+        view_ort=false
+    else
+        view_ort=nothing
+    end
+
+    return (view_ort, w, h, anim)
 end

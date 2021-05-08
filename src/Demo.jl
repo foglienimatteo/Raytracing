@@ -29,7 +29,8 @@ function demo(
           width::Int64, 
           height::Int64, 
           pfm_output::String="demo.pfm", 
-          png_output::String="demo.png"
+          png_output::String="demo.png",
+		bool_print::Bool=true
           )
      
 	image = HDRimage(width, height)
@@ -74,7 +75,7 @@ function demo(
 		write(outf, img)
 	end
 
-	println("\nHDR demo image written to $(pfm_output)\n")
+	(bool_print==true) && (println("\nHDR demo image written to $(pfm_output)\n"))
 
 	# Apply tone-mapping to the image
 	normalize_image!(img, 0.18)
@@ -84,8 +85,49 @@ function demo(
 	#println(img, 3)
 
 	# Save the LDR image
-	#Images.save(png_output, get_matrix(img))
-     Images.save(File{format"PNG"}(png_output), get_matrix(img))
+	if (typeof(query(png_output)) == File{DataFormat{:UNKNOWN}, String})
+     	Images.save(File{format"PNG"}(png_output), get_matrix(img))
+	else
+		Images.save(png_output, get_matrix(img))
+	end
 
-	println("\nHDR demo image written to $(png_output)\n")
+	(bool_print==true) && (println("\nHDR demo image written to $(png_output)\n"))
 end
+
+
+function demo_animation( 
+		ort::Bool,
+          width::Int64, 
+          height::Int64, 
+          anim_output::String= "demo-animation.mp4"
+		)
+	iter = ProgressBar(0:359)
+	for angle in iter
+		angleNNN = @sprintf "%03d" angle
+		#main(["demo", "--per", "--width=640", "--height=480", 
+		#		"--alpha=$angle", "--set-png-name=\"animazione/image$(angleNNN).png\""])
+		demo(ort, 1.0*angle, width, height, ".wpi_animation/demo.pfm",
+				".wpi_animation/image$(angleNNN).png", false)
+		set_description(iter, string(@sprintf("Frame generated: ")))
+	end
+
+	# -r 25: Number of frames per second
+	name = anim_output
+	run(`ffmpeg -r 25 -f image2 -s $(width)x$(height) -i 
+	.wpi_animation/image%03d.png -vcodec libx264 
+	-pix_fmt yuv420p $(name)`)
+
+	run(`rm -r .wpi_animation`)
+end
+
+#=
+for angle in $(seq 0 359); do
+    angleNNN=$(printf "%03d" $angle)
+    ./main demo --per --width=640 --height=480 --alpha=$angle --set-png-name="animazione/image${angleNNN}.png"
+done
+
+# -r 25: Number of frames per second
+ffmpeg -r 25 -f image2 -s 50x30 -i animazione/image%03d.png \
+    -vcodec libx264 -pix_fmt yuv420p \
+    spheres-perspective.mp4
+=#

@@ -19,9 +19,11 @@
 
 module Raytracing
 
-using Colors, Images, ImageIO, LinearAlgebra, StaticArrays, FileIO
+using Colors, Images, ImageIO, FileIO
 using ColorTypes:RGB
-#import FileIO: @format_str
+using LinearAlgebra, StaticArrays
+using Printf, Progressbars
+
 import Base.:+; import Base.:-; import Base.:≈; import Base.:/; import Base.:*
 import Base: write, read, print, println;
 import LinearAlgebra.:⋅; import LinearAlgebra.:×
@@ -44,7 +46,7 @@ export at, fire_ray, fire_all_rays!
 # from Shapes.jl
 export ray_intersection, sphere_point_to_uv, sphere_normal, add_shape
 # from Demo.jl
-export demo
+export demo, demo_animation
 
 
 include("Structs.jl")
