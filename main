@@ -118,10 +118,13 @@ function ArgParse_command_line(arguments)
 			help = "pixel number on the width of the resulting demo image."
 			arg_type = Int64
 			default = 640
+			range_tester = iseven
 		"--height", "-v"
 			help = "pixel number on the height of the resulting demo image."
 			arg_type = Int64
 			default = 480
+			range_tester = iseven
+
 	end
 	add_arg_group!(s["demo"], "demo optional filenames");
 	@add_arg_table! s["demo"] begin
@@ -156,10 +159,12 @@ function ArgParse_command_line(arguments)
 			help = "pixel number on the width of the resulting demo image animation."
 			arg_type = Int64
 			default = 200
+			range_tester = iseven
 		"--height", "-v"
 			help = "pixel number on the height of the resulting demo image animation."
 			arg_type = Int64
 			default = 150
+			range_tester = iseven
 	end
 	add_arg_group!(s["demo-animation"], "demo-animation optional filename");
 	@add_arg_table! s["demo-animation"] begin
