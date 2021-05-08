@@ -319,6 +319,31 @@ end
 		@test img ≈ img2
 	end
 
+	@testset "test_overturn" begin
+		M1 = [1 2 3 ; 4 5 6 ; 7 8 9]
+		M2 = [1 4 7 ; 2 5 8 ; 3 6 9]
+		@test M1 ≈ Raytracing.overturn(M2)
+	end
+
+	@testset "test_get_matrix" begin
+		img = Raytracing.HDRimage(2, 3, [
+				RGB(1.0, 2.0, 3.0), RGB(4.0, 5.0, 6.0), RGB(7.0, 8.0, 9.0), 
+				RGB(10.0, 11.0, 12.0), RGB(13.0, 14.0, 15.0), RGB(16.0, 17.0, 18.0)
+				])
+		M1 = RGB{Float32}[
+			RGB(1.0, 2.0, 3.0) RGB(4.0, 5.0, 6.0) ;
+			RGB(7.0, 8.0, 9.0) RGB(10.0, 11.0, 12.0) ;
+			RGB(13.0, 14.0, 15.0) RGB(16.0, 17.0, 18.0)
+			]
+		@test M1 ≈  Raytracing.get_matrix(img)
+	end
+
+	@testset "test_tone_mapping_inputs" begin
+		@test_throws MethodError tone_mapping("abracadabra")
+		@test_throws ArgumentError tone_mapping(["abracadabra"])
+		@test_throws ArgumentError tone_mapping(["a", "b", "c", "d", "e"])
+	end
+
 end
 
 ##########################################################################################92
@@ -540,16 +565,11 @@ end
 			Pcam = PerspectiveCamera(1., 2.) # PAY ATTENSTION TO POSITIONAL ARGUMENTS!!!!!!!!!!!!!!!!!
 			tracer = ImageTracer(img, Pcam)
 
-			bl_r = fire_ray(tracer, 0, 0, 0., 0.)
-			@test Point(0., 2., 1.) ≈ at(bl_r, 1.)
+			top_left_ray = fire_ray(tracer, 0, 0, 0., 0.)
+			bottom_right_ray = fire_ray(tracer, 3, 1, 1.0, 1.0)
 
-			br_r = fire_ray(tracer, 3, 1, 1.0, 1.0)
-
-			#println(tl_r)
-			#println(br_r)
-
-			@test Point(0., 2., 1.) ≈ at(tl_r, 1.)
-			@test Point(0., -2., -1.) ≈ at(br_r, 1.)
+			@test Point(0., 2., 1.) ≈ at(top_left_ray, 1.)
+			@test Point(0., -2., -1.) ≈ at(bottom_right_ray, 1.)
 		end
 
 		@testset "test_image_coverage" begin

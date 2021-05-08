@@ -110,10 +110,10 @@ function parse_img_size(line::String)
         (width > 0 && height > 0) || throw(ErrorException)
         return width, height
     catch e
-        isa(e, InexactError) || throw(InvalidPfmFileFormat("cannot convert width/heigth
+        isa(e, InexactError) || throw(InvalidPfmFileFormat("cannot convert width/height
                                                             $(elements) to Tuple{Int, Int}")
         )
-        isa(e, ErrorException) || throw(InvalidPfmFileFormat("width/heigth cannot be negative,
+        isa(e, ErrorException) || throw(InvalidPfmFileFormat("width/height cannot be negative,
                                                               but in $(elements) at least one
                                                               of them is <0.")
         )
@@ -268,4 +268,56 @@ function parse_command_line(args)
     end
 
     return infile, outfile, a, γ
+end
+
+
+##########################################################################################92
+
+
+function parse_tonemapping_settings(dict::Dict{String, Any})
+    a::Float64 = dict["alpha"]
+    γ::Float64 = dict["gamma"]
+    pfm::String = dict["pfm_infile"]
+    png::String = dict["outfile"]
+    return (pfm, png, a, γ)
+end
+
+function parse_demo_settings(dict::Dict{String, Any})
+    ort::Bool = dict["orthogonal"]
+    per::Bool = dict["perspective"]
+    α::Float64 = dict["alpha"]
+    w::Int64 = dict["width"]
+    h::Int64 = dict["height"]
+    pfm::String = dict["set-pfm-name"]
+    png::String = dict["set-png-name"]
+
+    if ( (ort==true) || (ort==per==false) ) 
+        view_ort=true
+    elseif ((ort==false) && (per==true))
+        view_ort=false
+    else
+        view_ort=nothing
+    end
+
+    return (view_ort, α, w, h, pfm, png)
+end
+
+
+
+function parse_demoanimation_settings(dict::Dict{String, Any})
+    ort::Bool = dict["orthogonal"]
+    per::Bool = dict["perspective"]
+    w::Int64 = dict["width"]
+    h::Int64 = dict["height"]
+    anim::String = dict["set-anim-name"]
+
+    if ( (ort==true) || (ort==per==false) ) 
+        view_ort=true
+    elseif ((ort==false) && (per==true))
+        view_ort=false
+    else
+        view_ort=nothing
+    end
+
+    return (view_ort, w, h, anim)
 end

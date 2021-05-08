@@ -130,3 +130,49 @@ function get_matrix(img::HDRimage)
     m = reshape(img.rgb_m, (img.width,img.height))
     return overturn(m)
 end
+
+##########################################################################################92
+
+
+function tone_mapping(infile::String, outfile::String, a::Float64=0.18, γ::Float64=1.0)
+    tone_mapping(["$(infile)", "$(outfile)", "$a", "$γ"])
+end
+
+function tone_mapping(args::Vector{String})
+    correct_usage =  
+        "\ncorrect usage of tone mapping function for vector of string arguments:\n"*
+        "julia>  tonemapping([\"infile\",\"outfile\" ])\n"*
+        "julia>  tonemapping([\"infile\",\"outfile\", \"a\"])\n"*
+        "julia>  tonemapping([\"infile\",\"outfile\",  \"a\",  \"γ\" ])\n\n"*
+        "default values are a=0.18 and γ=1.0\n\n"
+    if isempty(args) || length(args)==1 || length(args)>4
+        throw(ArgumentError(correct_usage))
+		return nothing
+
+    end
+	parameters = nothing
+	try
+		parameters =  Parameters(parse_command_line(args)...)
+	catch e
+		println("Error: ", e)
+        println(correct_usage)
+		return nothing
+	end
+
+	img = open(parameters.infile, "r") do inpf; read(inpf, HDRimage); end
+	
+	println("\nfile $(parameters.infile) has been read from disk.\n")
+
+	normalize_image!(img, parameters.a)
+	clamp_image!(img)
+	Raytracing.γ_correction!(img, parameters.γ)
+	#println(img, 3)
+	
+	matrix = get_matrix(img)
+	Images.save(parameters.outfile, matrix)
+	#Images.save(Images.File(PNG,parameters.outfile), img.rgb_m)
+	#Images.save(File("PNG", parameters.outfile), img.rgb_m)
+
+	println("\nFile $(parameters.outfile) has been written into the disk.\n")
+
+end
