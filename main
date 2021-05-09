@@ -87,7 +87,7 @@ function demo(orthogonal::Bool=true, pfm_output::String="demo.pfm", png_output::
 	add_shape(world, Sphere( translation(Vec(0.0, 0.5, 0.0)) * scaling(Vec(0.1, 0.1, 0.1)) ))
 
 	# Initialize a camera
-	camera_tr = rotation_z(deg2rad(α)) * translation(Vec(-1.0, 0.0, 0.0))
+	camera_tr = rotation_x(deg2rad(α)) * translation(Vec(-1.0, 0.0, 0.0))
 	if orthogonal==true
 		camera = OrthogonalCamera(width / height, camera_tr)
 	else

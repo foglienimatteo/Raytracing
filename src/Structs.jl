@@ -152,7 +152,7 @@ abstract type Camera end
     The parameter `aspect_ratio` defines how larger than the height is the image. For fullscreen
     images, you should probably set `aspect_ratio` to 16/9, as this is the most used aspect ratio
     used in modern monitors.
-    The `transformation` parameter is an instance of the :class:`.Transformation` class.
+    The `transformation` parameter is an instance of the :class:`::Transformation` class.
 
     Implements the point of view of an observator, in the
     negative part of the x-axis; used for orthogonal projection.
@@ -169,10 +169,10 @@ end
 
 """
     Implements the point of view of an observator, in the
-   negative part of the x-axis (-d, 0, 0); used for perspective
-   projection.
-   Needs the aspect ratio a (by default a=1.0) of the screen(/image),
-   distance d from it and possible transformation.
+    negative part of the x-axis (-d, 0, 0); used for perspective
+    projection.
+    Needs the aspect ratio a (by default a=1.0) of the screen(/image),
+    distance d from it and possible transformation.
 """
 struct PerspectiveCamera <: Camera
     d::Float64 # distance from the screen
@@ -184,7 +184,7 @@ end
 ##########################################################################################92
 
 """
-    Used for implement the "screen": has a `HDRimage` and a `Camera`.
+    Used for implement the "screen": has a :struct:`::HDRimage` and a :struct:`::Camera`.
 """
 struct ImageTracer
     img::HDRimage
@@ -222,10 +222,10 @@ end
 """
     A struct holding information about a ray-shape intersection
     The parameters defined in this struct are the following:
-    -   `world_point`: a :struct:`Point` object holding the world coordinates of the hit point
-    -   `normal`: a :struct:`Normal` object holding the orientation of the normal to the
+    -   `world_point`: a :struct:`::Point` object holding the world coordinates of the hit point
+    -   `normal`: a :struct:`::Normal` object holding the orientation of the normal to the
         surface where the hit happened
-    -   `surface_point`: a :struct:`Vec2d` object holding the position of the hit point
+    -   `surface_point`: a :struct:`::Vec2d` object holding the position of the hit point
         on the surface of the object
     -   `t`: a floating-point value specifying the distance from the origin of the ray where
         the hit happened
@@ -243,8 +243,8 @@ end
 
 """
     A class holding a list of shapes, which make a «world»
-    You can add shapes to a world using `.World.add`.
-    Typically, you call `.World.ray_intersection`
+    You can add shapes to a world using `add_shape(::World, ::Shape)` ([`add_shape`](@ref)).
+    Typically, you call `ray_intersection(::World, ::Ray)` ([`ray_intersection`](@ref))
     to check whether a light ray intersects any of the
     shapes in the world.
 """

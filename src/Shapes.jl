@@ -21,7 +21,7 @@
 """
     ray_intersection(shape::Shape, ray::Ray) -> ErrorException
 
-    Compute the intersection between a ray and this shape
+    Compute the intersection between a ray and a shape
 """
 function ray_intersection(shape::Shape, ray::Ray)
     return ErrorException("ray_intersection is an abstract method
@@ -57,7 +57,7 @@ end
 
     The normal is computed for `point` (a point on the surface of the
     sphere), and it is chosen so that it is always in the opposite
-    direction with respect to `ray_dir`.
+    direction with respect to `ray.dir`.
 
 """
 function sphere_normal(point::Point, ray_dir::Vec)
@@ -73,7 +73,7 @@ end
 
     Checks if a ray intersects the sphere
 
-    Return a `HitRecord`, or `nothing` if no intersection was found.
+    Return a :struct:`::HitRecord`, or `::nothing` if no intersection was found.
 """
 function ray_intersection(sphere::Sphere, ray::Ray)
     inv_ray = inverse(sphere.T) * ray
@@ -112,7 +112,7 @@ end
 """
     add_shape(W::World, S::Shape)
 
-    Append a new shape to this world
+    Append a new shape to a world
 """
 function add_shape(W::World, S::Shape)
     push!(W.shapes, S)
