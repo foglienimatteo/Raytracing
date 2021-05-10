@@ -30,7 +30,8 @@ function demo(
           height::Int64, 
           pfm_output::String="demo.pfm", 
           png_output::String="demo.png",
-		bool_print::Bool=true
+		bool_print::Bool=true,
+		bool_savepfm::Bool=true
           )
      
 	image = HDRimage(width, height)
@@ -70,9 +71,11 @@ function demo(
 	fire_all_rays!(tracer, compute_color)
 	img = tracer.img
 
-	# Save the HDR image
-	open(pfm_output, "w") do outf
-		write(outf, img)
+	if bool_savepfm==true
+		# Save the HDR image
+		open(pfm_output, "w") do outf
+			write(outf, img)
+		end
 	end
 
 	(bool_print==true) && (println("\nHDR demo image written to $(pfm_output)\n"))
@@ -99,7 +102,8 @@ function demo_animation(
 		ort::Bool=false,
           width::Int64=200, 
           height::Int64=150, 
-          anim_output::String= "demo-animation.mp4"
+          anim_output::String= "demo-animation.mp4",
+		bool_printpfm::Bool=false
 		)
 	run(`rm -rf .wpi_animation`)
 	run(`mkdir .wpi_animation`)
@@ -110,7 +114,7 @@ function demo_animation(
 		#main(["demo", "--per", "--width=640", "--height=480", 
 		#		"--alpha=$angle", "--set-png-name=\"animazione/image$(angleNNN).png\""])
 		demo(ort, 1.0*angle, width, height, ".wpi_animation/demo.pfm",
-				".wpi_animation/image$(angleNNN).png", false)
+				".wpi_animation/image$(angleNNN).png", false, bool_printpfm)
 		set_description(iter, string(@sprintf("Frame generated: ")))
 	end
 
