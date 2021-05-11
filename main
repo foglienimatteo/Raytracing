@@ -49,8 +49,9 @@ function parse_commandline_error_handler(settings::ArgParseSettings, err, err_co
      	println(stderr, err.text, "\n" , usage_string(settings))
 		#ArgParse.show_help(settings)
     	end
-	    
-	exit(err_code)
+	 
+	throw(ArgumentError("error code : $err_code"))
+	#exit(err_code)
 	#return err_code
 end
 
@@ -194,7 +195,7 @@ end
 main(x::Union{String, Float64, Int64}...) = main([string(var) for var in [x...]])
 function main(args)
 	parsed_arguments = ArgParse_command_line(args) # the result is a Dict{String,Any}
-	(parsed_arguments==nothing) && (return nothing)
+	(isnothing(parsed_arguments)) && (return nothing)
 	#print_ArgParseSettings(parsed_arguments)
 
 	parsed_command = parsed_arguments["%COMMAND%"]
