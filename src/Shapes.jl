@@ -40,13 +40,8 @@ See also: [`Point`](@ref), [`Vec2d`](@ref)
 """
 function sphere_point_to_uv(point::Point)
     u = acos(point.z) / π
-
-    if (point.y == 0.0) || (point.x == 0.)
-        v = 0.
-    else
-        v = tan(point.y/point.x) / (2.0 * π)
-    end
-    
+    v = atan(point.y, point.x) / (2.0 * π)
+    v>=0 ? nothing : v+= 1.0
     return Vec2d(u,v)
 end
 
@@ -83,7 +78,7 @@ function ray_intersection(sphere::Sphere, ray::Ray)
     a = squared_norm(inv_ray.dir)
     b = 2.0 * origin_vec ⋅ inv_ray.dir
     c = squared_norm(origin_vec) - 1.0
-    Δ = b * b - 4.0 * a * c
+    Δ = b * b - 4.0 * a * c 
      
     (Δ > 0.0) || (return nothing)
 
@@ -99,6 +94,7 @@ function ray_intersection(sphere::Sphere, ray::Ray)
     end
 
     hit_point = at(inv_ray, first_hit_t)
+    println(hit_point)
     return HitRecord(
         sphere.T * hit_point,
         sphere.T * sphere_normal(hit_point, inv_ray.dir),

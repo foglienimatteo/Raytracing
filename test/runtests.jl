@@ -670,6 +670,69 @@ end
 		# Check if the *inverse* transformation was wrongly applied
 		@test typeof( ray_intersection(sphere, Ray( Point(-10, 0, 0), -VEC_Z ) ) ) == Nothing
 	end
+
+	@testset "test_Normals" begin
+        	sphere = Sphere(scaling(Vec(2.0, 1.0, 1.0)))
+        	ray = Ray(Point(1.0, 1.0, 0.0), Vec(-1.0, -1.0, 0.0))
+        	intersection = ray_intersection(sphere, ray)
+
+		@test intersection.normal ≈ Normal(1.0, 4.0, 0.0)
+	end
+
+    	@testset "test_Normal_direction" begin
+        	# Scaling a sphere by -1 keeps the sphere the same but reverses its
+        	# reference frame
+        	sphere = Sphere(scaling(Vec(-1.0, -1.0, -1.0)))
+
+        	ray = Ray(Point(0.0, 2.0, 0.0), -VEC_Y)
+        	intersection = ray_intersection(sphere, ray)
+
+       	@test intersection.normal ≈ Normal(0.0, 1.0, 0.0)
+	end
+
+ 	@testset "test_UV_Coordinates" begin
+		sphere = Sphere()
+
+		# The first four rays hit the unit sphere at the
+		# points P1, P2, P3, and P4.
+		#
+		#                    ^ y
+		#                    | P2
+		#              , - ~ * ~ - ,
+		#          , '       |       ' ,
+		#        ,           |           ,
+		#       ,            |            ,
+		#      ,             |             , P1
+		# -----*-------------+-------------*---------> x
+		#   P3 ,             |             ,
+		#       ,            |            ,
+		#        ,           |           ,
+		#          ,         |        , '
+		#            ' - , _ * _ ,  '
+		#                    | P4
+		#
+		# P5 and P6 are aligned along the x axis and are displaced
+		# along z (ray5 in the positive direction, ray6 in the negative
+		# direction).
+
+		ray1 = Ray(Point(2.0, 0.0, 0.0), -VEC_X)
+		@test ray_intersection(sphere, ray1).surface_point ≈ Vec2d(0.5, 0.0)
+
+		ray2 = Ray(Point(0.0, 2.0, 0.0), -VEC_Y)
+		@test ray_intersection(sphere, ray2).surface_point ≈ Vec2d(0.5, 0.25)
+
+		ray3 = Ray(Point(-2.0, 0.0, 0.0), VEC_X)
+		@test ray_intersection(sphere, ray3).surface_point ≈ Vec2d(0.5, 0.5)
+		
+		ray4 = Ray(Point(0.0, -2.0, 0.0), VEC_Y)
+		@test ray_intersection(sphere, ray4).surface_point ≈ Vec2d(0.5, 0.75)
+	
+		ray5 = Ray(Point(2.0, 0.0, 0.5), -VEC_X)
+		@test ray_intersection(sphere, ray5).surface_point ≈ Vec2d(1/3, 0.0)
+	
+		ray6 = Ray(Point(2.0, 0.0, -0.5), -VEC_X)
+		@test ray_intersection(sphere, ray6).surface_point ≈ Vec2d(2/3, 0.0)
+	end
 end
 
 @testset "test_world" begin
