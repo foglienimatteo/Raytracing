@@ -21,7 +21,7 @@
 """
     ray_intersection(shape::Shape, ray::Ray) -> ErrorException
 
-Compute the intersection between a ray and a shape
+Compute the intersection between a [`Ray`](@ref) and a [`Shape`](@ref)
 """
 function ray_intersection(shape::Shape, ray::Ray)
     return ErrorException("ray_intersection is an abstract method
@@ -35,6 +35,8 @@ end
     sphere_point_to_uv(point::Point) -> Vec2d
 
 Convert a 3D point on the surface of the unit sphere into a (u, v) 2D point
+
+See also: [`Point`](@ref), [`Vec2d`](@ref)
 """
 function sphere_point_to_uv(point::Point)
     u = acos(point.z) / π
@@ -53,11 +55,11 @@ end
 """
     sphere_normal(point::Point, ray_dir::Vec) -> Normal
 
-Compute the normal of a unit sphere
+Compute the [`Normal`](@ref)  of a unit sphere
 
-The normal is computed for `point` (a point on the surface of the
+The normal is computed for [`Point`](@ref) (a point on the surface of the
 sphere), and it is chosen so that it is always in the opposite
-direction with respect to `ray_dir`.
+direction with respect to `ray_dir` ([`Vec`](@ref)).
 """
 function sphere_normal(point::Point, ray_dir::Vec)
     result = Normal(point.x, point.y, point.z)
@@ -70,9 +72,9 @@ end
 """
     ray_intersection(sphere::Sphere, ray::Ray) -> HitRecord
 
-Checks if a ray intersects the sphere
+Check if a ray ([`Ray`](@ref)) intersects the sphere ([`Sphere`](@ref))
 
-Return a :struct:`HitRecord`, or `nothing` if no intersection was found.
+Return a [`HitRecord`](@ref), or `nothing` if no intersection is found.
 """
 function ray_intersection(sphere::Sphere, ray::Ray)
     inv_ray = inverse(sphere.T) * ray
@@ -112,6 +114,8 @@ end
     add_shape(W::World, S::Shape)
 
 Append a new shape to this world
+
+See also: [`Shape`](@ref), [`World`](@ref)
 """
 function add_shape(W::World, S::Shape)
     push!(W.shapes, S)
@@ -123,7 +127,7 @@ end
 """
     ray_intersection(world::World, ray::Ray) -> HitRecord
 
-Determine whether a ray intersects any of the objects in this world
+Determine whether a [`Ray`](@ref) intersects any of the objects in this [`World`](@ref)
 """
 function ray_intersection(world::World, ray::Ray)
     closest = nothing

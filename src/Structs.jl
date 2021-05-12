@@ -24,13 +24,16 @@ WHITE = RGB{Float32}(1.0, 1.0, 1.0)
 ##########################################################################################92
 
 """ 
-This type defines a image in format High-Dynamic-Range 2D image; has three members:
-- `width`
-- `height`
+Define a image in format High-Dynamic-Range 2D image
+
+# Arguments
+- `width::Float64`
+- `height::Float64`
 - array containing `RGB` color, it's a 2linearized" matrix; the first element is the one in the bottom-left of the matrix, then the line is read left-to-right and going to the upper row.
-Has two constructors:
-- HDRimage(width, height)
-- HDRimage(width, height, RGB-array)
+
+# Constructors:
+- `HDRimage(width, height)`
+- `HDRimage(width, height, RGB-array)`
 """
 struct HDRimage
     width::Int64
@@ -46,11 +49,13 @@ end # HDRimage
 ##########################################################################################92
 
 """ 
-Type used to save (passed from command line):
-- input file name (must be a .pfm)
-- output file name (must be a .png)
-- parameter a for (optional)
-- parameter γ for screen correction (optional)
+Parameters passed from command line
+
+# Arguments
+- `infile::String`: input file name (must be a .pfm)
+- `outfile::String`: output file name (must be a .png)
+- [`a`]: parameter a for luminosity corrections
+- [`γ`]: parameter γ for screen correction
 """
 struct Parameters
     infile::String
@@ -61,7 +66,14 @@ struct Parameters
 end
 
 ##########################################################################################92
+"""
+A point in 3D space.
 
+# Arguments
+- `x::Float64`
+- `y::Float64`
+- `z::Float64`
+"""
 struct Point
     x::Float64
     y::Float64
@@ -71,7 +83,14 @@ struct Point
 end
 
 ##########################################################################################92
+"""
+A 3D vector.
 
+# Arguments
+- `x::Float64`
+- `y::Float64`
+- `z::Float64`
+"""
 struct Vec
     x::Float64
     y::Float64
@@ -90,7 +109,12 @@ VEC_Z = Vec(0.0, 0.0, 1.0) # ̂z
 ##########################################################################################92
 
 """
-Is a normalized vector, you can give three components and its struct normalize them.
+A normal vector in 3D space, you can give three components and its struct normalize them.
+
+# Arguments
+- `x::Float64`
+- `y::Float64`
+- `z::Float64`
 """
 struct Normal
     x::Float64
@@ -105,8 +129,8 @@ end
 ##########################################################################################92
 
 """
-Contains two matrices 4x4 of ::Float64, one the inverse of the other.
-It's used to implement rotations, scaling and translationscin 3D with homogenous
+Contain two matrices 4x4 of `Float64`, one the inverse of the other.
+It's used to implement rotations, scaling and translationscin 3D space with homogenous
 formalism.
 """
 struct Transformation
@@ -120,9 +144,10 @@ end
 
 """
 A ray of light propagating in space
-The class contains the following members:
-- `origin` (``Point``): the 3D point where the ray originated
-- `dir` (``Vec``): the 3D direction along which this ray propagates
+
+# Arguments
+- `origin` ([`Point`](@ref)): the 3D point where the ray originated
+- `dir` ([`Vec`](@ref)): the 3D direction along which this ray propagates
 - `tmin` (`Float64`): the minimum distance travelled by the ray is this number times `dir`
 - `tmax` (`Float64`): the maximum distance travelled by the ray is this number times `dir`
 - `depth` (`Int64`): number of times this ray was reflected/refracted
@@ -143,19 +168,14 @@ abstract type Camera end
 ##########################################################################################92
 
 """
-# A camera implementing an orthogonal 3D → 2D projection
-# This class implements an observer seeing the world through an orthogonal projection.
+A camera implementing an orthogonal 3D → 2D projection
+This class implements an observer seeing the world through an orthogonal projection.
 
-Create a new orthographic camera
-The parameter `aspect_ratio` defines how larger than the height is the image. For fullscreen
-images, you should probably set `aspect_ratio` to 16/9, as this is the most used aspect ratio
+# Arguments
+- `a`: the aspect ratio, defines how larger than the height is the image. For fullscreen
+images, you should probably set `a` to 16/9, as this is the most used aspect ratio
 used in modern monitors.
-The `transformation` parameter is an instance of the :class:`::Transformation` class.
-
-Implements the point of view of an observator, in the
-negative part of the x-axis; used for orthogonal projection.
-Needs only the aspect ratio a (by default a=1.0) of the
-screen(/image) and possible transformation.
+- `T`: is an instance of the [`Transformation`](@ref) struct.
 """
 struct OrthogonalCamera <: Camera
     a::Float64 # aspect ratio
@@ -166,11 +186,16 @@ end
 ##########################################################################################92
 
 """
-Implements the point of view of an observator, in the
-negative part of the x-axis (-d, 0, 0); used for perspective
-projection.
-Needs the aspect ratio a (by default a=1.0) of the screen(/image),
-distance d from it and possible transformation.
+A camera implementing a perspective 3D → 2D projection
+    This class implements an observer seeing the world through a perspective projection.
+
+# Arguments
+- `d`: tells how much far from the eye of the observer is the screen,
+and it influences the so-called «aperture» (the field-of-view angle along the horizontal direction).
+- `a`: the aspect ratio, defines how larger than the height is the image. For fullscreen
+images, you should probably set `a` to 16/9, as this is the most used aspect ratio
+used in modern monitors.
+- `T`: is an instance of the [`Transformation`](@ref) struct.
 """
 struct PerspectiveCamera <: Camera
     d::Float64 # distance from the screen
@@ -182,7 +207,11 @@ end
 ##########################################################################################92
 
 """
-Used for implement the "screen": has a :struct:`::HDRimage` and a :struct:`::Camera`.
+Implement the "screen"
+Trace an image by shooting light rays through each of its pixels
+# Arguments
+- [`HDRimage`](@ref): must be already initialized
+- [`Camera`](@ref)
 """
 struct ImageTracer
     img::HDRimage
@@ -197,6 +226,8 @@ abstract type Shape end
 
 """
 A 3D unit sphere centered on the origin of the axes
+# Arguments
+- `T`: potentially [`Transformation`](@ref) associated to the sphere
 """
 struct Sphere <: Shape
     T::Transformation
@@ -220,9 +251,9 @@ end
 """
 A struct holding information about a ray-shape intersection
 The parameters defined in this struct are the following:
-- `world_point`: a :struct:`::Point` object holding the world coordinates of the hit point
-- `normal`: a :struct:`::Normal` object holding the orientation of the normal to the surface where the hit happened
-- `surface_point`: a :struct:`::Vec2d` object holding the position of the hit point on the surface of the object
+- `world_point`: a :struct:`Point` object holding the world coordinates of the hit point
+- `normal`: a :struct:`Normal` object holding the orientation of the normal to the surface where the hit happened
+- `surface_point`: a :struct:`Vec2d` object holding the position of the hit point on the surface of the object
 - `t`: a floating-point value specifying the distance from the origin of the ray where the hit happened
 - `ray`: the ray that hit the surface
 """
@@ -238,8 +269,8 @@ end
 
 """
 A class holding a list of shapes, which make a «world»
-You can add shapes to a world using `add_shape(::World, ::Shape)` ([`add_shape`](@ref)).
-Typically, you call `ray_intersection(::World, ::Ray)` ([`ray_intersection`](@ref))
+You can add shapes to a world using [`add_shape`](@ref)([`World`](@ref), [`Shape`](@ref)).
+Typically, you call [`ray_intersection`](@ref)([`World`](@ref), [`Ray`](@ref))
 to check whether a light ray intersects any of the shapes in the world.
 """
 struct World
