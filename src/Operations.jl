@@ -50,7 +50,12 @@ Base.:*(scalar::Real, c::RGB{T}) where {T} = RGB(scalar*c.r , scalar*c.g, scalar
 Base.:*(c::RGB{T}, scalar::Real) where {T} = scalar * c
 Base.:/(c::RGB{T}, scalar::Real) where {T} = RGB(c.r/scalar , c.g/scalar, c.b/scalar)
 
-# Definitions of operations for Vec
+# operations for Point
+Base.:*(s::Real, a::Point) = Point(s*a.x, s*a.y, s*a.z)
+Base.:*(a::Point, s::Real) = Point(s*a.x, s*a.y, s*a.z)
+Base.:/(a::Point, s::Real) = Point(a.x/s, a.y/s, a.z/s)
+
+# operations for Vec
 Base.:+(a::Vec, b::Vec) = Vec(a.x+b.x, a.y+b.y, a.z+b.z)
 Base.:-(a::Vec, b::Vec) = Vec(a.x-b.x, a.y-b.y, a.z-b.z)
 Base.:-(a::Vec) = Vec(-a.x, -a.y, -a.z)
@@ -60,39 +65,62 @@ Base.:/(a::Vec, s::Real) = Vec(a.x/s, a.y/s, a.z/s)
 LinearAlgebra.:⋅(a::Vec, b::Vec) = a.x*b.x + a.y*b.y + a.z*b.z
 LinearAlgebra.:×(a::Vec, b::Vec) = Vec(a.y*b.z-a.z*b.y, b.x*a.z-a.x*b.z, a.x*b.y-a.y*b.x)
 
-# Definitions of operations for Normal
+# operations for Normal
 Base.:-(a::Normal) = Normal(-a.x, -a.y, -a.z)
 
 # Definitions of operations between Vec and Point
 Base.:+(p::Point, v::Vec) = Point(p.x+v.x, p.y+v.y, p.z+v.z)
-# Base.:+(v::Vec, p::Point) = Point(p.x+v.x, p.y+v.y, p.z+v.z)
+Base.:+(v::Vec, p::Point) = Point(p.x+v.x, p.y+v.y, p.z+v.z)
 Base.:-(p::Point, v::Vec) = Point(p.x-v.x, p.y-v.y, p.z-v.z)
-Base.:*(s::Real, a::Point) = Point(s*a.x, s*a.y, s*a.z)
-Base.:*(a::Point, s::Real) = Point(s*a.x, s*a.y, s*a.z)
 Base.:-(a::Point, b::Point) = Vec(b.x-a.x, b.y-a.y, b.z-a.z)
 
 # Definitions of operations for Transformations
 Base.:*(s::Transformation, t::Transformation) = Transformation(s.M*t.M, t.invM*s.invM)
 function Base.:*(t::Transformation, p::Point)
-    q = Point(t.M[1] * p.x + t.M[5] * p.y + t.M[9] * p.z +t.M[13],
-              t.M[2] * p.x + t.M[6] * p.y + t.M[10] * p.z +t.M[14],
-              t.M[3] * p.x + t.M[7] * p.y + t.M[11] * p.z +t.M[15]
-    )
+    PV = SVector{4, Float64}(p.x, p.y, p.z, 1)
+    res = t.M*PV
+    (res[end] == 1) || (res /= res[end])
+    Point(res)
+
+    #= metodo 2
+    @inbounds q =  Point(t.M[1] * p.x + t.M[5] * p.y + t.M[9] * p.z +t.M[13],
+                t.M[2] * p.x + t.M[6] * p.y + t.M[10] * p.z +t.M[14],
+                t.M[3] * p.x + t.M[7] * p.y + t.M[11] * p.z +t.M[15]
+                )   
+    @inbounds λ = t.M[4] * p.x + t.M[8] * p.y + t.M[12] * p.z + t.M[16]
+    λ == 1.0 ? (return q) : (return q/λ)
+    =#
+    #= metodo 1
+    q =  Point(t.M[1] * p.x + t.M[5] * p.y + t.M[9] * p.z +t.M[13],
+                    t.M[2] * p.x + t.M[6] * p.y + t.M[10] * p.z +t.M[14],
+                    t.M[3] * p.x + t.M[7] * p.y + t.M[11] * p.z +t.M[15]
+                    ) 
     λ = t.M[4] * p.x + t.M[8] * p.y + t.M[12] * p.z + t.M[16]
     λ == 1.0 ? (return q) : (return q/λ)
+    =#
 end
 function Base.:*(t::Transformation, p::Vec)
+    VV = SVector{4, Float64}(p.x, p.y, p.z, 0)
+    res = t.M*VV
+    Vec(res)
+    #=
     Vec(t.M[1] * p.x + t.M[5] * p.y + t.M[9]  * p.z, 
         t.M[2] * p.x + t.M[6] * p.y + t.M[10] * p.z, 
         t.M[3] * p.x + t.M[7] * p.y + t.M[11] * p.z)
+        =#
 end
 function Base.:*(t::Transformation, n::Normal)
+    NV = SVector{4, Float64}(n.x, n.y, n.z, 0)
+    Normal(transpose(t.invM)*NV)
+    #Normal(transpose(@view(t.invM[1:3,1:3])) * NV)
+    #=
     Mat = transpose(t.invM)
     l = Normal(Mat[1] * n.x + Mat[5] * n.y + Mat[9]  *n.z,
-               Mat[2] * n.x + Mat[6] * n.y + Mat[10] *n.z,
-               Mat[3] * n.x + Mat[7] * n.y + Mat[11] *n.z
+                Mat[2] * n.x + Mat[6] * n.y + Mat[10] *n.z,
+                Mat[3] * n.x + Mat[7] * n.y + Mat[11] *n.z
     )
     return l
+    =#
 end
 Base.:*(t::Transformation, r::Ray) = Ray(t * r.origin, t*r.dir, r.tmin, r.tmax, r.depth)
 Base.:*(r::Ray, t::Transformation) = t*r

@@ -80,6 +80,7 @@ struct Point
     z::Float64
     Point(x, y, z) = new(x, y, z)
     Point() = new(0., 0. ,0.)
+    Point(v::SVector{4, Float64}) = new(v[1], v[2], v[3])
 end
 
 ##########################################################################################92
@@ -96,15 +97,16 @@ struct Vec
     y::Float64
     z::Float64
     Vec(x, y, z) = new(x, y, z)
-    Vec()=new(0.0, 0.0, 0.0)
+    Vec() = new(0.0, 0.0, 0.0)
     Vec(P::Point) = new(P.x, P.y, P.z)
+    Vec(v::SVector{4, Float64}) = new(v[1], v[2], v[3])
 end
 
 ##########################################################################################92
 
-VEC_X = Vec(1.0, 0.0, 0.0) # ̂x
-VEC_Y = Vec(0.0, 1.0, 0.0) # ̂y
-VEC_Z = Vec(0.0, 0.0, 1.0) # ̂z
+const VEC_X = Vec(1.0, 0.0, 0.0) # ̂x
+const VEC_Y = Vec(0.0, 1.0, 0.0) # ̂y
+const VEC_Z = Vec(0.0, 0.0, 1.0) # ̂z
 
 ##########################################################################################92
 
@@ -123,6 +125,15 @@ struct Normal
     function Normal(x, y, z)
         m = √(x^2+y^2+z^2)
         new(x/m, y/m, z/m)
+    end
+    function Normal(v::Vector{Float64})
+        @assert length(v) == 3
+        m = √(v[1]^2+v[2]^2+v[3]^2)
+        new(v[1]/m, v[2]/m, v[3]/m)
+    end
+    function Normal(v::SVector{4,Float64})
+        m = √(v[1]^2+v[2]^2+v[3]^2)
+        new(v[1]/m, v[2]/m, v[3]/m)
     end
 end
 
