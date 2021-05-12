@@ -118,8 +118,8 @@ end # scaling
 """
     translation(v::Vec) -> Transformation
 
-Return a `Transformation` object encoding a rigid translation.
-The parameter `Vec` specifies the amount of shift to be applied along the three axes.
+Return a [`Transformation`](@ref) object encoding a rigid translation.
+The parameter [`Vec`](@ref) specifies the amount of shift to be applied along the three axes.
 """    
 function translation(v::Vec)
    Transformation(
@@ -152,7 +152,7 @@ end # inverse
 """
     is_consistent(T::Transformation) -> Bool
 
-Check the internal consistency of the transformation, returning a bool variable indicating
+Check the internal consistency of the [`Transformation`](@ref), returning a bool variable indicating
 whether `T.M==T.invM`.
 This method is useful when writing tests.
 """

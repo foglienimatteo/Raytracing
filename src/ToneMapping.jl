@@ -33,7 +33,7 @@ luminosity(c::RGB{T}) where {T} = (max(c.r, c.g, c.b) + min(c.r, c.g, c.b))/2.
     avg_lum(img::HDRimage, δ::Number=1e-10) -> Float64
 
 Return the average luminosity of the image
-The `delta` parameter is used to prevent  numerical problems for underilluminated pixels
+The `δ` parameter is used to prevent  numerical problems for underilluminated pixels
 """
 function avg_lum(img::HDRimage, δ::Number=1e-10)
     cumsum=0.0
@@ -49,8 +49,8 @@ end # avg_lum
     normalize_image!(img::HDRimage, a::Number=0.18, lum::Union{Number, Nothing}=nothing,
     δ::Number=1e-10)
 
-Normalize all the RGB components of a `::HDRimage` with its average luminosity
-(given by avg_lum(`::HDRimage`, `::Number`)) and a factor 'a' (by default a=0.18,
+Normalize all the RGB components of a [`HDRimage`](@ref) with its average luminosity
+(given by [`avg_lum`](@ref)(`::HDRimage`, `::Number`)) and a factor 'a' (by default a=0.18,
 can be changed).
 """
 function normalize_image!(img::HDRimage, a::Number=0.18,
@@ -76,6 +76,8 @@ clamp(x::Number) = x/(x+1)
     clamp_image!(img::HDRimage)
 
 Adjust the color levels of the brightest pixels in the image.
+
+See also: [`HDRimage`](@ref)
 """
 function clamp_image!(img::HDRimage)
     h=img.height
@@ -99,7 +101,9 @@ and putput signals of a monitor/screen.
 
 As third optional argument, you can pass the maximum value 'k' of the range you want the
 RGB colors may have. The default value is 'k=1.0', so the range RGB colors can span
-is '[0.0, 1.0]'.
+is '[0.0, 1.0]'
+
+See also: [`HDRimage`](@ref), [`get_pixel`](@ref)(::HDRimage, ::Int, ::Int), [`set_pixel`](@ref)(::HDRimage, ::Int, ::Int, ::RGB{T})
 """
 function γ_correction!(img::HDRimage, γ::Float64=1.0, k::Float64=1.)
     h=img.height

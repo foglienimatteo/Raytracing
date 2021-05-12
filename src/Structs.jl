@@ -251,11 +251,11 @@ end
 """
 A struct holding information about a ray-shape intersection
 The parameters defined in this struct are the following:
-- `world_point`: a :struct:`Point` object holding the world coordinates of the hit point
-- `normal`: a :struct:`Normal` object holding the orientation of the normal to the surface where the hit happened
-- `surface_point`: a :struct:`Vec2d` object holding the position of the hit point on the surface of the object
-- `t`: a floating-point value specifying the distance from the origin of the ray where the hit happened
-- `ray`: the ray that hit the surface
+- `world_point`: a [`Point`](@ref) object holding the world coordinates of the hit point
+- `normal`: a [`Normal`](@ref) object holding the orientation of the normal to the surface where the hit happened
+- `surface_point`: a [`Vec2d`](@ref) object holding the position of the hit point on the surface of the object
+- `t`: a `Float64` value specifying the distance from the origin of the ray where the hit happened
+- `ray`: the [`Ray`](@ref) that hit the surface
 """
 struct HitRecord
     world_point::Point # obserator frame sistem
@@ -275,7 +275,7 @@ end
 ##########################################################################################92
 
 """
-A class holding a list of shapes, which make a «world»
+A struct holding a list of shapes, which make a «world»
 You can add shapes to a world using [`add_shape`](@ref)([`World`](@ref), [`Shape`](@ref)).
 Typically, you call [`ray_intersection`](@ref)([`World`](@ref), [`Ray`](@ref))
 to check whether a light ray intersects any of the shapes in the world.

@@ -21,7 +21,7 @@
 """
     valid_coordinates(hdr::HDRimage, x::Int, y::Int) -> Bool
 
-Return True if ``(x, y)`` are coordinates within the 2D matrix
+Return `True` if ``(x, y)`` are coordinates within the 2D matrix (in [`HDRimage`](@ref))
 """
 valid_coordinates(hdr::HDRimage, x::Int, y::Int) = x>=0 && y>=0 && x<hdr.width && y<hdr.height
 
@@ -97,8 +97,8 @@ end # write(::IO, ::HDRimage)
 """
     parse_img_size(line::String) -> (Int64, Int64)
 
-Can interpret the size of an image from a PFM file. Needs a ::String,
-obtained from read_line(::IO).
+Can interpret the size of an image from a PFM file. Needs a `String`,
+obtained from [`read_line`](@ref)(::IO)
 """
 function parse_img_size(line::String)
     elements = split(line, " ")
@@ -126,7 +126,7 @@ end # parse_img_size
 """
     parse_endianness(ess::String) -> Float64
 
-Can understand the endianness of a file; needs a ::String, obtained from read_line(::IO).
+Can understand the endianness of a file; needs a `String`, obtained from [`read_line`](@ref)(`::IO`).
 Returns error if the number is different from ±1.0.
 """
 function parse_endianness(ess::String)
@@ -147,8 +147,8 @@ end # parse_endianness
 """
     read_float(io::IO, ess::Float64) -> Float32
 
-Can interpret numbers from a string; needs as input a ::IO and the endianness (as ±1.0).
-Reads numbers as ::Float32; controls if there are enough bits in order to form a Float32,
+Can interpret numbers from a string; needs as input a `IO` and the endianness (as ±1.0).
+Reads numbers as `Float32`; controls if there are enough bits in order to form a `Float32`,
 otherwise returns an error.
 """
 function read_float(io::IO, ess::Float64)
@@ -168,7 +168,7 @@ end # read_float
 """
     read_line(io::IO) -> String
 
-Reads aline from a file, given as a ::IO. Can understand when the file is ended and when
+Reads aline from a file, given as a `IO`. Can understand when the file is ended and when
 a new line begins.
 """
 function read_line(io::IO)
@@ -189,13 +189,11 @@ end # read_line
     read(io::IO, ::Type{HDRimage}) -> HDRimage
 
 Read a PFM image from a stream
-Return a ``HdrImage`` object containing the image. If an error occurs, raise a
+Return a [`HDRimage`](@ref) object containing the image. If an error occurs, raise a
 ``InvalidPfmFileFormat`` exception.
-Other functions used:
-- read_line(::IO)
-- parse_image_size(::String)
-- parse_endianness(::String)
-- read_float(::IO, ::Float64)
+
+See also: [`read_line`](@ref)(`::IO`), [`parse_image_size`](@ref)(`::String`),
+[`parse_endianness`](@ref)(`::String`), [`read_float`](@ref)(`::IO, `::Float64`)
 """
 function read(io::IO, ::Type{HDRimage})
     magic = read_line(io)
@@ -231,10 +229,12 @@ end # read_pfm_image(::IO)
     parse_command_line(ARGS) -> (String, String, Float64, Float64)
 
 Can interpret the command line when the main is executed.
-It's necessary to give the input .pfm file and the name of the .png file you want.
-You can give also:
-- the 'a' factor (default 0.18, used in normalize_image!(::HDRimage, ::Number, :Union{Number, Nothing}, Number)
-- the γ factor (default 1.0, used in γ_correction!(::HDR, ::Float64, ::Float64)
+
+# Arguments
+- input file name, must be a PFM format
+- outfile format name, can be a PNG or TIFF image format
+- [`a`] factor for luminosity correction (default 0.18, used in [`normalize_image!`](@ref))(`::HDRimage`, `::Number`, `::Union`{`Number`, `nothing`}, `::Number`)
+- [`γ`] factor for screen correction (default 1.0, used in [`γ_correction!`](`::HDR`, `::Float64`, `::Float64`)
 """
 function parse_command_line(args)
     (isempty(args) || length(args)==1 || length(args)>4) && throw(Exception)	  
