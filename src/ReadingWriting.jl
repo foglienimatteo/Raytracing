@@ -146,10 +146,12 @@ end # parse_endianness
 
 """
     read_float(io::IO, ess::Float64) -> Float32
+    
+Read a `Float32` from a given IO stream `io` with the (required) endianness `ess`; `ess`
+must be `+1.0` (Big Endian) or `-1.0` (Little Endian).
 
-Can interpret numbers from a string; needs as input a `IO` and the endianness (as ±1.0).
-Reads numbers as `Float32`; controls if there are enough bits in order to form a `Float32`,
-otherwise returns an error.
+Controls also if there are enough bits in order to form a `Float32`, 
+otherwise throw `InvalidPfmFileFormat`.
 """
 function read_float(io::IO, ess::Float64)
     # controllo che in ingresso abbia una stringa che sia cnovertibile in Float32
@@ -161,15 +163,16 @@ function read_float(io::IO, ess::Float64)
     catch e
         throw(InvalidPfmFileFormat("color is not Float32, it's a $(typeof(io))"))  # ess → io
     end
-end # read_float
+end 
 
 ##########################################################################################92
 
 """
     read_line(io::IO) -> String
 
-Reads aline from a file, given as a `IO`. Can understand when the file is ended and when
-a new line begins.
+Reads a line from the file whose the given IO object `io` refers to. 
+Do understand when the file is ended and when a new line begins.
+Return the readed line as a `String`.
 """
 function read_line(io::IO)
     result = b""
@@ -181,14 +184,14 @@ function read_line(io::IO)
         result = vcat(result, cur_byte)  
     end
     return String(result)
-end # read_line
+end
 
 ##########################################################################################92
 
 """
     read(io::IO, ::Type{HDRimage}) -> HDRimage
 
-Read a PFM image from a stream
+Read a PFM image from a stream object `io`.
 Return a [`HDRimage`](@ref) object containing the image. If an error occurs, raise a
 ``InvalidPfmFileFormat`` exception.
 
@@ -198,9 +201,8 @@ See also: [`read_line`](@ref)(`::IO`), [`parse_image_size`](@ref)(`::String`),
 function read(io::IO, ::Type{HDRimage})
     magic = read_line(io)
     # lettura numero magico
-    magic == "PF" || throw(InvalidPfmFileFormat("invalid magic number in PFM file: 
-                                                 $(magic) instead of 'PF'.\n")
-    )
+    magic == "PF" || throw(InvalidPfmFileFormat("invalid magic number in PFM file:"* 
+                                                 "$(magic) instead of 'PF'.\n"))
     
     # lettura dimensioni immagine
     img_size = read_line(io)
@@ -221,22 +223,30 @@ function read(io::IO, ::Type{HDRimage})
     end
 
     return result
-end # read_pfm_image(::IO)
+end 
 
 ##########################################################################################92
 
 """
-    parse_command_line(ARGS) -> (String, String, Float64, Float64)
+    parse_command_line((args::Vector{String}) -> (String, String, Float64, Float64)
 
-Can interpret the command line when the main is executed.
+Interpret the command line when the main is executed, 
+and manage eventual argument errors.
 
 # Arguments
-- input file name, must be a PFM format
-- outfile format name, can be a PNG or TIFF image format
-- [`a`] factor for luminosity correction (default 0.18, used in [`normalize_image!`](@ref))(`::HDRimage`, `::Number`, `::Union`{`Number`, `nothing`}, `::Number`)
-- [`γ`] factor for screen correction (default 1.0, used in [`γ_correction!`](`::HDR`, `::Float64`, `::Float64`)
+An array of strings, with length 2, 3 or 4, cointaining:
+- first string (required): input file name, must be a PFM format
+- second string (required): output filename, its format can be PNG or TIFF
+- [`a`] : scale  factor for luminosity correction (default 0.18, 
+used in [`normalize_image!`](@ref))
+- [`γ`] : gamma factor for screen correction (default 1.0, used in [`γ_correction!`](@ref)
+
+# Returns
+A tuple `(infile, outfile, a, γ)`, with `a` and `γ` with type `Float64`
+
+See also : [`normalize_image!`](@ref)), [`γ_correction!`](@ref)
 """
-function parse_command_line(args)
+function parse_command_line(args::Vector{String})
     (isempty(args) || length(args)==1 || length(args)>4) && throw(Exception)	  
     infile = nothing; outfile = nothing; a=0.18; γ=1.0
     try
@@ -254,7 +264,8 @@ function parse_command_line(args)
             a = parse(Float64, args[3])
             a > 0. || throw(Exception)
         catch e
-            throw(InvalidArgumentError("invalid value for a: $(args[3])  must be a positive number"))
+            throw(InvalidArgumentError(
+                "invalid value for a: $(args[3])  must be a positive number"))
         end
 
         if length(args) == 4
@@ -262,7 +273,8 @@ function parse_command_line(args)
                 γ = parse(Float64, args[4])
                 γ > 0. || throw(Exception)
             catch e
-                throw(InvalidArgumentError("invalid value for γ: $(args[4])  must be a positive number"))
+                throw(InvalidArgumentError(
+                    "invalid value for γ: $(args[4])  must be a positive number"))
             end
         end
     end
@@ -274,11 +286,12 @@ end
 ##########################################################################################92
 
 """
-    parse_tonemapping_settings(dict::Dict{String, Any}) -> (pfm, png, a, γ)
+    parse_tonemapping_settings(dict::Dict{String, Any}) 
+        -> (String, String, Float64, Float64)
 
 Parse a `Dict{String, Any}` for the [`tone_mapping`](@ref) function;
-return a tuple containing the pfm input filename `pfm`, the LDR output filename `png`, the  
-scale factor `a` and the gamma factor `γ`.
+return a tuple `(pfm, png, a, γ)` containing the pfm input filename `pfm`, 
+the LDR output filename `png`, the scale factor `a` and the gamma factor `γ`.
 
 The keys for the input `Dict` are, respectively: "alpha", "gamma", "pfm_infile", "outfile"
 
@@ -293,10 +306,11 @@ function parse_tonemapping_settings(dict::Dict{String, Any})
 end
 
 """
-    parse_demo_settings(dict::Dict{String, Any}) -> (view_ort, α, w, h, pfm, png)
+    parse_demo_settings(dict::Dict{String, Any}) 
+        -> (Bool, Float64, Int64, Int64, String, String)
 
 Parse a `Dict{String, Any}` for the [`demo`](@ref) function;
-return a tuple containing a bool `view_ort` for the choosen point of view
+return a tuple `(view_ort, α, w, h, pfm, png)` containing a bool `view_ort` for the choosen point of view
 (`true`->Orthogonal, `false`->Perspective), the angle of view `α`, the number of pixels
 on width `w` and height `h`, the pfm output filename `pfm` and the LDR
 output filename `png`.
@@ -328,10 +342,11 @@ end
 
 
 """
-    parse_demoanimation_settings(dict::Dict{String, Any}) -> (view_ort, w, h, anim)
+    parse_demoanimation_settings(dict::Dict{String, Any}) 
+        -> (Bool, Int64, Int64, String)
 
 Parse a `Dict{String, Any}` for the [`demo_animation`](@ref) function;
-return a tuple containing a bool `view_ort` for the choosen point of view
+return a tuple `(view_ort, w, h, anim)` containing a bool `view_ort` for the choosen point of view
 (`true`->Orthogonal, `false`->Perspective), the number of pixels
 on width `w` and height `h` and the output animation name `anim`.
 
