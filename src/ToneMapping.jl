@@ -50,7 +50,7 @@ end # avg_lum
     δ::Number=1e-10)
 
 Normalize all the RGB components of a [`HDRimage`](@ref) with its average luminosity
-(given by [`avg_lum`](@ref)(`::HDRimage`, `::Number`)) and a factor 'a' (by default a=0.18,
+(given by [`avg_lum`](@ref)(`::HDRimage`, `::Number`)) and the scale factor 'a' (by default a=0.18,
 can be changed).
 """
 function normalize_image!(img::HDRimage, a::Number=0.18,

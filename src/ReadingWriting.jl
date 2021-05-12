@@ -273,7 +273,17 @@ end
 
 ##########################################################################################92
 
+"""
+    parse_tonemapping_settings(dict::Dict{String, Any}) -> (pfm, png, a, γ)
 
+Parse a `Dict{String, Any}` for the [`tone_mapping`](@ref) function;
+return a tuple containing the pfm input filename `pfm`, the LDR output filename `png`, the  
+scale factor `a` and the gamma factor `γ`.
+
+The keys for the input `Dict` are, respectively: "alpha", "gamma", "pfm_infile", "outfile"
+
+See also:  [`tone_mapping`](@ref)
+"""
 function parse_tonemapping_settings(dict::Dict{String, Any})
     a::Float64 = dict["alpha"]
     γ::Float64 = dict["gamma"]
@@ -282,6 +292,20 @@ function parse_tonemapping_settings(dict::Dict{String, Any})
     return (pfm, png, a, γ)
 end
 
+"""
+    parse_demo_settings(dict::Dict{String, Any}) -> (view_ort, α, w, h, pfm, png)
+
+Parse a `Dict{String, Any}` for the [`demo`](@ref) function;
+return a tuple containing a bool `view_ort` for the choosen point of view
+(`true`->Orthogonal, `false`->Perspective), the angle of view `α`, the number of pixels
+on width `w` and height `h`, the pfm output filename `pfm` and the LDR
+output filename `png`.
+
+The keys for the input `Dict` are, respectively: "orthogonal", "perspective", "alpha",
+ "width", "height", "set-pfm-name", "set-png-name"
+
+See also:  [`demo`](@ref)
+"""
 function parse_demo_settings(dict::Dict{String, Any})
     ort::Bool = dict["orthogonal"]
     per::Bool = dict["perspective"]
@@ -303,7 +327,19 @@ function parse_demo_settings(dict::Dict{String, Any})
 end
 
 
+"""
+    parse_demoanimation_settings(dict::Dict{String, Any}) -> (view_ort, w, h, anim)
 
+Parse a `Dict{String, Any}` for the [`demo_animation`](@ref) function;
+return a tuple containing a bool `view_ort` for the choosen point of view
+(`true`->Orthogonal, `false`->Perspective), the number of pixels
+on width `w` and height `h` and the output animation name `anim`.
+
+The keys for the input `Dict` are, respectively: "orthogonal", "perspective",
+ "width", "height", "set-anim-name"
+
+See also:  [`demo_animation`](@ref), [`demo`](@ref)
+"""
 function parse_demoanimation_settings(dict::Dict{String, Any})
     ort::Bool = dict["orthogonal"]
     per::Bool = dict["perspective"]
