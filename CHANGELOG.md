@@ -1,4 +1,5 @@
 # HEAD
+- Modified operation between `Transformation` and `Normal`, `Vec` and `Point` for time optimization
 - Added test for World, modified test for Sphere
 - Added feature: now can create an animation
 - New interface from command line
