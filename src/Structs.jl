@@ -232,6 +232,13 @@ struct HitRecord
     surface_point::Vec2d
     t::Float64
     ray::Ray
+    HitRecord(w,n,s,t,r) =  new(w,n,s,t,r)
+    #=
+    function HitRecord(w,n,s,t,r) 
+        norm = normalize(n)
+        new(w,norm,s,t,r)
+    end
+    =#
 end
 
 ##########################################################################################92

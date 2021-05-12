@@ -57,7 +57,7 @@ end
 
 function ArgParse_command_line(arguments)
 	s = ArgParseSettings()
-	s.description = "Raytracing for the generation of photorealistic images in Julia."
+	s.description = "Raytracer for the generation of photorealistic images in Julia."
 	s.exc_handler = parse_commandline_error_handler
 	s.version = @project_version
 	#s.version = "0.1.0"
@@ -101,8 +101,8 @@ function ArgParse_command_line(arguments)
 					"of the left face and the last in the lower one."*
 					"Execute it in order to check the correct placement of the spheres."
 	add_arg_group!(s["demo"], "demo mutually exclusive flags for the viewpoint tipe", exclusive=true)
-    @add_arg_table! s["demo"] begin
-    	"--orthogonal", "--ort"
+    	@add_arg_table! s["demo"] begin
+    		"--orthogonal", "--ort"
 			help = "flag for the Orthogonal projection view"
           	action = :store_true
 		"--perspective", "--per"

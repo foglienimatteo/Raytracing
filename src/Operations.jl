@@ -97,6 +97,6 @@ end
 Base.:*(t::Transformation, r::Ray) = Ray(t * r.origin, t*r.dir, r.tmin, r.tmax, r.depth)
 Base.:*(r::Ray, t::Transformation) = t*r
 
-squared_norm(v::Union{Vec,Point}) = v.x^2 + v.y^2 + v.z^2
-norm(v::Union{Vec,Point}) = √squared_norm(v)
-normalize(v::Vec) = v/norm(v)
+squared_norm(v::Union{Vec,Point, Normal}) = v.x^2 + v.y^2 + v.z^2
+norm(v::Union{Vec,Point,Normal}) = √squared_norm(v)
+normalize(v::Union{Vec, Normal}) = v/norm(v)
