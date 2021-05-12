@@ -57,8 +57,7 @@ Compute the normal of a unit sphere
 
 The normal is computed for `point` (a point on the surface of the
 sphere), and it is chosen so that it is always in the opposite
-direction with respect to `ray.dir`.
-
+direction with respect to `ray_dir`.
 """
 function sphere_normal(point::Point, ray_dir::Vec)
     result = Normal(point.x, point.y, point.z)
@@ -73,7 +72,7 @@ end
 
 Checks if a ray intersects the sphere
 
-Return a :struct:`::HitRecord`, or `::nothing` if no intersection was found.
+Return a :struct:`HitRecord`, or `nothing` if no intersection was found.
 """
 function ray_intersection(sphere::Sphere, ray::Ray)
     inv_ray = inverse(sphere.T) * ray
@@ -112,7 +111,7 @@ end
 """
     add_shape(W::World, S::Shape)
 
-Append a new shape to a world
+Append a new shape to this world
 """
 function add_shape(W::World, S::Shape)
     push!(W.shapes, S)
@@ -133,10 +132,10 @@ function ray_intersection(world::World, ray::Ray)
         intersection = ray_intersection(shape, ray)
 
         # The ray missed this shape, skip to the next one
-        !(intersection == nothing) || continue
+        !(isnothing(intersection)) || continue
 
         # There was a hit, and it was closer than any other hit found before
-        ( (closest == nothing) || (intersection.t < closest.t) ) &&  (closest = intersection)
+        ( isnothing(closest) || (intersection.t < closest.t) ) &&  (closest = intersection)
     end
     
     return closest

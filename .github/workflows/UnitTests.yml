@@ -17,10 +17,12 @@
 
 name: Unit tests
 
-on:
-  push:
-    branches:
-      - demo
+on: [push]
+
+#on:
+#  push:
+#    branches:
+#      - demo
 
 jobs:
   test:
