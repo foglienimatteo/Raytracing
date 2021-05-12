@@ -21,7 +21,7 @@
 """
     valid_coordinates(hdr::HDRimage, x::Int, y::Int) -> Bool
 
-    Return True if ``(x, y)`` are coordinates within the 2D matrix
+Return True if ``(x, y)`` are coordinates within the 2D matrix
 """
 valid_coordinates(hdr::HDRimage, x::Int, y::Int) = x>=0 && y>=0 && x<hdr.width && y<hdr.height
 
@@ -30,7 +30,7 @@ valid_coordinates(hdr::HDRimage, x::Int, y::Int) = x>=0 && y>=0 && x<hdr.width &
 """
     pixel_offset(hdr::HDRimage, x::Int, y::Int) -> Int64
 
-    Return the position in the 1D array of the specified pixel
+Return the position in the 1D array of the specified pixel
 """
 pixel_offset(hdr::HDRimage, x::Int, y::Int) = (@assert valid_coordinates(hdr, x, y); y*hdr.width + (x+1) )
 
@@ -39,8 +39,8 @@ pixel_offset(hdr::HDRimage, x::Int, y::Int) = (@assert valid_coordinates(hdr, x,
 """
     get_pixel(hdr::HDRimage, x::Int, y::Int) -> RBG{Float32}
 
-    Return the `Color` value for a pixel in the image
-    The pixel at the top-left corner has coordinates (0, 0).
+Return the `Color` value for a pixel in the image
+The pixel at the top-left corner has coordinates (0, 0).
 """
 get_pixel(hdr::HDRimage, x::Int, y::Int) = hdr.rgb_m[pixel_offset(hdr, x, y)]
 
@@ -49,8 +49,8 @@ get_pixel(hdr::HDRimage, x::Int, y::Int) = hdr.rgb_m[pixel_offset(hdr, x, y)]
 """
     set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{T})
 
-    Set the new color for a pixel in the image
-    The pixel at the top-left corner has coordinates (0, 0).
+Set the new color for a pixel in the image
+The pixel at the top-left corner has coordinates (0, 0).
 """
 set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{T}) where {T} = (hdr.rgb_m[pixel_offset(hdr, x,y)] = c; nothing)
 
@@ -65,9 +65,9 @@ end #InvalidPfmFileFormat
 """
     write(io::IO, img::HDRimage)
 
-    Write the image in a PFM file
-    The `stream` parameter must be a I/O stream. The parameter `endianness` specifies the
-    byte endianness to be used in the file.
+Write the image in a PFM file
+The `stream` parameter must be a I/O stream. The parameter `endianness` specifies the
+byte endianness to be used in the file.
 """
 function write(io::IO, img::HDRimage)
     endianness=-1.0
@@ -97,8 +97,8 @@ end # write(::IO, ::HDRimage)
 """
     parse_img_size(line::String) -> (Int64, Int64)
 
-    Can interpret the size of an image from a PFM file. Needs a ::String,
-    obtained from read_line(::IO).
+Can interpret the size of an image from a PFM file. Needs a ::String,
+obtained from read_line(::IO).
 """
 function parse_img_size(line::String)
     elements = split(line, " ")
@@ -110,10 +110,10 @@ function parse_img_size(line::String)
         (width > 0 && height > 0) || throw(ErrorException)
         return width, height
     catch e
-        isa(e, InexactError) || throw(InvalidPfmFileFormat("cannot convert width/heigth
+        isa(e, InexactError) || throw(InvalidPfmFileFormat("cannot convert width/height
                                                             $(elements) to Tuple{Int, Int}")
         )
-        isa(e, ErrorException) || throw(InvalidPfmFileFormat("width/heigth cannot be negative,
+        isa(e, ErrorException) || throw(InvalidPfmFileFormat("width/height cannot be negative,
                                                               but in $(elements) at least one
                                                               of them is <0.")
         )
@@ -126,8 +126,8 @@ end # parse_img_size
 """
     parse_endianness(ess::String) -> Float64
 
-    Can understand the endianness of a file; needs a ::String, obtained from read_line(::IO).
-    Returns error if the number is different from ±1.0.
+Can understand the endianness of a file; needs a ::String, obtained from read_line(::IO).
+Returns error if the number is different from ±1.0.
 """
 function parse_endianness(ess::String)
     try
@@ -168,8 +168,8 @@ end # read_float
 """
     read_line(io::IO) -> String
 
-    Reads aline from a file, given as a ::IO. Can understand when the file is ended and when
-    a new line begins.
+Reads aline from a file, given as a ::IO. Can understand when the file is ended and when
+a new line begins.
 """
 function read_line(io::IO)
     result = b""
@@ -230,11 +230,11 @@ end # read_pfm_image(::IO)
 """
     parse_command_line(ARGS) -> (String, String, Float64, Float64)
 
-    Can interpret the command line when the main is executed.
-    It's necessary to give the input .pfm file and the name of the .png file you want.
-    You can give also:
-    - the 'a' factor (default 0.18, used in normalize_image!(::HDRimage, ::Number, :Union{Number, Nothing}, Number)
-    - the γ factor (default 1.0, used in γ_correction!(::HDR, ::Float64, ::Float64)
+Can interpret the command line when the main is executed.
+It's necessary to give the input .pfm file and the name of the .png file you want.
+You can give also:
+- the 'a' factor (default 0.18, used in normalize_image!(::HDRimage, ::Number, :Union{Number, Nothing}, Number)
+- the γ factor (default 1.0, used in γ_correction!(::HDR, ::Float64, ::Float64)
 """
 function parse_command_line(args)
     (isempty(args) || length(args)==1 || length(args)>4) && throw(Exception)	  
@@ -268,4 +268,56 @@ function parse_command_line(args)
     end
 
     return infile, outfile, a, γ
+end
+
+
+##########################################################################################92
+
+
+function parse_tonemapping_settings(dict::Dict{String, Any})
+    a::Float64 = dict["alpha"]
+    γ::Float64 = dict["gamma"]
+    pfm::String = dict["pfm_infile"]
+    png::String = dict["outfile"]
+    return (pfm, png, a, γ)
+end
+
+function parse_demo_settings(dict::Dict{String, Any})
+    ort::Bool = dict["orthogonal"]
+    per::Bool = dict["perspective"]
+    α::Float64 = dict["alpha"]
+    w::Int64 = dict["width"]
+    h::Int64 = dict["height"]
+    pfm::String = dict["set-pfm-name"]
+    png::String = dict["set-png-name"]
+
+    if ( (ort==true) || (ort==per==false) ) 
+        view_ort=true
+    elseif ((ort==false) && (per==true))
+        view_ort=false
+    else
+        view_ort=nothing
+    end
+
+    return (view_ort, α, w, h, pfm, png)
+end
+
+
+
+function parse_demoanimation_settings(dict::Dict{String, Any})
+    ort::Bool = dict["orthogonal"]
+    per::Bool = dict["perspective"]
+    w::Int64 = dict["width"]
+    h::Int64 = dict["height"]
+    anim::String = dict["set-anim-name"]
+
+    if ( (ort==true) || (ort==per==false) ) 
+        view_ort=true
+    elseif ((ort==false) && (per==true))
+        view_ort=false
+    else
+        view_ort=nothing
+    end
+
+    return (view_ort, w, h, anim)
 end

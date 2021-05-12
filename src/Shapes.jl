@@ -21,7 +21,7 @@
 """
     ray_intersection(shape::Shape, ray::Ray) -> ErrorException
 
-    Compute the intersection between a ray and a shape
+Compute the intersection between a ray and a shape
 """
 function ray_intersection(shape::Shape, ray::Ray)
     return ErrorException("ray_intersection is an abstract method
@@ -34,7 +34,7 @@ end
 """
     sphere_point_to_uv(point::Point) -> Vec2d
 
-    Convert a 3D point on the surface of the unit sphere into a (u, v) 2D point
+Convert a 3D point on the surface of the unit sphere into a (u, v) 2D point
 """
 function sphere_point_to_uv(point::Point)
     u = acos(point.z) / π
@@ -53,11 +53,11 @@ end
 """
     sphere_normal(point::Point, ray_dir::Vec) -> Normal
 
-    Compute the normal of a unit sphere
+Compute the normal of a unit sphere
 
-    The normal is computed for `point` (a point on the surface of the
-    sphere), and it is chosen so that it is always in the opposite
-    direction with respect to `ray.dir`.
+The normal is computed for `point` (a point on the surface of the
+sphere), and it is chosen so that it is always in the opposite
+direction with respect to `ray.dir`.
 
 """
 function sphere_normal(point::Point, ray_dir::Vec)
@@ -71,9 +71,9 @@ end
 """
     ray_intersection(sphere::Sphere, ray::Ray) -> HitRecord
 
-    Checks if a ray intersects the sphere
+Checks if a ray intersects the sphere
 
-    Return a :struct:`::HitRecord`, or `::nothing` if no intersection was found.
+Return a :struct:`::HitRecord`, or `::nothing` if no intersection was found.
 """
 function ray_intersection(sphere::Sphere, ray::Ray)
     inv_ray = inverse(sphere.T) * ray
@@ -112,7 +112,7 @@ end
 """
     add_shape(W::World, S::Shape)
 
-    Append a new shape to a world
+Append a new shape to a world
 """
 function add_shape(W::World, S::Shape)
     push!(W.shapes, S)
@@ -124,7 +124,7 @@ end
 """
     ray_intersection(world::World, ray::Ray) -> HitRecord
 
-    Determine whether a ray intersects any of the objects in this world
+Determine whether a ray intersects any of the objects in this world
 """
 function ray_intersection(world::World, ray::Ray)
     closest = nothing

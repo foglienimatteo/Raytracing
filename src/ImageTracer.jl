@@ -22,10 +22,10 @@
 """
     at(r::Ray, t::Float64) -> Point
 
-    Compute the point along the ray's path at some distance from the origin.
+Compute the point along the ray's path at some distance from the origin.
 
-    Return a :struct:`::Point` object representing the point in 3D space whose distance from the
-    ray's origin is equal to `t`, measured in units of the length of `Vec.dir`.
+Return a :struct:`::Point` object representing the point in 3D space whose distance from the
+ray's origin is equal to `t`, measured in units of the length of `Vec.dir`.
 """
 at(r::Ray, t::Float64) = r.origin + r.dir * t
 
@@ -61,22 +61,22 @@ end # fire_ray
     fire_ray(Pcam::PerspectiveCamera, u::Float64, v::Float64) -> Ray
     fire_ray(ImTr::ImageTracer, col::Int64, row::Int64, u_px::Float64=0.5, v_px::Float64=0.5) -> Ray
 
-    Shoot one light :struct:`::Ray` through the pixel (`col`, `row`) of `ImTr.img` image. 
-    The parameters (`col`, `row`) are measured in the same way as they are in the 
-    ([`HDRimage`](@ref)) struct: the bottom left corner is placed at `(0, 0)`.
+Shoot one light :struct:`::Ray` through the pixel (`col`, `row`) of `ImTr.img` image. 
+The parameters (`col`, `row`) are measured in the same way as they are in the 
+([`HDRimage`](@ref)) struct: the bottom left corner is placed at `(0, 0)`.
 
-    The optional values `u_px` and `v_px` specify where the ray should cross the pixel; 
-    the convenction for their values are represented in the following 
-    diagram as `(u_px, v_px)`:
-    ```ditaa
-    (0, 1)                          (1, 1)
-        +------------------------------+
-        |                              |
-        |                              |
-        |                              |
-        +------------------------------+
-    (0, 0)                          (1, 0)
-    ```
+The optional values `u_px` and `v_px` specify where the ray should cross the pixel; 
+the convenction for their values are represented in the following 
+diagram as `(u_px, v_px)`:
+```ditaa
+(0, 1)                          (1, 1)
+    +------------------------------+
+    |                              |
+    |                              |
+    |                              |
+    +------------------------------+
+(0, 0)                          (1, 0)
+```
 """
 fire_ray
 
@@ -85,11 +85,11 @@ fire_ray
 """
     fire_all_rays!(ImTr::ImageTracer, func::Function)
  
-    Shoot several light rays crossing each of the pixels in the `ImTr.img` image.
+Shoot several light rays crossing each of the pixels in the `ImTr.img` image.
 
-    For each pixel in the [`HDRimage`](@ref) object fire one [`Ray`](@ref), and pass it to
-    the function `func`, which must accept a `Ray` as its only parameter and must return 
-    a `::RGB{Float32}` color instance telling the color to assign to that pixel in the image.
+For each pixel in the [`HDRimage`](@ref) object fire one [`Ray`](@ref), and pass it to
+the function `func`, which must accept a `Ray` as its only parameter and must return 
+a `::RGB{Float32}` color instance telling the color to assign to that pixel in the image.
 """
 function fire_all_rays!(ImTr::ImageTracer, func::Function)
     for row in ImTr.img.height-1:-1:0, col in 0:ImTr.img.width-1

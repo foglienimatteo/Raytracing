@@ -20,7 +20,7 @@
 """
     are_close(x, y, epsilon=1e-10) -> Bool
 
-    Returns true if the difference between two numbers is smaller than 1e-10.
+Returns true if the difference between two numbers is smaller than 1e-10.
 """
 are_close(x, y, epsilon=1e-10) = abs(x-y) < epsilon
 

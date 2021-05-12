@@ -21,11 +21,11 @@
 """
     rotation_x(ϑ::Float64) -> Transformation
 
-    Return a `Transformation` object encoding a rotation around the x-axis; 
-    the parameter `ϑ` specifies the rotation angle _**in radiant**_. 
+Return a `Transformation` object encoding a rotation around the x-axis; 
+the parameter `ϑ` specifies the rotation angle _**in radiant**_. 
 
-    The positive sign is given by the right-hand rule, therefore clockwise
-    rotation for entering x-axis corresponds to a `ϑ>0` rotation angle. 
+The positive sign is given by the right-hand rule, therefore clockwise
+rotation for entering x-axis corresponds to a `ϑ>0` rotation angle. 
 """
 function rotation_x(ϑ::Float64) # ϑ is in radiant
     Transformation(
@@ -46,11 +46,11 @@ end # rotation_x
 """
     rotation_y(ϑ::Float64) -> Transformation
 
-    Return a `Transformation` object encoding a rotation around the y-axis; 
-    the parameter `ϑ` specifies the rotation angle _**in radiant**_. 
+Return a `Transformation` object encoding a rotation around the y-axis; 
+the parameter `ϑ` specifies the rotation angle _**in radiant**_. 
 
-    The positive sign is given by the right-hand rule, therefore clockwise
-    rotation for entering y-axis corresponds to a `ϑ>0` rotation angle. 
+The positive sign is given by the right-hand rule, therefore clockwise
+rotation for entering y-axis corresponds to a `ϑ>0` rotation angle. 
 """
 function rotation_y(ϑ::Float64) # ϑ is in radiant
     Transformation(
@@ -71,11 +71,11 @@ end # rotation_y
 """
     rotation_z(ϑ::Float64) -> Transformation
 
-    Return a `Transformation` object encoding a rotation around the z-axis; 
-    the parameter `ϑ` specifies the rotation angle _**in radiant**_. 
+Return a `Transformation` object encoding a rotation around the z-axis; 
+the parameter `ϑ` specifies the rotation angle _**in radiant**_. 
 
-    The positive sign is given by the right-hand rule, therefore clockwise
-    rotation for entering z-axis corresponds to a `ϑ>0` rotation angle. 
+The positive sign is given by the right-hand rule, therefore clockwise
+rotation for entering z-axis corresponds to a `ϑ>0` rotation angle. 
 """
 function rotation_z(ϑ::Float64) # ϑ is in radiant
     Transformation(
@@ -96,8 +96,8 @@ end # rotation_z
 """
     scaling(v::Vec)
     
-    Check the internal consistency of the transformation.
-    This method is useful when writing tests.
+Check the internal consistency of the transformation.
+This method is useful when writing tests.
 """
 function scaling(v::Vec)
     Transformation(
@@ -118,8 +118,8 @@ end # scaling
 """
     translation(v::Vec) -> Transformation
 
-    Return a `Transformation` object encoding a rigid translation.
-    The parameter `Vec` specifies the amount of shift to be applied along the three axes.
+Return a `Transformation` object encoding a rigid translation.
+The parameter `Vec` specifies the amount of shift to be applied along the three axes.
 """    
 function translation(v::Vec)
    Transformation(
@@ -140,8 +140,8 @@ end # translation
 """
     inverse(T::Transformation) -> Transformation
 
-    Return a `Transformation` object representing the inverse affine transformation.
-    This method is very cheap to call.
+Return a `Transformation` object representing the inverse affine transformation.
+This method is very cheap to call.
 """
 function inverse(T::Transformation)
     return Transformation(T.invM, T.M)
@@ -152,9 +152,9 @@ end # inverse
 """
     is_consistent(T::Transformation) -> Bool
 
-    Check the internal consistency of the transformation, returning a bool variable indicating
-    whether `T.M==T.invM`.
-    This method is useful when writing tests.
+Check the internal consistency of the transformation, returning a bool variable indicating
+whether `T.M==T.invM`.
+This method is useful when writing tests.
 """
 function is_consistent(T::Transformation)
     p = T.M * T.invM

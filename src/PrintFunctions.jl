@@ -61,3 +61,4 @@ end
 println(ray::Ray) = println(stdout, ray)
 print(ray::Ray) = print(stdout, ray)
 
+
