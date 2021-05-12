@@ -100,12 +100,12 @@ end
 
 
 function demo_animation( 
-		ort::Bool=false,
-          width::Int64=200, 
-          height::Int64=150, 
-          anim_output::String= "demo-animation.mp4",
-		bool_printpfm::Bool=false
-		)
+		ort::Bool = false,
+        width::Int64 = 200, 
+        height::Int64 = 150, 
+        anim_output::String = "demo-animation.mp4",
+		bool_printpfm::Bool = false
+	)
 	run(`rm -rf .wpi_animation`)
 	run(`mkdir .wpi_animation`)
 	

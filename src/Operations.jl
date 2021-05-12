@@ -74,11 +74,11 @@ Base.:-(a::Point, b::Point) = Vec(b.x-a.x, b.y-a.y, b.z-a.z)
 # Definitions of operations for Transformations
 Base.:*(s::Transformation, t::Transformation) = Transformation(s.M*t.M, t.invM*s.invM)
 function Base.:*(t::Transformation, p::Point)
-    q = Point(t.M[1] * p.x + t.M[5] *p.y +t.M[9] *p.z +t.M[13],
-              t.M[2] * p.x + t.M[6] *p.y +t.M[10] *p.z +t.M[14],
-              t.M[3] * p.x + t.M[7]*p.y +t.M[11]*p.z +t.M[15]
+    q = Point(t.M[1] * p.x + t.M[5] * p.y + t.M[9] * p.z +t.M[13],
+              t.M[2] * p.x + t.M[6] * p.y + t.M[10] * p.z +t.M[14],
+              t.M[3] * p.x + t.M[7] * p.y + t.M[11] * p.z +t.M[15]
     )
-    λ = t.M[4] * p.x + t.M[8]*p.y +t.M[12]*p.z +t.M[16]
+    λ = t.M[4] * p.x + t.M[8] * p.y + t.M[12] * p.z + t.M[16]
     λ == 1.0 ? (return q) : (return q/λ)
 end
 function Base.:*(t::Transformation, p::Vec)

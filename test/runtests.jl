@@ -671,3 +671,17 @@ end
 		@test typeof( ray_intersection(sphere, Ray( Point(-10, 0, 0), -VEC_Z ) ) ) == Nothing
 	end
 end
+
+@testset "test_world" begin
+	w = World()
+	sph1 = Sphere(translation(VEC_X * 2))
+	sph2 = Sphere(translation(VEC_X * 8))
+	add_shape(w, sph1)
+	add_shape(w, sph2)
+
+	intersection1 = ray_intersection(w, Ray(Point(0.0, 0.0, 0.0), VEC_X))
+	@test intersection1.world_point ≈ Point(1., 0., 0.)
+
+	intersection2 = ray_intersection(w, Ray(Point(10.0, 0.0, 0.0), -VEC_X))
+	@test intersection2.world_point ≈ Point(9., 0., 0.)
+end

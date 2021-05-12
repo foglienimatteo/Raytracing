@@ -1,4 +1,7 @@
 # HEAD
+- Added test for World, modified test for Sphere
+- Added feature: now can create an animation
+- New interface from command line
 - Added test for camera orientation ([PR#8](https://github.com/cosmofico97/Raytracing/pull/8#issue-631504956))
 - Fixed bug in the code ([PR#7](https://github.com/cosmofico97/Raytracing/pull/7#issue-630790415))
 - Implemented a first main interface
