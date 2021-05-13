@@ -79,7 +79,8 @@ Base.:*(s::Transformation, t::Transformation) = Transformation(s.M*t.M, t.invM*s
 function Base.:*(t::Transformation, p::Point)
     PV = SVector{4, Float64}(p.x, p.y, p.z, 1)
     res = t.M*PV
-    (res[end] == 1) || (res /= res[end])
+    #(res[end] == 1) || (res /= res[end])
+    res /= res[4]
     Point(res)
 
     #= metodo 2
