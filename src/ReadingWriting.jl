@@ -73,6 +73,8 @@ follow this sketch:
 set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{Float32}) = 
     (hdr.rgb_m[pixel_offset(hdr, x,y)] = c; nothing)
 
+set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{T}) where {T}= 
+    (hdr.rgb_m[pixel_offset(hdr,x,y)] = convert(RGB{Float32}, c); nothing)
 ##########################################################################################92
 
 struct InvalidPfmFileFormat <: Exception
