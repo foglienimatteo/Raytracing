@@ -818,17 +818,17 @@ end
 			ray2
         		) ≈ intersection2
 
-		plane3 = Plane(translation(0., 1., 0.)*rotation_x(π/4))
-        	ray3 = Ray(Point(0.0, 0.0, 1.0), Vec(0., 1., 0.))
+		plane3 = Plane(translation(Vec(0., 1., 0.))*rotation_x(π/4))
+        	ray3 = Ray(Point(0.0, 0.0, √2), Vec(0., 1., 0.))
         	intersection3 = ray_intersection(plane3, ray3)
 		@test HitRecord(
-			Point(3.0, 2.0, 3.0),
-			Normal(0.0, 0.0, -1.0),
+			Point(0., 1+√2, √2),
+			Normal(0.0, -1.0, 1.0),
 			Vec2d(0.0, 0.0),
-			3.0,
-			ray2
+			1+√2,
+			ray3
         		) ≈ intersection3
-			   
+
         	# Check if the plane failed to move by trying to hit the untransformed shape
         	@test isnothing( ray_intersection(plane, Ray( Point(0, 0, 2), -VEC_Z ) ) )
 	end
@@ -856,7 +856,7 @@ end
         	ray = Ray(Point(0.0, 0.0, 2.0), -VEC_Z)
         	intersection = ray_intersection(plane, ray)
 
-       	@test intersection.normal ≈ Normal(0.0, 0.0, -1.0)
+       	@test intersection.normal ≈ Normal(0.0, 0.0, 1.0)
 	end
 
  	@testset "test_UV_Coordinates" begin
