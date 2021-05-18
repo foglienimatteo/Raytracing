@@ -176,8 +176,6 @@ end
 
 abstract type Camera end
 
-##########################################################################################92
-
 """
 A camera implementing an orthogonal 3D → 2D projection
 This class implements an observer seeing the world through an orthogonal projection.
@@ -193,8 +191,6 @@ struct OrthogonalCamera <: Camera
     T::Transformation
     OrthogonalCamera(a=1., T=Transformation()) = new(a, T)
 end
-
-##########################################################################################92
 
 """
 A camera implementing a perspective 3D → 2D projection
@@ -243,6 +239,16 @@ A 3D unit sphere centered on the origin of the axes
 struct Sphere <: Shape
     T::Transformation
     Sphere(T=Transformation()) = new(T)
+end
+
+"""
+A 3D unit plane, i.e. the x-y plane (set of 3D points with z=0)
+# Arguments
+- `T`: potentially [`Transformation`](@ref) associated to the plane
+"""
+struct Plane <: Shape
+    T::Transformation
+    Plane(T=Transformation()) = new(T)
 end
 
 ##########################################################################################92

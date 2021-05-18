@@ -16,54 +16,14 @@
 # CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
-using Raytracing, Test, LinearAlgebra, StaticArrays
-import ColorTypes:RGB
+rgb_matrix = fill(RGB(0., 0., 0.0), (6,))
+img_1 = Raytracing.HDRimage(3, 2, rgb_matrix)
+img_2 = Raytracing.HDRimage(3, 2)
 
-##########################################################################################92
+@test img_1.width == 3
+@test img_1.height == 2
+@test img_1.rgb_m == img_2.rgb_m
 
-
-@testset "test_RGB" begin
-	include("test_RGB.jl")
-end
-
-@testset "test_HDRimage" begin
-	include("test_HDRimage.jl")
-end
-
-@testset "test_ReadingWriting" begin
-	include("test_ReadingWriting.jl")
-end
-
-
-@testset "test_ToneMapping" begin
-	include("test_ToneMapping.jl")
-end
-
-##########################################################################################92
-
-@testset "test_Geometry" begin
-	include("test_Geometry.jl")
-end
-
-@testset "test_Transformation" begin
-	include("test_Transformation.jl")
-end
-
-@testset "test_Rays-Cameras-ImageTracer" begin
-	include("test_Rays-Cameras-ImageTracer.jl")
-
-end
-
-##########################################################################################92
-
-@testset "test_Sphere" begin
-	include("test_Sphere.jl")
-end
-
-@testset "test_Plane" begin
-	include("test_Plane.jl")
-end
-
-@testset "test_Shapes-World" begin
-	include("test_Shapes-World.jl")
-end
+# Controllo della scrittura errata nell'assert
+@test_throws AssertionError img = Raytracing.HDRimage(3, 3, rgb_matrix)
+@test_throws AssertionError img = Raytracing.HDRimage(1, 3, rgb_matrix)

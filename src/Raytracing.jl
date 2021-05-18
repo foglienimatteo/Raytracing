@@ -32,7 +32,7 @@ import LinearAlgebra.:⋅; import LinearAlgebra.:×
 export BLACK, WHITE, HDRimage, Parameters
 export Point, Vec, Normal,VEC_X, VEC_Y, VEC_Z, Transformation
 export Ray, OrthogonalCamera, PerspectiveCamera, ImageTracer
-export Sphere, Vec2d, HitRecord, World
+export Sphere, Plane, Vec2d, HitRecord, World
 # from Operations.jl
 export squared_norm, norm, normalize
 # from ReadingWriting.jl

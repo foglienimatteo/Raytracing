@@ -61,15 +61,10 @@ function demo(
 
 	# Run the ray-tracer
 	tracer = ImageTracer(image, camera)
-	function compute_color(ray::Ray)
-		if ray_intersection(world,ray) ≠ nothing
-			return WHITE
-		else
-			return BLACK
-		end
-	end
 
-	fire_all_rays!(tracer, compute_color)
+	compute_color_BW = ray::Ray -> ray_intersection(world,ray) ≠ nothing ? WHITE : BLACK
+
+	fire_all_rays!(tracer, compute_color_BW)
 	img = tracer.img
 
 	if bool_savepfm==true
@@ -100,32 +95,32 @@ end
 
 
 function demo_animation( 
-		ort::Bool = false,
-        width::Int64 = 200, 
-        height::Int64 = 150, 
-        anim_output::String = "demo-animation.mp4",
-		bool_printpfm::Bool = false
-	)
-	run(`rm -rf .wpi_animation`)
-	run(`mkdir .wpi_animation`)
+			ort::Bool = false,
+        		width::Int64 = 200, 
+        		height::Int64 = 150, 
+       		anim_output::String = "demo-animation.mp4",
+			bool_printpfm::Bool = false
+		)
+	run(`rm -rf .wip_animation`)
+	run(`mkdir .wip_animation`)
 	
 	iter = ProgressBar(0:359)
 	for angle in iter
 		angleNNN = @sprintf "%03d" angle
 		#main(["demo", "--per", "--width=640", "--height=480", 
 		#		"--alpha=$angle", "--set-png-name=\"animazione/image$(angleNNN).png\""])
-		demo(ort, 1.0*angle, width, height, ".wpi_animation/demo.pfm",
-				".wpi_animation/image$(angleNNN).png", false, bool_printpfm)
+		demo(ort, 1.0*angle, width, height, ".wip_animation/demo.pfm",
+				".wip_animation/image$(angleNNN).png", false, bool_printpfm)
 		set_description(iter, string(@sprintf("Frame generated: ")))
 	end
 
 	# -r 25: Number of frames per second
 	name = anim_output
 	run(`ffmpeg -r 25 -f image2 -s $(width)x$(height) -i 
-	.wpi_animation/image%03d.png -vcodec libx264 
+	.wip_animation/image%03d.png -vcodec libx264 
 	-pix_fmt yuv420p $(name)`)
 
-	run(`rm -r .wpi_animation`)
+	run(`rm -rf .wip_animation`)
 end
 
 #=
