@@ -23,6 +23,16 @@
         "tool",
         "ideas"
       ]
+    },
+    {
+      "login": "Samuele-Colombo",
+      "name": "Samuele-Colombo",
+      "avatar_url": "https://avatars.githubusercontent.com/u/79973069?v=4",
+      "profile": "https://github.com/Samuele-Colombo",
+      "contributions": [
+        "ideas",
+        "tool"
+      ]
     }
   ],
   "contributorsPerLine": 7,
