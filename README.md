@@ -20,6 +20,22 @@ Physics "Aldo Pontremoli"](dip-fisica).
 
 ## Table of Contents
 
+- [Raytracing](#raytracing)
+  - [Table of Contents](#table-of-contents)
+  - [Installation](#installation)
+  - [Usage](#usage)
+    - [REPL](#repl)
+    - [Command Line Interface (CLI)](#command-line-interface-cli)
+  - [Licence](#licence)
+  - [Contributors ✨](#contributors-)
+
+## Installation
+
+## Usage
+
+### REPL
+
+### Command Line Interface (CLI)
 
 ## Licence
 All the files in this repository are under a MIT license. See the file [LICENSE.md](./LICENSE.md)
