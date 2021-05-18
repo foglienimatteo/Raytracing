@@ -1,6 +1,6 @@
 # Raytracing
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 This software is a simple raytracing program written in the [Julia Programming Language](https://julialang.org), developed during the curse *Numerical techniques for photorealistic image generation* (AY2020-2021) at University of Milan.
 
@@ -19,6 +19,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <table>
   <tr>
     <td align="center"><a href="http://ziotom78.blogspot.it/"><img src="https://avatars.githubusercontent.com/u/377795?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Maurizio Tomasi</b></sub></a><br /><a href="#mentoring-ziotom78" title="Mentoring">🧑‍🏫</a></td>
+    <td align="center"><a href="https://github.com/Paolo97Gll"><img src="https://avatars.githubusercontent.com/u/49845775?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Paolo Galli</b></sub></a><br /><a href="#tool-Paolo97Gll" title="Tools">🔧</a> <a href="#ideas-Paolo97Gll" title="Ideas, Planning, & Feedback">🤔</a></td>
   </tr>
 </table>
 
