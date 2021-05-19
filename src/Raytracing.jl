@@ -52,7 +52,7 @@ export ray_intersection, sphere_point_to_uv, sphere_normal, add_shape
 # from Demo.jl
 export demo, demo_animation
 # from Renderers.jl
-export call
+export choose_renderer, call
 # from Pigment.jl
 export get_color, eval
 

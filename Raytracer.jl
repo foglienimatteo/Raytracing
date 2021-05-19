@@ -58,23 +58,24 @@ end
 
 function ArgParse_command_line(arguments)
 	s = ArgParseSettings()
+
 	s.description = "Raytracer for the generation of photorealistic images in Julia."
 	s.exc_handler = parse_commandline_error_handler
 	s.version = @project_version
-	#s.version = "0.1.0"
+
 	@add_arg_table! s begin
 		"demo"
 			action = :command
-			help = "create a standard image that checks the correct behaviour of the program."
+			help = "create a standard image that checks the correct behaviour of the program"
 		"demo-animation"
 			action = :command
-			help = "create an animation of a 360 degree rotation of demo image "
+			help = "create an animation of a 360 degree rotation of the demo image"
 		"tonemapping"
 			action = :command
-			help = "apply tone mapping to a pfm image and save it to file"
+			help = "apply tone mapping to a pfm image and save it as a ldr file"
 	end
 
-	s["tonemapping"].description = "Apply tone mapping to a pfm image and save it to file."
+	s["tonemapping"].description = "Apply tone mapping to a pfm image and save it as a ldr file"
 	add_arg_group!(s["tonemapping"], "tonemapping settings");
 	@add_arg_table! s["tonemapping"] begin
 		"--alpha", "-a"
@@ -86,7 +87,7 @@ function ArgParse_command_line(arguments)
 			arg_type = Float64
 			default = 1.27
 	end
-	add_arg_group!(s["tonemapping"], "filenames");
+	add_arg_group!(s["tonemapping"], "tonemapping filenames");
 	@add_arg_table! s["tonemapping"] begin
 		"pfm_infile"
 			help = "path to input file, it must be a PFM file"
@@ -97,9 +98,9 @@ function ArgParse_command_line(arguments)
 			required = true
 	end
 
-	s["demo"].description = "creates a demo.png and a demo.pfm files of 10 white spheres on a dark backgroud."*
+	s["demo"].description = "Creates a demo.png and a demo.pfm files of 10 white spheres on a dark backgroud. "*
 					"8 spheres are placed at the 8 vertexes of a cube, 1 in the middle "*
-					"of the left face and the last in the lower one."*
+					"of the left face and the last in the lower one. "*
 					"Execute it in order to check the correct placement of the spheres."
 	#=
 	add_arg_group!(s["demo"], "demo mutually exclusive flags for the viewpoint tipe", exclusive=true)
@@ -160,17 +161,19 @@ function ArgParse_command_line(arguments)
 
 	s["demo-animation"].description = "creates an animation of a 360 degree rotation around"*
 								"vertical axis of the demo image."
-	add_arg_group!(s["demo-animation"], "demo-animation mutually exclusive flags for the viewpoint tipe", exclusive=true)
-    @add_arg_table! s["demo-animation"] begin
-    		"--orthogonal", "--ort"
-          	action = :store_true
-          	help = "flag for the Orthogonal projection view"
-		"--perspective", "--per"
-			help = "flag for the Perspective projection view"
-			action = :store_true
-    	end
 	add_arg_group!(s["demo-animation"], "demo-animation settings");
 	@add_arg_table! s["demo-animation"] begin
+		"--camera_type", "-t"
+			help = "flag for the camera type:\n"*
+	    				"ort -> Orthogonal camera, per -> Perspective camera"
+          	arg_type = String
+			default = "ort"
+			range_tester = input -> (input ∈ ["ort", "per"])
+    		"--algorithm", "-r"
+			help = "flag for the renderer algorithm"
+          	arg_type = String
+			default = "onoff"
+			range_tester = input -> (input ∈ RENDERERS)
 		"--width", "-o"
 			help = "pixel number on the width of the resulting demo image animation."
 			arg_type = Int64
