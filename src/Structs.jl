@@ -229,29 +229,7 @@ end
 
 abstract type Shape end
 
-"""
-A 3D unit sphere centered on the origin of the axes
-# Arguments
-- `T`: potentially [`Transformation`](@ref) associated to the sphere
-- `Material`: potentially [`Material`](@ref) associated to the sphere
-"""
-struct Sphere <: Shape
-    T::Transformation
-    Material::Material
-    Sphere(T=Transformation(), M=Material()) = new(T,M)
-end
 
-"""
-A 3D unit plane, i.e. the x-y plane (set of 3D points with z=0)
-# Arguments
-- `T`: potentially [`Transformation`](@ref) associated to the plane
-- `Material`: potentially [`Material`](@ref) associated to the plane
-"""
-struct Plane <: Shape
-    T::Transformation
-    Material::Material
-    Plane(T=Transformation(), M=Material()) = new(T,M)
-end
 
 ##########################################################################################92
 
@@ -282,7 +260,8 @@ struct HitRecord
     surface_point::Vec2d
     t::Float64
     ray::Ray
-    HitRecord(w,n,s,t,r) =  new(w,n,s,t,r)
+    shape::Shape
+    HitRecord(w,n,s,t,r, shp = Sphere()) =  new(w,n,s,t,r, shp)
     #=
     function HitRecord(w,n,s,t,r) 
         norm = normalize(n)
@@ -321,10 +300,9 @@ A uniform pigment
 This is the most boring pigment: a uniform hue over the whole surface.
 """
 struct UniformPigment <: Pigment
-    color::RBG{Float32}
-    UniformPigment(c = WHITE) = new(c)
+    color::RGB{Float32}
+    UniformPigment(c = BLACK) = new(c)
 end
-
 
 """
 A checkered pigment
@@ -332,12 +310,11 @@ The number of rows/columns in the checkered pattern is tunable, but you cannot h
 repetitions along the u/v directions.
 """
 struct CheckeredPigment <: Pigment
-    color1::RBG{Float32}
-    color2::RBG{Float32}
+    color1::RGB{Float32}
+    color2::RGB{Float32}
     num_steps::Int64
     CheckeredPigment(c1 = WHITE, c2 = BLACK, n = 2) = new(c1, c2, n)
 end
-
 
 """
 A textured pigment
@@ -362,7 +339,7 @@ A class representing an ideal diffuse BRDF (also called «Lambertian»)
 struct DiffuseBRDF <: BRDF
     pigment::Pigment
     reflectance::Float64
-    DiffuseBRDF(pig = UniformPigment(), r=1.0) = new(pig, r)
+    DiffuseBRDF(pig = UniformPigment(WHITE), r=1.0) = new(pig, r)
 end
 
 """
@@ -371,5 +348,60 @@ A material
 struct Material
     brdf::BRDF
     emitted_radiance::Pigment
-    Material(brdf = DiffuseBRDF(), er = UniformPigment(BLACK)) = new(brdf, er)
+    Material(brdf = DiffuseBRDF(), er = UniformPigment()) = new(brdf, er)
+end
+
+##########################################################################################92
+
+"""
+A class implementing a solver of the rendering equation.
+This is an abstract class; you should use a derived concrete class.
+"""
+abstract type Renderer end
+
+"""
+A on/off renderer
+This renderer is mostly useful for debugging purposes, as it is really fast, but it produces boring images.
+"""
+struct OnOffRenderer <: Renderer
+    world::World
+    background_color::RGB{Float32}
+    color::RGB{Float32}
+    OnOffRenderer(w = World(), bc = BLACK, c = WHITE) = new(w, bc, c)
+end
+
+"""
+A «flat» renderer
+This renderer estimates the solution of the rendering equation by neglecting any contribution of the light.
+It just uses the pigment of each surface to determine how to compute the final radiance.
+"""
+struct FlatRenderer <: Renderer
+    world::World
+    background_color::RGB{Float32}
+    FlatRenderer(w = World(), bc = BLACK) = new(w, bc)
+end
+
+
+"""
+A 3D unit sphere centered on the origin of the axes
+# Arguments
+- `T`: potentially [`Transformation`](@ref) associated to the sphere
+- `Material`: potentially [`Material`](@ref) associated to the sphere
+"""
+struct Sphere <: Shape
+    T::Transformation
+    Material::Material
+    Sphere(T=Transformation(), M=Material()) = new(T,M)
+end
+
+"""
+A 3D unit plane, i.e. the x-y plane (set of 3D points with z=0)
+# Arguments
+- `T`: potentially [`Transformation`](@ref) associated to the plane
+- `Material`: potentially [`Material`](@ref) associated to the plane
+"""
+struct Plane <: Shape
+    T::Transformation
+    Material::Material
+    Plane(T=Transformation(), M=Material()) = new(T,M)
 end

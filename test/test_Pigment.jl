@@ -29,22 +29,22 @@
 end
 
 @testset "test_ImagePigment" begin
-     image = HdrImage(2, 2)
-     set_pixel(image, 0, 0, RGB(1.0, 2.0, 3.0))
-     set_pixel(image, 1, 0, RGB(2.0, 3.0, 1.0))
-     set_pixel(image, 0, 1, RGB(2.0, 1.0, 3.0))
-     set_pixel(image, 1, 1, RGB(3.0, 2.0, 1.0))
+     image = HDRimage(2, 2)
+     Raytracing.set_pixel(image, 0, 0, RGB{Float32}(1.0, 2.0, 3.0))
+     Raytracing.set_pixel(image, 1, 0, RGB{Float32}(2.0, 3.0, 1.0))
+     Raytracing.set_pixel(image, 0, 1, RGB{Float32}(2.0, 1.0, 3.0))
+     Raytracing.set_pixel(image, 1, 1, RGB{Float32}(3.0, 2.0, 1.0))
 
      pigment = ImagePigment(image)
-     @test get_color(pigment, Vec2d(0.0, 0.0)) ≈ RGB(1.0, 2.0, 3.0)
-     @test get_color(pigment, Vec2d(1.0, 0.0)) ≈ RGB(2.0, 3.0, 1.0)
-     @test get_color(pigment, Vec2d(0.0, 1.0)) ≈ RGB(2.0, 1.0, 3.0)
-     @test get_color(pigment, Vec2d(1.0, 1.0)) ≈ RGB(3.0, 2.0, 1.0)
+     @test get_color(pigment, Vec2d(0.0, 0.0)) ≈ RGB{Float32}(1.0, 2.0, 3.0)
+     @test get_color(pigment, Vec2d(1.0, 0.0)) ≈ RGB{Float32}(2.0, 3.0, 1.0)
+     @test get_color(pigment, Vec2d(0.0, 1.0)) ≈ RGB{Float32}(2.0, 1.0, 3.0)
+     @test get_color(pigment, Vec2d(1.0, 1.0)) ≈ RGB{Float32}(3.0, 2.0, 1.0)
 end
 
 @testset "test_CheckeredPigment" begin
-     color1 = RGB(1.0, 2.0, 3.0)
-     color2 = RGB(10.0, 20.0, 30.0)
+     color1 = RGB{Float32}(1.0, 2.0, 3.0)
+     color2 = RGB{Float32}(10.0, 20.0, 30.0)
 
      pigment = CheckeredPigment(color1, color2, 2)
 

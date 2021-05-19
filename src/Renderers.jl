@@ -17,33 +17,22 @@
 # IN THE SOFTWARE.
 
 """
-Return the color of the pigment at the specified coordinates
+    call(::FloatRenderer, ::Ray) -> RGB{Float32}
+
+give WHITE if the ray hit the object, else BLACK
 """
-get_color(p::Pigment, uv::Vec2d) = ErrorExpectation("struct Pigment is abstract and cannot be used in get_color()")
+call(OnOffR::OnOffRenderer, r::Ray) = ray_intersection(w ,r) ≠ nothing ? OnOffR.color : OnOffR.background_color
 
-get_color(p::UniformPigment, uv::Vec2d) = p.color
+"""
+    call(::FlatRenderer, ::Ray) -> RGB{Float32}
 
-function get_color(p::CheckeredPigment, uv::Vec2d)
-    u = floor(uv.u * p.num_steps)
-    v = floor(uv.v * p.num_steps)
-    if (u%2) == (v%2)
-        return p.color1
-    else
-        return p.color2
-    end
+give BLACK if ray doesn't hit any objects, else evaluate the color depending on the material and the self luminosity
+"""
+function call(FlatR::FlatRenderer, r::Ray)
+    hit = ray_intersection(FlatR.world, r)
+    (hit == nothing) && (return FlatR.background_color)
+
+    mat = hit.shape.Material
+
+    return (get_color(mat.brdf.pigment, hit.surface_point) + get_color(mat.emitted_radiance, hit.surface_point))
 end
-
-function get_color(p::ImagePigment, uv::Vec2d)
-    col = uv.u * p.image.width
-    row = uv.v * p.image.height
-    (col >= p.image.width) || (col = p.image.width - 1)
-    (row >= p.image.height) || (row = p.image.height - 1)
-
-    return get_pixel(p.image, convert(Int64, col), convert(Int64, row))
-end
-
-##########################################################################################92
-
-eval(b::BRDF, n::Normal, in_dir::Vec, out_dit::Vec, uv::Vec2d) = BLACK
-
-eval(b::DiffuseBRDF, n::Normal, in_dir::Vec, out_dit::Vec, uv::Vec2d) = get_color(b.pigment, uv) * (p.reflectance / pi)
