@@ -108,7 +108,6 @@ function demo(
 		throw(ArgumentError("Unknown renderer: $algorithm"))
 	end
 
-	println(typeof(renderer))
 	compute_color(ray::Ray) = call(renderer, ray) 
 	fire_all_rays!(tracer, compute_color)
 	img = tracer.img

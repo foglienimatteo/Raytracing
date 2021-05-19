@@ -260,8 +260,8 @@ struct HitRecord
     surface_point::Vec2d
     t::Float64
     ray::Ray
-    shape::Shape
-    HitRecord(w,n,s,t,r, shp = Sphere()) =  new(w,n,s,t,r, shp)
+    shape::Union{Shape, Nothing}
+    HitRecord(w,n,s,t,r, shp=nothing) =  new(w,n,s,t,r, shp)
     #=
     function HitRecord(w,n,s,t,r) 
         norm = normalize(n)

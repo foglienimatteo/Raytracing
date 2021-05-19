@@ -128,7 +128,8 @@ function ray_intersection(sphere::Sphere, ray::Ray)
         sphere.T * sphere_normal(hit_point, inv_ray.dir),
         sphere_point_to_uv(hit_point),
         first_hit_t,
-        ray
+        ray, 
+        sphere
     )
 end
 
@@ -156,7 +157,8 @@ function ray_intersection(plane::Plane, ray::Ray)
         plane.T * plane_normal(hit_point, inv_ray.dir),
         plane_point_to_uv(hit_point),
         hit_t,
-        ray
+        ray,
+        plane
     )
 end
 
