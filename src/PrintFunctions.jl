@@ -61,4 +61,15 @@ end
 println(ray::Ray) = println(stdout, ray)
 print(ray::Ray) = print(stdout, ray)
 
+function print_not_black(img::HDRimage)
+     w=img.width
+     h=img.height
+     println("HDRImage to be printed")
+     println("width = ", w, "\t height = ", h)
 
+     for (i, color) in enumerate(img.rgb_m)
+          color==BLACK ? nothing : println(i, "\t", color)
+     end
+
+     nothing
+end

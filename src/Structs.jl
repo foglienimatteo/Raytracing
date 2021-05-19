@@ -327,7 +327,6 @@ end
 
 ##########################################################################################92
 
-
 """
 An abstract class representing a Bidirectional Reflectance Distribution Function
 """

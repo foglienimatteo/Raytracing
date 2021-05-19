@@ -36,9 +36,10 @@ function call(FlatR::FlatRenderer, r::Ray)
     !(isnothing(hit)) || (return FlatR.background_color)
 
     mat = hit.shape.Material
-    
+    println(mat.brdf.pigment)
     col1 = get_color(mat.brdf.pigment, hit.surface_point)
     col2 = get_color(mat.emitted_radiance, hit.surface_point)
+    #println(col1, "\t", col2)
 
     return (col1 + col2)
 end

@@ -104,7 +104,6 @@ function demo(
 	elseif algorithm == "flat"
 		(bool_print==true) && (println("Using flat renderer"))
 		renderer = FlatRenderer(world, BLACK)
-		println()
 	else
 		throw(ArgumentError("Unknown renderer: $algorithm"))
 	end
@@ -113,16 +112,16 @@ function demo(
 	compute_color(ray::Ray) = call(renderer, ray) 
 	fire_all_rays!(tracer, compute_color)
 	img = tracer.img
+	#print_not_black(img)
 
 	# Save the HDR image
 	(bool_savepfm==true) && (open(pfm_output, "w") do outf; write(outf, img); end)
 	(bool_print==true) && (println("\nHDR demo image written to $(pfm_output)\n"))
 
 	# Apply tone-mapping to the image
-	normalize_image!(img, 0.18, 1.)
+	normalize_image!(img, 0.18, 0.1)
 	clamp_image!(img)
 	γ_correction!(img, 1.27)
-	#println(img, 3)
 
 	# Save the LDR image
 	if (typeof(query(png_output)) == File{DataFormat{:UNKNOWN}, String})

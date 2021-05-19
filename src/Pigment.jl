@@ -26,6 +26,7 @@ get_color(p::UniformPigment, uv::Vec2d) = p.color
 function get_color(p::CheckeredPigment, uv::Vec2d)
     u = floor(uv.u * p.num_steps)
     v = floor(uv.v * p.num_steps)
+    println(u, "\t", v)
     if (u%2) == (v%2)
         return p.color1
     else
