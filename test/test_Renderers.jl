@@ -21,7 +21,7 @@
 @testset "test_OnOffRenderer" begin
      sphere = Sphere(translation(Vec(2, 0, 0)) * scaling(Vec(0.2, 0.2, 0.2)),
                     Material(DiffuseBRDF(UniformPigment(WHITE))))
-     image = HdrImage(3, 3)
+     image = HDRimage(3, 3)
      camera = OrthogonalCamera()
      tracer = ImageTracer(image,camera)
      world = World()
@@ -46,7 +46,7 @@ end
      sphere_color = RGB(1.0, 2.0, 3.0)
      sphere = Sphere(translation(Vec(2, 0, 0)) * scaling(Vec(0.2, 0.2, 0.2)),
                     Material(DiffuseBRDF(UniformPigment(sphere_color))))
-     image = HdrImage(3, 3)
+     image = HDRimage(3, 3)
      camera = OrthogonalCamera()
      tracer = ImageTracer(image, camera)
      world = World()

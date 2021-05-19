@@ -37,9 +37,9 @@ function get_color(p::ImagePigment, uv::Vec2d)
     col = uv.u * p.image.width
     row = uv.v * p.image.height
     (col >= p.image.width) || (col = p.image.width - 1)
-    (row >= p.image.heigh) || (row = p.image.heigh - 1)
+    (row >= p.image.height) || (row = p.image.height - 1)
 
-    return get_pixel(p.image, col, row)
+    return get_pixel(p.image, convert(Int64, col), convert(Int64, row))
 end
 
 ##########################################################################################92
