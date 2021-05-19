@@ -32,7 +32,10 @@ import LinearAlgebra.:⋅; import LinearAlgebra.:×
 export BLACK, WHITE, HDRimage, Parameters
 export Point, Vec, Normal,VEC_X, VEC_Y, VEC_Z, Transformation
 export Ray, OrthogonalCamera, PerspectiveCamera, ImageTracer
-export Sphere, Plane, Vec2d, HitRecord, World
+export Shape, Sphere, Plane, Vec2d, HitRecord, World
+export Pigment, UniformPigment, CheckeredPigment, ImagePigment
+export BRDF, DiffuseBRDF, Material
+export Renderer, OnOffRenderer, FlatRenderer
 # from Operations.jl
 export squared_norm, norm, normalize
 # from ReadingWriting.jl
@@ -48,6 +51,10 @@ export at, fire_ray, fire_all_rays!
 export ray_intersection, sphere_point_to_uv, sphere_normal, add_shape
 # from Demo.jl
 export demo, demo_animation
+# from Renderers.jl
+export call
+# from Pigment.jl
+export get_color, eval
 
 
 include("Structs.jl")
@@ -59,6 +66,8 @@ include("Transformations.jl")
 include("ImageTracer.jl")
 include("Shapes.jl")
 include("Demo.jl")
+include("Pigment.jl")
+include("Renderers.jl")
 
 
 end  # module
