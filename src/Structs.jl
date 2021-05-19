@@ -302,3 +302,7 @@ struct World
     World(s::Shape) = new(s)
     World() = new( Array{Shape,1}() )
 end
+
+##########################################################################################92
+
+abstract type Pigment end
