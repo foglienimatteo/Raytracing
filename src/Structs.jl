@@ -345,5 +345,5 @@ The texture is given through a PFM image.
 """
 struct ImagePigment
     image::HDRimage
-    ImagePigment(img = HDRimage(3, 2, fill(RGB(0., 0., 0.0), (6,))))
+    ImagePigment(img = HDRimage(3, 2, fill(BLACK, (6,)))) = new(img)
 end

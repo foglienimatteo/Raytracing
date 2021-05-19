@@ -16,6 +16,11 @@
 # CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
+"""
+Return the color of the pigment at the specified coordinates
+"""
+get_color(p::Pigment, uv::Vec2d) = ErrorExpectation("struct Pigment is abstract and cannot be used in get_color()")
+
 get_color(p::UniformPigment, uv::Vec2d) = p.color
 
 function get_color(p::CheckeredPigment, uv::Vec2d)
@@ -27,3 +32,18 @@ function get_color(p::CheckeredPigment, uv::Vec2d)
         return p.color2
     end
 end
+
+function get_color(p::ImagePigment, uv::Vec2d)
+    col = uv.u * p.image.width
+    row = uv.v * p.image.height
+    (col >= p.image.width) || (col = p.image.width - 1)
+    (row >= p.image.heigh) || (row = p.image.heigh - 1)
+
+    return get_pixel(p.image, col, row)
+end
+
+##########################################################################################92
+
+eval(b::BRDF, n::Normal, in_dir::Vec, out_dit::Vec, uv::Vec2d) = BLACK
+
+eval(b::DiffuseBRDF, n::Normal, in_dir::Vec, out_dit::Vec, uv::Vec2d) = get_color(b.pigment, uv) * (p.reflectance / pi)
