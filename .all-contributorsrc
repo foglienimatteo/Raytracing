@@ -1,0 +1,44 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "ziotom78",
+      "name": "Maurizio Tomasi",
+      "avatar_url": "https://avatars.githubusercontent.com/u/377795?v=4",
+      "profile": "http://ziotom78.blogspot.it/",
+      "contributions": [
+        "mentoring"
+      ]
+    },
+    {
+      "login": "Paolo97Gll",
+      "name": "Paolo Galli",
+      "avatar_url": "https://avatars.githubusercontent.com/u/49845775?v=4",
+      "profile": "https://github.com/Paolo97Gll",
+      "contributions": [
+        "tool",
+        "ideas"
+      ]
+    },
+    {
+      "login": "Samuele-Colombo",
+      "name": "Samuele-Colombo",
+      "avatar_url": "https://avatars.githubusercontent.com/u/79973069?v=4",
+      "profile": "https://github.com/Samuele-Colombo",
+      "contributions": [
+        "ideas",
+        "tool"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "Raytracing",
+  "projectOwner": "cosmofico97",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}

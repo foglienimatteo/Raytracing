@@ -1,5 +1,5 @@
-#!/usr/bin/env julia
-
+# -*- encoding: utf-8 -*-
+#
 # The MIT License (MIT)
 #
 # Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
@@ -16,45 +16,14 @@
 # CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
+rgb_matrix = fill(RGB(0., 0., 0.0), (6,))
+img_1 = Raytracing.HDRimage(3, 2, rgb_matrix)
+img_2 = Raytracing.HDRimage(3, 2)
 
-using Pkg
-Pkg.activate(normpath(@__DIR__))
+@test img_1.width == 3
+@test img_1.height == 2
+@test img_1.rgb_m == img_2.rgb_m
 
-using Colors, Images, ImageIO
-using ColorTypes:RGB
-using Raytracing
-
-function main(args)
-	if isempty(args) || length(args)==1 || length(args)>4
-        println("\ncorrect usage: ./main input_pfm_filename output_png_filename [a , [γ]]")
-	   return nothing
-	end  
-
-	parameters = nothing
-	try
-		parameters =  Parameters(parse_command_line(args)...)
-	catch e
-		println("Error: ", e)
-		return nothing
-	end
-
-	img = open(parameters.infile, "r") do inpf; read(inpf, HDRimage); end
-	
-	println("\nfile $(parameters.infile) has been read from disk.\n")
-
-	normalize_image!(img, parameters.a)
-	clamp_image!(img)
-	γ_correction!(img, parameters.γ)
-	println(img, 3)
-
-	matrix = get_matrix(img)
-	Images.save(parameters.outfile, matrix)
-	#Images.save(Images.File(PNG,parameters.outfile), img.rgb_m)
-	#Images.save(File("PNG", parameters.outfile), img.rgb_m)
-
-	println("\nFile $(parameters.outfile) has been written into the disk.\n")
-
-	return nothing
-end
-
-main(ARGS)
+# Controllo della scrittura errata nell'assert
+@test_throws AssertionError img = Raytracing.HDRimage(3, 3, rgb_matrix)
+@test_throws AssertionError img = Raytracing.HDRimage(1, 3, rgb_matrix)
