@@ -73,3 +73,7 @@ end
 @testset "test_Pigment" begin
 	include("test_Pigment.jl")
 end
+
+@testset "test_Renderers" begin
+	include("test_Renderers.jl")
+end
