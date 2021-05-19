@@ -20,10 +20,12 @@
 ##########################################################################################92
 
 
-demo() = demo(true, "onoff", 0., 640, 480, "demo.pfm", "demo.png")
+demo() = demo(false, "onoff", 0., 640, 480, "demo.pfm", "demo.png")
 demo(ort::Bool) = demo(ort, "onoff", 0., 640, 480, "demo.pfm", "demo.png")
+demo(al::String) = demo(false, al, 0., 640, 480, "demo.pfm", "demo.png")
+demo(ort::Bool, al::String) = demo(ort, al, 0., 640, 480, "demo.pfm", "demo.png")
 demo(ort::Bool, α::Float64) = demo(ort, "onoff", α, 640, 480, "demo.pfm", "demo.png")
-demo(w::Int64, h::Int64) = demo(true, "onoff", 0., w, h, "demo.pfm", "demo.png")
+demo(w::Int64, h::Int64) = demo(false, "onoff", 0., w, h, "demo.pfm", "demo.png")
 
 function demo(
           orthogonal::Bool,
@@ -31,16 +33,11 @@ function demo(
           α::Float64, 
           width::Int64, 
           height::Int64, 
-          pfm_output::String="demo.pfm", 
-          png_output::String="demo.png",
+          pfm_output::String, 
+          png_output::String,
 		bool_print::Bool=true,
 		bool_savepfm::Bool=true
           )
-     
-	image = HDRimage(width, height)
-
-	# Create a world and populate it with a few shapes
-	world = World()
 
 	material1 = Material(DiffuseBRDF(UniformPigment(RGB(0.7, 0.3, 0.2))))
     	material2 = Material(DiffuseBRDF(	CheckeredPigment(
@@ -51,7 +48,7 @@ function demo(
 						)
 				)
 
-	sphere_texture = HdrImage(2, 2)
+	sphere_texture = HDRimage(2, 2)
 	set_pixel(sphere_texture, 0, 0, RGB(0.1, 0.2, 0.3))
     	set_pixel(sphere_texture, 0, 1, RGB(0.2, 0.1, 0.3))
 	set_pixel(sphere_texture, 1, 0, RGB(0.3, 0.2, 0.1))
@@ -59,6 +56,8 @@ function demo(
 
 	material3 = Material(DiffuseBRDF(ImagePigment(sphere_texture)))
 
+	# Create a world and populate it with a few shapes
+	world = World()
 	for x in [-0.5, 0.5], y in [-0.5, 0.5], z in [-0.5, 0.5]
 		add_shape(world,
 				Sphere( 
@@ -96,18 +95,21 @@ function demo(
 
 	
 	# Run the ray-tracer
+	image = HDRimage(width, height)
 	tracer = ImageTracer(image, camera)
 
 	if algorithm == "onoff"
-		(print_bool==true) && (println("Using on/off renderer"))
+		(bool_print==true) && (println("Using on/off renderer"))
 		renderer = OnOffRenderer(world, BLACK)
 	elseif algorithm == "flat"
-		(print_bool==true) && (println("Using flat renderer"))
+		(bool_print==true) && (println("Using flat renderer"))
 		renderer = FlatRenderer(world, BLACK)
+		println()
 	else
-		throw(InvalidArgumentError("Unknown renderer: $algorithm"))
+		throw(ArgumentError("Unknown renderer: $algorithm"))
 	end
 
+	println(typeof(renderer))
 	compute_color(ray::Ray) = call(renderer, ray) 
 	fire_all_rays!(tracer, compute_color)
 	img = tracer.img
@@ -117,7 +119,7 @@ function demo(
 	(bool_print==true) && (println("\nHDR demo image written to $(pfm_output)\n"))
 
 	# Apply tone-mapping to the image
-	normalize_image!(img, 0.18)
+	normalize_image!(img, 0.18, 1.)
 	clamp_image!(img)
 	γ_correction!(img, 1.27)
 	#println(img, 3)
@@ -140,13 +142,20 @@ end
 
 ##########################################################################################92
 
+demo_animation() = demo_animation(false, "onoff", 200, 150, "demo-animation.mp4")
+demo_animation(ort::Bool) = demo_animation(ort, "onoff", 200, 150, "demo-animation.mp4")
+demo_animation(al::String) = demo_animation(false, al, 200, 150, "demo-animation.mp4")
+demo_animation(ort::Bool, al::String) = 
+					demo_animation(ort, al, 200, 150, "demo-animation.mp4")
+demo_animation(ort::Bool, al::String, w::Float64, h::Float64) = 
+					demo_animation(ort, al, w, h, "demo-animation.mp4")
+
 function demo_animation( 
-			ort::Bool = false,
+			ort::Bool,
 			algorithm::String,
-        		width::Int64 = 200, 
-        		height::Int64 = 150, 
-       		anim_output::String = "demo-animation.mp4",
-			bool_savepfm::Bool = false
+        		width::Int64, 
+        		height::Int64, 
+       		anim_output::String
 		)
 	run(`rm -rf .wip_animation`)
 	run(`mkdir .wip_animation`)
@@ -155,7 +164,7 @@ function demo_animation(
 	for angle in iter
 		angleNNN = @sprintf "%03d" angle
 		demo(ort, algorithm, 1.0*angle, width, height, ".wip_animation/demo.pfm",
-				".wip_animation/image$(angleNNN).png", false, bool_savepfm)
+				".wip_animation/image$(angleNNN).png", false, false)
 		set_description(iter, string(@sprintf("Frame generated: ")))
 	end
 
