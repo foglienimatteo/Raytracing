@@ -305,4 +305,45 @@ end
 
 ##########################################################################################92
 
+"""
+A «pigment»
+
+This abstract class represents a pigment, i.e., a function that associates a color with
+each point on a parametric surface (u,v). Call the method :meth:`.Pigment.get_color` to
+retrieve the color of the surface given a :class:`.Vec2d` object.
+"""
 abstract type Pigment end
+
+##########################################################################################92
+
+"""
+A uniform pigment
+This is the most boring pigment: a uniform hue over the whole surface.
+"""
+struct UniformPigment <: Pigment
+    color::RBG{Float32}
+    UniformPigment(c = WHITE) = new(c)
+end
+
+
+"""
+A checkered pigment
+The number of rows/columns in the checkered pattern is tunable, but you cannot have a different number of
+repetitions along the u/v directions.
+"""
+struct CheckeredPigment <: Pigment
+    color1::RBG{Float32}
+    color2::RBG{Float32}
+    num_steps::Int64
+    CheckeredPigment(c1 = WHITE, c2 = BLACK, n = 2) = new(c1, c2, n)
+end
+
+
+"""
+A textured pigment
+The texture is given through a PFM image.
+"""
+struct ImagePigment
+    image::HDRimage
+    ImagePigment(img = HDRimage(3, 2, fill(RGB(0., 0., 0.0), (6,))))
+end
