@@ -19,13 +19,14 @@
 
 ##########################################################################################92
 
-demo() = demo(true, 0., 640, 480, "demo.pfm", "demo.png")
-demo(ort::Bool) = demo(ort, 0., 640, 480, "demo.pfm", "demo.png")
-demo(ort::Bool, α::Float64) = demo(ort, α, 640, 480, "demo.pfm", "demo.png")
-demo(w::Int64, h::Int64) = demo(true, 0., w, h, "demo.pfm", "demo.png")
+demo() = demo(true, "onoff", 0., 640, 480, "demo.pfm", "demo.png")
+demo(ort::Bool) = demo(ort, "onoff", 0., 640, 480, "demo.pfm", "demo.png")
+demo(ort::Bool, α::Float64) = demo(ort, "onoff", α, 640, 480, "demo.pfm", "demo.png")
+demo(w::Int64, h::Int64) = demo(true, "onoff", 0., w, h, "demo.pfm", "demo.png")
 
 function demo(
           orthogonal::Bool,
+		algorithm::String,
           α::Float64, 
           width::Int64, 
           height::Int64, 

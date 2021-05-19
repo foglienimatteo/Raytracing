@@ -26,6 +26,7 @@ import FileIO: @format_str, query
 using Raytracing
 
 FILE_NAME = split(PROGRAM_FILE, "/")[end]
+RENDERERS = ["onoff", "flat"]
 
 function parse_commandline_error_handler(settings::ArgParseSettings, err, err_code::Int = 1)
 	help_string = 
@@ -100,6 +101,7 @@ function ArgParse_command_line(arguments)
 					"8 spheres are placed at the 8 vertexes of a cube, 1 in the middle "*
 					"of the left face and the last in the lower one."*
 					"Execute it in order to check the correct placement of the spheres."
+	#=
 	add_arg_group!(s["demo"], "demo mutually exclusive flags for the viewpoint tipe", exclusive=true)
     	@add_arg_table! s["demo"] begin
     		"--orthogonal", "--ort"
@@ -109,8 +111,22 @@ function ArgParse_command_line(arguments)
 			help = "flag for the Perspective projection view"
 			action = :store_true
     	end
-	add_arg_group!(s["demo"], "demo angle viewpoint direction and image dimensions");
+	=#
+
+    	
+	add_arg_group!(s["demo"], "demo options");
 	@add_arg_table! s["demo"] begin
+		"--camera_type", "-t"
+			help = "flag for the camera type:\n"*
+	    				"ort -> Orthogonal camera, per -> Perspective camera"
+          	arg_type = String
+			default = "ort"
+			range_tester = input -> (input ∈ ["ort", "per"])
+    		"--algorithm", "-r"
+			help = "flag for the renderer algorithm"
+          	arg_type = String
+			default = "onoff"
+			range_tester = input -> (input ∈ RENDERERS)
 		"--alpha", "-a"
 			help = "angle of view, in degrees"
 			arg_type = Float64
@@ -125,7 +141,6 @@ function ArgParse_command_line(arguments)
 			arg_type = Int64
 			default = 480
 			range_tester = iseven
-
 	end
 	add_arg_group!(s["demo"], "demo optional filenames");
 	@add_arg_table! s["demo"] begin
@@ -147,7 +162,7 @@ function ArgParse_command_line(arguments)
 								"vertical axis of the demo image."
 	add_arg_group!(s["demo-animation"], "demo-animation mutually exclusive flags for the viewpoint tipe", exclusive=true)
     @add_arg_table! s["demo-animation"] begin
-    	"--orthogonal", "--ort"
+    		"--orthogonal", "--ort"
           	action = :store_true
           	help = "flag for the Orthogonal projection view"
 		"--perspective", "--per"

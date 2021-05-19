@@ -355,23 +355,19 @@ The keys for the input `Dict` are, respectively: "orthogonal", "perspective", "a
 See also:  [`demo`](@ref)
 """
 function parse_demo_settings(dict::Dict{String, Any})
-    ort::Bool = dict["orthogonal"]
-    per::Bool = dict["perspective"]
+    view::String = dict["camera_type"]
+    alg::Bool = dict["algorithm"]
     α::Float64 = dict["alpha"]
     w::Int64 = dict["width"]
     h::Int64 = dict["height"]
     pfm::String = dict["set-pfm-name"]
     png::String = dict["set-png-name"]
 
-    if ( (ort==true) || (ort==per==false) ) 
-        view_ort=true
-    elseif ((ort==false) && (per==true))
-        view_ort=false
-    else
-        view_ort=nothing
-    end
+    view_ort = nothing
+    view == "ort" ? view_ort = true : nothing
+    view == "per" ? view_ort = false : nothing
 
-    return (view_ort, α, w, h, pfm, png)
+    return (view_ort, alg, α, w, h, pfm, png)
 end
 
 
@@ -395,6 +391,7 @@ function parse_demoanimation_settings(dict::Dict{String, Any})
     w::Int64 = dict["width"]
     h::Int64 = dict["height"]
     anim::String = dict["set-anim-name"]
+    
 
     if ( (ort==true) || (ort==per==false) ) 
         view_ort=true
