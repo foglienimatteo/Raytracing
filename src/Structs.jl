@@ -314,8 +314,6 @@ retrieve the color of the surface given a :class:`.Vec2d` object.
 """
 abstract type Pigment end
 
-##########################################################################################92
-
 """
 A uniform pigment
 This is the most boring pigment: a uniform hue over the whole surface.
@@ -343,7 +341,35 @@ end
 A textured pigment
 The texture is given through a PFM image.
 """
-struct ImagePigment
+struct ImagePigment <: Pigment
     image::HDRimage
-    ImagePigment(img = HDRimage(3, 2, fill(RGB(0., 0., 0.0), (6,))))
+    ImagePigment(img = HDRimage(3, 2, fill(BLACK, (6,)))) = new(img)
+end
+
+
+
+##########################################################################################92
+
+
+"""
+An abstract class representing a Bidirectional Reflectance Distribution Function
+"""
+abstract type BRDF end
+
+"""
+A class representing an ideal diffuse BRDF (also called «Lambertian»)
+"""    
+struct DiffuseBRDF <: BRDF
+    pigment::Pigment
+    reflectance::Float64
+    DiffuseBRDF(pig = UniformPigment(), r=1.0) = new(pig, r)
+end
+
+"""
+A material
+"""
+struct Material
+    brdf::BRDF
+    emitted_radiance::Pigment
+    Material(brdf = DiffuseBRDF(), er = UniformPigment(BLACK)) = new(brdf, er)
 end
