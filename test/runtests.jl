@@ -67,3 +67,9 @@ end
 @testset "test_Shapes-World" begin
 	include("test_Shapes-World.jl")
 end
+
+##########################################################################################92
+
+@testset "test_Pigment" begin
+	include("test_Pigment.jl")
+end
