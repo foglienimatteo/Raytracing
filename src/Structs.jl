@@ -229,26 +229,28 @@ end
 
 abstract type Shape end
 
-##########################################################################################92
-
 """
 A 3D unit sphere centered on the origin of the axes
 # Arguments
 - `T`: potentially [`Transformation`](@ref) associated to the sphere
+- `Material`: potentially [`Material`](@ref) associated to the sphere
 """
 struct Sphere <: Shape
     T::Transformation
-    Sphere(T=Transformation()) = new(T)
+    Material::Material
+    Sphere(T=Transformation(), M=Material()) = new(T,M)
 end
 
 """
 A 3D unit plane, i.e. the x-y plane (set of 3D points with z=0)
 # Arguments
 - `T`: potentially [`Transformation`](@ref) associated to the plane
+- `Material`: potentially [`Material`](@ref) associated to the plane
 """
 struct Plane <: Shape
     T::Transformation
-    Plane(T=Transformation()) = new(T)
+    Material::Material
+    Plane(T=Transformation(), M=Material()) = new(T,M)
 end
 
 ##########################################################################################92
