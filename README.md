@@ -23,6 +23,7 @@ Physics "Aldo Pontremoli"](dip-fisica).
 - [Raytracing](#raytracing)
   - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
+  - [Animation Tutorial](#animation-tutorial)
   - [Usage](#usage)
     - [REPL](#repl)
     - [Command Line Interface (CLI)](#command-line-interface-cli)
@@ -30,6 +31,25 @@ Physics "Aldo Pontremoli"](dip-fisica).
   - [Contributors ✨](#contributors-)
 
 ## Installation
+
+The simplest way to install this software is cloning the repository where it is built in. Run in the command line
+```bash
+git clone https://github.com/cosmofico97/Raytracing
+```
+or download the source code from the github repository https://github.com/cosmofico97/Raytracing
+
+## Animation Tutorial
+
+To star of and checks the correct behavior of the software run the following command inside the main directory
+```bash
+./Raytracer.jl demo-animation --camera_type=per --algorithm=flat --width=640 --height=480
+```
+and enjoy the animation `demo/demo_anim_Flat_640x480x360.mp4`!
+
+![animation](demo/demo_anim_Flat_640x480x360.gif)
+
+
+It may takes few minutes to renderer this animation; you might also gives smaller (integer and even) values to `--width` and `--height` in order to obtain the same animation in a smaller amount of time (the price to pay is a worse definition of the animation itself).
 
 ## Usage
 

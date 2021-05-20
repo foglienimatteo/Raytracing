@@ -118,7 +118,7 @@ function demo(
 	(bool_print==true) && (println("\nHDR demo image written to $(pfm_output)\n"))
 
 	# Apply tone-mapping to the image
-	normalize_image!(img, 0.18)
+	normalize_image!(img, 0.18, bool_print)
 	clamp_image!(img)
 	γ_correction!(img, 1.27)
 
@@ -187,4 +187,7 @@ done
 ffmpeg -r 25 -f image2 -s 50x30 -i animazione/image%03d.png \
     -vcodec libx264 -pix_fmt yuv420p \
     spheres-perspective.mp4
+
+ffmpeg -i demo/demo_anim_Flat_640x480x360.mp4 -t 14 
+	-pix_fmt rgb24 demo/demo_anim_Flat_640x480x360.gif
 =#
