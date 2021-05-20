@@ -38,6 +38,8 @@ export BRDF, DiffuseBRDF, Material
 export Renderer, OnOffRenderer, FlatRenderer
 # from Operations.jl
 export squared_norm, norm, normalize
+# from PrintFunctions.jl
+export print_not_black
 # from ReadingWriting.jl
 export parse_command_line, parse_demo_settings
 export parse_tonemapping_settings, parse_demoanimation_settings
@@ -52,7 +54,7 @@ export ray_intersection, sphere_point_to_uv, sphere_normal, add_shape
 # from Demo.jl
 export demo, demo_animation
 # from Renderers.jl
-export call
+export choose_renderer, call
 # from Pigment.jl
 export get_color, eval
 

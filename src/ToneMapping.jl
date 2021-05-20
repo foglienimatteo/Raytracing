@@ -41,9 +41,7 @@ function avg_lum(img::HDRimage, δ::Number=1e-10)
         cumsum += log10(δ + luminosity(pix))
     end
     10^(cumsum/(img.width*img.height))
-end # avg_lum
-
-##########################################################################################92
+end
 
 """
     normalize_image!(img::HDRimage, a::Number=0.18, lum::Union{Number, Nothing}=nothing,

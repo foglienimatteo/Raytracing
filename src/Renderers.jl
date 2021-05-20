@@ -16,12 +16,15 @@
 # CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
+
 """
     call(::FloatRenderer, ::Ray) -> RGB{Float32}
 
 give WHITE if the ray hit the object, else BLACK
 """
-call(OnOffR::OnOffRenderer, r::Ray) = ray_intersection(w ,r) ≠ nothing ? OnOffR.color : OnOffR.background_color
+function call(OnOffR::OnOffRenderer, r::Ray) 
+    ray_intersection(OnOffR.world, r) ≠ nothing ? OnOffR.color : OnOffR.background_color
+end
 
 """
     call(::FlatRenderer, ::Ray) -> RGB{Float32}
@@ -30,9 +33,11 @@ give BLACK if ray doesn't hit any objects, else evaluate the color depending on 
 """
 function call(FlatR::FlatRenderer, r::Ray)
     hit = ray_intersection(FlatR.world, r)
-    (hit == nothing) && (return FlatR.background_color)
+    !(isnothing(hit)) || (return FlatR.background_color)
 
     mat = hit.shape.Material
+    col1 = get_color(mat.brdf.pigment, hit.surface_point)
+    col2 = get_color(mat.emitted_radiance, hit.surface_point)
 
-    return (get_color(mat.brdf.pigment, hit.surface_point) + get_color(mat.emitted_radiance, hit.surface_point))
+    return (col1 + col2)
 end

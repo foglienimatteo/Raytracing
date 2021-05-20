@@ -341,7 +341,7 @@ end
 
 """
     parse_demo_settings(dict::Dict{String, Any}) 
-        -> (Bool, Float64, Int64, Int64, String, String)
+        -> (Bool, String, Float64, Int64, Int64, String, String)
 
 Parse a `Dict{String, Any}` for the [`demo`](@ref) function;
 return a tuple `(view_ort, α, w, h, pfm, png)` containing a bool `view_ort` for the choosen point of view
@@ -349,60 +349,57 @@ return a tuple `(view_ort, α, w, h, pfm, png)` containing a bool `view_ort` for
 on width `w` and height `h`, the pfm output filename `pfm` and the LDR
 output filename `png`.
 
-The keys for the input `Dict` are, respectively: "orthogonal", "perspective", "alpha",
+The keys for the input `Dict` are, respectively: "camera_type", "algorithm", "alpha",
  "width", "height", "set-pfm-name", "set-png-name"
 
 See also:  [`demo`](@ref)
 """
 function parse_demo_settings(dict::Dict{String, Any})
-    ort::Bool = dict["orthogonal"]
-    per::Bool = dict["perspective"]
+    view::String = dict["camera_type"]
+    alg::Bool = dict["algorithm"]
     α::Float64 = dict["alpha"]
     w::Int64 = dict["width"]
     h::Int64 = dict["height"]
     pfm::String = dict["set-pfm-name"]
     png::String = dict["set-png-name"]
 
-    if ( (ort==true) || (ort==per==false) ) 
-        view_ort=true
-    elseif ((ort==false) && (per==true))
-        view_ort=false
-    else
-        view_ort=nothing
-    end
+    view_ort = nothing
+    view == "ort" ? view_ort = true : nothing
+    view == "per" ? view_ort = false : nothing
+    !(isnothing(view_ort)) || 
+        throw(ArgumentError("""view must be "ort" or "per", but instead is equal to view=$view"""))
 
-    return (view_ort, α, w, h, pfm, png)
+    return (view_ort, alg, α, w, h, pfm, png)
 end
 
 
 """
     parse_demoanimation_settings(dict::Dict{String, Any}) 
-        -> (Bool, Int64, Int64, String)
+        -> (Bool, String, Int64, Int64, String)
 
 Parse a `Dict{String, Any}` for the [`demo_animation`](@ref) function;
 return a tuple `(view_ort, w, h, anim)` containing a bool `view_ort` for the choosen point of view
 (`true`->Orthogonal, `false`->Perspective), the number of pixels
 on width `w` and height `h` and the output animation name `anim`.
 
-The keys for the input `Dict` are, respectively: "orthogonal", "perspective",
+The keys for the input `Dict` are, respectively: "camera_type", "algorithm",
  "width", "height", "set-anim-name"
 
 See also:  [`demo_animation`](@ref), [`demo`](@ref)
 """
 function parse_demoanimation_settings(dict::Dict{String, Any})
-    ort::Bool = dict["orthogonal"]
-    per::Bool = dict["perspective"]
+    view::String = dict["camera_type"]
+    alg::Bool = dict["algorithm"]
     w::Int64 = dict["width"]
     h::Int64 = dict["height"]
     anim::String = dict["set-anim-name"]
 
-    if ( (ort==true) || (ort==per==false) ) 
-        view_ort=true
-    elseif ((ort==false) && (per==true))
-        view_ort=false
-    else
-        view_ort=nothing
-    end
 
-    return (view_ort, w, h, anim)
+    view_ort = nothing
+    view == "ort" ? view_ort = true : nothing
+    view == "per" ? view_ort = false : nothing
+    !(isnothing(view_ort)) || 
+        throw(ArgumentError("""view must be "ort" or "per", but instead is equal to view=$view"""))
+
+    return (view_ort, alg, w, h, anim)
 end

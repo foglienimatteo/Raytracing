@@ -62,3 +62,20 @@ println(ray::Ray) = println(stdout, ray)
 print(ray::Ray) = print(stdout, ray)
 
 
+println(io::IO, uv::Vec2d) =  println(io, "Vec2d = (", uv.u, ", ", uv.v, ")" )
+println(uv::Vec2d) =  println(stdout, "Vec2d = (", uv.u, ", ", uv.v, ")" )
+print(io::IO, uv::Vec2d) =  print(io, "Vec2d = (", uv.u, ", ", uv.v, ")" )
+print(uv::Vec2d) =  print(stdout, "Vec2d = (", uv.u, ", ", uv.v, ")" )
+
+function print_not_black(img::HDRimage)
+     w=img.width
+     h=img.height
+     println("HDRImage to be printed")
+     println("width = ", w, "\t height = ", h)
+
+     for (i, color) in enumerate(img.rgb_m)
+          color==BLACK ? nothing : println(i, "\t", color)
+     end
+
+     nothing
+end
