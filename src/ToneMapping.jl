@@ -58,6 +58,12 @@ function σ_lum(lum::Float64, img::HDRimage)
 end
 
 
+normalize_image!(  img::HDRimage, 
+                    a::Float64=0.18,
+                    lum::Union{Number, Nothing}=nothing, 
+                    δ::Number=1e-10,
+                ) = normalize_image!(img, a, true, lum, δ)
+
 function normalize_image!(  img::HDRimage, 
                             a::Float64=0.18,
                             bool_print::Bool=true,
