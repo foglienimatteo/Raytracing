@@ -34,8 +34,8 @@ function get_color(p::CheckeredPigment, uv::Vec2d)
 end
 
 function get_color(p::ImagePigment, uv::Vec2d)
-    col = uv.u * p.image.width
-    row = uv.v * p.image.height
+    row = uv.u * p.image.width
+    col = uv.v * p.image.height
     (col >= p.image.width) || (col = p.image.width - 1)
     (row >= p.image.height) || (row = p.image.height - 1)
 
