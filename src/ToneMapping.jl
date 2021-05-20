@@ -57,34 +57,13 @@ function σ_lum(lum::Float64, img::HDRimage)
     return √(σ/N)
 end
 
-
-normalize_image!(  img::HDRimage, 
-                    a::Float64=0.18,
-                    lum::Union{Number, Nothing}=nothing, 
-                    δ::Number=1e-10,
-                ) = normalize_image!(img, a, true, lum, δ)
-
 function normalize_image!(  img::HDRimage, 
                             a::Float64=0.18,
-                            bool_print::Bool=true,
                             lum::Union{Number, Nothing}=nothing, 
-                            δ::Number=1e-10,
+                            δ::Number=1e-10
                         )
 
-    if isnothing(lum)
-        lum = avg_lum(img, δ)
-
-        if !(σ_lum(lum, img)/lum < 0.5)
-            (bool_print==true) && println(
-                "The image has a standard luminosity deviation σ=$(σ_lum(lum, img)) \n"*
-                "and an average luminosity l=$lum, consequently l/σ = $(σ_lum(lum, img)/lum).\n"*
-                "It's necessary to use a different average luminosity.")
-            
-            cost=5.
-            lum =  lum_max(img)/cost
-            (bool_print==true) && println("We choose to use lum_max/$cost = $lum")
-        end
-    end
+    isnothing(lum) && (lum = avg_lum(img, δ))
     img.rgb_m .= img.rgb_m .* a ./lum
     nothing
 end 

@@ -118,7 +118,11 @@ function demo(
 	(bool_print==true) && (println("\nHDR demo image written to $(pfm_output)\n"))
 
 	# Apply tone-mapping to the image
-	normalize_image!(img, 0.18, bool_print)
+	if algorithm == "onoff"
+		normalize_image!(img, 0.18, nothing)
+	elseif algorithm == "flat"
+		normalize_image!(img, 0.18, 0.1)
+	end
 	clamp_image!(img)
 	γ_correction!(img, 1.27)
 
