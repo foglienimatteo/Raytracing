@@ -118,7 +118,7 @@ function demo(
 	(bool_print==true) && (println("\nHDR demo image written to $(pfm_output)\n"))
 
 	# Apply tone-mapping to the image
-	normalize_image!(img, 0.18, 0.1)
+	normalize_image!(img, 0.18)
 	clamp_image!(img)
 	γ_correction!(img, 1.27)
 
@@ -145,6 +145,8 @@ demo_animation(ort::Bool) = demo_animation(ort, "onoff", 200, 150, "demo-animati
 demo_animation(al::String) = demo_animation(false, al, 200, 150, "demo-animation.mp4")
 demo_animation(ort::Bool, al::String) = 
 					demo_animation(ort, al, 200, 150, "demo-animation.mp4")
+demo_animation(al::String, w::Int64, h::Int64) = 
+					demo_animation(false, al, w, h, "demo-animation.mp4")
 demo_animation(ort::Bool, al::String, w::Float64, h::Float64) = 
 					demo_animation(ort, al, w, h, "demo-animation.mp4")
 

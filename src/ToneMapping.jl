@@ -26,8 +26,13 @@ Gives the best average luminosity of a Pixel.
 As input needs a `::RGB{T}` and returns a `::Float64`.
 """
 luminosity(c::RGB{T}) where {T} = (max(c.r, c.g, c.b) + min(c.r, c.g, c.b))/2.
-
-##########################################################################################92
+function lum_max(img::HDRimage) 
+    lum_max=0.0
+    for pix in img.rgb_m
+        (lum_max>luminosity(pix)) || (lum_max=luminosity(pix))
+    end
+    lum_max
+end
 
 """
     avg_lum(img::HDRimage, δ::Number=1e-10) -> Float64
@@ -43,6 +48,40 @@ function avg_lum(img::HDRimage, δ::Number=1e-10)
     10^(cumsum/(img.width*img.height))
 end
 
+function σ_lum(lum::Float64, img::HDRimage)
+    σ=0.
+    N = img.width*img.height
+    for pix in img.rgb_m
+        σ += abs( luminosity(pix) - lum )^2.
+    end
+    return √(σ/N)
+end
+
+
+function normalize_image!(  img::HDRimage, 
+                            a::Float64=0.18,
+                            lum::Union{Number, Nothing}=nothing, 
+                            δ::Number=1e-10
+                        )
+
+    if isnothing(lum)
+        lum = avg_lum(img, δ)
+
+        if !(σ_lum(lum, img)/lum < 0.5)
+            println(
+                "The image has a standard luminosity deviation σ=$(σ_lum(lum, img)) \n"*
+                "and an average luminosity l=$lum, consequently l/σ = $(σ_lum(lum, img)/lum).\n"*
+                "It's necessary to use a different average luminosity.")
+            
+            cost=5.
+            lum =  lum_max(img)/cost
+            println("We choose to use lum_max/$cost = $lum")
+        end
+    end
+    img.rgb_m .= img.rgb_m .* a ./lum
+    nothing
+end 
+
 """
     normalize_image!(img::HDRimage, a::Number=0.18, lum::Union{Number, Nothing}=nothing,
     δ::Number=1e-10)
@@ -51,13 +90,7 @@ Normalize all the RGB components of a [`HDRimage`](@ref) with its average lumino
 (given by [`avg_lum`](@ref)(`::HDRimage`, `::Number`)) and the scale factor 'a' (by default a=0.18,
 can be changed).
 """
-function normalize_image!(img::HDRimage, a::Number=0.18,
-                          lum::Union{Number, Nothing}=nothing, δ::Number=1e-10
-    )
-    (!isnothing(lum)) || (lum = avg_lum(img, δ))
-    img.rgb_m .= img.rgb_m .* a ./lum
-    nothing
-end # normalize_image
+normalize_image!
 
 ##########################################################################################92
 

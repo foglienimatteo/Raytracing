@@ -356,7 +356,7 @@ See also:  [`demo`](@ref)
 """
 function parse_demo_settings(dict::Dict{String, Any})
     view::String = dict["camera_type"]
-    alg::Bool = dict["algorithm"]
+    alg::String = dict["algorithm"]
     α::Float64 = dict["alpha"]
     w::Int64 = dict["width"]
     h::Int64 = dict["height"]
@@ -389,7 +389,7 @@ See also:  [`demo_animation`](@ref), [`demo`](@ref)
 """
 function parse_demoanimation_settings(dict::Dict{String, Any})
     view::String = dict["camera_type"]
-    alg::Bool = dict["algorithm"]
+    alg::String = dict["algorithm"]
     w::Int64 = dict["width"]
     h::Int64 = dict["height"]
     anim::String = dict["set-anim-name"]

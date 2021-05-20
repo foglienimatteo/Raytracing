@@ -121,7 +121,7 @@ function ArgParse_command_line(arguments)
 			help = "flag for the camera type:\n"*
 	    				"ort -> Orthogonal camera, per -> Perspective camera"
           	arg_type = String
-			default = "ort"
+			default = "per"
 			range_tester = input -> (input ∈ ["ort", "per"])
     		"--algorithm", "-r"
 			help = "flag for the renderer algorithm"

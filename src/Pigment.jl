@@ -40,6 +40,11 @@ end
 
 ##########################################################################################92
 
-eval(b::BRDF, n::Normal, in_dir::Vec, out_dit::Vec, uv::Vec2d) = BLACK
+evaluate(b::BRDF, n::Normal, in_dir::Vec, out_dit::Vec, uv::Vec2d) = BLACK
 
-eval(b::DiffuseBRDF, n::Normal, in_dir::Vec, out_dit::Vec, uv::Vec2d) = get_color(b.pigment, uv) * (p.reflectance / pi)
+evaluate(   b::DiffuseBRDF, 
+            n::Normal, 
+            in_dir::Vec, 
+            out_dit::Vec, 
+            uv::Vec2d
+            ) = get_color(b.pigment, uv) * (p.reflectance / pi)
