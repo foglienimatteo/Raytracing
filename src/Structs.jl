@@ -384,6 +384,30 @@ struct FlatRenderer <: Renderer
     FlatRenderer(w = World(), bc = BLACK) = new(w, bc)
 end
 
+"""
+A simple path-tracing renderer
+The algorithm implemented here allows the caller to tune number of rays thrown at each iteration, as well as the
+maximum depth. It implements Russian roulette, so in principle it will take a finite time to complete the
+calculation even if you set max_depth to `Inf`.
+
+# Arguments
+- `world`
+- `background_color`: set the background color if the Ray doesn-t hit anything
+- `pcg`: for random numbers usevul for evaluating integrals
+- `N`: number of `Ray`s generated for integral evaluation
+- `max_depth`: maximal number recursive integrations
+- `russian_roulette_limit`: set the depth at whitch the Russian Roulette algorithm begins
+"""
+struct PathTracer <: Renderer
+    world::World
+    background_color::RGB{Float32}
+    pcg::PCG
+    N::Int64 # number of ::Ray(s) to use in the integral evaluation
+    max_depth::Int64
+    russian_roulette_limit::Int64
+    PathTracer(w, bc = BLACK, pcg = PCG(), nubR = 10, md = 2, RRlim = 3)
+end
+
 
 """
 A 3D unit sphere centered on the origin of the axes

@@ -8,7 +8,7 @@
 
 
 """
-    call(::FloatRenderer, ::Ray) -> RGB{Float32}
+    call(::OnOffRenderer, ::Ray) -> RGB{Float32}
 
 give WHITE if the ray hit the object, else BLACK
 """
@@ -30,4 +30,33 @@ function call(FlatR::FlatRenderer, r::Ray)
     col2 = get_color(mat.emitted_radiance, hit.surface_point)
 
     return (col1 + col2)
+end
+
+"""
+    call(::PathTracer, ::Ray) -> RGB{Float64}
+"""
+function call(PT::PathTracer, r::Ray)
+    if r.depth > PT.max_depth
+        return BLACK
+    end
+
+    hit_record = ray_intersection(PT.world, r)
+    if hit_record == nothing
+        return PT.background_color
+    end
+
+    hit_material = hit_record.material
+    hit_color = get_color(hit_material.brdf.pigment, hit_record.surface_point)
+    emitted_radiance = get_color(hit_material.emitted_radiance, hit_record.surface_point)
+    hit_color_lum = max(hit_color.r, hit_color)
+
+    # Russian Roulette
+    if r.depth >= PT.russian_roulette_limit
+        if random(PT.pcg) > hit_color_lum
+            hit_color *= 1.0 / (1.0 - hit_color_lum)
+        else
+            # Terminate prematurely
+            return emitted_radiance
+        end
+    end
 end

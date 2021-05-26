@@ -21,8 +21,8 @@ export Point, Vec, Normal,VEC_X, VEC_Y, VEC_Z, Transformation
 export Ray, OrthogonalCamera, PerspectiveCamera, ImageTracer
 export Shape, Sphere, Plane, Vec2d, HitRecord, World
 export Pigment, UniformPigment, CheckeredPigment, ImagePigment
-export BRDF, DiffuseBRDF, Material
-export Renderer, OnOffRenderer, FlatRenderer
+export BRDF, DiffuseBRDF, SpecularBRDF, Material
+export Renderer, OnOffRenderer, FlatRenderer, pathTracer
 # from Operations.jl
 export squared_norm, norm, normalize
 # from PrintFunctions.jl
