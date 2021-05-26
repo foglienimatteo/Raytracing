@@ -47,7 +47,7 @@ To star of and checks the correct behavior of the software run the following com
 and enjoy the animation `demo/demo_anim_Flat_640x480x360.mp4`!
 
 
-<video width="640" height="480" src="./demo/demo_anim_Flat_640x480x360.mp4" type="video/mp4" autoplay loop>
+<video width="640" height="480" src="https://user-images.githubusercontent.com/79974922/119556147-ef2b3200-bd9e-11eb-956f-17de6ea6bdda.mp4" type="video/mp4" autoplay loop>
 </video>
 
 [comment]: < ![animation](demo/demo_anim_Flat_640x480x360.gif) >
