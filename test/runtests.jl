@@ -81,3 +81,7 @@ end
 @testset "test_PCG" begin
 	include("test_PCG.jl")
 end
+
+@testset "test_OrthoNormalBasis" begin
+	include("test_OrthoNormalBasis.jl")
+end
