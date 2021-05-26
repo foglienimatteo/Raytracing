@@ -8,7 +8,7 @@
     pcg = PCG()
 
     for i in 1:10
-        normal = Normal(random(pcg, Float64), random(pcg, Float64), random(pcg, Float64))
+        normal = Normal(random(pcg), random(pcg), random(pcg))
         e1, e2, e3 = create_ong_from_z(normal)
 
         @test e3 ≈ normal # z axis must be aligned with the normal

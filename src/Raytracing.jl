@@ -45,7 +45,7 @@ export choose_renderer, call
 # from Pigment.jl
 export get_color, eval
 # from PCG.jl
-export random
+export PCG, random
 # from OrthoNormalBasis.jl
 export create_onb_from_z
 #from ScatterRay.jl

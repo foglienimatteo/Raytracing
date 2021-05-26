@@ -6,26 +6,27 @@
 #
 
 
-function catter_ray(pcg::PCG, incoming_dir::Vec, interaction_point::Point, normal::Normal, depth::Int64)
+function scatter_ray(pcg::PCG, incoming_dir::Vec, interaction_point::Point, normal::Normal, depth::Int64, ::DiffuseBRDF)
     e1, e2, e3 = create_onb_from_z(normal)
-    cos_theta_sq = random_float(pcg, Float46)
-    cos_theta, sin_theta = sqrt(cos_theta_sq), sqrt(1.0 - cos_theta_sq)
-    phi = 2.0 * pi * pcg.random_float()
+    cos_θ_sq = random_float(pcg)
+    cos_θ = √(cos_θ_sq)
+    sin_θ = √(1.0 - cos_θ_sq)
+    ϕ = 2.0 * pi * pcg.random_float()
 
-    return Ray(origin=interaction_point,
-               dir=e1 * cos(phi) * cos_theta + e2 * sin(phi) * cos_theta + e3 * sin_theta,
-               tmin=1.0e-3,   # Be generous here
-               tmax=inf,
-               depth=depth)
+    return Ray(interaction_point,
+                e1 * cos(ϕ) * cos_θ + e2 * sin(ϕ) * cos_θ + e3 * sin_θ,
+                1.0e-3,   # tmin, be generous here
+                Inf,
+                depth)
 end
 
-function scatter_ray(self, pcg: PCG, incoming_dir: Vec, interaction_point: Point, normal: Normal, depth: int)
-    ray_dir = Vec(incoming_dir.x, incoming_dir.y, incoming_dir.z).normalize()
-    normal = normal.to_vec().normalize()
+function scatter_ray(pcg: PCG, incoming_dir::Vec, interaction_point::Point, normal::Normal, depth::int, ::SpecularBRDF)
+    ray_dir = normalize(Vec(incoming_dir.x, incoming_dir.y, incoming_dir.z))
+    normal = Vec(normal)
 
-    return Ray(origin=interaction_point,
-               dir=ray_dir - normal * 2 * normal.dot(ray_dir),
-               tmin=1e-3,
-               tmax=inf,
-               depth=depth)
+    return Ray(interaction_point,
+               ray_dir - normal * 2 * (normal ⋅ ray_dir),
+               1e-3,
+               Inf,
+               depth)
 end

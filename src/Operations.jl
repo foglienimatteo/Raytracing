@@ -57,6 +57,12 @@ LinearAlgebra.:×(a::Vec, b::Vec) = Vec(a.y*b.z-a.z*b.y, b.x*a.z-a.x*b.z, a.x*b.
 
 # operations for Normal
 Base.:-(a::Normal) = Normal(-a.x, -a.y, -a.z)
+LinearAlgebra.:⋅(a::Normal, b::Normal) = a.x*b.x + a.y*b.y + a.z*b.z
+LinearAlgebra.:⋅(a::Normal, b::Vec) = a.x*b.x + a.y*b.y + a.z*b.z
+LinearAlgebra.:⋅(a::Vec, b::Normal) = a.x*b.x + a.y*b.y + a.z*b.z
+LinearAlgebra.:×(a::Normal, b::Normal) = Vec(a.y*b.z-a.z*b.y, b.x*a.z-a.x*b.z, a.x*b.y-a.y*b.x)
+LinearAlgebra.:×(a::Normal, b::Vec) = Vec(a.y*b.z-a.z*b.y, b.x*a.z-a.x*b.z, a.x*b.y-a.y*b.x)
+LinearAlgebra.:×(a::Vec, b::Normal) = Vec(a.y*b.z-a.z*b.y, b.x*a.z-a.x*b.z, a.x*b.y-a.y*b.x)
 
 # Definitions of operations between Vec and Point
 Base.:+(p::Point, v::Vec) = Point(p.x+v.x, p.y+v.y, p.z+v.z)

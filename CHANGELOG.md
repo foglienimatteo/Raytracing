@@ -1,5 +1,7 @@
 # HEAD
-- Implemented PCG algorithm for random numbers
+- Implemented scalar and vector products between two `Normal` and between `Normal` and `Vec`
+- New struct `SpecularBRDF`
+- Implemented PCG new struct (`PCG`) and algorithm for random numbers
 - Functions to decide which type of render use
 - Functions to get the color from a pigment and evaluete it thanks to the BRDF
 - New structs for rendering (`OnOffRenderer`, `FlatRRenderer`) and tests

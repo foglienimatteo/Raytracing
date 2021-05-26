@@ -89,6 +89,7 @@ struct Vec
     Vec(x, y, z) = new(x, y, z)
     Vec() = new(0.0, 0.0, 0.0)
     Vec(P::Point) = new(P.x, P.y, P.z)
+    Vec(N::Normal) = new(N.x, N.y, N.z)
     Vec(v::SVector{4, Float64}) = new(v[1], v[2], v[3])
 end
 
@@ -333,6 +334,15 @@ struct DiffuseBRDF <: BRDF
     pigment::Pigment
     reflectance::Float64
     DiffuseBRDF(pig = UniformPigment(WHITE), r=1.0) = new(pig, r)
+end
+
+"""
+A class representing an ideal mirror BRDF
+"""
+struct SpecularBRDF <: BRDF
+    pigment::Pigment
+    theresold_angle_rad::Float64
+    SpecularBRDF(p, thAngle) = new(p=UniformPigment(WHITE), thAngle = π/180.)
 end
 
 """
