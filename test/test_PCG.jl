@@ -5,13 +5,20 @@
 # Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
 #
 
-@testset "test_random" begin
-     pcg = PCG()
+pcg = PCG()
 
-     @test pcg.state == UInt(1753877967969059832)
-     @test pcg.inc == UInt(109)
+@test pcg.state == UInt64(1753877967969059832)
+@test pcg.inc == UInt64(109)
 
-     for expected in [2707161783, 2068313097, 3122475824, 2211639955, 3215226955, 3421331566]
-          @test UInt32(expected) == random(pcg, UInt32)
-     end
+for expected in [
+          2707161783,
+          2068313097,
+          3122475824,
+          2211639955,
+          3215226955,
+          3421331566,
+     ]
+     val = random(pcg, UInt32)
+     println("Exp: $expected, Found: $(repr(val |> Int))")
+     @test UInt32(expected) == val
 end
