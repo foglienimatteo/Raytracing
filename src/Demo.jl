@@ -40,19 +40,15 @@ function demo(
           )
 
 	material1 = Material(DiffuseBRDF(UniformPigment(RGB(0.7, 0.3, 0.2))))
-    	material2 = Material(DiffuseBRDF(	CheckeredPigment(
-		    							RGB(0.2, 0.7, 0.3), 
-	    								RGB(0.3, 0.2, 0.7), 
-									4
-								)
-						)
-				)
+    material2 = Material(DiffuseBRDF(CheckeredPigment(RGB(0.2, 0.7, 0.3), 
+	    											  RGB(0.3, 0.2, 0.7), 
+									                  4) )	)
 
 	sphere_texture = HDRimage(2, 2)
 	set_pixel(sphere_texture, 0, 0, RGB(0.1, 0.2, 0.3))
-    	set_pixel(sphere_texture, 0, 1, RGB(0.2, 0.1, 0.3))
+    set_pixel(sphere_texture, 0, 1, RGB(0.2, 0.1, 0.3))
 	set_pixel(sphere_texture, 1, 0, RGB(0.3, 0.2, 0.1))
-    	set_pixel(sphere_texture, 1, 1, RGB(0.3, 0.1, 0.2))
+    set_pixel(sphere_texture, 1, 1, RGB(0.3, 0.1, 0.2))
 
 	material3 = Material(DiffuseBRDF(ImagePigment(sphere_texture)))
 
@@ -91,8 +87,6 @@ function demo(
 	camera = orthogonal==true ? 
 			OrthogonalCamera(aspect_ratio, camera_tr) :
 			PerspectiveCamera(1., aspect_ratio, camera_tr)
-
-
 	
 	# Run the ray-tracer
 	image = HDRimage(width, height)
