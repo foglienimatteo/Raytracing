@@ -126,6 +126,10 @@ struct Normal
         m = √(x^2+y^2+z^2)
         new(x/m, y/m, z/m)
     end
+    function Normal(v::Vec)
+        m = √(v.x^2+v.y^2+v.z^2)
+        new(v.x/m, v.y/m, v.z/m)
+    end
     function Normal(v::Vector{Float64})
         @assert length(v) == 3
         m = √(v[1]^2+v[2]^2+v[3]^2)
