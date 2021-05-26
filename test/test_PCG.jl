@@ -18,7 +18,5 @@ for expected in [
           3215226955,
           3421331566,
      ]
-     val = random(pcg, UInt32)
-     println("Exp: $expected, Found: $(repr(val |> Int))")
-     @test UInt32(expected) == val
+     @test UInt32(expected) == random(pcg, UInt32)
 end
