@@ -14,13 +14,13 @@ function scatter_ray(::Type{DiffuseBRDF},
                     depth::Int64,
                 )
     e1, e2, e3 = create_onb_from_z(normal)
-    cos_θ_sq = random_float(pcg)
+    cos_θ_sq = random(pcg)
     cos_θ = √(cos_θ_sq)
     sin_θ = √(1.0 - cos_θ_sq)
-    ϕ = 2.0 * pi * pcg.random_float()
+    ϕ = 2.0 * pi * random(pcg)
 
     return Ray(interaction_point,
-                e1 * cos(ϕ) * cos_θ + e2 * sin(ϕ) * cos_θ + e3 * sin_θ,
+                e1*cos(ϕ)*cos_θ + e2*sin(ϕ)*cos_θ + e3*sin_θ,
                 1.0e-3,   # tmin, be generous here
                 Inf,
                 depth)
