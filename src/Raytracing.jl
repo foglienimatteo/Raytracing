@@ -51,7 +51,7 @@ export create_onb_from_z
 #from ScatterRay.jl
 export scatter_ray
 
-
+include("PCG.jl")
 include("Structs.jl")
 include("Operations.jl")
 include("PrintFunctions.jl")
@@ -63,7 +63,6 @@ include("Shapes.jl")
 include("Demo.jl")
 include("Pigment.jl")
 include("Renderers.jl")
-include("PCG.jl")
 include("OrthoNormalBasis.jl")
 include("ScatterRay.jl")
 

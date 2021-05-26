@@ -31,7 +31,7 @@ function scatter_ray(::Type{SpecularBRDF},
                     incoming_dir::Vec, 
                     interaction_point::Point, 
                     normal::Normal, 
-                    depth::int,
+                    depth::Int64,
                 ) 
     ray_dir = normalize(Vec(incoming_dir.x, incoming_dir.y, incoming_dir.z))
     normal = Vec(normal)
