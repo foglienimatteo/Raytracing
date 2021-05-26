@@ -46,7 +46,11 @@ To star of and checks the correct behavior of the software run the following com
 ```
 and enjoy the animation `demo/demo_anim_Flat_640x480x360.mp4`!
 
-![animation](demo/demo_anim_Flat_640x480x360.gif)
+
+<video width="640" height="480" src="https://user-images.githubusercontent.com/79974922/119556147-ef2b3200-bd9e-11eb-956f-17de6ea6bdda.mp4" type="video/mp4" autoplay loop>
+</video>
+
+[comment]: < ![animation](demo/demo_anim_Flat_640x480x360.gif) >
 
 
 It may takes few minutes to renderer this animation; you might also gives smaller (integer and even) values to `--width` and `--height` in order to obtain the same animation in a smaller amount of time (the price to pay is a worse definition of the animation itself).
