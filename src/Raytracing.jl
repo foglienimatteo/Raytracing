@@ -45,6 +45,8 @@ export demo, demo_animation
 export choose_renderer, call
 # from Pigment.jl
 export get_color, eval
+# from PCG.jl
+export PCG, random
 
 
 include("Structs.jl")
@@ -58,6 +60,7 @@ include("Shapes.jl")
 include("Demo.jl")
 include("Pigment.jl")
 include("Renderers.jl")
+include("PCG.jl")
 
 
 end  # module
