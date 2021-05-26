@@ -8,9 +8,9 @@
 @testset "test_OrthoNormalBasis" begin
     pcg = PCG()
 
-    for i in 1:10
+    for i in 1:100000
         normal = Normal(random(pcg), random(pcg), random(pcg))
-        e1, e2, e3 = create_ong_from_z(normal)
+        e1, e2, e3 = create_onb_from_z(normal)
 
         @test e3 ≈ normal # z axis must be aligned with the normal
         

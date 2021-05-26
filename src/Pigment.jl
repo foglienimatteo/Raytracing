@@ -34,7 +34,7 @@ evaluate(b::BRDF, n::Normal, in_dir::Vec, out_dit::Vec, uv::Vec2d) = BLACK
 
 evaluate(b::DiffuseBRDF, n::Normal, in_dir::Vec, out_dit::Vec, uv::Vec2d) = get_color(b.pigment, uv) * (p.reflectance / pi)
 
-function evaluate(b::SpecularBRDF, n::Normal, in_dir:Vec, out_dir::Vec, uv::Vec2d)
+function evaluate(b::SpecularBRDF, n::Normal, in_dir::Vec, out_dir::Vec, uv::Vec2d)
     θ_in = acos(n ⋅ normalize(in_dir))
     θ_out = acos(n ⋅ normalize(out_dir))
 

@@ -89,7 +89,6 @@ struct Vec
     Vec(x, y, z) = new(x, y, z)
     Vec() = new(0.0, 0.0, 0.0)
     Vec(P::Point) = new(P.x, P.y, P.z)
-    Vec(N::Normal) = new(N.x, N.y, N.z)
     Vec(v::SVector{4, Float64}) = new(v[1], v[2], v[3])
 end
 
@@ -131,6 +130,7 @@ struct Normal
         new(v[1]/m, v[2]/m, v[3]/m)
     end
 end
+Vec(N::Normal) = Vec(N.x, N.y, N.z)
 
 ##########################################################################################92
 
