@@ -63,7 +63,13 @@ function call(PT::PathTracer, r::Ray)
     cum_radiance = BLACK
     if hit_color_lum > 0.0
         for ray_index ∈ 0:PT.N
-            new_ray = scatter_ray(PT.pcg, hit_record.ray.dir, hit_record.world_point, hit_record.normal, ray.depth + 1, hit.material.brdf)
+            new_ray = scatter_ray(PT.pcg,
+                                  hit_record.ray.dir,
+                                  hit_record.world_point,
+                                  hit_record.normal, 
+                                  ray.depth + 1,
+                                  hit.material.brdf
+            )
             new_radiance = call(PT, new_ray)
             cum_radiance = hit_color * new_radiance
         end
