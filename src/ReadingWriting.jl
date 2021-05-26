@@ -2,7 +2,9 @@
 #
 # The MIT License (MIT)
 #
-# Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni.
+# Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
+#
+
 
 ##########################################################################################92
 

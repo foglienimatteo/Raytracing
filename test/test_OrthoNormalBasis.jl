@@ -7,6 +7,20 @@
 @testset "test_OrthoNormalBasis" begin
     pcg = PCG()
 
-    for i in 1:1000
-        normal = Vec()
+    for i in 1:10
+        normal = Normal(random(pcg, Float64), random(pcg, Float64), random(pcg, Float64))
+        e1, e2, e3 = create_ong_from_z(normal)
+
+        @test e3 ≈ normal # z axis must be aligned with the normal
+        
+        # testing orthogonality
+        @test are_close(e1 ⋅ e2, 0.)
+        @test are_close(e1 ⋅ e3, 0.)
+        @test are_close(e3 ⋅ e2, 0.)
+        
+        # testing normality
+        @test are_close(squared_norm(e1), 1.)
+        @test are_close(squared_norm(e2), 1.)
+        @test are_close(squared_norm(e3), 1.)
+    end
 end

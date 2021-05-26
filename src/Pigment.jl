@@ -2,7 +2,9 @@
 #
 # The MIT License (MIT)
 #
-# Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
+# Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni.
+#
+
 
 """
 Return the color of the pigment at the specified coordinates

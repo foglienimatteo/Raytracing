@@ -4,6 +4,9 @@
 #
 # Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
 
+"""
+Create an orthonormal base with the z-axes parallel to the normal of the surface
+"""
 function create_onb_from_z(normal::Union{Vec, Normal})
     (typeof(normal) == Vec) && (normal = Normal(normal))
 
