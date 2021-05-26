@@ -20,7 +20,11 @@ function scatter_ray(pcg::PCG, incoming_dir::Vec, interaction_point::Point, norm
                 depth)
 end
 
-function scatter_ray(pcg: PCG, incoming_dir::Vec, interaction_point::Point, normal::Normal, depth::int, ::SpecularBRDF)
+function scatter_ray(pcg::PCG,
+                    incoming_dir::Vec,
+                    interaction_point::Point,
+                    normal::Normal,
+                    depth::int, ::SpecularBRDF)
     ray_dir = normalize(Vec(incoming_dir.x, incoming_dir.y, incoming_dir.z))
     normal = Vec(normal)
 

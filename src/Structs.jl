@@ -342,7 +342,7 @@ A class representing an ideal mirror BRDF
 struct SpecularBRDF <: BRDF
     pigment::Pigment
     theresold_angle_rad::Float64
-    SpecularBRDF(p, thAngle) = new(p=UniformPigment(WHITE), thAngle = π/180.)
+    SpecularBRDF(p=UniformPigment(WHITE), thAngle = π/180.) = new(p, thAngle)
 end
 
 """
@@ -405,7 +405,7 @@ struct PathTracer <: Renderer
     N::Int64 # number of ::Ray(s) to use in the integral evaluation
     max_depth::Int64
     russian_roulette_limit::Int64
-    PathTracer(w, bc = BLACK, pcg = PCG(), nubR = 10, md = 2, RRlim = 3)
+    PathTracer(w, bc = BLACK, pcg = PCG(), nubR = 10, md = 2, RRlim = 3) = new(w, bc, pcg, nubR, md, RRlim)
 end
 
 
