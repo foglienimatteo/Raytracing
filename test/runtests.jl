@@ -77,3 +77,7 @@ end
 @testset "test_Renderers" begin
 	include("test_Renderers.jl")
 end
+
+@testset "test_PCG" begin
+	include("test_PCG.jl")
+end
