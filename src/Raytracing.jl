@@ -22,9 +22,9 @@ export Ray, OrthogonalCamera, PerspectiveCamera, ImageTracer
 export Shape, Sphere, Plane, Vec2d, HitRecord, World
 export Pigment, UniformPigment, CheckeredPigment, ImagePigment
 export BRDF, DiffuseBRDF, SpecularBRDF, Material
-export Renderer, OnOffRenderer, FlatRenderer, pathTracer
+export Renderer, OnOffRenderer, FlatRenderer, PathTracer
 # from Operations.jl
-export squared_norm, norm, normalize
+export are_close, squared_norm, norm, normalize
 # from PrintFunctions.jl
 export print_not_black
 # from ReadingWriting.jl

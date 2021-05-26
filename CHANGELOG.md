@@ -1,5 +1,9 @@
 # HEAD
+<<<<<<< HEAD
 - New struct and funciton for generate a better image considering lights and angles (`PathTracer`) and tests
+=======
+- New struct for generate a better image considering lights and angles (``PathTracer`) and tests
+>>>>>>> fd4fe977965d7d739e6f05c08b3c39920764fa54
 - Implemented scalar and vector products between two `Normal` and between `Normal` and `Vec`
 - New struct `SpecularBRDF`
 - Implemented PCG new struct (`PCG`) and algorithm for random numbers

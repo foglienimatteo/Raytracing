@@ -6,7 +6,13 @@
 #
 
 
-function scatter_ray(pcg::PCG, incoming_dir::Vec, interaction_point::Point, normal::Normal, depth::Int64, ::DiffuseBRDF)
+function scatter_ray(::Type{DiffuseBRDF},
+                    pcg::PCG, 
+                    incoming_dir::Vec, 
+                    interaction_point::Point, 
+                    normal::Normal, 
+                    depth::Int64,
+                )
     e1, e2, e3 = create_onb_from_z(normal)
     cos_θ_sq = random_float(pcg)
     cos_θ = √(cos_θ_sq)
@@ -20,11 +26,13 @@ function scatter_ray(pcg::PCG, incoming_dir::Vec, interaction_point::Point, norm
                 depth)
 end
 
-function scatter_ray(pcg::PCG,
-                    incoming_dir::Vec,
-                    interaction_point::Point,
-                    normal::Normal,
-                    depth::int, ::SpecularBRDF)
+function scatter_ray(::Type{SpecularBRDF},
+                    pcg::PCG, 
+                    incoming_dir::Vec, 
+                    interaction_point::Point, 
+                    normal::Normal, 
+                    depth::int,
+                ) 
     ray_dir = normalize(Vec(incoming_dir.x, incoming_dir.y, incoming_dir.z))
     normal = Vec(normal)
 

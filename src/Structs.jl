@@ -405,7 +405,8 @@ struct PathTracer <: Renderer
     N::Int64 # number of ::Ray(s) to use in the integral evaluation
     max_depth::Int64
     russian_roulette_limit::Int64
-    PathTracer(w, bc = BLACK, pcg = PCG(), nubR = 10, md = 2, RRlim = 3) = new(w, bc, pcg, nubR, md, RRlim)
+    PathTracer(w, bc=BLACK, pcg=PCG(), nubR=10, md=2, RRlim=3) = 
+        new(w, bc, pcg, nubR, md, RRlim)
 end
 
 
