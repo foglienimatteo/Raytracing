@@ -268,7 +268,7 @@ used in [`normalize_image!`](@ref))
 # Returns
 A tuple `(infile, outfile, a, γ)`, with `a` and `γ` with type `Float64`
 
-See also : [`normalize_image!`](@ref)), [`γ_correction!`](@ref)
+See also : [`normalize_image!`](@ref), [`γ_correction!`](@ref)
 """
 function parse_command_line(args::Vector{String})
     (isempty(args) || length(args)==1 || length(args)>4) && throw(Exception)	  

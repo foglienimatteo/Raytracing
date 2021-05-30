@@ -30,15 +30,15 @@ function demo(
           )
 
 	material1 = Material(DiffuseBRDF(UniformPigment(RGB(0.7, 0.3, 0.2))))
-    material2 = Material(DiffuseBRDF(CheckeredPigment(RGB(0.2, 0.7, 0.3), 
+    	material2 = Material(DiffuseBRDF(CheckeredPigment(RGB(0.2, 0.7, 0.3), 
 	    											  RGB(0.3, 0.2, 0.7), 
 									                  4) )	)
 
 	sphere_texture = HDRimage(2, 2)
 	set_pixel(sphere_texture, 0, 0, RGB(0.1, 0.2, 0.3))
-    set_pixel(sphere_texture, 0, 1, RGB(0.2, 0.1, 0.3))
+    	set_pixel(sphere_texture, 0, 1, RGB(0.2, 0.1, 0.3))
 	set_pixel(sphere_texture, 1, 0, RGB(0.3, 0.2, 0.1))
-    set_pixel(sphere_texture, 1, 1, RGB(0.3, 0.1, 0.2))
+    	set_pixel(sphere_texture, 1, 1, RGB(0.3, 0.1, 0.2))
 
 	material3 = Material(DiffuseBRDF(ImagePigment(sphere_texture)))
 
@@ -95,7 +95,6 @@ function demo(
 	compute_color(ray::Ray) = call(renderer, ray) 
 	fire_all_rays!(tracer, compute_color)
 	img = tracer.img
-	#print_not_black(img)
 
 	# Save the HDR image
 	(bool_savepfm==true) && (open(pfm_output, "w") do outf; write(outf, img); end)
@@ -124,7 +123,57 @@ function demo(
 	end
 
 	(bool_print==true) && (println("\nHDR demo image written to $(png_output)\n"))
+	nothing
 end
+
+
+"""
+	function demo(
+          orthogonal::Bool, algorithm::String,
+          α::Float64, 
+          width::Int64, height::Int64, 
+          pfm_output::String, png_output::String,
+		bool_print::Bool=true, bool_savepfm::Bool=true
+          ) 
+
+Creates the demo image with the specified options. 
+
+The demo image consist in a set of 10 spheres of equal radius 0.1: 8 spheres are
+placed at the verteces of a cube of side 1.0, one in the center of the lower cube 
+face and the last one in the center of the left cube face.
+
+The creation of the demo image has the objective to check the correct behaviour of
+the rendering software, specifically the orientation upside-down and left-right.
+
+# Arguments
+
+- `orthogonal::Bool` : bool variable tha set the perspective projection view:
+		- `orthogonal==false` -> set [`PerspectiveCamera`](@ref)  (default value)
+		- `orthogonal==true`  -> set [`OrthogonalCamera`](@ref)
+
+- `algorithm::String` : string specifing the algorithm to be used in the rendered
+  demo image prova:
+		- `algorithm==onoff` -> [`OnOffRenderer`](@ref) algorithm (default value)
+		- `algorithm==flat` -> [`FlatRenderer`](@ref) algorithm 
+
+- `α::Float64` : angle of rotation _*IN RADIANTS*_, relative to the vertical
+  (i.e. z) axis, of the view direction
+
+- `width::Int64` and `height::Int64` : pixel dimensions of the demo image
+
+- `pfm_output::String` : name of the output pfm file; default is `demo.pfm`
+
+- `png_output::String` : name of the output ldr file; default is `demo.png`
+
+- `bool_print::Bool=true` : bool that specifies if the WIP messages of the demo
+  function should be printed or not (useful option for [`demo_animation`](@ref))
+
+- `bool_savepfm::Bool=true` : bool that specifies if the pfm file should be saved
+  or not (useful option for [`demo_animation`](@ref))
+
+See also: [`OnOffRenderer`](@ref), [`FlatRenderer`](@ref), [`demo_animation`](@ref)
+""" 
+demo
 
 ##########################################################################################92
 
@@ -165,6 +214,47 @@ function demo_animation(
 	run(`rm -rf .wip_animation`)
 end
 
+"""
+	function demo_animation( 
+				ort::Bool,
+				algorithm::String,
+        			width::Int64, 
+        			height::Int64, 
+       			anim_output::String
+			)
+	
+Creates an animation of the demo image with the specified options. It's
+necessary to have istalled the ffmpeg software to run this function.
+
+This function works following this steps:
+- creates an hidden directory, called ".wip_animation"; if it already exists,
+  it will be destroyed and recreated.
+- inside ".wpi_animation", creates 360 png images of the demo image (using the 
+  [`demo`](@ref) function with the specified projection, algorithm and image 
+  dims); each image correspons to a frame of the future animation
+- through the `ffmpeg` software, the 360 png images are converted into the
+  animation mp4 file, and saved in the main directory
+- the ".wpi_animation" directory and all the png images inside it are destroyed
+
+
+# Arguments
+
+- `ort::Bool` : bool variable tha set the perspective projection view:
+		- `ort==false` -> set [`PerspectiveCamera`](@ref)  (default value)
+		- `ort==true`  -> set [`OrthogonalCamera`](@ref)
+
+- `algorithm::String` : string specifing the algorithm to be used in the rendered
+  demo image prova:
+		- `algorithm==onoff` -> [`OnOffRenderer`](@ref) algorithm (default value)
+		- `algorithm==flat` -> [`FlatRenderer`](@ref) algorithm
+		
+- `width::Int64` and `height::Int64` : pixel dimensions of the demo animation
+
+- `pfm_output::String` : name of the output animation file; default is "demo-animation.mp4"
+
+See also: [`OnOffRenderer`](@ref), [`FlatRenderer`](@ref), [`demo`](@ref)
+"""
+demo_animation
 #=
 for angle in $(seq 0 359); do
     angleNNN=$(printf "%03d" $angle)

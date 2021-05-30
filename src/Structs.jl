@@ -364,7 +364,8 @@ abstract type Renderer end
 
 """
 A on/off renderer
-This renderer is mostly useful for debugging purposes, as it is really fast, but it produces boring images.
+This renderer is mostly useful for debugging purposes, 
+as it is really fast, but it produces boring images.
 """
 struct OnOffRenderer <: Renderer
     world::World
