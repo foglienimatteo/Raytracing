@@ -351,7 +351,7 @@ end
         :: (Bool, String, Float64, Int64, Int64, String, String)
 
 Parse a `Dict{String, Any}` for the [`demo`](@ref) function.
-The keys for the input `Dict` are, respectively: "camera_type", "algorithm",
+The keys for the input `Dict` are, respectively: "camera-type", "algorithm",
 "alpha", "width", "height", "set-pfm-name", "set-png-name"
 
 ## Returns
@@ -361,6 +361,7 @@ A tuple `(view_ort, alg, α, w, h, pfm, png)` containing:
   (`true`->Orthogonal, `false`->Perspective)
 - `alg::String` : choosen algorithm for the rendering image
 - `type::String` : choosen world type to be rendered
+- `obs::String` : "X,Y,Z" coordinates of the choosen observation point of view 
 - `α::String` : choosen angle of rotation respect to vertical (i.e. z) axis
 - `w::Int64` and `h::Int64` : width and height of the rendered image
 - `pfm::String` : output pfm filename
@@ -369,14 +370,19 @@ A tuple `(view_ort, alg, α, w, h, pfm, png)` containing:
 See also:  [`demo`](@ref)
 """
 function parse_demo_settings(dict::Dict{String, Any})
-    view::String = dict["camera_type"]
+    view::String = dict["camera-type"]
     alg::String = dict["algorithm"]
-    t::String = dict["world-type"]
     α::Float64 = dict["alpha"]
     w::Int64 = dict["width"]
     h::Int64 = dict["height"]
     pfm::String = dict["set-pfm-name"]
     png::String = dict["set-png-name"]
+
+    t::String = dict["world-type"]
+
+    obs::String = dict["camera-position"]
+    (x,y,z) = Tuple(parse.(Float64, split(obs, ",")))
+    point = Point(x,y,z)
 
     view_ort = nothing
     view == "ort" ? view_ort = true : nothing
@@ -385,7 +391,7 @@ function parse_demo_settings(dict::Dict{String, Any})
         throw(ArgumentError("""view must be "ort" or "per" """*
                             """but instead is equal to view=$view"""))
 
-    return (view_ort, alg, α, w, h, pfm, png, true, true, t)
+    return (view_ort, alg, α, w, h, pfm, png, true, true, t, point)
 end
 
 
@@ -394,7 +400,7 @@ end
         :: (Bool, String, Int64, Int64, String)
 
 Parse a `Dict{String, Any}` for the [`demo_animation`](@ref) function.
-The keys for the input `Dict` are, respectively: "camera_type", "algorithm",
+The keys for the input `Dict` are, respectively: "camera-type", "algorithm",
 "width", "height", "set-anim-name".
 
 ## Returns
@@ -409,7 +415,7 @@ A tuple `(view_ort, alg, w, h, anim)` containing:
 See also:  [`demo_animation`](@ref), [`demo`](@ref)
 """
 function parse_demoanimation_settings(dict::Dict{String, Any})
-    view::String = dict["camera_type"]
+    view::String = dict["camera-type"]
     alg::String = dict["algorithm"]
     w::Int64 = dict["width"]
     h::Int64 = dict["height"]

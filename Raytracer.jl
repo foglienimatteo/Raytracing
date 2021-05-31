@@ -117,7 +117,7 @@ function ArgParse_command_line(arguments)
     	
 	add_arg_group!(s["demo"], "demo options");
 	@add_arg_table! s["demo"] begin
-		"--camera_type", "-t"
+		"--camera-type", "-t"
 			help = "option for the camera type:\n"*
 	    				"ort -> Orthogonal camera, per -> Perspective camera"
           	arg_type = String
@@ -133,6 +133,11 @@ function ArgParse_command_line(arguments)
           	arg_type = String
 			default = "A"
 			range_tester = input -> (input ∈ ["A", "B"])
+		"--camera-position", "-p"
+          	help = "camera position in the scene as 'X,Y,Z'"
+          	arg_type = String
+          	default = "-1,0,0"
+          	range_tester = input -> (length(split(input, ",")) == 3)
 		"--alpha", "-a"
 			help = "angle of view, in degrees"
 			arg_type = Float64
@@ -168,7 +173,7 @@ function ArgParse_command_line(arguments)
 								"vertical axis of the demo image."
 	add_arg_group!(s["demo-animation"], "demo-animation settings");
 	@add_arg_table! s["demo-animation"] begin
-		"--camera_type", "-t"
+		"--camera-type", "-t"
 			help = "flag for the camera type:\n"*
 	    				"ort -> Orthogonal camera, per -> Perspective camera"
           	arg_type = String

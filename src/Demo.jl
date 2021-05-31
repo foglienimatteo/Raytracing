@@ -78,28 +78,35 @@ function second_world()
 	mirror_material = 
 		Material(SpecularBRDF(UniformPigment(RGB{Float32}(0.6, 0.2, 0.3))))
 	
+	
 	add_shape!(
 		world,
 		Sphere(
+			scaling(Vec(50, 50, 50)) * translation(Vec(0, 0, 0)),
 			sky_material,
-			scaling(Vec(200, 200, 200)) * translation(Vec(0, 0, 0.4))
 		)
 	)
-
-	add_shape!(world, Plane(ground_material))
+	
+	add_shape!(
+		world, 
+		Plane(
+			Transformation(), 
+			ground_material,
+		)
+	)
 
 	add_shape!(
 		world,
 		Sphere(
+			translation(Vec(0, 0, 0.3)) * scaling(Vec(0.6, 0.6, 0.6)),
 			sphere_material,
-			translation(Vec(0, 0, 1)),
 		)
 	)
 	add_shape!(
 		world,
 		Sphere(
+			translation(Vec(0.4, 1.5, 0)) * scaling(Vec(0.5, 0.5, 0.5)),
 			mirror_material,
-			translation(Vec(1, 2.5, 0)),
 		)
 	)
 
@@ -132,13 +139,15 @@ function demo(
           png_output::String,
 		bool_print::Bool=true,
 		bool_savepfm::Bool=true,
-		type::String = "A"
+		type::String = "A",
+		obs::Point = Point(-1., 0., 0.)
           )
 
 	world = select_world(type)
 
 	# Initialize a camera
-	camera_tr = rotation_z(deg2rad(α)) * translation(Vec(-1.0, 0.0, 0.0))
+	observer_vec = Point(0., 0., 0.) - obs
+	camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec)
 	aspect_ratio = width / height
 	camera = orthogonal==true ? 
 			OrthogonalCamera(aspect_ratio, camera_tr) :
@@ -156,7 +165,7 @@ function demo(
 		renderer = FlatRenderer(world, BLACK)
 	elseif algorithm == "pathtracing"
 		(bool_print==true) && (println("Using path tracing renderer"))
-		renderer = PathTracer(world, BLACK)
+		renderer = PathTracer(world, BLACK, PCG(), 10, 2, 3)
 	else
 		throw(ArgumentError("Unknown renderer: $algorithm"))
 	end
@@ -172,6 +181,8 @@ function demo(
 	if algorithm == "onoff"
 		normalize_image!(img, 0.18, nothing)
 	elseif algorithm == "flat"
+		normalize_image!(img, 0.18, 0.1)
+	elseif algorithm == "pathtracing"
 		normalize_image!(img, 0.18, 0.1)
 	end
 	clamp_image!(img)
@@ -202,13 +213,17 @@ end
           width::Int64, height::Int64, 
           pfm_output::String, png_output::String,
 		bool_print::Bool=true, bool_savepfm::Bool=true
+		type::String = "A"
           ) 
 
-Creates the demo image with the specified options. 
+Creates a demo image with the specified options. 
 
-The demo image consist in a set of 10 spheres of equal radius 0.1: 8 spheres are
-placed at the verteces of a cube of side 1.0, one in the center of the lower cube 
-face and the last one in the center of the left cube face.
+There are two possible demo image "world" to be rendered, specified through the
+input string `type`.
+
+The `type=="A"` demo image world consist in a set of 10 spheres of equal radius 0.1:
+8 spheres are placed at the verteces of a cube of side 1.0, one in the center of
+the lower cube face and the last one in the center of the left cube face.
 
 The creation of the demo image has the objective to check the correct behaviour of
 the rendering software, specifically the orientation upside-down and left-right.
@@ -238,6 +253,8 @@ the rendering software, specifically the orientation upside-down and left-right.
 
 - `bool_savepfm::Bool=true` : bool that specifies if the pfm file should be saved
   or not (useful option for [`demo_animation`](@ref))
+
+- `type::String="A"` : specifies the type of world to be rendered ("A" or "B")
 
 See also: [`OnOffRenderer`](@ref), [`FlatRenderer`](@ref), [`demo_animation`](@ref)
 """ 
