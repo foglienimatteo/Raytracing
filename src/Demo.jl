@@ -95,17 +95,18 @@ function second_world()
 		)
 	)
 
+	s1, s2 = 0.6, 1.0
 	add_shape!(
 		world,
 		Sphere(
-			translation(Vec(0, 0, 0.3)) * scaling(Vec(0.6, 0.6, 0.6)),
+			translation(Vec(0, 0, 0.3)) * scaling(Vec(s1, s1, s1)),
 			sphere_material,
 		)
 	)
 	add_shape!(
 		world,
 		Sphere(
-			translation(Vec(0.4, 1.5, 0)) * scaling(Vec(0.5, 0.5, 0.5)),
+			translation(Vec(0.4, 1.5, 0)) * scaling(Vec(s2, s2, s2)),
 			mirror_material,
 		)
 	)

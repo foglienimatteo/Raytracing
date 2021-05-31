@@ -63,36 +63,35 @@ end
 end
 
 @testset "test_PathTracer" begin
+     # Here is impemented the Furnace test.
+     # It is runned several times using random values 
+     # for the emitted radiance and reflectance.
+     
+     pcg = PCG()
 
-     @testset "test_Furnace" begin
-          pcg = PCG()
+     for i in 1:10
+          world = World()
+          emitted_radiance = random(pcg)
+          reflectance = random(pcg)
+          enclosure_material = 
+               Material(
+                    DiffuseBRDF(UniformPigment(RGB{Float32}(1., 1., 1.) * reflectance)),
+                    UniformPigment(RGB{Float32}(1., 1., 1.) * emitted_radiance),
+               )
 
-          # Run the furnace test several times using random values for the emitted radiance and reflectance
-          for i in 1:10
-               world = World()
-               emitted_radiance = random(pcg)
-               reflectance = random(pcg)
-               enclosure_material = 
-                    Material(
-                         DiffuseBRDF(UniformPigment(RGB{Float32}(1., 1., 1.) * reflectance)),
-                         UniformPigment(RGB{Float32}(1., 1., 1.) * emitted_radiance),
-                    )
+          add_shape!(world, Sphere(enclosure_material))
 
-               add_shape!(world, Sphere(enclosure_material))
+          path_tracer = PathTracer(world, BLACK, pcg, 1, 100, 101)
 
-               path_tracer = PathTracer(world, BLACK, pcg, 1, 100, 101)
+          ray = Ray(Point(0., 0., 0.), Vec(1., 0., 0.))
+          color = path_tracer(ray)
 
-               ray = Ray(Point(0., 0., 0.), Vec(1., 0., 0.))
-               color = path_tracer(ray)
+          expected = emitted_radiance / (1.0 - reflectance)
+          
+          err=1e-3
+          @test are_close(expected, color.r, err)
+          @test are_close(expected, color.g, err)
+          @test are_close(expected, color.b, err)
 
-               expected = emitted_radiance / (1.0 - reflectance)
-               
-               err=1e-3
-               @test are_close(expected, color.r, err)
-               @test are_close(expected, color.g, err)
-               @test are_close(expected, color.b, err)
-
-               
-          end
      end
 end

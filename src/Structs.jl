@@ -365,14 +365,14 @@ A 3D unit sphere centered on the origin of the axes
 struct Sphere <: Shape
     T::Transformation
     Material::Material
-    #=
+    
     Sphere(T::Transformation, M::Material) = new(T,M)
     Sphere(M::Material, T::Transformation) = new(T,M)
     Sphere(T::Transformation) = new(T, Material())
     Sphere(M::Material) = new(Transformation(), M)
     Sphere() = new(Transformation(), Material())
-    =#
-    Sphere(T=Transformation(), M=Material()) = new(T,M)
+    
+    #Sphere(T=Transformation(), M=Material()) = new(T,M)
 end
 
 """
@@ -384,14 +384,13 @@ A 3D unit plane, i.e. the x-y plane (set of 3D points with z=0)
 struct Plane <: Shape
     T::Transformation
     Material::Material
-    #=
+    
     Plane(T::Transformation, M::Material) = new(T,M)
     Plane(M::Material, T::Transformation) = new(T,M)
     Plane(T::Transformation) = new(T, Material())
     Plane(M::Material) = new(Transformation(), M)
     Plane() = new(Transformation(), Material())
-    =#
-    Plane(T=Transformation(), M=Material()) = new(T,M)
+    #Plane(T=Transformation(), M=Material()) = new(T,M)
 end
 
 ##########################################################################################92
