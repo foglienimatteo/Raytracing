@@ -9,67 +9,68 @@
 ##########################################################################################92
 
 """
-    valid_coordinates(hdr::HDRimage, x::Int, y::Int) -> Bool
+    valid_coordinates(hdr::HDRimage, x::Int, y::Int) :: Bool
 
-Return `True` if `(x, y)` are valid coordinates for the 
-2D matrix of the [`HDRimage`](@ref)
+Return `true` if (`x`, `y`) are valid coordinates for the 
+2D matrix of the [`HDRimage`](@ref), else return `false`.
 """
-valid_coordinates(hdr::HDRimage, x::Int, y::Int) = 
+function valid_coordinates(hdr::HDRimage, x::Int, y::Int)
     x>=0 && y>=0 && x<hdr.width && y<hdr.height
-
-##########################################################################################92
-
-"""
-    pixel_offset(hdr::HDRimage, x::Int, y::Int) -> Int64
-
-Return the index in the 1D array of the specified pixel `(x, y)` for the 
-given [`HDRimage`](@ref)
-"""
-pixel_offset(hdr::HDRimage, x::Int, y::Int) = 
-    (@assert valid_coordinates(hdr, x, y); y*hdr.width + (x+1) )
-
-##########################################################################################92
+end
 
 """
-    get_pixel(hdr::HDRimage, x::Int, y::Int) -> RBG{Float32}
+    pixel_offset(hdr::HDRimage, x::Int, y::Int) :: Int64
 
-Return the `RBG{Float32}` color for the `(x, y)` pixel in the given [`HDRimage`](@ref).
-The indexes for a `HDRimage` pixel matrix with `w` width and `h` height 
-follow this sketch:
+Return the index in the 1D array of the specified pixel (`x`, `y`) 
+for the given [`HDRimage`](@ref).
+"""
+function pixel_offset(hdr::HDRimage, x::Int, y::Int)
+    @assert valid_coordinates(hdr, x, y)
+    y*hdr.width + (x+1)
+end
+
+"""
+    get_pixel(hdr::HDRimage, x::Int, y::Int) :: RBG{Float32}
+
+Return the `RBG{Float32}` color for the (`x`, `y`) pixel in the 
+given [`HDRimage`](@ref). The indexes for a `HDRimage` pixel matrix 
+with `w` width and `h` height follow this sketch:
 ```ditaa
-    (0,0) - (0,1) - ... - (0,w)
-    (1,0) - (1,1) - ... - (1,w)
-    ...
-    (h,1) - (h,2) - ... - (h,w)
+|  (0,0)    (0,1)    (0,2)   ...   (0,w-1)  |
+|  (1,0)    (1,1)    (1,2)   ...   (1,w-1)  |
+|   ...      ...      ...    ...     ...    |
+| (h-1,0)  (h-1,1)  (h-1,2)  ...  (h-1,w-1) |
 ```
 """
-get_pixel(hdr::HDRimage, x::Int, y::Int) = hdr.rgb_m[pixel_offset(hdr, x, y)]
+function get_pixel(hdr::HDRimage, x::Int, y::Int)
+    return hdr.rgb_m[pixel_offset(hdr, x, y)]
+end
 
-##########################################################################################92
+function set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{Float32}) 
+    hdr.rgb_m[pixel_offset(hdr, x,y)] = c
+    return nothing
+end
+
+function set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{T}) where {T}
+    hdr.rgb_m[pixel_offset(hdr,x,y)] = convert(RGB{Float32}, c)
+    return nothing
+end
 
 """
     set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{Float32})
+    set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{T}) where {T}
 
-Set the new `RGB{Float32}` color for the `(x, y)` pixel in the given [`HDRimage`](@ref).
-The indexes for a `HDRimage` pixel matrix with `w` width and `h` height 
-follow this sketch:
+Set the new RGB color `c` for the (`x`, `y`) pixel in 
+the given [`HDRimage`](@ref). The indexes for a `HDRimage` pixel 
+matrix with `w` width and `h` height follow this sketch:
 ```ditaa
-    (0,0) - (0,1) - ... - (0,w)
-    (1,0) - (1,1) - ... - (1,w)
-    ...
-    (h,1) - (h,2) - ... - (h,w)
+|  (0,0)    (0,1)    (0,2)   ...   (0,w-1)  |
+|  (1,0)    (1,1)    (1,2)   ...   (1,w-1)  |
+|   ...      ...      ...    ...     ...    |
+| (h-1,0)  (h-1,1)  (h-1,2)  ...  (h-1,w-1) |
 ```
 """
-set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{Float32}) = 
-    (hdr.rgb_m[pixel_offset(hdr, x,y)] = c; nothing)
-
-set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{T}) where {T}= 
-    (hdr.rgb_m[pixel_offset(hdr,x,y)] = convert(RGB{Float32}, c); nothing)
-##########################################################################################92
-
-struct InvalidPfmFileFormat <: Exception
-    var::String
-end
+set_pixel
 
 ##########################################################################################92
 
@@ -107,8 +108,12 @@ end
 
 ##########################################################################################92
 
+struct InvalidPfmFileFormat <: Exception
+    var::String
+end
+
 """
-    parse_img_size(line::String) -> (Int64, Int64)
+    parse_img_size(line::String) :: (Int64, Int64)
 
 Return the size (width and height) parsed from a given `String`, throwing 
 `InvalidPfmFileFormat` exception if encounters invalid values.
@@ -137,10 +142,8 @@ function parse_img_size(line::String)
 
 end
 
-##########################################################################################92
-
 """
-    parse_endianness(ess::String) -> Float64
+    parse_endianness(ess::String) :: Float64
 
 Return the endianness  parsed from a given `String`, throwing 
 `InvalidPfmFileFormat` exception if encounters an invalid value.
@@ -160,10 +163,8 @@ function parse_endianness(ess::String)
     end
 end
 
-##########################################################################################92
-
 """
-    read_float(io::IO, ess::Float64) -> Float32
+    read_float(io::IO, ess::Float64) :: Float32
     
 Return a `Float32`, readed from the given IO stream `io` with the 
 (required) endianness `ess`; `ess` must be `+1.0` (Big Endian) or 
@@ -185,10 +186,8 @@ function read_float(io::IO, ess::Float64)
     end
 end 
 
-##########################################################################################92
-
 """
-    read_line(io::IO) -> String
+    read_line(io::IO) :: String
 
 Reads a line from the file whose the given IO object `io` refers to. 
 Do understand when the file is ended and when a new line begins.
@@ -206,10 +205,8 @@ function read_line(io::IO)
     return String(result)
 end
 
-##########################################################################################92
-
 """
-    read(io::IO, ::Type{HDRimage}) -> HDRimage
+    read(io::IO, ::Type{HDRimage}) :: HDRimage
 
 Read a PFM image from a stream object `io`.
 Return a [`HDRimage`](@ref) object containing the image. If an error occurs, raise a
@@ -252,7 +249,7 @@ end
 ##########################################################################################92
 
 """
-    parse_command_line((args::Vector{String}) -> (String, String, Float64, Float64)
+    parse_command_line((args::Vector{String}) :: (String, String, Float64, Float64)
 
 Interpret the command line when the main is executed, 
 and manage eventual argument errors.
@@ -311,7 +308,7 @@ end
 
 """
     parse_tonemapping_settings(dict::Dict{String, Any}) 
-        -> (String, String, Float64, Float64)
+        :: (String, String, Float64, Float64)
 
 Parse a `Dict{String, Any}` for the [`tone_mapping`](@ref) function;
 return a tuple `(pfm, png, a, γ)` containing the pfm input filename `pfm`, 
@@ -331,7 +328,7 @@ end
 
 """
     parse_demo_settings(dict::Dict{String, Any}) 
-        -> (Bool, String, Float64, Int64, Int64, String, String)
+        :: (Bool, String, Float64, Int64, Int64, String, String)
 
 Parse a `Dict{String, Any}` for the [`demo`](@ref) function;
 return a tuple `(view_ort, α, w, h, pfm, png)` containing a bool `view_ort` for the choosen point of view

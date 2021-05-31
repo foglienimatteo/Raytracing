@@ -58,7 +58,7 @@ The following diagram shows the convenction for an image with dimensions (`w`,`h
 ```ditaa
 | (h,0)  (h,1)  (h,2)  ...  (h,w) |
 |  ...    ...    ...   ...   ...  |
-| (1,0)  (1,1)  (1,2)  ...  (0,w) |
+| (1,0)  (1,1)  (1,2)  ...  (1,w) |
 | (0,0)  (0,1)  (0,2)  ...  (0,w) |
 ```
 

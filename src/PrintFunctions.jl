@@ -5,21 +5,47 @@
 # Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
 #
 
-
+# RBG print functions
 print(io::IO, c::RGB{T}) where T = print(io, "RGB = (", c.r, ", ", c.g, ", ", c.b, ")" )
 print(c::RGB{T}) where T = print(stdout, c)
 println(io::IO, c::RGB{T}) where T = println(io, "RGB = (", c.r, ", ", c.g, ", ", c.b, ")" )
 println(c::RGB{T}) where T = println(stdout, c)
 
+# Point print functions
 print(io::IO, p::Point) = print(io, "Point = (", p.x, ", ", p.y, ", ", p.z, ")" )
 print(p::Point) = print(stdout, p)
 println(io::IO, p::Point) = print(io, "Point = (", p.x, ", ", p.y, ", ", p.z, ")" )
 println(p::Point) = println(stdout, p)
 
+# Vec print functions
 print(io::IO, v::Vec) = print(io, "Vec = (", v.x, ", ", v.y, ", ", v.z, ")" )
 print(v::Vec) = print(stdout, v)
 println(io::IO,v::Vec) = println(io, "Vec = (", v.x, ", ", v.y, ", ", v.z, ")" )
 println(v::Vec) = println(stdout,v)
+
+# Normal print functions
+print(io::IO, n::Normal) = print(io, "Normal = (", n.x, ", ", n.y, ", ", n.z, ")" )
+print(n::Normal) = print(stdout, n)
+println(io::IO,n::Normal) = println(io, "Normal = (", n.x, ", ", n.y, ", ", n.z, ")" )
+println(n::Normal) = println(stdout,n)
+
+# Ray print functions
+function println(io::IO, ray::Ray)
+     print("Ray with origin and direction: \t")
+     println(ray.origin, "  ,  ", ray.dir)
+end
+function print(io::IO, ray::Ray)
+     print("Ray with origin and direction: \t")
+     print(ray.origin, "  ,  ", ray.dir)
+end
+println(ray::Ray) = println(stdout, ray)
+print(ray::Ray) = print(stdout, ray)
+
+# Vec2d print functions
+println(io::IO, uv::Vec2d) =  println(io, "Vec2d = (", uv.u, ", ", uv.v, ")" )
+println(uv::Vec2d) =  println(stdout, "Vec2d = (", uv.u, ", ", uv.v, ")" )
+print(io::IO, uv::Vec2d) =  print(io, "Vec2d = (", uv.u, ", ", uv.v, ")" )
+print(uv::Vec2d) =  print(stdout, "Vec2d = (", uv.u, ", ", uv.v, ")" )
 
 
 function println(img::HDRimage, n::Int64=5)
@@ -39,23 +65,6 @@ function println(img::HDRimage, n::Int64=5)
      end
      nothing
 end
-
-function println(io::IO, ray::Ray)
-     print("Ray with origin and direction: \t")
-     println(ray.origin, "  ,  ", ray.dir)
-end
-function print(io::IO, ray::Ray)
-     print("Ray with origin and direction: \t")
-     print(ray.origin, "  ,  ", ray.dir)
-end
-println(ray::Ray) = println(stdout, ray)
-print(ray::Ray) = print(stdout, ray)
-
-
-println(io::IO, uv::Vec2d) =  println(io, "Vec2d = (", uv.u, ", ", uv.v, ")" )
-println(uv::Vec2d) =  println(stdout, "Vec2d = (", uv.u, ", ", uv.v, ")" )
-print(io::IO, uv::Vec2d) =  print(io, "Vec2d = (", uv.u, ", ", uv.v, ")" )
-print(uv::Vec2d) =  print(stdout, "Vec2d = (", uv.u, ", ", uv.v, ")" )
 
 function print_not_black(img::HDRimage)
      w=img.width
