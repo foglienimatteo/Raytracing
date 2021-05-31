@@ -150,7 +150,9 @@ function demo(
 		bool_print::Bool=true,
 		bool_savepfm::Bool=true,
 		type::String = "A",
-		obs::Point = Point(-1., 0., 0.)
+		obs::Point = Point(-1., 0., 0.), 
+		init_state::Int64 = 45,
+		init_seq::Int64 = 54,
           )
 
 	world = select_world(type)
@@ -175,7 +177,14 @@ function demo(
 		renderer = FlatRenderer(world, BLACK)
 	elseif algorithm == "pathtracing"
 		(bool_print==true) && (println("Using path tracing renderer"))
-		renderer = PathTracer(world, BLACK, PCG(), 10, 2, 3)
+		renderer = PathTracer(
+					world, 
+					BLACK, 
+					PCG(UInt64(init_state), UInt64(init_seq)), 
+					10, 
+					2, 
+					3
+				)
 	else
 		throw(ArgumentError("Unknown renderer: $algorithm"))
 	end

@@ -133,6 +133,15 @@ function ArgParse_command_line(arguments)
           	arg_type = String
 			default = "A"
 			range_tester = input -> (input ∈ ["A", "B"])
+    		"--init-state"
+    			arg_type=Int64
+    			help="Initial seed for the random number generator (positive number)."
+    			default=45
+    		"--init-seq"
+    			arg_type=Int64
+    			help="Identifier of the sequence produced by the "*
+			    "random number generator (positive number)."
+    			default=54
 		"--camera-position", "-p"
           	help = "camera position in the scene as 'X,Y,Z'"
           	arg_type = String

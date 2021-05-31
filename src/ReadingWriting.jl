@@ -360,29 +360,33 @@ A tuple `(view_ort, alg, α, w, h, pfm, png)` containing:
 - `view_ort::Bool` : choosen point of view 
   (`true`->Orthogonal, `false`->Perspective)
 - `alg::String` : choosen algorithm for the rendering image
-- `type::String` : choosen world type to be rendered
 - `obs::String` : "X,Y,Z" coordinates of the choosen observation point of view 
 - `α::String` : choosen angle of rotation respect to vertical (i.e. z) axis
 - `w::Int64` and `h::Int64` : width and height of the rendered image
 - `pfm::String` : output pfm filename
 - `png::String` : output LDR filename
+- `type::String` : choosen world type to be rendered
+
 
 See also:  [`demo`](@ref)
 """
 function parse_demo_settings(dict::Dict{String, Any})
     view::String = dict["camera-type"]
-    alg::String = dict["algorithm"]
+    algorithm::String = dict["algorithm"]
     α::Float64 = dict["alpha"]
-    w::Int64 = dict["width"]
-    h::Int64 = dict["height"]
+    width::Int64 = dict["width"]
+    height::Int64 = dict["height"]
     pfm::String = dict["set-pfm-name"]
     png::String = dict["set-png-name"]
 
-    t::String = dict["world-type"]
+    world_type::String = dict["world-type"]
 
     obs::String = dict["camera-position"]
     (x,y,z) = Tuple(parse.(Float64, split(obs, ",")))
-    point = Point(x,y,z)
+    camera_position = Point(x,y,z)
+
+    init_state::Int64 = dict["init-state"]
+    init_seq::Int64 = dict["init-seq"]
 
     view_ort = nothing
     view == "ort" ? view_ort = true : nothing
@@ -391,7 +395,17 @@ function parse_demo_settings(dict::Dict{String, Any})
         throw(ArgumentError("""view must be "ort" or "per" """*
                             """but instead is equal to view=$view"""))
 
-    return (view_ort, alg, α, w, h, pfm, png, true, true, t, point)
+    return (
+            view_ort, 
+            algorithm, 
+            α, 
+            width, height, 
+            pfm, png, 
+            true, true, 
+            world_type, 
+            camera_position, 
+            init_state, init_seq
+        )
 end
 
 
