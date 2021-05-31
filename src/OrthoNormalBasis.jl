@@ -3,9 +3,15 @@
 # The MIT License (MIT)
 #
 # Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
+#
 
 """
-Create an orthonormal base with the z-axes parallel to the normal of the surface
+    create_onb_from_z(normal::Union{Vec, Normal}) :: (Normal, Normal, Normal)
+
+Return an orthonormal base of 3 `Normal`s with the z-axes (i.e. the third 
+`Normal` returned) parallel to the input `Vec`/ `Normal`.
+
+See also: [`Vec`](@ref), [`Normal`](@ref)
 """
 function create_onb_from_z(normal::Union{Vec, Normal})
     (typeof(normal) == Vec) && (normal = Normal(normal))
