@@ -12,7 +12,9 @@
     valid_coordinates(hdr::HDRimage, x::Int, y::Int) :: Bool
 
 Return `true` if (`x`, `y`) are valid coordinates for the 
-2D matrix of the [`HDRimage`](@ref), else return `false`.
+2D matrix of the `HDRimage`, else return `false`.
+
+See also: [`HDRimage`](@ref)
 """
 function valid_coordinates(hdr::HDRimage, x::Int, y::Int)
     x>=0 && y>=0 && x<hdr.width && y<hdr.height
@@ -22,7 +24,9 @@ end
     pixel_offset(hdr::HDRimage, x::Int, y::Int) :: Int64
 
 Return the index in the 1D array of the specified pixel (`x`, `y`) 
-for the given [`HDRimage`](@ref).
+for the given `HDRimage`.
+
+See also: [`valid_coordinates`](@ref), [`HDRimage`](@ref)
 """
 function pixel_offset(hdr::HDRimage, x::Int, y::Int)
     @assert valid_coordinates(hdr, x, y)
@@ -41,6 +45,9 @@ with `w` width and `h` height follow this sketch:
 |   ...      ...      ...    ...     ...    |
 | (h-1,0)  (h-1,1)  (h-1,2)  ...  (h-1,w-1) |
 ```
+
+See also: [`pixel_offset`](@ref), [`valid_coordinates`](@ref), 
+[`HDRimage`](@ref)
 """
 function get_pixel(hdr::HDRimage, x::Int, y::Int)
     return hdr.rgb_m[pixel_offset(hdr, x, y)]
@@ -69,6 +76,9 @@ matrix with `w` width and `h` height follow this sketch:
 |   ...      ...      ...    ...     ...    |
 | (h-1,0)  (h-1,1)  (h-1,2)  ...  (h-1,w-1) |
 ```
+
+See also: [`pixel_offset`](@ref), [`valid_coordinates`](@ref), 
+[`HDRimage`](@ref)
 """
 set_pixel
 
@@ -79,6 +89,8 @@ set_pixel
 
 Write the given [`HDRimage`](@ref) image using the given `IO` stream.
 The `endianness` used for writing the file is Little Endian (`-1.0`).
+
+See also: [`get_pixel`](@ref), [`HDRimage`](@ref)
 """
 function write(io::IO, img::HDRimage)
     endianness=-1.0
@@ -208,12 +220,13 @@ end
 """
     read(io::IO, ::Type{HDRimage}) :: HDRimage
 
-Read a PFM image from a stream object `io`.
-Return a [`HDRimage`](@ref) object containing the image. If an error occurs, raise a
+Read a PFM image from a stream object `io`, and return a `HDRimage` 
+object containing the image. If an error occurs, raise a
 `InvalidPfmFileFormat` exception.
 
 See also: [`read_line`](@ref)(`::IO`), [`parse_image_size`](@ref)(`::String`),
-[`parse_endianness`](@ref)(`::String`), [`read_float`](@ref)(`::IO, `::Float64`)
+[`parse_endianness`](@ref)(`::String`), [`read_float`](@ref)(`::IO, `::Float64`),
+[`HDRimage`](@ref)
 """
 function read(io::IO, ::Type{HDRimage})
     # magic number
@@ -260,7 +273,8 @@ An array of strings, with length 2, 3 or 4, cointaining:
 - second string (required): output filename, its format can be PNG or TIFF
 - [`a`] : scale  factor for luminosity correction (default 0.18, 
 used in [`normalize_image!`](@ref))
-- [`γ`] : gamma factor for screen correction (default 1.0, used in [`γ_correction!`](@ref)
+- [`γ`] : gamma factor for screen correction (default 1.0, used in 
+  [`γ_correction!`](@ref))
 
 # Returns
 A tuple `(infile, outfile, a, γ)`, with `a` and `γ` with type `Float64`
@@ -310,19 +324,25 @@ end
     parse_tonemapping_settings(dict::Dict{String, Any}) 
         :: (String, String, Float64, Float64)
 
-Parse a `Dict{String, Any}` for the [`tone_mapping`](@ref) function;
-return a tuple `(pfm, png, a, γ)` containing the pfm input filename `pfm`, 
-the LDR output filename `png`, the scale factor `a` and the gamma factor `γ`.
+Parse a `Dict{String, Any}` for the [`tone_mapping`](@ref) function.
+The keys for the input `Dict` are, respectively: "pfm_infile",
+"outfile", "alpha", "gamma", 
 
-The keys for the input `Dict` are, respectively: "alpha", "gamma", "pfm_infile", "outfile"
+## Returns
+
+A tuple `(pfm, png, a, γ)` containing:
+- `pfm::String` : input pfm filename
+- `png::String` : output LDR filename
+- `a::Float64` : scale factor
+- `γ::Float64` : gamma factor
 
 See also:  [`tone_mapping`](@ref)
 """
 function parse_tonemapping_settings(dict::Dict{String, Any})
-    a::Float64 = dict["alpha"]
-    γ::Float64 = dict["gamma"]
     pfm::String = dict["pfm_infile"]
     png::String = dict["outfile"]
+    a::Float64 = dict["alpha"]
+    γ::Float64 = dict["gamma"]
     return (pfm, png, a, γ)
 end
 
@@ -330,14 +350,20 @@ end
     parse_demo_settings(dict::Dict{String, Any}) 
         :: (Bool, String, Float64, Int64, Int64, String, String)
 
-Parse a `Dict{String, Any}` for the [`demo`](@ref) function;
-return a tuple `(view_ort, α, w, h, pfm, png)` containing a bool `view_ort` for the choosen point of view
-(`true`->Orthogonal, `false`->Perspective), the angle of view `α`, the number of pixels
-on width `w` and height `h`, the pfm output filename `pfm` and the LDR
-output filename `png`.
+Parse a `Dict{String, Any}` for the [`demo`](@ref) function.
+The keys for the input `Dict` are, respectively: "camera_type", "algorithm",
+"alpha", "width", "height", "set-pfm-name", "set-png-name"
 
-The keys for the input `Dict` are, respectively: "camera_type", "algorithm", "alpha",
- "width", "height", "set-pfm-name", "set-png-name"
+## Returns
+
+A tuple `(view_ort, alg, α, w, h, pfm, png)` containing:
+- `view_ort::Bool` : choosen point of view 
+  (`true`->Orthogonal, `false`->Perspective)
+- `alg::String` : choosen algorithm for the rendering image
+- `α::String` : choosen angle of rotation respect to vertical (i.e. z) axis
+- `w::Int64` and `h::Int64` : width and height of the rendered image
+- `pfm::String` : output pfm filename
+- `png::String` : output LDR filename
 
 See also:  [`demo`](@ref)
 """
@@ -354,7 +380,8 @@ function parse_demo_settings(dict::Dict{String, Any})
     view == "ort" ? view_ort = true : nothing
     view == "per" ? view_ort = false : nothing
     !(isnothing(view_ort)) || 
-        throw(ArgumentError("""view must be "ort" or "per", but instead is equal to view=$view"""))
+        throw(ArgumentError("""view must be "ort" or "per" """*
+                            """but instead is equal to view=$view"""))
 
     return (view_ort, alg, α, w, h, pfm, png)
 end
@@ -362,15 +389,20 @@ end
 
 """
     parse_demoanimation_settings(dict::Dict{String, Any}) 
-        -> (Bool, String, Int64, Int64, String)
+        :: (Bool, String, Int64, Int64, String)
 
-Parse a `Dict{String, Any}` for the [`demo_animation`](@ref) function;
-return a tuple `(view_ort, w, h, anim)` containing a bool `view_ort` for the choosen point of view
-(`true`->Orthogonal, `false`->Perspective), the number of pixels
-on width `w` and height `h` and the output animation name `anim`.
-
+Parse a `Dict{String, Any}` for the [`demo_animation`](@ref) function.
 The keys for the input `Dict` are, respectively: "camera_type", "algorithm",
- "width", "height", "set-anim-name"
+"width", "height", "set-anim-name".
+
+## Returns
+
+A tuple `(view_ort, alg, w, h, anim)` containing:
+- `view_ort::Bool` : choosen point of view 
+  (`true`->Orthogonal, `false`->Perspective)
+- `alg::String` : choosen algorithm for the rendering image
+- `w::Int64` and `h::Int64` : width and height of the rendered image
+- `anim::String` : output animation name
 
 See also:  [`demo_animation`](@ref), [`demo`](@ref)
 """
@@ -386,7 +418,8 @@ function parse_demoanimation_settings(dict::Dict{String, Any})
     view == "ort" ? view_ort = true : nothing
     view == "per" ? view_ort = false : nothing
     !(isnothing(view_ort)) || 
-        throw(ArgumentError("""view must be "ort" or "per", but instead is equal to view=$view"""))
+        throw(ArgumentError("""view must be "ort" or "per","""*
+                            """but instead is equal to view=$view"""))
 
     return (view_ort, alg, w, h, anim)
 end
