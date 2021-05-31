@@ -46,10 +46,10 @@ end
 function (renderer::PathTracer)(ray::Ray)
     !(ray.depth > renderer.max_depth) || (return BLACK)
 
-    hit_record = ray_intersection(renderer.world, r)
-    !isnothing(hit_record) || (return PT.background_color)
+    hit_record = ray_intersection(renderer.world, ray)
+    !isnothing(hit_record) || (return renderer.background_color)
 
-    hit_material = hit_record.material
+    hit_material = hit_record.shape.Material
     hit_surface_point = hit_record.surface_point
     hit_color = get_color(hit_material.brdf.pigment, hit_surface_point)
     emitted_radiance = get_color(hit_material.emitted_radiance, hit_surface_point)
@@ -90,5 +90,5 @@ function (renderer::PathTracer)(ray::Ray)
         end
     end
 
-    return emitted_radiance + cum_radiance * (1.0 / self.num_of_rays)
+    return emitted_radiance + cum_radiance * (1.0 / renderer.num_of_rays)
 end

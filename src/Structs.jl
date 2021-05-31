@@ -365,7 +365,10 @@ A 3D unit sphere centered on the origin of the axes
 struct Sphere <: Shape
     T::Transformation
     Material::Material
-    Sphere(T=Transformation(), M=Material()) = new(T,M)
+    Sphere(T::Transformation, M::Material) = new(T,M)
+    Sphere(T::Transformation) = new(T, Material())
+    Sphere(M::Material) = new(Transformation(), M)
+    Sphere() = new(Transformation(), Material())
 end
 
 """
@@ -377,7 +380,10 @@ A 3D unit plane, i.e. the x-y plane (set of 3D points with z=0)
 struct Plane <: Shape
     T::Transformation
     Material::Material
-    Plane(T=Transformation(), M=Material()) = new(T,M)
+    Plane(T::Transformation, M::Material) = new(T,M)
+    Plane(T::Transformation) = new(T, Material())
+    Plane(M::Material) = new(Transformation(), M)
+    Plane() = new(Transformation(), Material())
 end
 
 ##########################################################################################92
@@ -438,7 +444,7 @@ max_depth to `Inf`.
 
 - `pcg::PCG` :  PCG random number generator for evaluating integrals
 
-- `N::Int64` : number of `Ray`s generated for each integral evaluation
+- `num_of_rays::Int64` : number of `Ray`s generated for each integral evaluation
 
 - `max_depth::Int64` : maximal number recursive integrations
 
@@ -451,9 +457,9 @@ struct PathTracer <: Renderer
     world::World
     background_color::RGB{Float32}
     pcg::PCG
-    N::Int64
+    num_of_rays::Int64
     max_depth::Int64
     russian_roulette_limit::Int64
-    PathTracer(w, bc=BLACK, pcg=PCG(), nubR=10, md=2, RRlim=3) = 
-        new(w, bc, pcg, nubR, md, RRlim)
+    PathTracer(w, bc=BLACK, pcg=PCG(), n=10, md=2, RRlim=3) = 
+        new(w, bc, pcg, n, md, RRlim)
 end

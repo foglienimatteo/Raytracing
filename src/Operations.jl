@@ -38,11 +38,12 @@ Base.:≈(v1::Vec2d, v2::Vec2d) = (are_close(v1.u, v2.u)) && (are_close(v1.v, v2
 Base.:≈(H1::HitRecord, H2::HitRecord) = (H1.normal ≈ H2.normal) && (H1.ray ≈ H2.ray) && (H1.surface_point ≈ H2.surface_point)&& (are_close(H1.t, H2.t)) && (H1.world_point ≈ H2.world_point)
 
 # Operations for RGB objects
-Base.:+(a::RGB{T}, b::RGB{T}) where {T} = RGB(a.r + b.r, a.g + b.g, a.b + b.b)
-Base.:-(a::RGB{T}, b::RGB{T}) where {T} = RGB(a.r - b.r, a.g - b.g, a.b - b.b)
-Base.:*(scalar::Real, c::RGB{T}) where {T} = RGB(scalar*c.r , scalar*c.g, scalar*c.b)
+Base.:+(a::RGB{T}, b::RGB{T}) where {T} = RGB{T}(a.r + b.r, a.g + b.g, a.b + b.b)
+Base.:-(a::RGB{T}, b::RGB{T}) where {T} = RGB{T}(a.r - b.r, a.g - b.g, a.b - b.b)
+Base.:*(scalar::Real, c::RGB{T}) where {T} = RGB{T}(scalar*c.r , scalar*c.g, scalar*c.b)
+Base.:*(a::RGB{T}, b::RGB{T}) where {T} = RGB{T}(a.r*b.r, a.g*b.g, a.b*b.b)
 Base.:*(c::RGB{T}, scalar::Real) where {T} = scalar * c
-Base.:/(c::RGB{T}, scalar::Real) where {T} = RGB(c.r/scalar , c.g/scalar, c.b/scalar)
+Base.:/(c::RGB{T}, scalar::Real) where {T} = RGB{T}(c.r/scalar , c.g/scalar, c.b/scalar)
 
 # Operations for Point
 Base.:*(s::Real, a::Point) = Point(s*a.x, s*a.y, s*a.z)
@@ -61,6 +62,8 @@ LinearAlgebra.:×(a::Vec, b::Vec) = Vec(a.y*b.z-a.z*b.y, b.x*a.z-a.x*b.z, a.x*b.
 
 # Operations for Normal
 Base.:-(a::Normal) = Normal(-a.x, -a.y, -a.z)
+Base.:*(a::Normal, b::Real) = Vec(b*a.x, b*a.y, b*a.z)
+Base.:*(b::Real, a::Normal) = Vec(b*a.x, b*a.y, b*a.z)
 LinearAlgebra.:⋅(a::Normal, b::Normal) = a.x*b.x + a.y*b.y + a.z*b.z
 LinearAlgebra.:⋅(a::Normal, b::Vec) = a.x*b.x + a.y*b.y + a.z*b.z
 LinearAlgebra.:⋅(a::Vec, b::Normal) = a.x*b.x + a.y*b.y + a.z*b.z
