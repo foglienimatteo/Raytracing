@@ -269,7 +269,7 @@ end
 
 """
 A struct holding a list of shapes, which make a «world»
-You can add shapes to a world using [`add_shape`](@ref)([`World`](@ref), [`Shape`](@ref)).
+You can add shapes to a world using [`add_shape!`](@ref)([`World`](@ref), [`Shape`](@ref)).
 Typically, you call [`ray_intersection`](@ref)([`World`](@ref), [`Ray`](@ref))
 to check whether a light ray intersects any of the shapes in the world.
 """

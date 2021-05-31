@@ -15,7 +15,7 @@
      camera = OrthogonalCamera()
      tracer = ImageTracer(image,camera)
      world = World()
-     add_shape(world, sphere)
+     add_shape!(world, sphere)
      renderer = OnOffRenderer(world)
      fire_all_rays!(tracer, renderer)
 
@@ -45,7 +45,7 @@ end
      tracer = ImageTracer(image, camera)
 
      world = World()
-     add_shape(world, sphere)
+     add_shape!(world, sphere)
      renderer = FlatRenderer(world)
      fire_all_rays!(tracer, renderer)
 
@@ -78,7 +78,7 @@ end
                          UniformPigment(RGB{Float32}(1., 1., 1.) * emitted_radiance),
                     )
 
-               add_shape(world, Sphere(enclosure_material))
+               add_shape!(world, Sphere(enclosure_material))
 
                path_tracer = PathTracer(world, BLACK, pcg, 1, 100, 101)
 

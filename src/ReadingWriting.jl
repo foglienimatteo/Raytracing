@@ -360,6 +360,7 @@ A tuple `(view_ort, alg, α, w, h, pfm, png)` containing:
 - `view_ort::Bool` : choosen point of view 
   (`true`->Orthogonal, `false`->Perspective)
 - `alg::String` : choosen algorithm for the rendering image
+- `type::String` : choosen world type to be rendered
 - `α::String` : choosen angle of rotation respect to vertical (i.e. z) axis
 - `w::Int64` and `h::Int64` : width and height of the rendered image
 - `pfm::String` : output pfm filename
@@ -370,6 +371,7 @@ See also:  [`demo`](@ref)
 function parse_demo_settings(dict::Dict{String, Any})
     view::String = dict["camera_type"]
     alg::String = dict["algorithm"]
+    t::Int64 = dict["world-type"]
     α::Float64 = dict["alpha"]
     w::Int64 = dict["width"]
     h::Int64 = dict["height"]
@@ -383,7 +385,7 @@ function parse_demo_settings(dict::Dict{String, Any})
         throw(ArgumentError("""view must be "ort" or "per" """*
                             """but instead is equal to view=$view"""))
 
-    return (view_ort, alg, α, w, h, pfm, png)
+    return (view_ort, alg, α, w, h, pfm, png, t)
 end
 
 

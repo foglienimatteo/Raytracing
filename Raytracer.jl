@@ -118,16 +118,21 @@ function ArgParse_command_line(arguments)
 	add_arg_group!(s["demo"], "demo options");
 	@add_arg_table! s["demo"] begin
 		"--camera_type", "-t"
-			help = "flag for the camera type:\n"*
+			help = "option for the camera type:\n"*
 	    				"ort -> Orthogonal camera, per -> Perspective camera"
           	arg_type = String
 			default = "per"
 			range_tester = input -> (input ∈ ["ort", "per"])
     		"--algorithm", "-r"
-			help = "flag for the renderer algorithm"
+			help = "option for the renderer algorithm"
           	arg_type = String
 			default = "onoff"
 			range_tester = input -> (input ∈ RENDERERS)
+		"--world-type", "-l"
+			help = "flag for the world to be rendered"
+          	arg_type = String
+			default = "A"
+			range_tester = input -> (input ∈ ["A", "B"])
 		"--alpha", "-a"
 			help = "angle of view, in degrees"
 			arg_type = Float64

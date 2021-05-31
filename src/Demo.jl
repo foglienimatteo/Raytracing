@@ -7,8 +7,113 @@
 
 
 
-##########################################################################################92
 
+function first_world()
+	material1 = Material(DiffuseBRDF(UniformPigment(RGB(0.7, 0.3, 0.2))))
+    	material2 = Material(DiffuseBRDF(CheckeredPigment(RGB(0.2, 0.7, 0.3), 
+	    											  RGB(0.3, 0.2, 0.7), 
+									                  4) )	)
+
+	sphere_texture = HDRimage(2, 2)
+	set_pixel(sphere_texture, 0, 0, RGB(0.1, 0.2, 0.3))
+    	set_pixel(sphere_texture, 0, 1, RGB(0.2, 0.1, 0.3))
+	set_pixel(sphere_texture, 1, 0, RGB(0.3, 0.2, 0.1))
+    	set_pixel(sphere_texture, 1, 1, RGB(0.3, 0.1, 0.2))
+
+	material3 = Material(DiffuseBRDF(ImagePigment(sphere_texture)))
+
+	# Create a world and populate it with a few shapes
+	world = World()
+	for x in [-0.5, 0.5], y in [-0.5, 0.5], z in [-0.5, 0.5]
+		add_shape!(world,
+				Sphere( 
+					translation(Vec(x, y, z)) * scaling(Vec(0.1, 0.1, 0.1)),
+					material1
+				)
+		)
+	end
+
+	# Place two other balls in the bottom/left part of the cube, so
+	# that we can check if there are issues with the orientation of
+	# the image
+	add_shape!(
+		world, 
+		Sphere( 
+			translation(Vec(0.0, 0.0, -0.5)) * scaling(Vec(0.1, 0.1, 0.1)),
+			material2
+		)
+	)
+	add_shape!(
+		world, 
+		Sphere( 
+			translation(Vec(0.0, 0.5, 0.0)) * scaling(Vec(0.1, 0.1, 0.1)),
+			material3
+		)
+	)
+
+	return world
+end
+
+function second_world()
+	world = World()
+
+	sky_material = 
+		Material(
+			DiffuseBRDF(UniformPigment(RGB{Float32}(0., 0., 0.))),
+			UniformPigment(RGB{Float32}(1.0, 0.9, 0.5)),
+		)
+
+	ground_material = 
+		Material(
+			DiffuseBRDF(
+				CheckeredPigment(
+					RGB{Float32}(0.3, 0.5, 0.1),
+					RGB{Float32}(0.1, 0.2, 0.5),
+				)
+			)
+		)
+
+	sphere_material = 
+		Material(DiffuseBRDF(UniformPigment(RGB{Float32}(0.3, 0.4, 0.8))))
+	mirror_material = 
+		Material(SpecularBRDF(UniformPigment(RGB{Float32}(0.6, 0.2, 0.3))))
+	
+	add_shape!(
+		world,
+		Sphere(
+			sky_material,
+			scaling(Vec(200, 200, 200)) * translation(Vec(0, 0, 0.4))
+		)
+	)
+
+	add_shape!(world, Plane(ground_material))
+
+	add_shape!(
+		world,
+		Sphere(
+			sphere_material,
+			translation(Vec(0, 0, 1)),
+		)
+	)
+	add_shape!(
+		world,
+		Sphere(
+			mirror_material,
+			translation(Vec(1, 2.5, 0)),
+		)
+	)
+
+	return world
+end
+
+function select_world(type::String)
+	(type=="A") && (return first_world())
+	(type=="B") && (return second_world())
+
+	throw(ArgumentError("The input type of world $type does not exists"))
+end
+
+##########################################################################################92
 
 demo() = demo(false, "onoff", 0., 640, 480, "demo.pfm", "demo.png")
 demo(ort::Bool) = demo(ort, "onoff", 0., 640, 480, "demo.pfm", "demo.png")
@@ -26,50 +131,11 @@ function demo(
           pfm_output::String, 
           png_output::String,
 		bool_print::Bool=true,
-		bool_savepfm::Bool=true
+		bool_savepfm::Bool=true,
+		type::String = "A"
           )
 
-	material1 = Material(DiffuseBRDF(UniformPigment(RGB(0.7, 0.3, 0.2))))
-    	material2 = Material(DiffuseBRDF(CheckeredPigment(RGB(0.2, 0.7, 0.3), 
-	    											  RGB(0.3, 0.2, 0.7), 
-									                  4) )	)
-
-	sphere_texture = HDRimage(2, 2)
-	set_pixel(sphere_texture, 0, 0, RGB(0.1, 0.2, 0.3))
-    	set_pixel(sphere_texture, 0, 1, RGB(0.2, 0.1, 0.3))
-	set_pixel(sphere_texture, 1, 0, RGB(0.3, 0.2, 0.1))
-    	set_pixel(sphere_texture, 1, 1, RGB(0.3, 0.1, 0.2))
-
-	material3 = Material(DiffuseBRDF(ImagePigment(sphere_texture)))
-
-	# Create a world and populate it with a few shapes
-	world = World()
-	for x in [-0.5, 0.5], y in [-0.5, 0.5], z in [-0.5, 0.5]
-		add_shape(world,
-				Sphere( 
-					translation(Vec(x, y, z)) * scaling(Vec(0.1, 0.1, 0.1)),
-					material1
-				)
-		)
-	end
-
-	# Place two other balls in the bottom/left part of the cube, so
-	# that we can check if there are issues with the orientation of
-	# the image
-	add_shape(
-		world, 
-		Sphere( 
-			translation(Vec(0.0, 0.0, -0.5)) * scaling(Vec(0.1, 0.1, 0.1)),
-			material2
-		)
-	)
-	add_shape(
-		world, 
-		Sphere( 
-			translation(Vec(0.0, 0.5, 0.0)) * scaling(Vec(0.1, 0.1, 0.1)),
-			material3
-		)
-	)
+	world = select_world(type)
 
 	# Initialize a camera
 	camera_tr = rotation_z(deg2rad(α)) * translation(Vec(-1.0, 0.0, 0.0))
