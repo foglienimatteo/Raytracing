@@ -8,8 +8,21 @@
 """
     create_onb_from_z(normal::Union{Vec, Normal}) :: (Normal, Normal, Normal)
 
-Return an orthonormal base of 3 `Normal`s with the z-axes (i.e. the third 
-`Normal` returned) parallel to the input `Vec`/ `Normal`.
+Return an orthonormal base of 3 `Normal`s with the z-axes 
+(i.e. the third `Normal` returned) parallel to the 
+input `Vec`/ `Normal`.
+
+The implementation of this function is based on the paper
+of Duff et al. (2017), which improved the already efficient
+work made by Frisvad (2012).
+
+## References
+
+- Duff et al. (2017), ["Building an Orthonormal Basis, 
+  Revisited"](https://graphics.pixar.com/library/OrthonormalB/paper.pdf)
+
+- Frisvad (2012), ["Building an Orthonormal Basis from a 3D 
+  Unit Vector Without Normalization"](https://backend.orbit.dtu.dk/ws/portalfiles/portal/126824972/onb_frisvad_jgt2012_v2.pdf)
 
 See also: [`Vec`](@ref), [`Normal`](@ref)
 """

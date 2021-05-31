@@ -145,7 +145,7 @@ face and the last one in the center of the left cube face.
 The creation of the demo image has the objective to check the correct behaviour of
 the rendering software, specifically the orientation upside-down and left-right.
 
-# Arguments
+## Arguments
 
 - `orthogonal::Bool` : bool variable tha set the perspective projection view:
 		- `orthogonal==false` -> set [`PerspectiveCamera`](@ref)  (default value)
@@ -237,7 +237,7 @@ This function works following this steps:
 - the ".wpi_animation" directory and all the png images inside it are destroyed
 
 
-# Arguments
+## Arguments
 
 - `ort::Bool` : bool variable tha set the perspective projection view:
 		- `ort==false` -> set [`PerspectiveCamera`](@ref)  (default value)
