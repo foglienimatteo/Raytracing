@@ -154,12 +154,14 @@ function demo(
 	elseif algorithm == "flat"
 		(bool_print==true) && (println("Using flat renderer"))
 		renderer = FlatRenderer(world, BLACK)
+	elseif algorithm == "pathtracing"
+		(bool_print==true) && (println("Using path tracing renderer"))
+		renderer = PathTracer(world, BLACK)
 	else
 		throw(ArgumentError("Unknown renderer: $algorithm"))
 	end
 
-	compute_color(ray::Ray) = call(renderer, ray) 
-	fire_all_rays!(tracer, compute_color)
+	fire_all_rays!(tracer, renderer)
 	img = tracer.img
 
 	# Save the HDR image

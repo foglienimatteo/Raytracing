@@ -371,7 +371,7 @@ See also:  [`demo`](@ref)
 function parse_demo_settings(dict::Dict{String, Any})
     view::String = dict["camera_type"]
     alg::String = dict["algorithm"]
-    t::Int64 = dict["world-type"]
+    t::String = dict["world-type"]
     α::Float64 = dict["alpha"]
     w::Int64 = dict["width"]
     h::Int64 = dict["height"]
@@ -385,7 +385,7 @@ function parse_demo_settings(dict::Dict{String, Any})
         throw(ArgumentError("""view must be "ort" or "per" """*
                             """but instead is equal to view=$view"""))
 
-    return (view_ort, alg, α, w, h, pfm, png, t)
+    return (view_ort, alg, α, w, h, pfm, png, true, true, t)
 end
 
 

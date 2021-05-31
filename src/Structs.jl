@@ -366,6 +366,7 @@ struct Sphere <: Shape
     T::Transformation
     Material::Material
     Sphere(T::Transformation, M::Material) = new(T,M)
+    Sphere(M::Material, T::Transformation) = new(T,M)
     Sphere(T::Transformation) = new(T, Material())
     Sphere(M::Material) = new(Transformation(), M)
     Sphere() = new(Transformation(), Material())
@@ -381,6 +382,7 @@ struct Plane <: Shape
     T::Transformation
     Material::Material
     Plane(T::Transformation, M::Material) = new(T,M)
+    Plane(M::Material, T::Transformation) = new(T,M)
     Plane(T::Transformation) = new(T, Material())
     Plane(M::Material) = new(Transformation(), M)
     Plane() = new(Transformation(), Material())

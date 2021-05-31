@@ -26,7 +26,7 @@ import FileIO: @format_str, query
 using Raytracing
 
 FILE_NAME = split(PROGRAM_FILE, "/")[end]
-RENDERERS = ["onoff", "flat"]
+RENDERERS = ["onoff", "flat", "pathtracing"]
 
 function parse_commandline_error_handler(settings::ArgParseSettings, err, err_code::Int = 1)
 	help_string = 

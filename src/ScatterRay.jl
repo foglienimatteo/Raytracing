@@ -35,10 +35,11 @@ function scatter_ray(::Type{SpecularBRDF},
                     depth::Int64,
                 ) 
     #ray_dir = normalize(Vec(incoming_dir.x, incoming_dir.y, incoming_dir.z))
+    ray_dir = normalize(incoming_dir)
 
     return Ray(
                 interaction_point,
-                ray_dir - normal*2.0*(Vec(normal) ⋅ normalize(incoming_dir)),
+                ray_dir - normal*2.0*(Vec(normal) ⋅ ray_dir),
                 1e-3,
                 Inf,
                 depth
