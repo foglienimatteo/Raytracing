@@ -74,9 +74,11 @@ function second_world()
 		)
 
 	sphere_material = 
-		Material(DiffuseBRDF(UniformPigment(RGB{Float32}(0.3, 0.4, 0.8))))
+		Material(DiffuseBRDF(UniformPigment(to_RGB(0, 128, 240))))
 	mirror_material = 
-		Material(SpecularBRDF(UniformPigment(RGB{Float32}(0.6, 0.2, 0.3))))
+		Material(SpecularBRDF(UniformPigment(to_RGB(232, 10, 10))))
+	mirror_material_2 = 
+		Material(SpecularBRDF(UniformPigment(to_RGB(178, 255, 102))))
 	
 	
 	add_shape!(
@@ -92,6 +94,13 @@ function second_world()
 		Plane(
 			Transformation(), 
 			ground_material,
+		)
+	)
+	add_shape!(
+		world, 
+		Plane(
+			translation(Vec(0., -2., 0)) * rotation_z(π/6.) * rotation_x(π/2.), 
+			mirror_material_2,
 		)
 	)
 

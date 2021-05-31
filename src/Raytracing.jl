@@ -16,7 +16,7 @@ import Base: write, read, print, println;
 import LinearAlgebra.:⋅; import LinearAlgebra.:×
 
 # from Structs.jl
-export BLACK, WHITE, HDRimage, Parameters
+export BLACK, WHITE, to_RGB, HDRimage, Parameters
 export Point, Vec, Normal,VEC_X, VEC_Y, VEC_Z, Transformation
 export Ray, OrthogonalCamera, PerspectiveCamera, ImageTracer
 export Shape, Sphere, Plane, Vec2d, HitRecord, World
