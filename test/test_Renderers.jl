@@ -17,8 +17,7 @@
      world = World()
      add_shape(world, sphere)
      renderer = OnOffRenderer(world)
-     compute_color(ray::Ray) = call(renderer, ray)
-     fire_all_rays!(tracer, compute_color)
+     fire_all_rays!(tracer, renderer)
 
      @test Raytracing.get_pixel(image, 0, 0) ≈ BLACK
      @test Raytracing.get_pixel(image, 1, 0) ≈ BLACK
@@ -48,8 +47,7 @@ end
      world = World()
      add_shape(world, sphere)
      renderer = FlatRenderer(world)
-     compute_color(ray::Ray) = call(renderer, ray)
-     fire_all_rays!(tracer, compute_color)
+     fire_all_rays!(tracer, renderer)
 
      @test Raytracing.get_pixel(image, 0, 0) ≈ BLACK
      @test Raytracing.get_pixel(image, 1, 0) ≈ BLACK

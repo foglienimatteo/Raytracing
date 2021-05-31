@@ -386,7 +386,7 @@ end
 A class implementing a solver of the rendering equation.
 This is an abstract class; you should use a derived concrete class.
 """
-abstract type Renderer end
+abstract type Renderer <: Function end
 
 """
 A on/off renderer
