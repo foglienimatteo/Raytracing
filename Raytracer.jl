@@ -26,7 +26,7 @@ import FileIO: @format_str, query
 using Raytracing
 
 FILE_NAME = split(PROGRAM_FILE, "/")[end]
-RENDERERS = ["onoff", "flat"]
+RENDERERS = ["onoff", "flat", "pathtracing"]
 
 function parse_commandline_error_handler(settings::ArgParseSettings, err, err_code::Int = 1)
 	help_string = 
@@ -117,17 +117,36 @@ function ArgParse_command_line(arguments)
     	
 	add_arg_group!(s["demo"], "demo options");
 	@add_arg_table! s["demo"] begin
-		"--camera_type", "-t"
-			help = "flag for the camera type:\n"*
+		"--camera-type", "-t"
+			help = "option for the camera type:\n"*
 	    				"ort -> Orthogonal camera, per -> Perspective camera"
           	arg_type = String
 			default = "per"
 			range_tester = input -> (input ∈ ["ort", "per"])
     		"--algorithm", "-r"
-			help = "flag for the renderer algorithm"
+			help = "option for the renderer algorithm"
           	arg_type = String
 			default = "onoff"
 			range_tester = input -> (input ∈ RENDERERS)
+		"--world-type", "-l"
+			help = "flag for the world to be rendered"
+          	arg_type = String
+			default = "A"
+			range_tester = input -> (input ∈ ["A", "B"])
+    		"--init-state"
+    			arg_type=Int64
+    			help="Initial seed for the random number generator (positive number)."
+    			default=45
+    		"--init-seq"
+    			arg_type=Int64
+    			help="Identifier of the sequence produced by the "*
+			    "random number generator (positive number)."
+    			default=54
+		"--camera-position", "-p"
+          	help = "camera position in the scene as 'X,Y,Z'"
+          	arg_type = String
+          	default = "-1,0,0"
+          	range_tester = input -> (length(split(input, ",")) == 3)
 		"--alpha", "-a"
 			help = "angle of view, in degrees"
 			arg_type = Float64
@@ -163,7 +182,7 @@ function ArgParse_command_line(arguments)
 								"vertical axis of the demo image."
 	add_arg_group!(s["demo-animation"], "demo-animation settings");
 	@add_arg_table! s["demo-animation"] begin
-		"--camera_type", "-t"
+		"--camera-type", "-t"
 			help = "flag for the camera type:\n"*
 	    				"ort -> Orthogonal camera, per -> Perspective camera"
           	arg_type = String

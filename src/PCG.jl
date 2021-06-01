@@ -6,7 +6,23 @@
 #
 
 """
-PCG Uniform Pseudo-random Number Generator
+     PCG(state::UInt64 = UInt64(42), inc::UInt64 = UInt64(54))
+
+A mutable struct for the PCG Uniform Pseudo-random Number Generator.
+
+## Parameters
+
+- `state::UInt64 = UInt64(42)` : initial state number
+- `inc::UInt64 = UInt64(54)` : initial sequence number
+
+## References
+
+Melissa E. O’Neill (2014), ["PCG: A Family of Simple Fast 
+Space-Efficient Statistically Good Algorithms 
+for Random Number Generation"](https://www.pcg-random.org/paper.html)
+
+See also: [`random(pcg::PCG, ::Type{UInt32})`](@ref), 
+[`random(pcg::PCG, ::Type{Float64})`](@ref)
 """
 mutable struct PCG 
      state::UInt64
@@ -27,7 +43,21 @@ mutable struct PCG
 end
 
 """
-Return a new random number and advance PCG's internal state
+     random(pcg::PCG, ::Type{UInt32}) :: UInt32
+
+Return a new random UInt32 number and advance PCG's internal state.
+
+This function is based on the paper of Melissa E. O’Neill (2014), 
+where the Permuted Congruential Generator (PCG) family of random 
+number generators is defined and explained.
+
+## References
+
+Melissa E. O’Neill (2014), ["PCG: A Family of Simple Fast 
+Space-Efficient Statistically Good Algorithms 
+for Random Number Generation"](https://www.pcg-random.org/paper.html)
+
+See also: [`random(pcg::PCG, ::Type{Float64})`](@ref), [`PCG`](@ref)
 """
 function random(pcg::PCG, ::Type{UInt32})
      # 64-bit
@@ -46,7 +76,29 @@ function random(pcg::PCG, ::Type{UInt32})
      return UInt32( ((xorshifted >> rot) | (xorshifted << ((-rot) & 31))))  # % typemax(UInt32)
 end
 
+"""
+     random(pcg::PCG, ::Type{Float64}) :: Float64
 
+Returns a `Float64` random number inside `[0,1]` interval obtained 
+with a PCG Uniform Pseudo-random Number Generator.
+
+It calls the `random(pcg::PCG, ::Type{UInt32})` function, which
+returns a `UInt32` random number, and divides it with ` typemax(UInt32)`.
+
+See also: [`random(pcg::PCG, ::Type{UInt32})`](@ref), [`PCG`](@ref)
+"""
 random(pcg::PCG, ::Type{Float64}) = random(pcg, UInt32) / typemax(UInt32)
+
+"""
+     random(pcg::PCG) :: Float64
+
+Returns a `Float64` random number inside `[0,1]` interval obtained 
+with a PCG Uniform Pseudo-random Number Generator.
+
+It calls the `random(pcg::PCG, ::Type{Float64})` function.
+
+See also: [`random(pcg::PCG, ::Type{Float64})`](@ref),
+[`random(pcg::PCG, ::Type{UInt32})`](@ref), [`PCG`](@ref)
+"""
 random(pcg::PCG) = random(pcg, Float64)
   

@@ -9,67 +9,78 @@
 ##########################################################################################92
 
 """
-    valid_coordinates(hdr::HDRimage, x::Int, y::Int) -> Bool
+    valid_coordinates(hdr::HDRimage, x::Int, y::Int) :: Bool
 
-Return `True` if `(x, y)` are valid coordinates for the 
-2D matrix of the [`HDRimage`](@ref)
+Return `true` if (`x`, `y`) are valid coordinates for the 
+2D matrix of the `HDRimage`, else return `false`.
+
+See also: [`HDRimage`](@ref)
 """
-valid_coordinates(hdr::HDRimage, x::Int, y::Int) = 
+function valid_coordinates(hdr::HDRimage, x::Int, y::Int)
     x>=0 && y>=0 && x<hdr.width && y<hdr.height
-
-##########################################################################################92
-
-"""
-    pixel_offset(hdr::HDRimage, x::Int, y::Int) -> Int64
-
-Return the index in the 1D array of the specified pixel `(x, y)` for the 
-given [`HDRimage`](@ref)
-"""
-pixel_offset(hdr::HDRimage, x::Int, y::Int) = 
-    (@assert valid_coordinates(hdr, x, y); y*hdr.width + (x+1) )
-
-##########################################################################################92
+end
 
 """
-    get_pixel(hdr::HDRimage, x::Int, y::Int) -> RBG{Float32}
+    pixel_offset(hdr::HDRimage, x::Int, y::Int) :: Int64
 
-Return the `RBG{Float32}` color for the `(x, y)` pixel in the given [`HDRimage`](@ref).
-The indexes for a `HDRimage` pixel matrix with `w` width and `h` height 
-follow this sketch:
+Return the index in the 1D array of the specified pixel (`x`, `y`) 
+for the given `HDRimage`.
+
+See also: [`valid_coordinates`](@ref), [`HDRimage`](@ref)
+"""
+function pixel_offset(hdr::HDRimage, x::Int, y::Int)
+    @assert valid_coordinates(hdr, x, y)
+    y*hdr.width + (x+1)
+end
+
+"""
+    get_pixel(hdr::HDRimage, x::Int, y::Int) :: RBG{Float32}
+
+Return the `RBG{Float32}` color for the (`x`, `y`) pixel in the 
+given [`HDRimage`](@ref). The indexes for a `HDRimage` pixel matrix 
+with `w` width and `h` height follow this sketch:
 ```ditaa
-    (0,0) - (0,1) - ... - (0,w)
-    (1,0) - (1,1) - ... - (1,w)
-    ...
-    (h,1) - (h,2) - ... - (h,w)
+|  (0,0)    (0,1)    (0,2)   ...   (0,w-1)  |
+|  (1,0)    (1,1)    (1,2)   ...   (1,w-1)  |
+|   ...      ...      ...    ...     ...    |
+| (h-1,0)  (h-1,1)  (h-1,2)  ...  (h-1,w-1) |
 ```
-"""
-get_pixel(hdr::HDRimage, x::Int, y::Int) = hdr.rgb_m[pixel_offset(hdr, x, y)]
 
-##########################################################################################92
+See also: [`pixel_offset`](@ref), [`valid_coordinates`](@ref), 
+[`HDRimage`](@ref)
+"""
+function get_pixel(hdr::HDRimage, x::Int, y::Int)
+    return hdr.rgb_m[pixel_offset(hdr, x, y)]
+end
+
+function set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{Float32}) 
+    hdr.rgb_m[pixel_offset(hdr, x,y)] = c
+    return nothing
+end
+
+function set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{T}) where {T}
+    hdr.rgb_m[pixel_offset(hdr,x,y)] = convert(RGB{Float32}, c)
+    return nothing
+end
 
 """
     set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{Float32})
+    set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{T}) where {T}
 
-Set the new `RGB{Float32}` color for the `(x, y)` pixel in the given [`HDRimage`](@ref).
-The indexes for a `HDRimage` pixel matrix with `w` width and `h` height 
-follow this sketch:
+Set the new RGB color `c` for the (`x`, `y`) pixel in 
+the given [`HDRimage`](@ref). The indexes for a `HDRimage` pixel 
+matrix with `w` width and `h` height follow this sketch:
 ```ditaa
-    (0,0) - (0,1) - ... - (0,w)
-    (1,0) - (1,1) - ... - (1,w)
-    ...
-    (h,1) - (h,2) - ... - (h,w)
+|  (0,0)    (0,1)    (0,2)   ...   (0,w-1)  |
+|  (1,0)    (1,1)    (1,2)   ...   (1,w-1)  |
+|   ...      ...      ...    ...     ...    |
+| (h-1,0)  (h-1,1)  (h-1,2)  ...  (h-1,w-1) |
 ```
+
+See also: [`pixel_offset`](@ref), [`valid_coordinates`](@ref), 
+[`HDRimage`](@ref)
 """
-set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{Float32}) = 
-    (hdr.rgb_m[pixel_offset(hdr, x,y)] = c; nothing)
-
-set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{T}) where {T}= 
-    (hdr.rgb_m[pixel_offset(hdr,x,y)] = convert(RGB{Float32}, c); nothing)
-##########################################################################################92
-
-struct InvalidPfmFileFormat <: Exception
-    var::String
-end
+set_pixel
 
 ##########################################################################################92
 
@@ -78,6 +89,8 @@ end
 
 Write the given [`HDRimage`](@ref) image using the given `IO` stream.
 The `endianness` used for writing the file is Little Endian (`-1.0`).
+
+See also: [`get_pixel`](@ref), [`HDRimage`](@ref)
 """
 function write(io::IO, img::HDRimage)
     endianness=-1.0
@@ -107,8 +120,12 @@ end
 
 ##########################################################################################92
 
+struct InvalidPfmFileFormat <: Exception
+    var::String
+end
+
 """
-    parse_img_size(line::String) -> (Int64, Int64)
+    parse_img_size(line::String) :: (Int64, Int64)
 
 Return the size (width and height) parsed from a given `String`, throwing 
 `InvalidPfmFileFormat` exception if encounters invalid values.
@@ -137,10 +154,8 @@ function parse_img_size(line::String)
 
 end
 
-##########################################################################################92
-
 """
-    parse_endianness(ess::String) -> Float64
+    parse_endianness(ess::String) :: Float64
 
 Return the endianness  parsed from a given `String`, throwing 
 `InvalidPfmFileFormat` exception if encounters an invalid value.
@@ -160,10 +175,8 @@ function parse_endianness(ess::String)
     end
 end
 
-##########################################################################################92
-
 """
-    read_float(io::IO, ess::Float64) -> Float32
+    read_float(io::IO, ess::Float64) :: Float32
     
 Return a `Float32`, readed from the given IO stream `io` with the 
 (required) endianness `ess`; `ess` must be `+1.0` (Big Endian) or 
@@ -185,10 +198,8 @@ function read_float(io::IO, ess::Float64)
     end
 end 
 
-##########################################################################################92
-
 """
-    read_line(io::IO) -> String
+    read_line(io::IO) :: String
 
 Reads a line from the file whose the given IO object `io` refers to. 
 Do understand when the file is ended and when a new line begins.
@@ -206,17 +217,16 @@ function read_line(io::IO)
     return String(result)
 end
 
-##########################################################################################92
-
 """
-    read(io::IO, ::Type{HDRimage}) -> HDRimage
+    read(io::IO, ::Type{HDRimage}) :: HDRimage
 
-Read a PFM image from a stream object `io`.
-Return a [`HDRimage`](@ref) object containing the image. If an error occurs, raise a
+Read a PFM image from a stream object `io`, and return a `HDRimage` 
+object containing the image. If an error occurs, raise a
 `InvalidPfmFileFormat` exception.
 
 See also: [`read_line`](@ref)(`::IO`), [`parse_image_size`](@ref)(`::String`),
-[`parse_endianness`](@ref)(`::String`), [`read_float`](@ref)(`::IO, `::Float64`)
+[`parse_endianness`](@ref)(`::String`), [`read_float`](@ref)(`::IO, `::Float64`),
+[`HDRimage`](@ref)
 """
 function read(io::IO, ::Type{HDRimage})
     # magic number
@@ -252,7 +262,7 @@ end
 ##########################################################################################92
 
 """
-    parse_command_line((args::Vector{String}) -> (String, String, Float64, Float64)
+    parse_command_line((args::Vector{String}) :: (String, String, Float64, Float64)
 
 Interpret the command line when the main is executed, 
 and manage eventual argument errors.
@@ -263,12 +273,13 @@ An array of strings, with length 2, 3 or 4, cointaining:
 - second string (required): output filename, its format can be PNG or TIFF
 - [`a`] : scale  factor for luminosity correction (default 0.18, 
 used in [`normalize_image!`](@ref))
-- [`γ`] : gamma factor for screen correction (default 1.0, used in [`γ_correction!`](@ref)
+- [`γ`] : gamma factor for screen correction (default 1.0, used in 
+  [`γ_correction!`](@ref))
 
 # Returns
 A tuple `(infile, outfile, a, γ)`, with `a` and `γ` with type `Float64`
 
-See also : [`normalize_image!`](@ref)), [`γ_correction!`](@ref)
+See also : [`normalize_image!`](@ref), [`γ_correction!`](@ref)
 """
 function parse_command_line(args::Vector{String})
     (isempty(args) || length(args)==1 || length(args)>4) && throw(Exception)	  
@@ -311,74 +322,114 @@ end
 
 """
     parse_tonemapping_settings(dict::Dict{String, Any}) 
-        -> (String, String, Float64, Float64)
+        :: (String, String, Float64, Float64)
 
-Parse a `Dict{String, Any}` for the [`tone_mapping`](@ref) function;
-return a tuple `(pfm, png, a, γ)` containing the pfm input filename `pfm`, 
-the LDR output filename `png`, the scale factor `a` and the gamma factor `γ`.
+Parse a `Dict{String, Any}` for the [`tone_mapping`](@ref) function.
+The keys for the input `Dict` are, respectively: "pfm_infile",
+"outfile", "alpha", "gamma", 
 
-The keys for the input `Dict` are, respectively: "alpha", "gamma", "pfm_infile", "outfile"
+## Returns
+
+A tuple `(pfm, png, a, γ)` containing:
+- `pfm::String` : input pfm filename
+- `png::String` : output LDR filename
+- `a::Float64` : scale factor
+- `γ::Float64` : gamma factor
 
 See also:  [`tone_mapping`](@ref)
 """
 function parse_tonemapping_settings(dict::Dict{String, Any})
-    a::Float64 = dict["alpha"]
-    γ::Float64 = dict["gamma"]
     pfm::String = dict["pfm_infile"]
     png::String = dict["outfile"]
+    a::Float64 = dict["alpha"]
+    γ::Float64 = dict["gamma"]
     return (pfm, png, a, γ)
 end
 
 """
     parse_demo_settings(dict::Dict{String, Any}) 
-        -> (Bool, String, Float64, Int64, Int64, String, String)
+        :: (Bool, String, Float64, Int64, Int64, String, String)
 
-Parse a `Dict{String, Any}` for the [`demo`](@ref) function;
-return a tuple `(view_ort, α, w, h, pfm, png)` containing a bool `view_ort` for the choosen point of view
-(`true`->Orthogonal, `false`->Perspective), the angle of view `α`, the number of pixels
-on width `w` and height `h`, the pfm output filename `pfm` and the LDR
-output filename `png`.
+Parse a `Dict{String, Any}` for the [`demo`](@ref) function.
+The keys for the input `Dict` are, respectively: "camera-type", "algorithm",
+"alpha", "width", "height", "set-pfm-name", "set-png-name"
 
-The keys for the input `Dict` are, respectively: "camera_type", "algorithm", "alpha",
- "width", "height", "set-pfm-name", "set-png-name"
+## Returns
+
+A tuple `(view_ort, alg, α, w, h, pfm, png)` containing:
+- `view_ort::Bool` : choosen point of view 
+  (`true`->Orthogonal, `false`->Perspective)
+- `alg::String` : choosen algorithm for the rendering image
+- `obs::String` : "X,Y,Z" coordinates of the choosen observation point of view 
+- `α::String` : choosen angle of rotation respect to vertical (i.e. z) axis
+- `w::Int64` and `h::Int64` : width and height of the rendered image
+- `pfm::String` : output pfm filename
+- `png::String` : output LDR filename
+- `type::String` : choosen world type to be rendered
+
 
 See also:  [`demo`](@ref)
 """
 function parse_demo_settings(dict::Dict{String, Any})
-    view::String = dict["camera_type"]
-    alg::String = dict["algorithm"]
+    view::String = dict["camera-type"]
+    algorithm::String = dict["algorithm"]
     α::Float64 = dict["alpha"]
-    w::Int64 = dict["width"]
-    h::Int64 = dict["height"]
+    width::Int64 = dict["width"]
+    height::Int64 = dict["height"]
     pfm::String = dict["set-pfm-name"]
     png::String = dict["set-png-name"]
+
+    world_type::String = dict["world-type"]
+
+    obs::String = dict["camera-position"]
+    (x,y,z) = Tuple(parse.(Float64, split(obs, ",")))
+    camera_position = Point(x,y,z)
+
+    init_state::Int64 = dict["init-state"]
+    init_seq::Int64 = dict["init-seq"]
 
     view_ort = nothing
     view == "ort" ? view_ort = true : nothing
     view == "per" ? view_ort = false : nothing
     !(isnothing(view_ort)) || 
-        throw(ArgumentError("""view must be "ort" or "per", but instead is equal to view=$view"""))
+        throw(ArgumentError("""view must be "ort" or "per" """*
+                            """but instead is equal to view=$view"""))
 
-    return (view_ort, alg, α, w, h, pfm, png)
+    return (
+            view_ort, 
+            algorithm, 
+            α, 
+            width, height, 
+            pfm, png, 
+            true, true, 
+            world_type, 
+            camera_position, 
+            init_state, init_seq
+        )
 end
 
 
 """
     parse_demoanimation_settings(dict::Dict{String, Any}) 
-        -> (Bool, String, Int64, Int64, String)
+        :: (Bool, String, Int64, Int64, String)
 
-Parse a `Dict{String, Any}` for the [`demo_animation`](@ref) function;
-return a tuple `(view_ort, w, h, anim)` containing a bool `view_ort` for the choosen point of view
-(`true`->Orthogonal, `false`->Perspective), the number of pixels
-on width `w` and height `h` and the output animation name `anim`.
+Parse a `Dict{String, Any}` for the [`demo_animation`](@ref) function.
+The keys for the input `Dict` are, respectively: "camera-type", "algorithm",
+"width", "height", "set-anim-name".
 
-The keys for the input `Dict` are, respectively: "camera_type", "algorithm",
- "width", "height", "set-anim-name"
+## Returns
+
+A tuple `(view_ort, alg, w, h, anim)` containing:
+- `view_ort::Bool` : choosen point of view 
+  (`true`->Orthogonal, `false`->Perspective)
+- `alg::String` : choosen algorithm for the rendering image
+- `w::Int64` and `h::Int64` : width and height of the rendered image
+- `anim::String` : output animation name
 
 See also:  [`demo_animation`](@ref), [`demo`](@ref)
 """
 function parse_demoanimation_settings(dict::Dict{String, Any})
-    view::String = dict["camera_type"]
+    view::String = dict["camera-type"]
     alg::String = dict["algorithm"]
     w::Int64 = dict["width"]
     h::Int64 = dict["height"]
@@ -389,7 +440,8 @@ function parse_demoanimation_settings(dict::Dict{String, Any})
     view == "ort" ? view_ort = true : nothing
     view == "per" ? view_ort = false : nothing
     !(isnothing(view_ort)) || 
-        throw(ArgumentError("""view must be "ort" or "per", but instead is equal to view=$view"""))
+        throw(ArgumentError("""view must be "ort" or "per","""*
+                            """but instead is equal to view=$view"""))
 
     return (view_ort, alg, w, h, anim)
 end

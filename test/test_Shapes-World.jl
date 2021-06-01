@@ -17,8 +17,8 @@ end
      w = World()
 	sph1 = Sphere(translation(VEC_X * 2))
 	sph2 = Sphere(translation(VEC_X * 8))
-	add_shape(w, sph1)
-	add_shape(w, sph2)
+	add_shape!(w, sph1)
+	add_shape!(w, sph2)
 
 	intersection1 = ray_intersection(w, Ray(Point(0.0, 0.0, 0.0), VEC_X))
 	@test intersection1.world_point ≈ Point(1., 0., 0.)

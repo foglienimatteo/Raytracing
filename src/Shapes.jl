@@ -223,13 +223,13 @@ end
 ##########################################################################################92
 
 """
-    add_shape(W::World, S::Shape)
+    add_shape!(W::World, S::Shape)
 
 Append a new shape to this world
 
 See also: [`Shape`](@ref), [`World`](@ref)
 """
-function add_shape(W::World, S::Shape)
+function add_shape!(W::World, S::Shape)
     push!(W.shapes, S)
     return nothing
 end

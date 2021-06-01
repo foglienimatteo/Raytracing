@@ -11,6 +11,10 @@
 BLACK = RGB{Float32}(0.0, 0.0, 0.0)
 WHITE = RGB{Float32}(1.0, 1.0, 1.0)
 
+function to_RGB(r::Int64, g::Int64, b::Int64)
+    return RGB{Float32}(r/255., g/255., b/255.)
+end
+
 ##########################################################################################92
 
 """ 
@@ -270,7 +274,7 @@ end
 
 """
 A struct holding a list of shapes, which make a «world»
-You can add shapes to a world using [`add_shape`](@ref)([`World`](@ref), [`Shape`](@ref)).
+You can add shapes to a world using [`add_shape!`](@ref)([`World`](@ref), [`Shape`](@ref)).
 Typically, you call [`ray_intersection`](@ref)([`World`](@ref), [`Ray`](@ref))
 to check whether a light ray intersects any of the shapes in the world.
 """
@@ -358,14 +362,54 @@ end
 ##########################################################################################92
 
 """
+A 3D unit sphere centered on the origin of the axes
+# Arguments
+- `T`: potentially [`Transformation`](@ref) associated to the sphere
+- `Material`: potentially [`Material`](@ref) associated to the sphere
+"""
+struct Sphere <: Shape
+    T::Transformation
+    Material::Material
+    
+    Sphere(T::Transformation, M::Material) = new(T,M)
+    Sphere(M::Material, T::Transformation) = new(T,M)
+    Sphere(T::Transformation) = new(T, Material())
+    Sphere(M::Material) = new(Transformation(), M)
+    Sphere() = new(Transformation(), Material())
+    
+    #Sphere(T=Transformation(), M=Material()) = new(T,M)
+end
+
+"""
+A 3D unit plane, i.e. the x-y plane (set of 3D points with z=0)
+# Arguments
+- `T`: potentially [`Transformation`](@ref) associated to the plane
+- `Material`: potentially [`Material`](@ref) associated to the plane
+"""
+struct Plane <: Shape
+    T::Transformation
+    Material::Material
+    
+    Plane(T::Transformation, M::Material) = new(T,M)
+    Plane(M::Material, T::Transformation) = new(T,M)
+    Plane(T::Transformation) = new(T, Material())
+    Plane(M::Material) = new(Transformation(), M)
+    Plane() = new(Transformation(), Material())
+    #Plane(T=Transformation(), M=Material()) = new(T,M)
+end
+
+##########################################################################################92
+
+"""
 A class implementing a solver of the rendering equation.
 This is an abstract class; you should use a derived concrete class.
 """
-abstract type Renderer end
+abstract type Renderer <: Function end
 
 """
 A on/off renderer
-This renderer is mostly useful for debugging purposes, as it is really fast, but it produces boring images.
+This renderer is mostly useful for debugging purposes, 
+as it is really fast, but it produces boring images.
 """
 struct OnOffRenderer <: Renderer
     world::World
@@ -386,28 +430,50 @@ struct FlatRenderer <: Renderer
 end
 
 """
-A simple path-tracing renderer
-The algorithm implemented here allows the caller to tune number of rays thrown at each iteration, as well as the
-maximum depth. It implements Russian roulette, so in principle it will take a finite time to complete the
-calculation even if you set max_depth to `Inf`.
+    PathTracer(
+            world::World, 
+            background_color::RGB{Float32} = BLACK,
+            pcg::PCG = PCG(),
+            N::Int64 = 10,
+            max_depth::Int64 = 2,
+            russian_roulette_limit::Int64 = 3
+        )
 
-# Arguments
-- `world`
-- `background_color`: set the background color if the Ray doesn-t hit anything
-- `pcg`: for random numbers usevul for evaluating integrals
-- `N`: number of `Ray`s generated for integral evaluation
-- `max_depth`: maximal number recursive integrations
-- `russian_roulette_limit`: set the depth at whitch the Russian Roulette algorithm begins
+A simple path-tracing renderer.
+
+The algorithm implemented here allows the caller to tune number 
+of rays thrown at each iteration, as well as the maximum depth. 
+It implements Russian roulette, so in principle it will take a 
+finite time to complete the calculation even if you set 
+max_depth to `Inf`.
+
+## Arguments
+
+- `world::World` : the world to be rendered
+
+- `background_color::RGB{Float32}` : default background color 
+  if the Ray doesn-t hit anything
+
+- `pcg::PCG` :  PCG random number generator for evaluating integrals
+
+- `num_of_rays::Int64` : number of `Ray`s generated for each integral evaluation
+
+- `max_depth::Int64` : maximal number recursive integrations
+
+- `russian_roulette_limit::Int64`: depth at whitch the Russian 
+  Roulette algorithm begins
+
+See also: [`Ray`](@ref), [`World`](@ref), [`PCG`](@ref)
 """
 struct PathTracer <: Renderer
     world::World
     background_color::RGB{Float32}
     pcg::PCG
-    N::Int64 # number of ::Ray(s) to use in the integral evaluation
+    num_of_rays::Int64
     max_depth::Int64
     russian_roulette_limit::Int64
-    PathTracer(w, bc=BLACK, pcg=PCG(), nubR=10, md=2, RRlim=3) = 
-        new(w, bc, pcg, nubR, md, RRlim)
+    PathTracer(w, bc=BLACK, pcg=PCG(), n=10, md=2, RRlim=3) = 
+        new(w, bc, pcg, n, md, RRlim)
 end
 
 

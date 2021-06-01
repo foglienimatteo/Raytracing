@@ -6,15 +6,19 @@
 #
 
 
+##########################################################################################92
 
 """
-    are_close(x, y, epsilon=1e-10) -> Bool
+    are_close(x, y, ε=1e-10) :: Bool
 
-Returns true if the difference between two numbers is smaller than 1e-10.
+Returns `true` if the absolute difference between 
+`x` and `y` is smaller than ε.
 """
-are_close(x, y, epsilon=1e-10) = abs(x-y) < epsilon
+are_close(x, y, ε=1e-10) = abs(x-y) < ε
 
-Base.:≈(a::RGB{T}, b::RGB{T}) where {T} = are_close(a.r,b.r) && are_close(a.g,b.g) && are_close(a.b, b.b)
+function Base.:≈(a::RGB{T}, b::RGB{T}) where {T}
+    are_close(a.r,b.r) && are_close(a.g,b.g) && are_close(a.b, b.b)
+end
 function Base.:≈(a::Array{RGB{T1}}, b::Array{RGB{T2}}) where {T1,T2}
     for (i,j) in zip(a, b); (i≈j) || (return false); end
     return true
@@ -33,19 +37,20 @@ Base.:≈(r1::Ray, r2::Ray) = (r1.origin ≈ r2.origin) && (r1.dir ≈ r2.dir)
 Base.:≈(v1::Vec2d, v2::Vec2d) = (are_close(v1.u, v2.u)) && (are_close(v1.v, v2.v))
 Base.:≈(H1::HitRecord, H2::HitRecord) = (H1.normal ≈ H2.normal) && (H1.ray ≈ H2.ray) && (H1.surface_point ≈ H2.surface_point)&& (are_close(H1.t, H2.t)) && (H1.world_point ≈ H2.world_point)
 
-# Definitions of operations for RGB objects
-Base.:+(a::RGB{T}, b::RGB{T}) where {T} = RGB(a.r + b.r, a.g + b.g, a.b + b.b)
-Base.:-(a::RGB{T}, b::RGB{T}) where {T} = RGB(a.r - b.r, a.g - b.g, a.b - b.b)
-Base.:*(scalar::Real, c::RGB{T}) where {T} = RGB(scalar*c.r , scalar*c.g, scalar*c.b)
+# Operations for RGB objects
+Base.:+(a::RGB{T}, b::RGB{T}) where {T} = RGB{T}(a.r + b.r, a.g + b.g, a.b + b.b)
+Base.:-(a::RGB{T}, b::RGB{T}) where {T} = RGB{T}(a.r - b.r, a.g - b.g, a.b - b.b)
+Base.:*(scalar::Real, c::RGB{T}) where {T} = RGB{T}(scalar*c.r , scalar*c.g, scalar*c.b)
+Base.:*(a::RGB{T}, b::RGB{T}) where {T} = RGB{T}(a.r*b.r, a.g*b.g, a.b*b.b)
 Base.:*(c::RGB{T}, scalar::Real) where {T} = scalar * c
-Base.:/(c::RGB{T}, scalar::Real) where {T} = RGB(c.r/scalar , c.g/scalar, c.b/scalar)
+Base.:/(c::RGB{T}, scalar::Real) where {T} = RGB{T}(c.r/scalar , c.g/scalar, c.b/scalar)
 
-# operations for Point
+# Operations for Point
 Base.:*(s::Real, a::Point) = Point(s*a.x, s*a.y, s*a.z)
 Base.:*(a::Point, s::Real) = Point(s*a.x, s*a.y, s*a.z)
 Base.:/(a::Point, s::Real) = Point(a.x/s, a.y/s, a.z/s)
 
-# operations for Vec
+# Operations for Vec
 Base.:+(a::Vec, b::Vec) = Vec(a.x+b.x, a.y+b.y, a.z+b.z)
 Base.:-(a::Vec, b::Vec) = Vec(a.x-b.x, a.y-b.y, a.z-b.z)
 Base.:-(a::Vec) = Vec(-a.x, -a.y, -a.z)
@@ -55,8 +60,10 @@ Base.:/(a::Vec, s::Real) = Vec(a.x/s, a.y/s, a.z/s)
 LinearAlgebra.:⋅(a::Vec, b::Vec) = a.x*b.x + a.y*b.y + a.z*b.z
 LinearAlgebra.:×(a::Vec, b::Vec) = Vec(a.y*b.z-a.z*b.y, b.x*a.z-a.x*b.z, a.x*b.y-a.y*b.x)
 
-# operations for Normal
+# Operations for Normal
 Base.:-(a::Normal) = Normal(-a.x, -a.y, -a.z)
+Base.:*(a::Normal, b::Real) = Vec(b*a.x, b*a.y, b*a.z)
+Base.:*(b::Real, a::Normal) = Vec(b*a.x, b*a.y, b*a.z)
 LinearAlgebra.:⋅(a::Normal, b::Normal) = a.x*b.x + a.y*b.y + a.z*b.z
 LinearAlgebra.:⋅(a::Normal, b::Vec) = a.x*b.x + a.y*b.y + a.z*b.z
 LinearAlgebra.:⋅(a::Vec, b::Normal) = a.x*b.x + a.y*b.y + a.z*b.z
@@ -64,13 +71,13 @@ LinearAlgebra.:×(a::Normal, b::Normal) = Vec(a.y*b.z-a.z*b.y, b.x*a.z-a.x*b.z, 
 LinearAlgebra.:×(a::Normal, b::Vec) = Vec(a.y*b.z-a.z*b.y, b.x*a.z-a.x*b.z, a.x*b.y-a.y*b.x)
 LinearAlgebra.:×(a::Vec, b::Normal) = Vec(a.y*b.z-a.z*b.y, b.x*a.z-a.x*b.z, a.x*b.y-a.y*b.x)
 
-# Definitions of operations between Vec and Point
+# Operations between Vec and Point
 Base.:+(p::Point, v::Vec) = Point(p.x+v.x, p.y+v.y, p.z+v.z)
 Base.:+(v::Vec, p::Point) = Point(p.x+v.x, p.y+v.y, p.z+v.z)
 Base.:-(p::Point, v::Vec) = Point(p.x-v.x, p.y-v.y, p.z-v.z)
 Base.:-(a::Point, b::Point) = Vec(b.x-a.x, b.y-a.y, b.z-a.z)
 
-# Definitions of operations for Transformations
+# Operations for Transformations
 Base.:*(s::Transformation, t::Transformation) = Transformation(s.M*t.M, t.invM*s.invM)
 function Base.:*(t::Transformation, p::Point)
     PV = SVector{4, Float64}(p.x, p.y, p.z, 1)
@@ -122,6 +129,8 @@ end
 Base.:*(t::Transformation, r::Ray) = Ray(t * r.origin, t*r.dir, r.tmin, r.tmax, r.depth)
 Base.:*(r::Ray, t::Transformation) = t*r
 
+
+# Useful normalize functions
 squared_norm(v::Union{Vec,Point, Normal}) = v.x^2 + v.y^2 + v.z^2
 norm(v::Union{Vec,Point,Normal}) = √squared_norm(v)
 normalize(v::Union{Vec, Normal}) = v/norm(v)
