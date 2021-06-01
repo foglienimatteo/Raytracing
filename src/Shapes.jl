@@ -48,6 +48,15 @@ function plane_point_to_uv(point::Point)
     return Vec2d(u,v)
 end
 
+
+function torus_point_to_uv(point::Point)
+    len_point = norm(P)
+    u = asin(point.y/len_point) / π
+    v = atan(point.z, point.x) / (2.0 * π)
+    v>=0 ? nothing : v+= 1.0
+    return Vec2d(u,v)
+end
+
 ##########################################################################################92
 
 """
@@ -77,6 +86,24 @@ direction with respect to `ray_dir` ([`Vec`](@ref)).
 function plane_normal(point::Point, ray_dir::Vec)
     result = Normal(0., 0., 1.)
     Vec(0., 0., 1.) ⋅ ray_dir < 0.0 ? nothing : result = -result
+    return result
+end
+
+"""
+    torus_normal(p::Point, ray_dir::Vec, R::Float64) -> Normal
+
+Compite the [`Normal`](@ref) of a torus
+
+The normal is computed for [`Point`](@ref) (a point on the surface of the
+torus), and it is chosen so that it is always in the opposite
+direction with respect to `ray_dir` ([`Vec`](@ref)).
+"""
+function torus_normal(p::Point, ray_dir::Vec, R::Float64)
+    R_z = copysign(R / √(1+(p.x/p.z)^2), p.z)
+    R_x = copysign(p.x / p.z * R_z, p.x)
+    R_p = Vec(R_x, 0, R_z)
+    result = Normal(p - R_p)
+    result ⋅ ray_dir < 0.0 ? nothing : result = -result
     return result
 end
 
@@ -152,6 +179,46 @@ function ray_intersection(plane::Plane, ray::Ray)
     )
 end
 
+function ray_intersection(torus::Torus, ray::Ray)
+    inv_ray = inverse(plane.T) * ray
+
+    d = normalize(inv_ray.dir)
+    o = inv_ray.origin
+    norm²_d = squared_norm(d)
+    norm²_o = squared_norm(Vec(o))
+    r = torus.r
+    R = torus.R
+    c4 = norm²_d^2
+    c3 = 4 * norm²_d * (o ⋅ d)
+    c2 = 2 * norm²_d * (norm²_o - r^2 - R^2) + 4 * (o ⋅ d)^2 + 4 * R^2 * (d.y)^2
+    c1 = 4 * (norm²_o - r^2 - R^2) *  (o ⋅ d) + 8 * R^2 * o.y * d.y
+    c0 = (norm²_o - r^2 - R^2)^2 - 4 * R^2 * (r^2 - (o.y)^2)
+
+    t_ints = roots(Polynomial([c0, c1, c2, c3, c4]))
+
+    hit_t = Union{Float64, Nothing}
+    hit_t = nothing
+    for i in t_ints
+        if (i > inv_ray.tmin) && (i < inv_ray.tmax)
+            hit_t = i
+        end
+    end
+
+    if hit_t == nothing
+        return nothing
+    end
+    
+    hit_point = at(inv_ray, hit_t)
+
+    return HitRecord(
+        torus.T * hit_point,
+        torus.T * torus_normal(hit_point, inv_ray.dir, torus.R),
+        torus_point_to_uv(hit_point), # manca la funzione
+        hit_t,
+        ray, 
+        torus
+    )
+end
 
 ##########################################################################################92
 
