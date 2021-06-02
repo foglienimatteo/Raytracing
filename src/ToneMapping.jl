@@ -4,17 +4,7 @@
 #
 # Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
 #
-# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-# documentation files (the “Software”), to deal in the Software without restriction, including without limitation the
-# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
-# and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all copies or substantial portions of
-# the Software. THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
-# LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
-# SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
-# CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-# IN THE SOFTWARE.
+
 
 
 ##########################################################################################92
@@ -26,8 +16,13 @@ Gives the best average luminosity of a Pixel.
 As input needs a `::RGB{T}` and returns a `::Float64`.
 """
 luminosity(c::RGB{T}) where {T} = (max(c.r, c.g, c.b) + min(c.r, c.g, c.b))/2.
-
-##########################################################################################92
+function lum_max(img::HDRimage) 
+    lum_max=0.0
+    for pix in img.rgb_m
+        (lum_max>luminosity(pix)) || (lum_max=luminosity(pix))
+    end
+    lum_max
+end
 
 """
     avg_lum(img::HDRimage, δ::Number=1e-10) -> Float64
@@ -41,9 +36,27 @@ function avg_lum(img::HDRimage, δ::Number=1e-10)
         cumsum += log10(δ + luminosity(pix))
     end
     10^(cumsum/(img.width*img.height))
-end # avg_lum
+end
 
-##########################################################################################92
+function σ_lum(lum::Float64, img::HDRimage)
+    σ=0.
+    N = img.width*img.height
+    for pix in img.rgb_m
+        σ += abs( luminosity(pix) - lum )^2.
+    end
+    return √(σ/N)
+end
+
+function normalize_image!(  img::HDRimage, 
+                            a::Float64=0.18,
+                            lum::Union{Number, Nothing}=nothing, 
+                            δ::Number=1e-10
+                        )
+
+    isnothing(lum) && (lum = avg_lum(img, δ))
+    img.rgb_m .= img.rgb_m .* a ./lum
+    nothing
+end 
 
 """
     normalize_image!(img::HDRimage, a::Number=0.18, lum::Union{Number, Nothing}=nothing,
@@ -53,13 +66,7 @@ Normalize all the RGB components of a [`HDRimage`](@ref) with its average lumino
 (given by [`avg_lum`](@ref)(`::HDRimage`, `::Number`)) and the scale factor 'a' (by default a=0.18,
 can be changed).
 """
-function normalize_image!(img::HDRimage, a::Number=0.18,
-                          lum::Union{Number, Nothing}=nothing, δ::Number=1e-10
-    )
-    (!isnothing(lum)) || (lum = avg_lum(img, δ))
-    img.rgb_m .= img.rgb_m .* a ./lum
-    nothing
-end # normalize_image
+normalize_image!
 
 ##########################################################################################92
 
