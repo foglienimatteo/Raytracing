@@ -16,9 +16,9 @@ function first_world()
 
 	sphere_texture = HDRimage(2, 2)
 	set_pixel(sphere_texture, 0, 0, RGB(0.1, 0.2, 0.3))
-    	set_pixel(sphere_texture, 0, 1, RGB(0.2, 0.1, 0.3))
+    set_pixel(sphere_texture, 0, 1, RGB(0.2, 0.1, 0.3))
 	set_pixel(sphere_texture, 1, 0, RGB(0.3, 0.2, 0.1))
-    	set_pixel(sphere_texture, 1, 1, RGB(0.3, 0.1, 0.2))
+    set_pixel(sphere_texture, 1, 1, RGB(0.3, 0.1, 0.2))
 
 	material3 = Material(DiffuseBRDF(ImagePigment(sphere_texture)))
 
@@ -52,7 +52,7 @@ function first_world()
 	)
 #=
 	t = Torus(
-		rotation_z(pi/4) * rotation_x(pi\4) * translation(Vec(0., 0., 0.5)),
+		rotation_z(2.),
 		material3,
 		0.1,
 		0.22

@@ -6,7 +6,7 @@
 
 module Raytracing
 
-using Colors, Images, ImageIO, FileIO#, Polynomials
+using Colors, Images, ImageIO, FileIO, Polynomials
 using ColorTypes:RGB
 using LinearAlgebra, StaticArrays
 using Printf, ProgressBars
