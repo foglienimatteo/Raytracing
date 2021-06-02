@@ -10,7 +10,7 @@
 
 function first_world()
 	material1 = Material(DiffuseBRDF(UniformPigment(RGB(0.7, 0.3, 0.2))))
-    	material2 = Material(DiffuseBRDF(CheckeredPigment(RGB(0.2, 0.7, 0.3), 
+    material2 = Material(DiffuseBRDF(CheckeredPigment(RGB(0.2, 0.7, 0.3), 
 	    											  RGB(0.3, 0.2, 0.7), 
 									                  4) )	)
 
@@ -50,7 +50,18 @@ function first_world()
 			material3
 		)
 	)
-
+#=
+	t = Torus(
+		rotation_z(pi/4) * rotation_x(pi\4) * translation(Vec(0., 0., 0.5)),
+		material3,
+		0.1,
+		0.22
+	)
+	add_shape!(
+		world,
+		t
+	)
+=#
 	return world
 end
 

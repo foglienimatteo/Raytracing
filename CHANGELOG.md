@@ -1,4 +1,5 @@
 # HEAD
+- New shape `Torus` with relative struct and functions
 - New struct and funciton for generate a better image considering lights and angles (`PathTracer`) and tests
 - Implemented scalar and vector products between two `Normal` and between `Normal` and `Vec`
 - New struct `SpecularBRDF`

@@ -6,7 +6,7 @@
 
 module Raytracing
 
-using Colors, Images, ImageIO, FileIO
+using Colors, Images, ImageIO, FileIO#, Polynomials
 using ColorTypes:RGB
 using LinearAlgebra, StaticArrays
 using Printf, ProgressBars
@@ -19,7 +19,7 @@ import LinearAlgebra.:⋅; import LinearAlgebra.:×
 export BLACK, WHITE, to_RGB, HDRimage, Parameters
 export Point, Vec, Normal,VEC_X, VEC_Y, VEC_Z, Transformation
 export Ray, OrthogonalCamera, PerspectiveCamera, ImageTracer
-export Shape, Sphere, Plane, Vec2d, HitRecord, World
+export Shape, Sphere, Plane, Torus, Vec2d, HitRecord, World
 export Pigment, UniformPigment, CheckeredPigment, ImagePigment
 export BRDF, DiffuseBRDF, SpecularBRDF, Material
 export Renderer, OnOffRenderer, FlatRenderer, PathTracer

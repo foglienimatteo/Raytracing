@@ -476,7 +476,7 @@ struct PathTracer <: Renderer
         new(w, bc, pcg, n, md, RRlim)
 end
 
-
+#=
 """
 A 3D unit sphere centered on the origin of the axes
 # Arguments
@@ -500,6 +500,7 @@ struct Plane <: Shape
     Material::Material
     Plane(T=Transformation(), M=Material()) = new(T,M)
 end
+=#
 
 """
 A 3D unit torus, a ring with circular section; has origin in (0, 0, 0) and axis parallel to the y-axis.
@@ -508,13 +509,14 @@ A 3D unit torus, a ring with circular section; has origin in (0, 0, 0) and axis 
 - `Material`: potentially [`Material`](@ref) associated to the plane
 - `r`: radious of the circular section
 - `R`: distance between the torus center and the section center
-
+```ditaa
 ^ ̂y                __-__
-|                 /     \
+|                 /     \\ 
 |---O------------(---o---)
-|                 \__ __/
+|                 \\__ __/
 |                    -
-   <--------R------><-r->
+      <--------R------><-r->
+```
 """
 struct Torus <: Shape
     T::Transformation
