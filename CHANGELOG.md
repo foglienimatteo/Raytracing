@@ -1,5 +1,7 @@
 # HEAD
 
+# VERSION 0.2.0
+
 - Modified `demo` function: now two possible world versions can be rendered
 - New struct for generate a better image considering lights and angles (`PathTracer`) and tests
 - Implemented scalar and vector products between two `Normal` and between `Normal` and `Vec`
@@ -21,5 +23,6 @@
 - Implemented structs: `Shape`, `Sphere`, `World` for a first image creation
 
 # VERSION 0.1.0
+
 - Added feature: now can convert from a .pfm image to .png and .tiff one 
 - Completed function for reading and writing a .pfm image file format
