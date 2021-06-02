@@ -67,3 +67,21 @@ end
 @testset "test_Shapes-World" begin
 	include("test_Shapes-World.jl")
 end
+
+##########################################################################################92
+
+@testset "test_Pigment" begin
+	include("test_Pigment.jl")
+end
+
+@testset "test_Renderers" begin
+	include("test_Renderers.jl")
+end
+
+@testset "test_PCG" begin
+	include("test_PCG.jl")
+end
+
+@testset "test_OrthoNormalBasis" begin
+	include("test_OrthoNormalBasis.jl")
+end

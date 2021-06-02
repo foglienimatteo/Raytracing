@@ -23,19 +23,43 @@ Physics "Aldo Pontremoli"](dip-fisica).
 - [Raytracing](#raytracing)
   - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
+  - [Animation Tutorial](#animation-tutorial)
   - [Usage](#usage)
-    - [REPL](#repl)
-    - [Command Line Interface (CLI)](#command-line-interface-cli)
   - [Licence](#licence)
   - [Contributors ✨](#contributors-)
 
 ## Installation
 
+The simplest way to install this software is cloning the repository where it is built in. Run in the command line
+```bash
+git clone https://github.com/cosmofico97/Raytracing
+```
+or download the source code from the github repository https://github.com/cosmofico97/Raytracing
+
+## Animation Tutorial
+
+To star of and checks the correct behavior of the software run one of (or both) the following command inside the main directory
+```bash
+./Raytracer.jl demo-animation --camera_type=per --algorithm=flat --width=640 --height=480
+```
+```bash
+./Raytracer.jl demo --world-type=B --camera-type=per --algorithm=pathtracing --camera-position=-1,0,1 --width=640 --height=480
+```
+and enjoy respectively the animation `demo/demo_anim_Flat_640x480x360.mp4` and the image `demo/demo_B_PathTracing_640x480.png`
+
+<!---
+<video width="640" height="480"  type="video/mp4" "src="https://user-images.githubusercontent.com/79974922/119556147-ef2b3200-bd9e-11eb-956f-17de6ea6bdda.mp4"  autoplay loop> </video>"
+-->
+
+Animation with FlatRenderer            | Image with PathTracing
+:-------------------------------------:|:-------------------------:
+![](demo/demo_anim_Flat_640x480x360.gif)  |  ![](demo/demo_B_PathTracing_640x480.png)
+
+
+It may takes few minutes to renderer the animation; you might also gives smaller (integer and even) values to `--width` and `--height` in order to obtain the same animation in a smaller amount of time (the price to pay is a worse definition of the animation itself).
+
 ## Usage
 
-### REPL
-
-### Command Line Interface (CLI)
 
 ## Licence
 All the files in this repository are under a MIT license. See the file [LICENSE.md](./LICENSE.md)
