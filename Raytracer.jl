@@ -1,4 +1,4 @@
-#!/usr/bin/env julia.exe
+#!/usr/bin/env julia
 
 # The MIT License (MIT)
 #
@@ -98,23 +98,19 @@ function ArgParse_command_line(arguments)
 			required = true
 	end
 
-	s["demo"].description = "Creates a demo.png and a demo.pfm files of 10 white spheres on a dark backgroud. "*
-					"8 spheres are placed at the 8 vertexes of a cube, 1 in the middle "*
-					"of the left face and the last in the lower one. "*
-					"Execute it in order to check the correct placement of the spheres."
-	#=
-	add_arg_group!(s["demo"], "demo mutually exclusive flags for the viewpoint tipe", exclusive=true)
-    	@add_arg_table! s["demo"] begin
-    		"--orthogonal", "--ort"
-			help = "flag for the Orthogonal projection view"
-          	action = :store_true
-		"--perspective", "--per"
-			help = "flag for the Perspective projection view"
-			action = :store_true
-    	end
-	=#
+	s["demo"].description = 
+		"""Creates a demo image with the specified options.\n"""*
+		"""There are two possible demo image "world" to be """*
+		"""rendered, specified through the input string `--world-type`.\n\n"""*
+		"""The `type=="A"` demo image world consist in a set of 10 spheres of equal radius 0.1:"""*
+		"""8 spheres are placed at the verteces of a cube of side 1.0, one in the center of"""*
+		"""the lower cube face and the last one in the center of the left cube face.\n\n"""*
+		"""The `type=="B"` demo image world consists in a checked x-y plane, a blue opaque"""* 
+		"""sphere, a red reflecting sphere, and a green oblique reflecting plane, all"""*
+		"""inside a giant emetting sphere.\n\n"""*
+		"""The creation of the demo image has the objective to check the correct behaviour of
+		the rendering software, specifically the orientation upside-down and left-right."""
 
-    	
 	add_arg_group!(s["demo"], "demo options");
 	@add_arg_table! s["demo"] begin
 		"--camera-type", "-t"
@@ -171,13 +167,13 @@ function ArgParse_command_line(arguments)
 	end
 	add_arg_group!(s["demo"], "demo optional filenames");
 	@add_arg_table! s["demo"] begin
-		"--set-pfm-name", "-A"
+		"--set-pfm-name"
 			help = "name of the pfm file to be saved"
 			nargs = '?'
 			arg_type = String
 			default = "demo.pfm"
 			constant = "demo.pfm"
-		"--set-png-name", "-B"
+		"--set-png-name"
 			help = "name of the png file to be saved"
 			nargs = '?'
 			arg_type = String

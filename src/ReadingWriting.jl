@@ -348,7 +348,10 @@ end
 
 """
     parse_demo_settings(dict::Dict{String, Any}) 
-        :: (Bool, String, Float64, Int64, Int64, String, String)
+        :: (
+            String, Point, String, Float64, Int64, Int64, String, String,
+            Bool, Bool, String, Int64, Int64, Int64
+            )
 
 Parse a `Dict{String, Any}` for the [`demo`](@ref) function.
 
@@ -376,7 +379,7 @@ variables; the corresponding keys are also showed:
 - `ise::Int64 = dict["init-seq"]` : initial sequence of the PCG random number generator
 - `spp::Int64  = dict["samples-per-pixel"]` : number of ray to be generated per pixel
 
-See also:  [`demo`](@ref)
+See also:  [`demo`](@ref), [`Point`](@ref)
 """
 function parse_demo_settings(dict::Dict{String, Any})
 
@@ -458,37 +461,48 @@ end
 
 """
     parse_demoanimation_settings(dict::Dict{String, Any}) 
-        :: (Bool, String, Int64, Int64, String)
+        :: (String, String, Int64, Int64, String)
 
 Parse a `Dict{String, Any}` for the [`demo_animation`](@ref) function.
-The keys for the input `Dict` are, respectively: "camera-type", "algorithm",
-"width", "height", "set-anim-name".
+
+## Input
+
+A `dict::Dict{String, Any}`
 
 ## Returns
 
-A tuple `(view_ort, alg, w, h, anim)` containing:
-- `view_ort::Bool` : choosen point of view 
-  (`true`->Orthogonal, `false`->Perspective)
-- `alg::String` : choosen algorithm for the rendering image
-- `w::Int64` and `h::Int64` : width and height of the rendered image
-- `anim::String` : output animation name
+A tuple `(ct, al, w, h, anim)` containing the following
+variables; the corresponding keys are also showed:
+
+- `ct::String = dict["camera-type"]` : choosen projection of view
+- `al::String = dict["algorithm"]` : choosen algorithm for the rendering image
+- `w::Int64 = dict["width"]` : number of pixels on the horizontal axis to be rendered 
+- `h::Int64 = dict["height"]` : width and height of the rendered image
+- `anim::String = dict["set-anim-name"]` : output animation name
 
 See also:  [`demo_animation`](@ref), [`demo`](@ref)
 """
 function parse_demoanimation_settings(dict::Dict{String, Any})
-    view::String = dict["camera-type"]
-    alg::String = dict["algorithm"]
-    w::Int64 = dict["width"]
-    h::Int64 = dict["height"]
-    anim::String = dict["set-anim-name"]
 
+    haskey(dict, "camera-type") ? 
+        camera_type::String = dict["camera-type"] : 
+        camera_type = "per"
 
-    view_ort = nothing
-    view == "ort" ? view_ort = true : nothing
-    view == "per" ? view_ort = false : nothing
-    !(isnothing(view_ort)) || 
-        throw(ArgumentError("""view must be "ort" or "per","""*
-                            """but instead is equal to view=$view"""))
+    haskey(dict, "algorithm") ? 
+        algorithm::String = dict["algorithm"] : 
+        algorithm = "flat"
 
-    return (view_ort, alg, w, h, anim)
+    haskey(dict, "width") ? 
+        width::Int64 = dict["width"] : 
+        width = 200
+
+    haskey(dict, "height") ? 
+        height::Int64 = dict["height"] : 
+        height= 150
+
+    haskey(dict, "set-pfm-name") ? 
+        anim::String = dict["set-anim-name"] : 
+        anim = "demo_animation.mp4"
+
+    return (camera_type, algorithm, width, height, anim)
 end
