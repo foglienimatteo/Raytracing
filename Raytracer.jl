@@ -134,14 +134,16 @@ function ArgParse_command_line(arguments)
 			default = "A"
 			range_tester = input -> (input ∈ ["A", "B"])
     		"--init-state"
-    			arg_type=Int64
-    			help="Initial seed for the random number generator (positive number)."
-    			default=45
+    			arg_type = Int64
+    			help = "Initial seed for the random number generator (positive number)."
+    			default = 45
+			range_tester = input -> (input>0)
     		"--init-seq"
-    			arg_type=Int64
-    			help="Identifier of the sequence produced by the "*
+    			arg_type = Int64
+    			help = "Identifier of the sequence produced by the "*
 			    "random number generator (positive number)."
-    			default=54
+    			default = 54
+			range_tester = input -> (input>0)
 		"--camera-position", "-p"
           	help = "camera position in the scene as 'X,Y,Z'"
           	arg_type = String
@@ -155,12 +157,17 @@ function ArgParse_command_line(arguments)
 			help = "pixel number on the width of the resulting demo image."
 			arg_type = Int64
 			default = 640
-			range_tester = iseven
+			range_tester = input -> (iseven(input) && input>0)
 		"--height", "-v"
 			help = "pixel number on the height of the resulting demo image."
 			arg_type = Int64
 			default = 480
-			range_tester = iseven
+			range_tester =  input -> (iseven(input) && input>0)
+     	"--samples-per-pixel"
+			help = "Number of samples per pixel (must be a perfect square, e.g., 16)."
+     		arg_type = Int64
+     		default = 0
+			range_tester =  input -> ((input>=0) && (√input - floor(√input) ≈ 0.))
 	end
 	add_arg_group!(s["demo"], "demo optional filenames");
 	@add_arg_table! s["demo"] begin

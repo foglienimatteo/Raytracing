@@ -132,42 +132,59 @@ end
 
 ##########################################################################################92
 
+#=
 demo() = demo(false, "onoff", 0., 640, 480, "demo.pfm", "demo.png")
 demo(ort::Bool) = demo(ort, "onoff", 0., 640, 480, "demo.pfm", "demo.png")
 demo(al::String) = demo(false, al, 0., 640, 480, "demo.pfm", "demo.png")
 demo(ort::Bool, al::String) = demo(ort, al, 0., 640, 480, "demo.pfm", "demo.png")
 demo(ort::Bool, α::Float64) = demo(ort, "onoff", α, 640, 480, "demo.pfm", "demo.png")
 demo(w::Int64, h::Int64) = demo(false, "onoff", 0., w, h, "demo.pfm", "demo.png")
+=#
 
 function demo(
-          orthogonal::Bool,
-		algorithm::String,
-          α::Float64, 
-          width::Int64, 
-          height::Int64, 
-          pfm_output::String, 
-          png_output::String,
-		bool_print::Bool=true,
-		bool_savepfm::Bool=true,
-		type::String = "A",
-		obs::Point = Point(-1., 0., 0.), 
+          camera_type::String = "per",
+		camera_position::Point = Point(-1.,0.,0.), 
+		algorithm::String = "flat",
+          α::Float64 = 0., 
+          width::Int64 = 640, 
+          height::Int64 = 480, 
+          pfm_output::String = "demo.pfm", 
+          png_output::String = "demo.png",
+		bool_print::Bool = true,
+		bool_savepfm::Bool = true,
+		world_type::String = "A",
 		init_state::Int64 = 45,
 		init_seq::Int64 = 54,
+		samples_per_pixel::Int64 = 0
           )
 
-	world = select_world(type)
+	samples_per_side = floor(√samples_per_pixel)
+     (samples_per_side^2 ≈ samples_per_pixel) ||
+		throw(ArgumentError(
+				"the number of samples per pixel "*
+				"$(samples_per_pixel) must be a perfect square")
+		)
+
+	world = select_world(world_type)
 
 	# Initialize a camera
-	observer_vec = Point(0., 0., 0.) - obs
+	observer_vec = Point(0., 0., 0.) - camera_position
 	camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec)
 	aspect_ratio = width / height
-	camera = orthogonal==true ? 
-			OrthogonalCamera(aspect_ratio, camera_tr) :
-			PerspectiveCamera(1., aspect_ratio, camera_tr)
+
+	if camera_type == "per"
+		(bool_print==true) && (println("Using perspective camera"))
+		PerspectiveCamera(1., aspect_ratio, camera_tr)
+	elseif camera_type == "ort"
+		(bool_print==true) && (println("Using orthogonal camera"))
+		camera = OrthogonalCamera(aspect_ratio, camera_tr) 
+	else
+		throw(ArgumentError("Unknown camera: $camera_type"))
+	end
 	
 	# Run the ray-tracer
 	image = HDRimage(width, height)
-	tracer = ImageTracer(image, camera)
+	tracer = ImageTracer(image, camera, samples_per_side)
 
 	if algorithm == "onoff"
 		(bool_print==true) && (println("Using on/off renderer"))
@@ -226,14 +243,22 @@ end
 
 
 """
-	function demo(
-          orthogonal::Bool, algorithm::String,
-          α::Float64, 
-          width::Int64, height::Int64, 
-          pfm_output::String, png_output::String,
-		bool_print::Bool=true, bool_savepfm::Bool=true
-		type::String = "A"
-          ) 
+	demo(
+          camera_type::String = "per",
+		camera_position::Point = Point(-1.,0.,0.), 
+		algorithm::String = "flat",
+          α::Float64 = 0., 
+          width::Int64 = 640, 
+          height::Int64 = 480, 
+          pfm_output::String = "demo.pfm", 
+          png_output::String = "demo.png",
+		bool_print::Bool = true,
+		bool_savepfm::Bool = true,
+		world_type::String = "A",
+		init_state::Int64 = 45,
+		init_seq::Int64 = 54,
+		samples_per_pixel::Int64 = 0
+          )
 
 Creates a demo image with the specified options. 
 

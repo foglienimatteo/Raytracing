@@ -351,60 +351,107 @@ end
         :: (Bool, String, Float64, Int64, Int64, String, String)
 
 Parse a `Dict{String, Any}` for the [`demo`](@ref) function.
-The keys for the input `Dict` are, respectively: "camera-type", "algorithm",
-"alpha", "width", "height", "set-pfm-name", "set-png-name"
+
+## Input
+
+A `dict::Dict{String, Any}`
 
 ## Returns
 
-A tuple `(view_ort, alg, α, w, h, pfm, png)` containing:
-- `view_ort::Bool` : choosen point of view 
-  (`true`->Orthogonal, `false`->Perspective)
-- `alg::String` : choosen algorithm for the rendering image
-- `obs::String` : "X,Y,Z" coordinates of the choosen observation point of view 
-- `α::String` : choosen angle of rotation respect to vertical (i.e. z) axis
-- `w::Int64` and `h::Int64` : width and height of the rendered image
-- `pfm::String` : output pfm filename
-- `png::String` : output LDR filename
-- `type::String` : choosen world type to be rendered
+A tuple `(ct, cp, al, α, w, h, pfm, png, bp, bs, wt, ist, ise, spp)` containing the following
+variables; the corresponding keys are also showed:
 
+- `ct::String = dict["camera-type"]` : choosen projection of view
+- `cp::Point = dict["camera-position"]`  : "X,Y,Z" coordinates of the choosen observation point of view 
+- `al::String = dict["algorithm"]` : choosen algorithm for the rendering image
+- `α::String = dict["alpha"]` : choosen angle of rotation respect to vertical (i.e. z) axis
+- `w::Int64 = dict["width"]` : number of pixels on the horizontal axis to be rendered 
+- `h::Int64 = dict["height"]` : number of pixels on the vertical axis to be rendered 
+- `pfm::String = dict["set-pfm-name"]` : output pfm filename
+- `png::String` = dict["set-png-name"]` : output LDR filename
+- `bp::Bool = dict["bool-print"]` : if `true`, WIP message of `demo` function are printed
+- `bs::Bool = dict["bool-savepfm"]` : if `true`, `demo` function saves the pfm file to disk
+- `wt::String = dict["world-type"]` : type of the world to be rendered
+- `ist::Int64 = dict["init-state"]` : initial state of the PCG random number generator
+- `ise::Int64 = dict["init-seq"]` : initial sequence of the PCG random number generator
+- `spp::Int64  = dict["samples-per-pixel"]` : number of ray to be generated per pixel
 
 See also:  [`demo`](@ref)
 """
 function parse_demo_settings(dict::Dict{String, Any})
-    view::String = dict["camera-type"]
-    algorithm::String = dict["algorithm"]
-    α::Float64 = dict["alpha"]
-    width::Int64 = dict["width"]
-    height::Int64 = dict["height"]
-    pfm::String = dict["set-pfm-name"]
-    png::String = dict["set-png-name"]
 
-    world_type::String = dict["world-type"]
+    haskey(dict, "camera-type") ? 
+        camera_type::String = dict["camera-type"] : 
+        camera_type = "per"
 
-    obs::String = dict["camera-position"]
-    (x,y,z) = Tuple(parse.(Float64, split(obs, ",")))
-    camera_position = Point(x,y,z)
+    haskey(dict, "camera-position") ?
+        begin
+            obs::String = dict["camera-position"]
+            (x,y,z) = Tuple(parse.(Float64, split(obs, ","))) 
+            camera_position = Point(x,y,z)
+        end : 
+        camera_position =  Point(-1.0 , 0. , 0.)
 
-    init_state::Int64 = dict["init-state"]
-    init_seq::Int64 = dict["init-seq"]
+    haskey(dict, "algorithm") ? 
+        algorithm::String = dict["algorithm"] : 
+        algorithm = "flat"
 
-    view_ort = nothing
-    view == "ort" ? view_ort = true : nothing
-    view == "per" ? view_ort = false : nothing
-    !(isnothing(view_ort)) || 
-        throw(ArgumentError("""view must be "ort" or "per" """*
-                            """but instead is equal to view=$view"""))
+    haskey(dict, "alpha") ? 
+        α::Float64 = dict["alpha"] : 
+        α = 0.
+
+    haskey(dict, "width") ? 
+        width::Int64 = dict["width"] : 
+        width = 640
+
+    haskey(dict, "height") ? 
+        height::Int64 = dict["height"] : 
+        height= 480
+
+    haskey(dict, "set-pfm-name") ? 
+        pfm::String = dict["set-pfm-name"] : 
+        pfm = "demo.pfm"
+
+    haskey(dict, "set-png-name") ? 
+        png::String = dict["set-png-name"] : 
+        png = "demo.png"
+
+    haskey(dict, "bool-print") ? 
+        bool_print::Bool = dict["bool-print"] : 
+        bool_print = true
+    
+    haskey(dict, "bool-savepfm") ? 
+        bool_savepfm::Bool = dict["bool-savepfm"] : 
+        bool_savepfm = true
+
+    haskey(dict, "world-type") ? 
+        world_type::String = dict["world-type"] : 
+        world_type = "A"
+
+    haskey(dict, "init-state") ? 
+        init_state::Int64 = dict["init-state"] : 
+        init_state = 54
+
+    haskey(dict, "init-seq") ? 
+        init_seq::Int64 = dict["init-seq"] : 
+        init_seq = 45
+
+    haskey(dict, "samples-per-pixel") ? 
+        samples_per_pixel::Int64 = dict["samples-per-pixel"] : 
+        samples_per_pixel = 45
+
 
     return (
-            view_ort, 
+            camera_type,
+            camera_position, 
             algorithm, 
             α, 
             width, height, 
             pfm, png, 
-            true, true, 
-            world_type, 
-            camera_position, 
-            init_state, init_seq
+            bool_print, bool_savepfm, 
+            world_type,
+            init_state, init_seq,
+            samples_per_pixel
         )
 end
 
