@@ -25,6 +25,5 @@
 - Implemented structs: `Shape`, `Sphere`, `World` for a first image creation
 
 # VERSION 0.1.0
-
 - Added feature: now can convert from a .pfm image to .png and .tiff one 
 - Completed function for reading and writing a .pfm image file format

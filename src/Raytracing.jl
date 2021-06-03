@@ -2,6 +2,10 @@
 #
 # The MIT License (MIT)
 #
+# Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
+#
+# The MIT License (MIT)
+#
 
 
 module Raytracing
