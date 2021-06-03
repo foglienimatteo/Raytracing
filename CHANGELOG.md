@@ -1,15 +1,10 @@
 # HEAD
-<<<<<<< HEAD
-
+- Added antialiasing algorithm
 
 # VERSION 0.2.0
-
 - Modified `demo` function: now two possible world versions can be rendered
 - New struct for generate a better image considering lights and angles (`PathTracer`) and tests
-=======
 - New shape `Torus` with relative struct and functions
-- New struct and funciton for generate a better image considering lights and angles (`PathTracer`) and tests
->>>>>>> pathtracing
 - Implemented scalar and vector products between two `Normal` and between `Normal` and `Vec`
 - New struct `SpecularBRDF`
 - Implemented PCG new struct (`PCG`) and algorithm for random numbers
@@ -19,14 +14,9 @@
 - New struct for implement the material of a Shape (`Material`) and tests
 - New structs for BRDF implementtion (`BRDF`, `DiffuseBRDF`) and tests
 - New structs for pigment implementation (`Pigment`, `UniformPigment`, `CheckeredPigment`, `ImagePigment`) and tests
-<<<<<<< HEAD
 - New struct from Shape: `Plane`
 - Modified operations and constructors between `Transformation` and `Normal`, `Vec` and `Point` for time optimization
 - Added test for `World`, modified test for `Sphere`
-=======
-- Modified operation between `Transformation` and `Normal`, `Vec` and `Point` for time optimization
-- Added test for World, modified test for Sphere
->>>>>>> pathtracing
 - Added feature: now can create an animation
 - New interface from command line
 - Added test for camera orientation ([PR#8](https://github.com/cosmofico97/Raytracing/pull/8#issue-631504956))
