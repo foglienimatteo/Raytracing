@@ -219,7 +219,7 @@ Trace an image by shooting light rays through each of its pixels
 - [`HDRimage`](@ref): must be already initialized
 - [`Camera`](@ref)
 - `samples_per_side`: if it is larger than zero, stratified sampling will be applied to each pixel in the
-image, using the random number generator `pcg`
+image, using the random number generator `pcg`, if not the value 4 will be used in `fire_all_rays!`
 - [`PCG`](@ref): random number generator
 """
 struct ImageTracer

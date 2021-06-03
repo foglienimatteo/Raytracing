@@ -117,7 +117,11 @@ function fire_all_rays!(ImTr::ImageTracer,
 
     for row in ImTr.img.height-1:-1:0, col in 0:ImTr.img.width-1
         cum_color = RGB{Float32}(0., 0., 0.)
-        smp_4_side = 9 # ImTr.samples_per_side    # need a command from line, remember must be a squared number
+        if ImTr.samples_per_side < 0.
+            smp_4_side = 4 # ImTr.samples_per_side    # need a command from line, remember must be a squared number
+        else
+            smp_4_side = ImTr.samples_per_side
+        end
         t = @elapsed if smp_4_side > 0
                         for inter_pixel_row in 0:smp_4_side-1, inter_pixel_col in 0:smp_4_side-1
                             u_pixel = (inter_pixel_col + random(ImTr.pcg)) / smp_4_side
