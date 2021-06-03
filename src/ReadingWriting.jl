@@ -5,20 +5,13 @@
 # Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
 #
 
-##########################################################################################92
 
-"""
-    valid_coordinates(hdr::HDRimage, x::Int, y::Int) -> Bool
-
-<<<<<<< HEAD
 ##########################################################################################92
 
 """
     valid_coordinates(hdr::HDRimage, x::Int, y::Int) :: Bool
-
 Return `true` if (`x`, `y`) are valid coordinates for the 
 2D matrix of the `HDRimage`, else return `false`.
-
 See also: [`HDRimage`](@ref)
 """
 function valid_coordinates(hdr::HDRimage, x::Int, y::Int)
@@ -27,10 +20,8 @@ end
 
 """
     pixel_offset(hdr::HDRimage, x::Int, y::Int) :: Int64
-
 Return the index in the 1D array of the specified pixel (`x`, `y`) 
 for the given `HDRimage`.
-
 See also: [`valid_coordinates`](@ref), [`HDRimage`](@ref)
 """
 function pixel_offset(hdr::HDRimage, x::Int, y::Int)
@@ -40,7 +31,6 @@ end
 
 """
     get_pixel(hdr::HDRimage, x::Int, y::Int) :: RBG{Float32}
-
 Return the `RBG{Float32}` color for the (`x`, `y`) pixel in the 
 given [`HDRimage`](@ref). The indexes for a `HDRimage` pixel matrix 
 with `w` width and `h` height follow this sketch:
@@ -50,7 +40,6 @@ with `w` width and `h` height follow this sketch:
 |   ...      ...      ...    ...     ...    |
 | (h-1,0)  (h-1,1)  (h-1,2)  ...  (h-1,w-1) |
 ```
-
 See also: [`pixel_offset`](@ref), [`valid_coordinates`](@ref), 
 [`HDRimage`](@ref)
 """
@@ -71,7 +60,6 @@ end
 """
     set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{Float32})
     set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{T}) where {T}
-
 Set the new RGB color `c` for the (`x`, `y`) pixel in 
 the given [`HDRimage`](@ref). The indexes for a `HDRimage` pixel 
 matrix with `w` width and `h` height follow this sketch:
@@ -81,68 +69,18 @@ matrix with `w` width and `h` height follow this sketch:
 |   ...      ...      ...    ...     ...    |
 | (h-1,0)  (h-1,1)  (h-1,2)  ...  (h-1,w-1) |
 ```
-
 See also: [`pixel_offset`](@ref), [`valid_coordinates`](@ref), 
 [`HDRimage`](@ref)
 """
 set_pixel
 
-=======
-    Return True if ``(x, y)`` are coordinates within the 2D matrix
-"""
-valid_coordinates(hdr::HDRimage, x::Int, y::Int) = x>=0 && y>=0 && x<hdr.width && y<hdr.height
-
-##########################################################################################92
-
-"""
-    pixel_offset(hdr::HDRimage, x::Int, y::Int) -> Int64
-
-    Return the position in the 1D array of the specified pixel
-"""
-pixel_offset(hdr::HDRimage, x::Int, y::Int) = (@assert valid_coordinates(hdr, x, y); y*hdr.width + (x+1) )
-
-##########################################################################################92
-
-"""
-    get_pixel(hdr::HDRimage, x::Int, y::Int) -> RBG{Float32}
-
-    Return the `Color` value for a pixel in the image
-    The pixel at the top-left corner has coordinates (0, 0).
-"""
-get_pixel(hdr::HDRimage, x::Int, y::Int) = hdr.rgb_m[pixel_offset(hdr, x, y)]
-
-##########################################################################################92
-
-"""
-    set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{T})
-
-    Set the new color for a pixel in the image
-    The pixel at the top-left corner has coordinates (0, 0).
-"""
-set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{T}) where {T} = (hdr.rgb_m[pixel_offset(hdr, x,y)] = c; nothing)
-
-##########################################################################################92
-
-struct InvalidPfmFileFormat <: Exception
-    var::String
-end #InvalidPfmFileFormat
-
->>>>>>> CLI
 ##########################################################################################92
 
 """
     write(io::IO, img::HDRimage)
-
-<<<<<<< HEAD
 Write the given [`HDRimage`](@ref) image using the given `IO` stream.
 The `endianness` used for writing the file is Little Endian (`-1.0`).
-
 See also: [`get_pixel`](@ref), [`HDRimage`](@ref)
-=======
-    Write the image in a PFM file
-    The `stream` parameter must be a I/O stream. The parameter `endianness` specifies the
-    byte endianness to be used in the file.
->>>>>>> CLI
 """
 function write(io::IO, img::HDRimage)
     endianness=-1.0
@@ -172,14 +110,12 @@ end
 
 ##########################################################################################92
 
-<<<<<<< HEAD
 struct InvalidPfmFileFormat <: Exception
     var::String
 end
 
 """
     parse_img_size(line::String) :: (Int64, Int64)
-
 Return the size (width and height) parsed from a given `String`, throwing 
 `InvalidPfmFileFormat` exception if encounters invalid values.
 It works inside the [`read_line`](@ref)(::IO) function.
@@ -189,27 +125,12 @@ function parse_img_size(line::String)
     length(elements) == 2 || throw(InvalidPfmFileFormat(
                                 "invalid image size specification: "*
                                 "$(length(elements)) instead of 2"))
-=======
-##########################################################################################92
-
-"""
-    parse_img_size(line::String) -> (Int64, Int64)
-
-    Can interpret the size of an image from a PFM file. Needs a ::String,
-    obtained from read_line(::IO).
-"""
-function parse_img_size(line::String)
-    elements = split(line, " ")
-    length(elements) == 2 || throw(InvalidPfmFileFormat("invalid image size specification
-                                                        : $(length(elements)) instead of 2"))
->>>>>>> CLI
 
     try
         width, height = convert.(Int, parse.(Float64, elements))
         (width > 0 && height > 0) || throw(ErrorException)
         return width, height
     catch e
-<<<<<<< HEAD
         isa(e, InexactError) || throw(InvalidPfmFileFormat(
                                     "cannot convert width/height "*
                                     "$(elements) to Tuple{Int, Int}")
@@ -217,14 +138,6 @@ function parse_img_size(line::String)
         isa(e, ErrorException) || throw(InvalidPfmFileFormat(
                                     "width/height cannot be negative,"*
                                     "but in $(elements) at least one of them is <0.")
-=======
-        isa(e, InexactError) || throw(InvalidPfmFileFormat("cannot convert width/heigth
-                                                            $(elements) to Tuple{Int, Int}")
-        )
-        isa(e, ErrorException) || throw(InvalidPfmFileFormat("width/heigth cannot be negative,
-                                                              but in $(elements) at least one
-                                                              of them is <0.")
->>>>>>> CLI
         )
     end
 
@@ -232,33 +145,16 @@ end
 
 """
     parse_endianness(ess::String) :: Float64
-
-<<<<<<< HEAD
 Return the endianness  parsed from a given `String`, throwing 
 `InvalidPfmFileFormat` exception if encounters an invalid value.
 It works inside the [`read_line`](@ref)(::IO) function.
-=======
-##########################################################################################92
-
-"""
-    parse_endianness(ess::String) -> Float64
-
-    Can understand the endianness of a file; needs a ::String, obtained from read_line(::IO).
-    Returns error if the number is different from ±1.0.
->>>>>>> CLI
 """
 function parse_endianness(ess::String)
     try
         val = parse(Float64, ess)
-<<<<<<< HEAD
         val in [1.0, -1.0] || throw(InvalidPfmFileFormat(
                                 "invalid endianness in PFM file:"*
                                 " $(val) instead of +1.0 or -1.0.\n")
-=======
-        (val == 1.0 || val == -1.0) || throw(InvalidPfmFileFormat("invalid endianness in PFM
-                                                                   file: $(parse(Float64, ess))
-                                                                   instead of +1.0 or -1.0.\n")
->>>>>>> CLI
         )
         return val
     catch e
@@ -273,58 +169,27 @@ end
 Return a `Float32`, readed from the given IO stream `io` with the 
 (required) endianness `ess`; `ess` must be `+1.0` (Big Endian) or 
 `-1.0` (Little Endian).
-
-<<<<<<< HEAD
 Controls also if there are enough bits in order to form a `Float32`, 
 otherwise throw `InvalidPfmFileFormat`.
-=======
-##########################################################################################92
-
-"""
-    read_float(io::IO, ess::Float64) -> Float32
-
-Can interpret numbers from a string; needs as input a ::IO and the endianness (as ±1.0).
-Reads numbers as ::Float32; controls if there are enough bits in order to form a Float32,
-otherwise returns an error.
->>>>>>> CLI
 """
 function read_float(io::IO, ess::Float64)
     # controllo che in ingresso abbia una stringa che sia cnovertibile in Float32
     ess == 1.0 || ess == -1.0 || throw(InvalidPfmFileFormat(
                                     "endianness $ess not acceptable."))
     try
-<<<<<<< HEAD
-        value = read(io, Float32)   # con Float32 leggo già i 4 byte (= 32 bits) del colore
-        ess == 1.0 ? value = ntoh(value) : value = ltoh(value) # convert machine's endianness
+        value = read(io, Float32) 
+        ess == 1.0 ? value=ntoh(value) : value=ltoh(value) # convert machine's endianness
         return value
     catch e
         throw(InvalidPfmFileFormat("color is not Float32, it's a $(typeof(io))"))
-=======
-        value = read(io, Float32)   # con Float32 leggo già i 4 byte del colore
-        ess == 1.0 ? value = ntoh(value) : value = ltoh(value) # convert machine's endianness
-        return value
-    catch e
-        throw(InvalidPfmFileFormat("color is not Float32, it's a $(typeof(io))"))  # ess → io
->>>>>>> CLI
     end
 end 
 
 """
     read_line(io::IO) :: String
-
-<<<<<<< HEAD
 Reads a line from the file whose the given IO object `io` refers to. 
 Do understand when the file is ended and when a new line begins.
 Return the readed line as a `String`.
-=======
-##########################################################################################92
-
-"""
-    read_line(io::IO) -> String
-
-    Reads aline from a file, given as a ::IO. Can understand when the file is ended and when
-    a new line begins.
->>>>>>> CLI
 """
 function read_line(io::IO)
     result = b""
@@ -336,50 +201,22 @@ function read_line(io::IO)
         result = vcat(result, cur_byte)  
     end
     return String(result)
-<<<<<<< HEAD
 end
 
 """
     read(io::IO, ::Type{HDRimage}) :: HDRimage
-
 Read a PFM image from a stream object `io`, and return a `HDRimage` 
 object containing the image. If an error occurs, raise a
 `InvalidPfmFileFormat` exception.
-
 See also: [`read_line`](@ref)(`::IO`), [`parse_image_size`](@ref)(`::String`),
 [`parse_endianness`](@ref)(`::String`), [`read_float`](@ref)(`::IO, `::Float64`),
 [`HDRimage`](@ref)
-=======
-end # read_line
-
-##########################################################################################92
-
-"""
-    read(io::IO, ::Type{HDRimage}) -> HDRimage
-
-Read a PFM image from a stream
-Return a ``HdrImage`` object containing the image. If an error occurs, raise a
-``InvalidPfmFileFormat`` exception.
-Other functions used:
-- read_line(::IO)
-- parse_image_size(::String)
-- parse_endianness(::String)
-- read_float(::IO, ::Float64)
->>>>>>> CLI
 """
 function read(io::IO, ::Type{HDRimage})
     # magic number
     magic = read_line(io)
-<<<<<<< HEAD
-    # reading magic number
     magic == "PF" || throw(InvalidPfmFileFormat("invalid magic number in PFM file:"* 
-                                                 "$(magic) instead of 'PF'.\n")
-=======
-    # lettura numero magico
-    magic == "PF" || throw(InvalidPfmFileFormat("invalid magic number in PFM file: 
-                                                 $(magic) instead of 'PF'.\n")
->>>>>>> CLI
-    )
+                                                 "$(magic) instead of 'PF'.\n"))
     
     # image dimension
     img_size = read_line(io)
@@ -399,26 +236,19 @@ function read(io::IO, ::Type{HDRimage})
     result = HDRimage(width, height)
     for y in height-1:-1:0, x in 0:width-1
 
-        (r, g, b) = [read_float(io, endianness) for i in 0:2]
-        set_pixel(result, x, y, RGB(r, g, b) )
+        (r,g,b) = [read_float(io, endianness) for i in 0:2]
+        set_pixel(result, x, y, RGB(r,g,b) )
     end
 
     return result
-<<<<<<< HEAD
 end 
-=======
-end # read_pfm_image(::IO)
->>>>>>> CLI
 
 ##########################################################################################92
 
 """
-<<<<<<< HEAD
     parse_command_line((args::Vector{String}) :: (String, String, Float64, Float64)
-
 Interpret the command line when the main is executed, 
 and manage eventual argument errors.
-
 # Arguments
 An array of strings, with length 2, 3 or 4, cointaining:
 - first string (required): input file name, must be a PFM format
@@ -427,24 +257,11 @@ An array of strings, with length 2, 3 or 4, cointaining:
 used in [`normalize_image!`](@ref))
 - [`γ`] : gamma factor for screen correction (default 1.0, used in 
   [`γ_correction!`](@ref))
-
 # Returns
 A tuple `(infile, outfile, a, γ)`, with `a` and `γ` with type `Float64`
-
 See also : [`normalize_image!`](@ref), [`γ_correction!`](@ref)
 """
 function parse_command_line(args::Vector{String})
-=======
-    parse_command_line(ARGS) -> (String, String, Float64, Float64)
-
-    Can interpret the command line when the main is executed.
-    It's necessary to give the input .pfm file and the name of the .png file you want.
-    You can give also:
-    - the 'a' factor (default 0.18, used in normalize_image!(::HDRimage, ::Number, :Union{Number, Nothing}, Number)
-    - the γ factor (default 1.0, used in γ_correction!(::HDR, ::Float64, ::Float64)
-"""
-function parse_command_line(args)
->>>>>>> CLI
     (isempty(args) || length(args)==1 || length(args)>4) && throw(Exception)	  
     infile = nothing; outfile = nothing; a=0.18; γ=1.0
     try
@@ -478,7 +295,7 @@ function parse_command_line(args)
     end
 
     return infile, outfile, a, γ
-end # parse_command_line(ARGS)
+end
 
 
 ##########################################################################################92
@@ -486,19 +303,15 @@ end # parse_command_line(ARGS)
 """
     parse_tonemapping_settings(dict::Dict{String, Any}) 
         :: (String, String, Float64, Float64)
-
 Parse a `Dict{String, Any}` for the [`tone_mapping`](@ref) function.
 The keys for the input `Dict` are, respectively: "pfm_infile",
 "outfile", "alpha", "gamma", 
-
 ## Returns
-
 A tuple `(pfm, png, a, γ)` containing:
 - `pfm::String` : input pfm filename
 - `png::String` : output LDR filename
 - `a::Float64` : scale factor
 - `γ::Float64` : gamma factor
-
 See also:  [`tone_mapping`](@ref)
 """
 function parse_tonemapping_settings(dict::Dict{String, Any})
@@ -512,13 +325,10 @@ end
 """
     parse_demo_settings(dict::Dict{String, Any}) 
         :: (Bool, String, Float64, Int64, Int64, String, String)
-
 Parse a `Dict{String, Any}` for the [`demo`](@ref) function.
 The keys for the input `Dict` are, respectively: "camera-type", "algorithm",
 "alpha", "width", "height", "set-pfm-name", "set-png-name"
-
 ## Returns
-
 A tuple `(view_ort, alg, α, w, h, pfm, png)` containing:
 - `view_ort::Bool` : choosen point of view 
   (`true`->Orthogonal, `false`->Perspective)
@@ -529,8 +339,6 @@ A tuple `(view_ort, alg, α, w, h, pfm, png)` containing:
 - `pfm::String` : output pfm filename
 - `png::String` : output LDR filename
 - `type::String` : choosen world type to be rendered
-
-
 See also:  [`demo`](@ref)
 """
 function parse_demo_settings(dict::Dict{String, Any})
@@ -575,20 +383,16 @@ end
 """
     parse_demoanimation_settings(dict::Dict{String, Any}) 
         :: (Bool, String, Int64, Int64, String)
-
 Parse a `Dict{String, Any}` for the [`demo_animation`](@ref) function.
 The keys for the input `Dict` are, respectively: "camera-type", "algorithm",
 "width", "height", "set-anim-name".
-
 ## Returns
-
 A tuple `(view_ort, alg, w, h, anim)` containing:
 - `view_ort::Bool` : choosen point of view 
   (`true`->Orthogonal, `false`->Perspective)
 - `alg::String` : choosen algorithm for the rendering image
 - `w::Int64` and `h::Int64` : width and height of the rendered image
 - `anim::String` : output animation name
-
 See also:  [`demo_animation`](@ref), [`demo`](@ref)
 """
 function parse_demoanimation_settings(dict::Dict{String, Any})

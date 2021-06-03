@@ -1,4 +1,4 @@
-#!/usr/bin/env julia
+#!/usr/bin/env julia.exe
 
 # The MIT License (MIT)
 #
