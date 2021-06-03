@@ -83,7 +83,9 @@ fire_ray
 ##########################################################################################92
 
 """
-    fire_all_rays!(ImTr::ImageTracer, func::Function)
+    fire_all_rays!(ImTr::ImageTracer, func::Function, callback::Union{Nothing, Function} = nothing,
+    callback_time_s::Float64 = 2.,
+    callback_kwargs::String)
  
 Shoot several light rays crossing each of the pixels in the `ImTr.img` image.
 
@@ -106,7 +108,7 @@ function fire_all_rays!(ImTr::ImageTracer,
                         func::Function,
                         callback::Union{Nothing, Function} = nothing,
                         callback_time_s::Float64 = 2.,
-                        callback_kwargs::String)
+                        callback_kwargs::Union{Nothing, String} = nothing)
     # last_call_time = time()  # use if @elapsed doesn't work propely for our pourpose
 
     if callback ≠ nothing
@@ -114,8 +116,8 @@ function fire_all_rays!(ImTr::ImageTracer,
     end # (callback ≠ nothing) && callback(0, 0, callback_kwargs)  -- possible abbreviation? bed's calling
 
     for row in ImTr.img.height-1:-1:0, col in 0:ImTr.img.width-1
-        cum_color::RGB{Float32}(0., 0., 0.)
-        smp_4_side = ImTr.samples_per_side
+        cum_color = RGB{Float32}(0., 0., 0.)
+        smp_4_side = 9 # ImTr.samples_per_side    # need a command from line, remember must be a squared number
         t = @elapsed if smp_4_side > 0
                         for inter_pixel_row in 0:smp_4_side-1, inter_pixel_col in 0:smp_4_side-1
                             u_pixel = (inter_pixel_col + random(ImTr.pcg)) / smp_4_side
