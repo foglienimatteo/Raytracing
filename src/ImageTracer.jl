@@ -82,6 +82,11 @@ fire_ray
 
 ##########################################################################################92
 
+
+function print_progress(row::Int64, col::Int64)
+        println("Rendering row $((row + 1)/col)")
+end
+
 """
     fire_all_rays!(
             ImTr::ImageTracer, 
@@ -122,7 +127,7 @@ function fire_all_rays!(
             )
     last_call_time = time()  # use if @elapsed doesn't work propely for our pourpose
 
-    isnothing(callback) && callback(0, 0, callback_kwargs)
+    !isnothing(callback) || (callback = print_progress)
     
     for row in ImTr.img.height-1:-1:0, col in 0:ImTr.img.width-1
         cum_color = RGB{Float32}(0., 0., 0.)
