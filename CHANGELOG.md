@@ -1,10 +1,5 @@
 # HEAD
-<<<<<<< HEAD
-- Divided code in runtests.jl in minor files
-- New struct from Shape: `Plane`
-- Modified operations and constructors between `Transformation` and `Normal`, `Vec` and `Point` for time optimization
-- Added test for `World`, modified test for `Sphere`
-=======
+
 
 # VERSION 0.2.0
 
@@ -19,9 +14,9 @@
 - New struct for implement the material of a Shape (`Material`) and tests
 - New structs for BRDF implementtion (`BRDF`, `DiffuseBRDF`) and tests
 - New structs for pigment implementation (`Pigment`, `UniformPigment`, `CheckeredPigment`, `ImagePigment`) and tests
-- Modified operation between `Transformation` and `Normal`, `Vec` and `Point` for time optimization
-- Added test for World, modified test for Sphere
->>>>>>> 1f1ea5e247e5b114b31f086772a2e2bb3790b5eb
+- New struct from Shape: `Plane`
+- Modified operations and constructors between `Transformation` and `Normal`, `Vec` and `Point` for time optimization
+- Added test for `World`, modified test for `Sphere`
 - Added feature: now can create an animation
 - New interface from command line
 - Added test for camera orientation ([PR#8](https://github.com/cosmofico97/Raytracing/pull/8#issue-631504956))
