@@ -361,25 +361,48 @@ A `dict::Dict{String, Any}`
 
 ## Returns
 
-A tuple `(ct, cp, al, α, w, h, pfm, png, bp, bs, wt, ist, ise, spp)` containing the following
-variables; the corresponding keys are also showed:
+A tuple `(ct, cp, al, α, w, h, pfm, png, bp, bs, wt, ist, ise, spp)`
+containing the following variables; the corresponding keys are also showed:
 
-- `ct::String = dict["camera-type"]` : choosen projection of view
-- `cp::Point = dict["camera-position"]`  : "X,Y,Z" coordinates of the choosen observation point of view 
-- `al::String = dict["algorithm"]` : choosen algorithm for the rendering image
-- `α::String = dict["alpha"]` : choosen angle of rotation respect to vertical (i.e. z) axis
-- `w::Int64 = dict["width"]` : number of pixels on the horizontal axis to be rendered 
+- `ct::String = dict["camera-type"]` : set the perspective projection view:
+		- `ct=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
+		- `ct=="ort"`  -> set [`OrthogonalCamera`](@ref)
+
+- `cp::Point = dict["camera-position"]`  : "X,Y,Z" coordinates of the 
+  choosen observation point of view 
+
+- `al::String = dict["algorithm"]` : algorithm to be used in the rendered:
+		- `al=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
+		- `al=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
+		- `al=="pathtracing"` -> [`PathTracer`](@ref) algorithm 
+
+- `α::String = dict["alpha"]` : choosen angle of rotation respect to vertical 
+  (i.e. z) axis
+
+- `w::Int64 = dict["width"]` : number of pixels on the horizontal axis to be rendered
+
 - `h::Int64 = dict["height"]` : number of pixels on the vertical axis to be rendered 
-- `pfm::String = dict["set-pfm-name"]` : output pfm filename
-- `png::String` = dict["set-png-name"]` : output LDR filename
-- `bp::Bool = dict["bool-print"]` : if `true`, WIP message of `demo` function are printed
-- `bs::Bool = dict["bool-savepfm"]` : if `true`, `demo` function saves the pfm file to disk
-- `wt::String = dict["world-type"]` : type of the world to be rendered
-- `ist::Int64 = dict["init-state"]` : initial state of the PCG random number generator
-- `ise::Int64 = dict["init-seq"]` : initial sequence of the PCG random number generator
-- `spp::Int64  = dict["samples-per-pixel"]` : number of ray to be generated per pixel
 
-See also:  [`demo`](@ref), [`Point`](@ref)
+- `pfm::String = dict["set-pfm-name"]` : output pfm filename
+
+- `png::String` = dict["set-png-name"]` : output LDR filename
+
+- `bp::Bool = dict["bool-print"]` : if `true`, WIP message of `demo` 
+  function are printed (otherwise no)
+
+- `bs::Bool = dict["bool-savepfm"]` : if `true`, `demo` function saves the 
+  pfm file to disk
+
+- `wt::String = dict["world-type"]` : type of the world to be rendered
+
+- `ist::Int64 = dict["init-state"]` : initial state of the PCG generator
+
+- `ise::Int64 = dict["init-seq"]` : initial sequence of the PCG generator
+
+- `spp::Int64  = dict["samples-per-pixel"]` : number of ray to be 
+  generated for each pixel
+
+See also:  [`demo`](@ref), [`Point`](@ref), [`PCG`](@ref)
 """
 function parse_demo_settings(dict::Dict{String, Any})
 
@@ -474,10 +497,19 @@ A `dict::Dict{String, Any}`
 A tuple `(ct, al, w, h, anim)` containing the following
 variables; the corresponding keys are also showed:
 
-- `ct::String = dict["camera-type"]` : choosen projection of view
-- `al::String = dict["algorithm"]` : choosen algorithm for the rendering image
+- `ct::String = dict["camera-type"]` : set the perspective projection view:
+		- `ct=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
+		- `ct=="ort"`  -> set [`OrthogonalCamera`](@ref)
+
+- `al::String = dict["algorithm"]` : algorithm to be used in the rendered:
+		- `al=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
+		- `al=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
+		- `al=="pathtracing"` -> [`PathTracer`](@ref) algorithm 
+
 - `w::Int64 = dict["width"]` : number of pixels on the horizontal axis to be rendered 
+
 - `h::Int64 = dict["height"]` : width and height of the rendered image
+
 - `anim::String = dict["set-anim-name"]` : output animation name
 
 See also:  [`demo_animation`](@ref), [`demo`](@ref)
