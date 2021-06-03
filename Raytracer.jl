@@ -67,7 +67,7 @@ function ArgParse_command_line(arguments)
 		"demo"
 			action = :command
 			help = "create a standard image that checks the correct behaviour of the program"
-		"demo-animation"
+		"demo_animation"
 			action = :command
 			help = "create an animation of a 360 degree rotation of the demo image"
 		"tonemapping"
@@ -113,53 +113,53 @@ function ArgParse_command_line(arguments)
 
 	add_arg_group!(s["demo"], "demo options");
 	@add_arg_table! s["demo"] begin
-		"--camera-type", "-t"
+		"--camera_type"
 			help = "option for the camera type:\n"*
 	    				"ort -> Orthogonal camera, per -> Perspective camera"
           	arg_type = String
 			default = "per"
 			range_tester = input -> (input ∈ ["ort", "per"])
-    		"--algorithm", "-r"
+    		"--algorithm"
 			help = "option for the renderer algorithm"
           	arg_type = String
 			default = "onoff"
 			range_tester = input -> (input ∈ RENDERERS)
-		"--world-type", "-l"
+		"--world_type"
 			help = "flag for the world to be rendered"
           	arg_type = String
 			default = "A"
 			range_tester = input -> (input ∈ ["A", "B"])
-    		"--init-state"
+    		"--init_state"
     			arg_type = Int64
     			help = "Initial seed for the random number generator (positive number)."
     			default = 45
 			range_tester = input -> (input>0)
-    		"--init-seq"
+    		"--init_seq"
     			arg_type = Int64
     			help = "Identifier of the sequence produced by the "*
 			    "random number generator (positive number)."
     			default = 54
 			range_tester = input -> (input>0)
-		"--camera-position", "-p"
+		"--camera_position"
           	help = "camera position in the scene as 'X,Y,Z'"
           	arg_type = String
           	default = "-1,0,0"
           	range_tester = input -> (length(split(input, ",")) == 3)
-		"--alpha", "-a"
+		"--alpha"
 			help = "angle of view, in degrees"
 			arg_type = Float64
 			default = 0.
-		"--width", "-o"
+		"--width"
 			help = "pixel number on the width of the resulting demo image."
 			arg_type = Int64
 			default = 640
 			range_tester = input -> (iseven(input) && input>0)
-		"--height", "-v"
+		"--height"
 			help = "pixel number on the height of the resulting demo image."
 			arg_type = Int64
 			default = 480
 			range_tester =  input -> (iseven(input) && input>0)
-     	"--samples-per-pixel"
+     	"--samples_per_pixel"
 			help = "Number of samples per pixel (must be a perfect square, e.g., 16)."
      		arg_type = Int64
      		default = 0
@@ -167,13 +167,13 @@ function ArgParse_command_line(arguments)
 	end
 	add_arg_group!(s["demo"], "demo optional filenames");
 	@add_arg_table! s["demo"] begin
-		"--set-pfm-name"
+		"--set_pfm_name"
 			help = "name of the pfm file to be saved"
 			nargs = '?'
 			arg_type = String
 			default = "demo.pfm"
 			constant = "demo.pfm"
-		"--set-png-name"
+		"--set_png_name"
 			help = "name of the png file to be saved"
 			nargs = '?'
 			arg_type = String
@@ -181,35 +181,35 @@ function ArgParse_command_line(arguments)
 			constant = "demo.png"
 	end
 
-	s["demo-animation"].description = "creates an animation of a 360 degree rotation around"*
+	s["demo_animation"].description = "creates an animation of a 360 degree rotation around"*
 								"vertical axis of the demo image."
-	add_arg_group!(s["demo-animation"], "demo-animation settings");
-	@add_arg_table! s["demo-animation"] begin
-		"--camera-type", "-t"
+	add_arg_group!(s["demo_animation"], "demo-animation settings");
+	@add_arg_table! s["demo_animation"] begin
+		"--camera_type"
 			help = "flag for the camera type:\n"*
 	    				"ort -> Orthogonal camera, per -> Perspective camera"
           	arg_type = String
 			default = "per"
 			range_tester = input -> (input ∈ ["ort", "per"])
-    		"--algorithm", "-r"
+    		"--algorithm"
 			help = "flag for the renderer algorithm"
           	arg_type = String
 			default = "onoff"
 			range_tester = input -> (input ∈ RENDERERS)
-		"--width", "-o"
+		"--width"
 			help = "pixel number on the width of the resulting demo image animation."
 			arg_type = Int64
 			default = 200
 			range_tester = iseven
-		"--height", "-v"
+		"--height"
 			help = "pixel number on the height of the resulting demo image animation."
 			arg_type = Int64
 			default = 150
 			range_tester = iseven
 	end
-	add_arg_group!(s["demo-animation"], "demo-animation optional filename");
-	@add_arg_table! s["demo-animation"] begin
-		"--set-anim-name", "-A"
+	add_arg_group!(s["demo_animation"], "demo-animation optional filename");
+	@add_arg_table! s["demo_animation"] begin
+		"--set_anim_name"
 			help = "name of the animation file to be saved"
 			nargs = '?'
 			arg_type = String

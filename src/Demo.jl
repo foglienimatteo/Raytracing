@@ -141,6 +141,10 @@ demo(ort::Bool, α::Float64) = demo(ort, "onoff", α, 640, 480, "demo.pfm", "dem
 demo(w::Int64, h::Int64) = demo(false, "onoff", 0., w, h, "demo.pfm", "demo.png")
 =#
 
+function demo(x::(Pair{T1,T2} where {T1,T2})...)
+	demo( parse_demo_settings(  Dict( pair for pair in [x...]) )... )
+end
+
 function demo(
           camera_type::String = "per",
 		camera_position::Point = Point(-1.,0.,0.), 
@@ -337,6 +341,10 @@ demo_animation(al::String, w::Int64, h::Int64) =
 demo_animation(ort::Bool, al::String, w::Float64, h::Float64) = 
 					demo_animation(ort, al, w, h, "demo-animation.mp4")
 =#
+
+function demo_animation(x::(Pair{T1,T2} where {T1,T2})...)
+	demo_animation( parse_demoanimation_settings(  Dict( pair for pair in [x...]) )... )
+end
 
 function demo_animation( 
 			camera_type::String = "per",
