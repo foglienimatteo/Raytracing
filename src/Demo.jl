@@ -362,9 +362,9 @@ function demo_animation(
 			"algorithm"=>algorithm, 
 			"width"=>width,
 			"height"=>height,
-			"bool-print"=>false,
-			"bool-savepfm"=>false,
-			"set-pfm-name"=>".wip_animation/demo.pfm"
+			"bool_print"=>false,
+			"bool_savepfm"=>false,
+			"set_pfm_name"=>".wip_animation/demo.pfm"
 			)
 
 	iter = ProgressBar(0:359)
@@ -372,9 +372,9 @@ function demo_animation(
 		angleNNN = @sprintf "%03d" angle
 		dict_spec = Dict(
 					"alpha"=>1.0*angle,
-					"set-png-name"=>".wip_animation/image$(angleNNN).png"
+					"set_png_name"=>".wip_animation/image$(angleNNN).png"
 					)
-		demo(parse_demo_settings(merge(dict_gen, dict_spec)))
+		demo(parse_demo_settings(merge(dict_gen, dict_spec))...)
 		set_description(iter, string(@sprintf("Frame generated: ")))
 	end
 

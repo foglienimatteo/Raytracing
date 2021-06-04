@@ -404,7 +404,7 @@ containing the following variables; the corresponding keys are also showed:
 
 See also:  [`demo`](@ref), [`Point`](@ref), [`PCG`](@ref)
 """
-function parse_demo_settings(dict::Dict{String, Any})
+function parse_demo_settings(dict::Dict{String, T}) where {T}
 
     keys = [
         "camera_type", "camera_position",
@@ -461,7 +461,7 @@ function parse_demo_settings(dict::Dict{String, Any})
         png = "demo.png"
 
     haskey(dict, "bool_print") ? 
-        bool_print::Bool = dict["bool-print"] : 
+        bool_print::Bool = dict["bool_print"] : 
         bool_print = true
     
     haskey(dict, "bool_savepfm") ? 
@@ -532,7 +532,7 @@ variables; the corresponding keys are also showed:
 
 See also:  [`demo_animation`](@ref), [`demo`](@ref)
 """
-function parse_demoanimation_settings(dict::Dict{String, Any})
+function parse_demoanimation_settings(dict::Dict{String, T}) where {T}
 
     keys = [
         "camera_type", "algorithm",
