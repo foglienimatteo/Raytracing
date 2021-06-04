@@ -140,20 +140,20 @@ demo(ort::Bool, α::Float64) = demo(ort, "onoff", α, 640, 480, "demo.pfm", "dem
 demo(w::Int64, h::Int64) = demo(false, "onoff", 0., w, h, "demo.pfm", "demo.png")
 
 function demo(
-          orthogonal::Bool,
+        orthogonal::Bool,
 		algorithm::String,
-          α::Float64, 
-          width::Int64, 
-          height::Int64, 
-          pfm_output::String, 
-          png_output::String,
+        α::Float64, 
+        width::Int64, 
+        height::Int64, 
+        pfm_output::String, 
+        png_output::String,
 		bool_print::Bool=true,
 		bool_savepfm::Bool=true,
 		type::String = "A",
 		obs::Point = Point(-1., 0., 0.), 
 		init_state::Int64 = 45,
 		init_seq::Int64 = 54,
-          )
+    )
 
 	world = select_world(type)
 
