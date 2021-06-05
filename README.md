@@ -59,7 +59,16 @@ Animation with FlatRenderer            | Image with PathTracing
 It may takes few minutes to renderer the animation; you might also gives smaller (integer and even) values to `--width` and `--height` in order to obtain the same animation in a smaller amount of time (the price to pay is a worse definition of the animation itself).
 
 ## Usage
+You can use Raytracer both form bash line and Julia repl. From bash you just need to type
+```bash
+./Raytracer.jl
+```
+followed by `demo`, `demo_animation` or `tonemapping`. If nothing is given from command line, default variables are used; if you insted want to specify your preferences just type the options with the following scheme (as seen previousliy in the tutorial): `--option=op`, following the help table.
 
+If you prefer using Julia repl, after having included Raytracer.jl, you can visualize the options for each function thanks to the help option (by typing `?`, than write the function name) and set the parameters, e.g.:
+```repl
+demo("camera_type"=>"ort", "world_type"=>"B")
+```
 
 ## Licence
 All the files in this repository are under a MIT license. See the file [LICENSE.md](./LICENSE.md)

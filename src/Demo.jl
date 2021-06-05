@@ -211,8 +211,8 @@ function demo(
 	end
 
 	function print_progress(row::Int64, col::Int64)
-     	print("Rendered row $(image.height - row)/$(image.height) \t= ")
-		@printf "%.2f" 100*((image.height - row)/image.height)
+     	print("Rendered $(image.width * (image.height - row) + col)/$(image.height*image.width) \t= ")
+		@printf "%.2f" 100*(((image.width * (image.height - row) + col))/(image.height*image.width)) # ((image.height - row)/image.height)
 		print("%\r")
 	end
 
