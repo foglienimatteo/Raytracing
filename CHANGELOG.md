@@ -1,4 +1,5 @@
 # HEAD
+- Added antialiasing algorithm, as default uses 9x9 rays in a pixel, missing command line option
 
 # VERSION 0.2.0
 
