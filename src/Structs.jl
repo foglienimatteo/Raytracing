@@ -8,9 +8,15 @@
 
 ##########################################################################################92
 
-BLACK = RGB{Float32}(0.0, 0.0, 0.0)
-WHITE = RGB{Float32}(1.0, 1.0, 1.0)
+const BLACK = RGB{Float32}(0.0, 0.0, 0.0)
+const WHITE = RGB{Float32}(1.0, 1.0, 1.0)
 
+
+"""
+    to_RGB(r::Int64, g::Int64, b::Int64) :: RGB{Float32}
+
+Return the RGB color with values inside the `[0,1]` interval.
+"""
 function to_RGB(r::Int64, g::Int64, b::Int64)
     return RGB{Float32}(r/255., g/255., b/255.)
 end
@@ -18,16 +24,23 @@ end
 ##########################################################################################92
 
 """ 
-Define a image in format High-Dynamic-Range 2D image
+    HDRimage(
+        width::Int64
+        height::Int64
+        rgb_m::Array{RGB{Float32}} = fill(RGB(0.0, 0.0, 0.0), (width*height,))
+        )
 
-# Arguments
-- `width::Float64`
-- `height::Float64`
-- array containing `RGB` color, it's a 2linearized" matrix; the first element is the one in the bottom-left of the matrix, then the line is read left-to-right and going to the upper row.
+Define a image in the format 2D  High-Dynamic-Range.
 
-# Constructors:
-- `HDRimage(width, height)`
-- `HDRimage(width, height, RGB-array)`
+## Arguments
+
+- `width::Float64` : width pixel number of the image
+
+- `height::Float64` : height pixel number of the image
+
+- `rgb_m::Array{RGB{Float32}}` : linearized color matrix; 
+  the first element is the one in the bottom-left of the matrix, 
+  then the line is read left-to-right and going to the upper row.
 """
 struct HDRimage
     width::Int64
@@ -43,13 +56,26 @@ end # HDRimage
 ##########################################################################################92
 
 """ 
-Parameters passed from command line
+    Parameters(
+        infile::String, 
+        outfile::String,
+        a::Float64 = 0.18,
+        γ::Float64 = 1.0
+        )
 
-# Arguments
-- `infile::String`: input file name (must be a .pfm)
-- `outfile::String`: output file name (must be a .png)
-- [`a`]: parameter a for luminosity corrections
-- [`γ`]: parameter γ for screen correction
+Parameters passed from command line for the tone mapping.
+
+## Arguments
+
+- `infile::String` : input file name (must be a pfm)
+
+- `outfile::String` : output file name (must be a png)
+
+- `a::Float64` : parameter a for luminosity correction
+
+- `γ::Float64` : parameter γ for screen correction
+
+See also: [`tone_mapping`](@ref)
 """
 struct Parameters
     infile::String
@@ -60,13 +86,19 @@ struct Parameters
 end
 
 ##########################################################################################92
+
 """
+    Point(x::Float64, y::Float64, z::Float64)
+
 A point in 3D space.
 
-# Arguments
-- `x::Float64`
-- `y::Float64`
-- `z::Float64`
+## Constructors
+
+- `Point() = new(0., 0. ,0.)`
+
+- `Point(x, y, z) = new(x, y, z)`
+
+- `Point(v::SVector{4, Float64}) = new(v[1], v[2], v[3])`
 """
 struct Point
     x::Float64
@@ -77,14 +109,24 @@ struct Point
     Point(v::SVector{4, Float64}) = new(v[1], v[2], v[3])
 end
 
-##########################################################################################92
 """
-A 3D vector.
+    Vec(x::Float64, y::Float64, z::Float64)
 
-# Arguments
-- `x::Float64`
-- `y::Float64`
-- `z::Float64`
+A 3D Vector
+
+## Constructors
+
+- `Vec() = new(0., 0. ,0.)`
+
+- `Vec(x, y, z) = new(x, y, z)`
+
+- `Vec(P::Point) = new(P.x, P.y, P.z)`
+
+- `Vec(v::SVector{4, Float64}) = new(v[1], v[2], v[3])`
+
+- `Vec(N::Normal) = Vec(N.x, N.y, N.z)`
+
+See also: [`Normal`](@ref)
 """
 struct Vec
     x::Float64
@@ -96,21 +138,29 @@ struct Vec
     Vec(v::SVector{4, Float64}) = new(v[1], v[2], v[3])
 end
 
-##########################################################################################92
-
-const VEC_X = Vec(1.0, 0.0, 0.0) # ̂x
-const VEC_Y = Vec(0.0, 1.0, 0.0) # ̂y
-const VEC_Z = Vec(0.0, 0.0, 1.0) # ̂z
-
-##########################################################################################92
+const VEC_X = Vec(1.0, 0.0, 0.0)
+const VEC_Y = Vec(0.0, 1.0, 0.0)
+const VEC_Z = Vec(0.0, 0.0, 1.0)
 
 """
-A normal vector in 3D space, you can give three components and its struct normalize them.
+    Normal(x::Float64, y::Float64, z::Float64)
 
-# Arguments
-- `x::Float64`
-- `y::Float64`
-- `z::Float64`
+A normal vector in 3D space, you can give three components 
+and its struct normalize them.
+
+## Constructors
+
+- `Normal(x,y,z) = new(x, y ,z)`
+
+- `Normal(v::Vec) = new(v[1]/m, v[2]/m, v[3]/m)`
+
+- `Normal(v::Vector{Float64}) = new(v[1]/m, v[2]/m, v[3]/m)`
+
+- `Normal(v::SVector{4,Float64}) = new(v[1]/m, v[2]/m, v[3]/m)`
+
+(`m` indicates the norm of the input vector)
+
+See also: [`Vec`](@ref)
 """
 struct Normal
     x::Float64
@@ -139,28 +189,52 @@ Vec(N::Normal) = Vec(N.x, N.y, N.z)
 ##########################################################################################92
 
 """
+    Transformation(
+        M::SMatrix{4,4,Float64}
+        invM::SMatrix{4,4,Float64}
+    )
+
 Contain two matrices 4x4 of `Float64`, one the inverse of the other.
-It's used to implement rotations, scaling and translationscin 3D space with homogenous
-formalism.
+It's used to implement rotations, scaling and translations in 3D space 
+with homogenous formalism.
 """
 struct Transformation
     M::SMatrix{4,4,Float64}
     invM::SMatrix{4,4,Float64}
     Transformation(m, invm) = new(m, invm)
-    Transformation() = new( SMatrix{4,4}( Diagonal(ones(4)) ),  SMatrix{4,4}( Diagonal(ones(4)) ) )
+    Transformation() = 
+        new( 
+            SMatrix{4,4}( Diagonal(ones(4)) ),  
+            SMatrix{4,4}( Diagonal(ones(4)) ) 
+        )
 end
 
 ##########################################################################################92
 
 """
-A ray of light propagating in space
+    Ray(
+        origin::Point,
+        dir::Vec,
+        tmin::Float64 = 1e-5,
+        tmax::Float64 = Inf,
+        depth::Int64 = 0,
+        )
 
-# Arguments
-- `origin` ([`Point`](@ref)): the 3D point where the ray originated
-- `dir` ([`Vec`](@ref)): the 3D direction along which this ray propagates
-- `tmin` (`Float64`): the minimum distance travelled by the ray is this number times `dir`
-- `tmax` (`Float64`): the maximum distance travelled by the ray is this number times `dir`
-- `depth` (`Int64`): number of times this ray was reflected/refracted
+A ray of light propagating in space.
+
+## Arguments
+
+- `origin::Point` : origin of the ray
+
+- `dir::Vec` : 3D direction along which this ray propagates
+
+- `tmin::Float64` : minimum distance travelled by the ray is this number times `dir`
+
+- `tmax::Float64` : maximum distance travelled by the ray is this number times `dir`
+
+- `depth::Int64` : number of times this ray was reflected/refracted
+
+See also: [`Point`](@ref), [`Vec`](@ref)
 """
 struct Ray
     origin::Point
