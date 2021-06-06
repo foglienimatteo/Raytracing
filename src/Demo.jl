@@ -7,7 +7,18 @@
 
 
 
+"""
+	first_world() :: World
 
+Render the first world (identified with the string "A").
+
+This world consists in a set of 10 spheres of equal radius 0.1:
+8 brown spheres are placed at the verteces of a cube of side 1.0, one green-purple 
+checked sphere is in the center of the lower cube face and another multi-colored sphere is
+in the center of the left cube face.
+
+See also: [`World`](@ref), [`demo`](@ref), [`demo_animation`](@ref)
+"""
 function first_world()
 	material1 = Material(DiffuseBRDF(UniformPigment(RGB(0.7, 0.3, 0.2))))
     	material2 = Material(DiffuseBRDF(CheckeredPigment(RGB(0.2, 0.7, 0.3), 
@@ -54,6 +65,18 @@ function first_world()
 	return world
 end
 
+
+"""
+	second_world() :: World
+
+Render the second world (identified with the string "B").
+
+This world consists in a checked x-y plane, a blue opaque 
+sphere, a red reflecting sphere, and a green oblique reflecting plane, all
+inside a giant emetting sphere.
+
+See also: [`World`](@ref), [`demo`](@ref), [`demo_animation`](@ref)
+"""
 function second_world()
 	world = World()
 
@@ -276,8 +299,9 @@ There are two possible demo image "world" to be rendered, specified through the
 input string `type`.
 
 The `type=="A"` demo image world consist in a set of 10 spheres of equal radius 0.1:
-8 spheres are placed at the verteces of a cube of side 1.0, one in the center of
-the lower cube face and the last one in the center of the left cube face.
+8 brown spheres are placed at the verteces of a cube of side 1.0, one green-purple 
+checked sphere is in the center of the lower cube face and another multi-colored sphere is
+in the center of the left cube face.
 
 The `type=="B"` demo image world consists in a checked x-y plane, a blue opaque 
 sphere, a red reflecting sphere, and a green oblique reflecting plane, all
@@ -289,16 +313,16 @@ the rendering software, specifically the orientation upside-down and left-right.
 ## Arguments
 
 - `camera_type::String = "per"` : set the perspective projection view:
-		- `camera_type=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
-		- `camera_type=="ort"`  -> set [`OrthogonalCamera`](@ref)
+  - `camera_type=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
+  - `camera_type=="ort"`  -> set [`OrthogonalCamera`](@ref)
 
 - `camera_position::Point = Point(-1.,0.,0.)` : set the point of observation 
   in (`X`,`Y,`Z`) coordinates
 
 - `algorithm::String = "flat"` : algorithm to be used in the rendered:
-		- `algorithm=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
-		- `algorithm=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
-		- `algorithm=="pathtracing"` -> [`PathTracer`](@ref) algorithm 
+  - `algorithm=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
+  - `algorithm=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
+  - `algorithm=="pathtracing"` -> [`PathTracer`](@ref) algorithm 
 
 - `α::Float64 = 0.` : angle of rotation _*IN RADIANTS*_, relative to the vertical
   (i.e. z) axis, of the view direction
@@ -412,13 +436,13 @@ This function works following this steps:
 ## Arguments
 
 - `camera_type::String = "per"` : set the perspective projection view:
-		- `camera_type=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
-		- `camera_type=="ort"`  -> set [`OrthogonalCamera`](@ref)
+  - `camera_type=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
+  - `camera_type=="ort"`  -> set [`OrthogonalCamera`](@ref)
 		
 - `algorithm::String = "flat"` : algorithm to be used in the rendered:
-		- `algorithm=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
-		- `algorithm=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
-		- `algorithm=="pathtracing"` -> [`PathTracer`](@ref) algorithm 
+  - `algorithm=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
+  - `algorithm=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
+  - `algorithm=="pathtracing"` -> [`PathTracer`](@ref) algorithm 
 
 - `width::Int64 = 640` and `height::Int64 = 480` : pixel dimensions of the demo image
 

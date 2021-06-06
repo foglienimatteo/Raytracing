@@ -6,9 +6,6 @@
 #
 
 
-
-##########################################################################################92
-
 """
     luminosity(c::RGB{T}) -> Float64
 
@@ -38,20 +35,12 @@ function avg_lum(img::HDRimage, δ::Number=1e-10)
     10^(cumsum/(img.width*img.height))
 end
 
-function σ_lum(lum::Float64, img::HDRimage)
-    σ=0.
-    N = img.width*img.height
-    for pix in img.rgb_m
-        σ += abs( luminosity(pix) - lum )^2.
-    end
-    return √(σ/N)
-end
-
-function normalize_image!(  img::HDRimage, 
-                            a::Float64=0.18,
-                            lum::Union{Number, Nothing}=nothing, 
-                            δ::Number=1e-10
-                        )
+function normalize_image!(  
+            img::HDRimage, 
+            a::Float64=0.18,
+            lum::Union{Number, Nothing}=nothing, 
+            δ::Number=1e-10
+            )
 
     isnothing(lum) && (lum = avg_lum(img, δ))
     img.rgb_m .= img.rgb_m .* a ./lum
@@ -68,8 +57,6 @@ can be changed).
 """
 normalize_image!
 
-##########################################################################################92
-
 """
     clamp(x::Number) -> Float64
 
@@ -77,7 +64,6 @@ Execute: x → x/(x+1)
 """
 clamp(x::Number) = x/(x+1)
 
-##########################################################################################92
 
 """
     clamp_image!(img::HDRimage)
@@ -97,8 +83,6 @@ function clamp_image!(img::HDRimage)
     end
     nothing
 end # clamp_image
-
-##########################################################################################92
 
 """
     γ_correction!(img::HDRimage, γ::Float64=1.0, k::Float64=1.)
@@ -127,23 +111,17 @@ function γ_correction!(img::HDRimage, γ::Float64=1.0, k::Float64=1.)
     nothing
 end
 
-##########################################################################################92
-
-function overturn(m::Matrix{T}) where T
-    m = permutedims(m)
-    #m = reverse(m, dims=1)
+function get_matrix(img::HDRimage)
+    m = permutedims(reshape(img.rgb_m, (img.width,img.height)))
     return m
 end
 
 ##########################################################################################92
 
-function get_matrix(img::HDRimage)
-    m = reshape(img.rgb_m, (img.width,img.height))
-    return overturn(m)
+
+function tone_mapping(x::(Pair{T1,T2} where {T1,T2})...)
+	tone_mapping( parse_tonemapping_settings(  Dict( pair for pair in [x...]) )... )
 end
-
-##########################################################################################92
-
 
 function tone_mapping(infile::String, outfile::String, a::Float64=0.18, γ::Float64=1.0)
     tone_mapping(["$(infile)", "$(outfile)", "$a", "$γ"])

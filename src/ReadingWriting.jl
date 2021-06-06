@@ -324,40 +324,71 @@ end
     parse_tonemapping_settings(dict::Dict{String, Any}) 
         :: (String, String, Float64, Float64)
 
-Parse a `Dict{String, Any}` for the [`tone_mapping`](@ref) function.
-The keys for the input `Dict` are, respectively: "pfm_infile",
-"outfile", "alpha", "gamma", 
+Parse a `Dict{String, T} where {T}` for the [`tone_mapping`](@ref) function.
+
+## Input
+
+A `dict::Dict{String, T} where {T}`
 
 ## Returns
 
 A tuple `(pfm, png, a, γ)` containing:
-- `pfm::String` : input pfm filename
-- `png::String` : output LDR filename
-- `a::Float64` : scale factor
-- `γ::Float64` : gamma factor
+
+- `pfm::String = dict["pfm_infile"]` : input pfm filename (required)
+
+- `png::String = dict["outfile"]` : output LDR filename (required)
+
+- `a::Float64 = dict["alpha"]` : scale factor (default = 0.18)
+
+- `γ::Float64 = dict["gamma"]` : gamma factor (default = 1.0)
 
 See also:  [`tone_mapping`](@ref)
 """
-function parse_tonemapping_settings(dict::Dict{String, Any})
-    pfm::String = dict["pfm_infile"]
-    png::String = dict["outfile"]
-    a::Float64 = dict["alpha"]
-    γ::Float64 = dict["gamma"]
+function parse_tonemapping_settings(dict::Dict{String, T}) where {T}
+
+    keys = ["pfm_infile", "outfile", "alpha", "gamma"]
+
+    for pair in dict
+        if (pair[1] in keys) ==false
+            throw(ArgumentError(
+                "invalid key : $(pair[1])\n"*
+                "valid keys for tonemapping function are:\n "*
+                "$(["$(key)" for key in keys])"
+            ))
+        end
+    end
+
+    haskey(dict, "pfm_infile") ? 
+        pfm::String = dict["pfm_infile"] : 
+        throw(ArgumentError("need to specify the input pfm file to be tonemapped"))
+
+    haskey(dict, "outfile") ? 
+        png::String = dict["outfile"] : 
+        throw(ArgumentError("need to specify the output LDR filename to be saved"))
+
+    haskey(dict, "alpha") ? 
+        a::Float64 = dict["alpha"] : 
+        a = 0.18
+
+    haskey(dict, "gamma") ? 
+        γ::Float64 = dict["gamma"] : 
+        γ = 1.0
+
     return (pfm, png, a, γ)
 end
 
 """
-    parse_demo_settings(dict::Dict{String, Any}) 
+    parse_demo_settings(dict::Dict{String, T}) where {T}
         :: (
             String, Point, String, Float64, Int64, Int64, String, String,
             Bool, Bool, String, Int64, Int64, Int64
             )
 
-Parse a `Dict{String, Any}` for the [`demo`](@ref) function.
+Parse a `Dict{String, T} where {T}` for the [`demo`](@ref) function.
 
 ## Input
 
-A `dict::Dict{String, Any}`
+A `dict::Dict{String, T} where {T}
 
 ## Returns
 
@@ -365,16 +396,16 @@ A tuple `(ct, cp, al, α, w, h, pfm, png, bp, bs, wt, ist, ise, spp)`
 containing the following variables; the corresponding keys are also showed:
 
 - `ct::String = dict["camera_type"]` : set the perspective projection view:
-		- `ct=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
-		- `ct=="ort"`  -> set [`OrthogonalCamera`](@ref)
+  - `ct=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
+  - `ct=="ort"`  -> set [`OrthogonalCamera`](@ref)
 
 - `cp::String = dict["camera_position"]` : "X,Y,Z" coordinates of the 
   choosen observation point of view 
 
 - `al::String = dict["algorithm"]` : algorithm to be used in the rendered:
-		- `al=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
-		- `al=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
-		- `al=="pathtracing"` -> [`PathTracer`](@ref) algorithm 
+  - `al=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
+  - `al=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
+  - `al=="pathtracing"` -> [`PathTracer`](@ref) algorithm 
 
 - `α::String = dict["alpha"]` : choosen angle of rotation respect to vertical 
   (i.e. z) axis
@@ -501,14 +532,14 @@ end
 
 
 """
-    parse_demoanimation_settings(dict::Dict{String, Any}) 
+    parse_demoanimation_settings(dict::Dict{String, T}) where {T}
         :: (String, String, Int64, Int64, String)
 
-Parse a `Dict{String, Any}` for the [`demo_animation`](@ref) function.
+Parse a `Dict{String, T} where {T}` for the [`demo_animation`](@ref) function.
 
 ## Input
 
-A `dict::Dict{String, Any}`
+A `dict::Dict{String, T} where {T}`
 
 ## Returns
 
@@ -516,13 +547,13 @@ A tuple `(ct, al, w, h, anim)` containing the following
 variables; the corresponding keys are also showed:
 
 - `ct::String = dict["camera_type"]` : set the perspective projection view:
-		- `ct=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
-		- `ct=="ort"`  -> set [`OrthogonalCamera`](@ref)
+  - `ct=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
+- `ct=="ort"`  -> set [`OrthogonalCamera`](@ref)
 
 - `al::String = dict["algorithm"]` : algorithm to be used in the rendered:
-		- `al=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
-		- `al=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
-		- `al=="pathtracing"` -> [`PathTracer`](@ref) algorithm 
+  - `al=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
+  - `al=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
+  - `al=="pathtracing"` -> [`PathTracer`](@ref) algorithm 
 
 - `w::Int64 = dict["width"]` : number of pixels on the horizontal axis to be rendered 
 
