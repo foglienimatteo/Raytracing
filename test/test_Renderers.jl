@@ -94,16 +94,6 @@ end
 end
 
 @testset "test_PointLightTracer" begin
-<<<<<<< HEAD
-     @testset "test_quick_ray_intersection" begin
-          world = World()
-
-          sphere1 = Sphere(translation(VEC_X * 2.0))
-          sphere2 = Sphere(translation(VEC_X * 8.0))
-          add_shape!(world, sphere1)
-          add_shape!(world, sphere2)
-
-=======
      @testset "quick_ray_intersection_sphere" begin
           world = World()
 
@@ -136,7 +126,6 @@ end
           add_shape!(world, plane2)
 
           @test is_point_visible(world, Point(-10.0, 0.0, 0.0), Point(0.0, 0.0, 0.0))
->>>>>>> ddb98273ccf586f2bf52ed0b928d7a4851a59b77
           @test !is_point_visible(world, Point(10.0, 0.0, 0.0), Point(0.0, 0.0, 0.0))
           @test !is_point_visible(world, Point(5.0, 0.0, 0.0), Point(0.0, 0.0, 0.0))
           @test is_point_visible(world, Point(5.0, 0.0, 0.0), Point(4.0, 0.0, 0.0))

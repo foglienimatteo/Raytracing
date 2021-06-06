@@ -1,28 +1,16 @@
 # HEAD
-<<<<<<< HEAD
+
 - Added antialiasing algorithm
-
-
 - Added point-light tracing algorithm, see PR[#17](https://github.com/cosmofico97/Raytracing/pull/17)
+
 
 # VERSION 0.3.0
 
 - Added antialiasing algorithm, see PR[#16](https://github.com/cosmofico97/Raytracing/pull/16)
-=======
-- Added antialiasing algorithm, as default uses 9x9 rays in a pixel, missing command line option
->>>>>>> antialiasing
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> ddb98273ccf586f2bf52ed0b928d7a4851a59b77
-
-# VERSION 0.2.0
->>>>>>> pointlighttracing
 
 
 # VERSION 0.2.0
+
 - Modified `demo` function: now two possible world versions can be rendered
 - New struct for generate a better image considering lights and angles (`PathTracer`) and tests
 - New shape `Torus` with relative struct and functions
@@ -45,6 +33,8 @@
 - Implemented a first main interface
 - Implemented structs: `Shape`, `Sphere`, `World` for a first image creation
 
+
 # VERSION 0.1.0
+
 - Added feature: now can convert from a .pfm image to .png and .tiff one 
 - Completed function for reading and writing a .pfm image file format
