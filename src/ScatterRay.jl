@@ -18,13 +18,13 @@
 Return a `Ray` scattered by a material with a `DiffuseBRDF`.
 
 A `DiffuseBRDF` has a uniform BRDF, i.e. 
-``f_r(\mathbf{x}, \boldsymbol{\Psi}\rightarrow\boldsymbol{\Theta}) = \rho_d / \pi``;
+``f_r(\mathbf{x}, \mathbf{\Psi}\rightarrow\mathbf{\Theta}) = \rho_d / \pi``;
 the importance sampling for the `PathTracer` algorithm use consequently the 
 following PDF:
 
 ```math
 p(\omega) \propto 
-    f_r(\mathbf{x}, \boldsymbol{\Psi}\rightarrow\boldsymbol{\Theta}) \, \cos(\vartheta)
+    f_r(\mathbf{x}, \mathbf{\Psi}\rightarrow\mathbf{\Theta}) \, \cos(\vartheta)
     = \frac{\rho_d}{\pi} \, \cos(\vartheta) 
     \propto \cos(\vartheta)
 ```
@@ -95,7 +95,7 @@ following PDF:
 
 ```math
 p(\omega) \propto 
-    f_r(\mathbf{x}, \boldsymbol{\Psi}\rightarrow\boldsymbol{\Theta}) \, \cos(\vartheta)
+    f_r(\mathbf{x}, \mathbf{\Psi}\rightarrow\mathbf{\Theta}) \, \cos(\vartheta)
     \propto \frac{1}{\cos(\vartheta)} \, \cos(\vartheta) 
     \propto cost
 ```

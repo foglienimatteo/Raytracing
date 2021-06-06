@@ -9,7 +9,7 @@
 ##########################################################################################92
 
 """
-    ray_intersection(shape::Shape, ray::Ray) -> ErrorException
+    ray_intersection(shape::Shape, ray::Ray) :: ErrorException
 
 Compute the intersection between a [`Ray`](@ref) and a [`Shape`](@ref)
 """
@@ -21,10 +21,17 @@ end
 
 ##########################################################################################92
 
-"""
-    sphere_point_to_uv(point::Point) -> Vec2d
+@doc raw"""
+    sphere_point_to_uv(point::Point) :: Vec2d
 
-Convert a 3D point on the surface of the unit sphere into a (u, v) 2D point
+Convert a 3D `Point` ``point = (P_x, P_y, P_z)`` on the surface of the unit sphere
+into a 2D `Vec2d` using the following spherical coordinates:
+
+```math
+u = \frac{\phi}{2\pi} = \frac{\arctan (P_y / P_x)}{2\pi}, 
+    \quad 
+v = \frac{\theta}{\pi} = \frac{\arccos (P_z)}{\pi}
+```
 
 See also: [`Point`](@ref), [`Vec2d`](@ref), [`Sphere`](@ref)
 """
@@ -35,10 +42,20 @@ function sphere_point_to_uv(point::Point)
     return Vec2d(u,v)
 end
 
-"""
-    plane_point_to_uv(point::Point) -> Vec2d
+@doc raw"""
+    plane_point_to_uv(point::Point) :: Vec2d
 
-Convert a 3D point on the surface of the unit plane into a (u, v) 2D point
+Convert a 3D `Point` ``point = (P_x, P_y, P_z)`` on the surface of the unit plane
+into a 2D `Vec2d` using the following periodical coordinates:
+
+```math
+u = P_x - \lfloor P_x \rfloor,
+    \quad 
+v = P_y - \lfloor P_y \rfloor,
+```
+    
+where ``\lfloor \cdot \rfloor`` indicates the rounding down approximation,
+in order to guarantee that ``u, v \in [0, 1)``.
 
 See also: [`Point`](@ref), [`Vec2d`](@ref), [`Plane`](@ref)
 """
@@ -50,14 +67,17 @@ end
 
 ##########################################################################################92
 
-"""
-    sphere_normal(point::Point, ray_dir::Vec) -> Normal
+@doc raw"""
+    sphere_normal(point::Point, ray_dir::Vec) :: Normal
 
-Compute the [`Normal`](@ref)  of a unit sphere
+Compute the `Normal` of a unit sphere.
 
-The normal is computed for [`Point`](@ref) (a point on the surface of the
-sphere), and it is chosen so that it is always in the opposite
-direction with respect to `ray_dir` ([`Vec`](@ref)).
+The normal is computed for the given `Point` ``point = (P_x, P_y, P_z)`` 
+(with ``\sqrt{P_x^2 + P_y^2 + P_z^2}=1``) on the 
+surface of the sphere, and it is chosen so that it is always in the opposite
+direction with respect to the given `Vec` `ray_dir`.
+
+See also: [`Point`](@ref), [`Ray`](@ref), [`Normal`](@ref), [`Sphere`](@ref)
 """
 function sphere_normal(point::Point, ray_dir::Vec)
     result = Normal(point.x, point.y, point.z)
@@ -65,14 +85,16 @@ function sphere_normal(point::Point, ray_dir::Vec)
     return result
 end
 
-"""
-    plane_normal(point::Point, ray_dir::Vec) -> Normal
+@doc raw"""
+    plane_normal(point::Point, ray_dir::Vec) :: Normal
 
-Compute the [`Normal`](@ref) of a unit plane
+Compute the `Normal` of a unit plane.
 
-The normal is computed for [`Point`](@ref) (a point on the surface of the
-plane), and it is chosen so that it is always in the opposite
-direction with respect to `ray_dir` ([`Vec`](@ref)).
+The normal is computed for the given `Point` ``point = (P_x, P_y, 0)`` on the 
+surface of the plane, and it is chosen so that it is always in the opposite
+direction with respect to the given `Vec` `ray_dir`.
+
+See also: [`Point`](@ref), [`Ray`](@ref), [`Normal`](@ref), [`Plane`](@ref)
 """
 function plane_normal(point::Point, ray_dir::Vec)
     result = Normal(0., 0., 1.)
