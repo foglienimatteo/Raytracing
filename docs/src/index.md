@@ -1,5 +1,7 @@
-# Example.jl Documentation
+# Example.jl Documentation
+
 
 ```@docs
+scatter_ray
 demo
 ```
