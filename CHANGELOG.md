@@ -1,5 +1,10 @@
 # HEAD
-- Added antialiasing algorithm, as default uses 9x9 rays in a pixel, missing command line option
+
+# VERSION 0.3.0
+
+- Added antialiasing algorithm, see PR[#16](https://github.com/cosmofico97/Raytracing/pull/16)
+
+
 
 # VERSION 0.2.0
 
