@@ -37,7 +37,10 @@ export rotation_x, rotation_y, rotation_z, scaling, translation, inverse
 # from ImageTracer.jl
 export at, fire_ray, fire_all_rays!
 # from Shapes.jl
-export ray_intersection, sphere_point_to_uv, sphere_normal, add_shape!, add_light!, quick_ray_intersection
+export ray_intersection, add_shape!, add_light!
+export sphere_point_to_uv, sphere_normal
+export plane_point_to_uv, plane_normal
+export is_point_visible, quick_ray_intersection
 # from Demo.jl
 export demo, demo_animation
 # from Renderers.jl
