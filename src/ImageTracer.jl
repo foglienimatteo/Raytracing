@@ -83,7 +83,13 @@ fire_ray
 ##########################################################################################92
 
 """
-    fire_all_rays!(ImTr::ImageTracer, func::Function)
+    fire_all_rays!(
+            ImTr::ImageTracer, 
+            func::Function, 
+            callback::Union{Nothing, Function} = nothing,
+            callback_time_s::Float64 = 2.,
+            callback_kwargs::String
+            )
  
 Shoot several light rays crossing each of the pixels in the `ImTr.img` image.
 
@@ -93,13 +99,60 @@ to the function `func`, which must:
 - return a `RGB{Float32}` color instance telling the color to 
   assign to that pixel in the image.
 
+If `callback` is not `nothing`, it must be a function accepting at least two 
+parameters named `col` and `row`.
+This function is called periodically during the rendering, and the two mandatory 
+arguments are the row and column number of the last pixel that has been traced. 
+
+_**Pay Attention**_: Both the row and column are increased by one starting
+from zero: first the row and then the column.
+
+The time between two consecutive calls to the callback can be tuned using the 
+parameter `callback_time_s`. Any keyword argument passed to `fire_all_rays` 
+is passed to the callback.
+
 See also: [`Ray`](@ref), [`HDRimage`](@ref), [`ImageTracer`](@ref)
 """
-function fire_all_rays!(ImTr::ImageTracer, func::Function)
+function fire_all_rays!(
+            ImTr::ImageTracer,
+            func::Function,
+            callback::Union{Nothing, Function} = nothing,
+            callback_time_s::Float64 = 2.,
+            callback_kwargs::Union{Nothing, String} = nothing                
+            )
+    last_call_time = time()  # use if @elapsed doesn't work propely for our pourpose
+
+    #isnothing(callback) || callback(0, 0)
+    
     for row in ImTr.img.height-1:-1:0, col in 0:ImTr.img.width-1
-        ray = fire_ray(ImTr, col, row)
-        color::RGB{Float32} = func(ray)
-        set_pixel(ImTr.img, col, row, color)
+        cum_color = RGB{Float32}(0., 0., 0.)
+
+        # need a command from line, remember must be a squared number
+        ImTr.samples_per_side <= 0 ? smp4side = 0 : smp4side = ImTr.samples_per_side
+       
+        #t = @elapsed 
+        if smp4side > 0
+            for inter_pixel_row in 0:smp4side-1, inter_pixel_col in 0:smp4side-1
+                u_pixel = (inter_pixel_col + random(ImTr.pcg)) / smp4side
+                v_pixel = (inter_pixel_row + random(ImTr.pcg)) / smp4side
+                ray = fire_ray(ImTr, col, row, u_pixel, v_pixel)
+                cum_color += func(ray)
+            end
+            set_pixel(ImTr.img, col, row, cum_color * (1.0/smp4side^2) )
+        else
+            ray = fire_ray(ImTr, col, row)
+            set_pixel(ImTr.img, col, row, func(ray))
+        end
+
+        current_time = time() # use if @elapsed doesn't work propely for our pourpose
+        t = current_time - last_call_time # use if @elapsed doesn't work propely for our pourpose
+
+        if (callback ≠ nothing) && (t > callback_time_s)
+            callback(row, col)
+            last_call_time = current_time    # use if @elapsed doesn't work propely for our pourpose
+        end
+
     end
+
     nothing
 end # fire_all_rays!

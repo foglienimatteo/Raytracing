@@ -212,24 +212,50 @@ end
 ##########################################################################################92
 
 """
-Implement the "screen"
-Trace an image by shooting light rays through each of its pixels
-# Arguments
-- [`HDRimage`](@ref): must be already initialized
-- [`Camera`](@ref)
+    ImageTracer(
+        img::HDRimage
+        cam::Camera
+        samples_per_side::Int64 = 0
+        pcg::PCG = PCG()
+        )
+
+Implement the "screen".
+
+Trace an image by shooting light rays through each of its pixels.
+
+## Arguments
+
+- `img::HDRimage` : must be already initialized
+- `cam::Camera`
+- `samples_per_side::Int64 = 0` : if it is larger than zero, stratified sampling will 
+  be applied to each pixel in the image, using the random number generator 
+  `pcg`, if not the value 4 will be used in `fire_all_rays!`
+- `pcg::PCG = PCG()` : PCG random number generator
+
+See also: [`HDRimage`](@ref),[`Camera`](@ref), [`PCG`](@ref),
+[`fire_ray`](@ref), [`fire_all_rays!`](@ref)
 """
 struct ImageTracer
     img::HDRimage
     cam::Camera
+    samples_per_side::Int64
+    pcg::PCG
+
+    ImageTracer(img::HDRimage, cam::Camera, s::Int64, p::PCG) = new(img, cam, s, p)
+    ImageTracer(img::HDRimage, cam::Camera, s::Int64) =  new(img, cam, s, PCG())
+    ImageTracer(img::HDRimage, cam::Camera) =  new(img, cam, 0, PCG()) 
 end
 
 ##########################################################################################92
 
 abstract type Shape end
 
+<<<<<<< HEAD
 
 ##########################################################################################92
 
+=======
+>>>>>>> 4c8cfbe1e04eecf317a560fe8976f3d7b818e54b
 """
 A 2D vector used to represent a point on a surface.
 The fields are named `u` and `v` to distinguish them
@@ -239,8 +265,6 @@ struct Vec2d
     u::Float64
     v::Float64
 end
-
-##########################################################################################92
 
 """
 A struct holding information about a ray-shape intersection
@@ -267,8 +291,6 @@ struct HitRecord
     end
     =#
 end
-
-##########################################################################################92
 
 """
 A struct holding a list of shapes, which make a «world»

@@ -13,7 +13,7 @@
                     Material(DiffuseBRDF(UniformPigment(WHITE))))
      image = HDRimage(3, 3)
      camera = OrthogonalCamera()
-     tracer = ImageTracer(image,camera)
+     tracer = ImageTracer(image, camera, 0) # without antialiasing
      world = World()
      add_shape!(world, sphere)
      renderer = OnOffRenderer(world)
@@ -24,7 +24,7 @@
      @test Raytracing.get_pixel(image, 2, 0) ≈ BLACK
 
      @test Raytracing.get_pixel(image, 0, 1) ≈ BLACK
-     @test Raytracing.get_pixel(image, 1, 1) ≈ WHITE
+     @test Raytracing.get_pixel(image, 1, 1) ≈ WHITE # gives error with antialiasing
      @test Raytracing.get_pixel(image, 2, 1) ≈ BLACK
 
      @test Raytracing.get_pixel(image, 0, 2) ≈ BLACK
@@ -42,7 +42,7 @@ end
 
      image = HDRimage(3, 3)
      camera = OrthogonalCamera()
-     tracer = ImageTracer(image, camera)
+     tracer = ImageTracer(image, camera, 0) # without antialiasing
 
      world = World()
      add_shape!(world, sphere)
@@ -54,7 +54,7 @@ end
      @test Raytracing.get_pixel(image, 2, 0) ≈ BLACK
 
      @test Raytracing.get_pixel(image, 0, 1) ≈ BLACK
-     @test Raytracing.get_pixel(image, 1, 1) ≈ sphere_color
+     @test Raytracing.get_pixel(image, 1, 1) ≈ sphere_color # gives error with antialiasing
      @test Raytracing.get_pixel(image, 2, 1) ≈ BLACK
 
      @test Raytracing.get_pixel(image, 0, 2) ≈ BLACK
