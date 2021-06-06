@@ -34,7 +34,7 @@
 
      P = Point(0., 5., 2.)
      Q = Point(6., 5., 0)
-     ray3 = Ray( P, P-Q )
+     ray3 = Ray( P, Q-P )
      intersection3 = ray_intersection(plane, ray3)
      @test typeof(intersection3) == HitRecord
      @test HitRecord(
@@ -106,7 +106,7 @@ end
      plane1 = Plane(rotation_y(-π/4))
      P = Point(0, 0, 1)
      Q = Point(1, 0, 0)
-     ray1 = Ray(P, P-Q)
+     ray1 = Ray(P, Q-P)
      intersection1 = ray_intersection(plane1, ray1)
 
      @test intersection1.normal ≈ Normal(-1.0, 0.0, 1.0)

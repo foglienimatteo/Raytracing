@@ -20,12 +20,12 @@ import LinearAlgebra.:⋅; import LinearAlgebra.:×
 export BLACK, WHITE, to_RGB, HDRimage, Parameters
 export Point, Vec, Normal,VEC_X, VEC_Y, VEC_Z, Transformation
 export Ray, OrthogonalCamera, PerspectiveCamera, ImageTracer
-export Shape, Sphere, Plane, Torus, Vec2d, HitRecord, World
+export Shape, PointLight, Sphere, Plane, Torus, Vec2d, HitRecord, World
 export Pigment, UniformPigment, CheckeredPigment, ImagePigment
 export BRDF, DiffuseBRDF, SpecularBRDF, Material
 export Renderer, OnOffRenderer, FlatRenderer, PathTracer, PointLightRenderer
 # from Operations.jl
-export are_close, squared_norm, norm, normalize
+export are_close, squared_norm, norm, normalize #, normalized_dot
 # from PrintFunctions.jl
 export print_not_black
 # from ReadingWriting.jl

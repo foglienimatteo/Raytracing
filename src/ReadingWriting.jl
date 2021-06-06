@@ -385,6 +385,7 @@ containing the following variables; the corresponding keys are also showed:
   - `al=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
   - `al=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
   - `al=="pathtracing"` -> [`PathTracer`](@ref) algorithm 
+  - `algorithm=="pointlight"` -> [`PointLightRenderer`](@ref) algorithm
 
 - `α::String = dict["alpha"]` : choosen angle of rotation respect to vertical 
   (i.e. z) axis
@@ -530,9 +531,16 @@ variables; the corresponding keys are also showed:
 		- `ct=="ort"`  -> set [`OrthogonalCamera`](@ref)
 
 - `al::String = dict["algorithm"]` : algorithm to be used in the rendered:
+<<<<<<< HEAD
 		- `al=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
 		- `al=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
 		- `al=="pathtracing"` -> [`PathTracer`](@ref) algorithm 
+=======
+  - `al=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
+  - `al=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
+  - `al=="pathtracing"` -> [`PathTracer`](@ref) algorithm 
+  - `algorithm=="pointlight"` -> [`PointLightRenderer`](@ref) algorithm
+>>>>>>> ddb98273ccf586f2bf52ed0b928d7a4851a59b77
 
 - `w::Int64 = dict["width"]` : number of pixels on the horizontal axis to be rendered 
 

@@ -133,3 +133,37 @@ function (renderer::PointLightRenderer)(ray::Ray)
 
     return result_color 
 end
+
+function (renderer::PointLightRenderer)(ray::Ray)
+    hit_record = ray_intersection(renderer.world, ray)
+    !isnothing(hit_record) || (return renderer.background_color)
+
+    hit_material = hit_record.shape.Material
+    result_color = renderer.ambient_color
+
+    for cur_light in renderer.world.point_lights
+        if is_point_visible(renderer.world, cur_light.position, hit_record.world_point)
+            distance_vec = hit_record.world_point - cur_light.position
+            distance = norm(distance_vec)
+            in_dir = distance_vec * (1.0 / distance)
+            cos_theta = max(0.0, -normalize(ray.dir)⋅hit_record.normal) 
+
+            distance_factor =  
+                (cur_light.linear_radius > 0) ? 
+                (cur_light.linear_radius / distance)^2 : 
+                1.0
+
+            emitted_color = get_color(hit_material.emitted_radiance, hit_record.surface_point)
+            brdf_color = evaluate(
+                            hit_material.brdf,
+                            hit_record.normal,
+                            in_dir,
+                            -ray.dir,
+                            hit_record.surface_point,
+                        )
+            result_color += (emitted_color + brdf_color) * cur_light.color * cos_theta * distance_factor
+        end
+    end
+
+    return result_color 
+end

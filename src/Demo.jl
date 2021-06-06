@@ -61,18 +61,13 @@ function first_world()
 			material3
 		)
 	)
-#=
-	t = Torus(
-		rotation_z(2.),
-		material3,
-		0.1,
-		0.22
+
+	add_light!(
+		world, 
+		PointLight(Point(-30.0, 30.0, 30.0), 
+		RGB{Float32}(1.0, 1.0, 1.0))
 	)
-	add_shape!(
-		world,
-		t
-	)
-=#
+
 	return world
 end
 
@@ -154,6 +149,12 @@ function second_world()
 		)
 	)
 
+	add_light!(
+		world, 
+		PointLight(Point(-1.0, 1.0, 1.0), 
+		RGB{Float32}(100.0, 100.0, 100.0))
+	)
+
 	return world
 end
 
@@ -205,8 +206,8 @@ function demo(
 
 	world = select_world(world_type)
 
-	# Initialize a camera
-	observer_vec = Point(0., 0., 0.) - camera_position
+	observer_vec = obs - Point(0., 0., 0.)
+
 	camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec)
 	aspect_ratio = width / height
 
@@ -340,9 +341,10 @@ the rendering software, specifically the orientation upside-down and left-right.
   in (`X`,`Y,`Z`) coordinates
 
 - `algorithm::String = "flat"` : algorithm to be used in the rendered:
-		- `algorithm=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
-		- `algorithm=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
-		- `algorithm=="pathtracing"` -> [`PathTracer`](@ref) algorithm 
+  - `algorithm=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
+  - `algorithm=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
+  - `algorithm=="pathtracing"` -> [`PathTracer`](@ref) algorithm 
+  - `algorithm=="pointlight"` -> [`PointLightRenderer`](@ref) algorithm
 
 - `α::Float64 = 0.` : angle of rotation _*IN RADIANTS*_, relative to the vertical
   (i.e. z) axis, of the view direction
@@ -460,9 +462,10 @@ This function works following this steps:
 		- `camera_type=="ort"`  -> set [`OrthogonalCamera`](@ref)
 		
 - `algorithm::String = "flat"` : algorithm to be used in the rendered:
-		- `algorithm=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
-		- `algorithm=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
-		- `algorithm=="pathtracing"` -> [`PathTracer`](@ref) algorithm 
+  - `algorithm=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
+  - `algorithm=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
+  - `algorithm=="pathtracing"` -> [`PathTracer`](@ref) algorithm
+  - `algorithm=="pointlight"` -> [`PointLightRenderer`](@ref) algorithm
 
 - `width::Int64 = 640` and `height::Int64 = 480` : pixel dimensions of the demo image
 

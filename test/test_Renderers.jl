@@ -94,6 +94,7 @@ end
 end
 
 @testset "test_PointLightTracer" begin
+<<<<<<< HEAD
      @testset "test_quick_ray_intersection" begin
           world = World()
 
@@ -102,6 +103,40 @@ end
           add_shape!(world, sphere1)
           add_shape!(world, sphere2)
 
+=======
+     @testset "quick_ray_intersection_sphere" begin
+          world = World()
+
+          sphere1 = Sphere(translation(Vec(2.0, 0.0, 0.0)))
+          sphere2 = Sphere(translation(Vec(8.0, 0.0, 0.0)))
+          add_shape!(world, sphere1)
+          add_shape!(world, sphere2)
+
+          @test is_point_visible(world, Point(-10.0, 0.0, 0.0), Point(0.0, 0.0, 0.0))
+          @test !is_point_visible(world, Point(10.0, 0.0, 0.0), Point(0.0, 0.0, 0.0))
+          @test !is_point_visible(world, Point(5.0, 0.0, 0.0), Point(0.0, 0.0, 0.0))
+          @test is_point_visible(world, Point(5.0, 0.0, 0.0), Point(4.0, 0.0, 0.0))
+          @test is_point_visible(world, Point(0.5, 0.0, 0.0), Point(0.0, 0.0, 0.0))
+          @test is_point_visible(world, Point(0.0, 10.0, 0.0), Point(0.0, 0.0, 0.0))
+          @test is_point_visible(world, Point(0.0, 0.0, 10.0), Point(0.0, 0.0, 0.0))
+     end
+
+     @testset "quick_ray_intersection_plane" begin
+          world = World()
+
+          plane1 = 
+               Plane(
+                    translation(Vec(2.0, 0.0, 0.0)) * rotation_y(π/2.)
+               )
+          plane2 = 
+               Plane(
+                    translation(Vec(8.0, 0.0, 0.0)) * rotation_y(π/2.)
+               )
+          add_shape!(world, plane1)
+          add_shape!(world, plane2)
+
+          @test is_point_visible(world, Point(-10.0, 0.0, 0.0), Point(0.0, 0.0, 0.0))
+>>>>>>> ddb98273ccf586f2bf52ed0b928d7a4851a59b77
           @test !is_point_visible(world, Point(10.0, 0.0, 0.0), Point(0.0, 0.0, 0.0))
           @test !is_point_visible(world, Point(5.0, 0.0, 0.0), Point(0.0, 0.0, 0.0))
           @test is_point_visible(world, Point(5.0, 0.0, 0.0), Point(4.0, 0.0, 0.0))

@@ -25,16 +25,15 @@ end
 
 @testset "test_Point" begin
      err = 1e-11
-     p = Point(1.0, 2.0, 3.0)
-     q = Point(4.0, 6.0, 8.0)
-     a = Vec(1.0, 2.0, 3.0)
+     p1 = Point(1.0, 2.0, 3.0)
+     p2 = Point(4.0, 6.0, 8.0)
+     v = Vec(4.0, 6.0, 8.0)
      
-     @test (p * 2) ≈ Point(2.0, 4.0 - err, 6.0)
-     @test (2 * p) ≈ Point(2.0, 4.0 + 8.5*err, 6.0)
-     # @test (p + q) ≈ Point(5.0, 8.0 - err, 11.0)
-     @test (p - q) ≈ Vec(3.0, 4.0 - 2 * err, 5.0)
-     @test (q - a) ≈ Point(3.0, 4.0, 5.0 - err)
-     @test (q + a) ≈ Point(5.0, 8.0, 11.0 - 5*err)
+     @test (p1 * 2) ≈ Point(2.0, 4.0 - err, 6.0)
+     @test (2 * p1) ≈ Point(2.0, 4.0 + 8.5*err, 6.0)
+     @test (p1 + v) ≈ Point(5.0, 8.0 - err, 11.0)
+     @test (p1 - v) ≈ Point(-3.0, -4.0 - err, -5.0)
+     @test (p2 - p1) ≈ Vec(3.0, 4.0 - 2 * err, 5.0)
 end
 
 @testset "test_geometry_normalizations" begin
