@@ -210,6 +210,7 @@ function demo(
 		throw(ArgumentError("Unknown renderer: $algorithm"))
 	end
 
+	
 	function print_progress(row::Int64, col::Int64)
      	print("Rendered $(image.width * (image.height - row) + col)/$(image.height*image.width) \t= ")
 		@printf "%.2f" 100*(((image.width * (image.height - row) + col))/(image.height*image.width)) # ((image.height - row)/image.height)
