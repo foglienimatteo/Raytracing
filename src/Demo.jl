@@ -185,6 +185,9 @@ function demo(
 					2, 
 					3
 				)
+	elseif algorithm == "pointlight"
+         print("Using a point-light tracer")
+         renderer = PointLightRenderer(world, BLACK)
 	else
 		throw(ArgumentError("Unknown renderer: $algorithm"))
 	end
@@ -202,6 +205,8 @@ function demo(
 	elseif algorithm == "flat"
 		normalize_image!(img, 0.18, 0.1)
 	elseif algorithm == "pathtracing"
+		normalize_image!(img, 0.18, 0.1)
+	elseif algorithm == "pointlight"
 		normalize_image!(img, 0.18, 0.1)
 	end
 	clamp_image!(img)

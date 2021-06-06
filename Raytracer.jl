@@ -26,7 +26,7 @@ import FileIO: @format_str, query
 using Raytracing
 
 FILE_NAME = split(PROGRAM_FILE, "/")[end]
-RENDERERS = ["onoff", "flat", "pathtracing"]
+RENDERERS = ["onoff", "flat", "pathtracing", "pointlight"]
 
 function parse_commandline_error_handler(settings::ArgParseSettings, err, err_code::Int = 1)
 	help_string = 
@@ -126,7 +126,7 @@ function ArgParse_command_line(arguments)
     		"--algorithm", "-r"
 			help = "option for the renderer algorithm"
           	arg_type = String
-			default = "onoff"
+			default = "flat"
 			range_tester = input -> (input ∈ RENDERERS)
 		"--world-type", "-l"
 			help = "flag for the world to be rendered"
