@@ -9,11 +9,13 @@ Documenter.makedocs(
 	build="build",
 	clean=false,
 	doctest=true,
+	format = Documenter.HTML(prettyurls = get(ENV, "CI", nothing) == "true"),
 	modules = [Raytracing],
-	sitename = "Raytracer.jl Documentation",
+	sitename = "Raytracer.jl",
 	pages = [
-			"Index" => "index.md",
-			]
+			"Introduction" => "index.md",
+			"Demo" => "demo.md",
+			],
 )
 
 deploydocs(repo = "github.com/cosmofico97/Raytracing.git")
