@@ -574,17 +574,10 @@ struct Torus <: Shape
     Torus(T=Transformation(), M=Material(), r=0.5, R=1.0) = new(T, M, r, R)
 end
 
-struct PointLightRenderer
-    world::World
-    background_color::RGB{Float64}
-    ambient_color::RGB{Float64}
-    PointLightRenderer(e, bc = RGB(0., 0., 0.), ac = (0.1, 0.1, 0.1)) = new(w, bc, ac)
-end
-
 """
     PointLightRenderer(
-        world::World
-        background_color::RGB{Float32} = RGB{Float32}(0., 0., 0.)
+        world::World,
+        background_color::RGB{Float32} = RGB{Float32}(0., 0., 0.),
         ambient_color::RGB{Float32} = RGB{Float32}(0.1, 0.1, 0.1)
     )
 
