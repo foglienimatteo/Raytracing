@@ -171,6 +171,7 @@ struct Ray
     Ray(o, d, m=1e-5, M=Inf, n=0) = new(o, d, m, M, n)
 end
 
+
 ##########################################################################################92
 
 abstract type Camera end
@@ -229,6 +230,22 @@ end
 abstract type Shape end
 
 
+
+"""
+A point light (used by the point-light renderer)
+This class holds information about a point light (a Dirac's delta in the rendering equation). The class has
+the following fields:
+-   `position`: a :class:`Point` object holding the position of the point light in 3D space
+-   `color`: the color of the point light (an instance of :class:`.Color`)
+-   `linear_radius`: a floating-point number. If non-zero, this «linear radius» `r` is used to compute the solid
+    angle subtended by the light at a given distance `d` through the formula `(r / d)²`.
+"""
+struct PointLight
+    position::Point
+    color::RGB{Float32}
+    linear_radius::Float64
+    PointLightRenderer(p, c, r = 0.0) = new(p, c, r)
+end
 
 ##########################################################################################92
 
@@ -473,4 +490,11 @@ struct PathTracer <: Renderer
     russian_roulette_limit::Int64
     PathTracer(w, bc=BLACK, pcg=PCG(), n=10, md=2, RRlim=3) = 
         new(w, bc, pcg, n, md, RRlim)
+end
+
+struct PointLightRenderer
+    world::World
+    background_color::RGB{Float64}
+    ambient_color::RGB{Float64}
+    PointLightRenderer(e, bc = RGB(0., 0., 0.), ac = (0.1, 0.1, 0.1)) = new(w, bc, ac)
 end

@@ -22,7 +22,7 @@ export Ray, OrthogonalCamera, PerspectiveCamera, ImageTracer
 export Shape, Sphere, Plane, Vec2d, HitRecord, World
 export Pigment, UniformPigment, CheckeredPigment, ImagePigment
 export BRDF, DiffuseBRDF, SpecularBRDF, Material
-export Renderer, OnOffRenderer, FlatRenderer, PathTracer
+export Renderer, OnOffRenderer, FlatRenderer, PathTracer, PointLightRenderer
 # from Operations.jl
 export are_close, squared_norm, norm, normalize
 # from PrintFunctions.jl
@@ -37,7 +37,7 @@ export rotation_x, rotation_y, rotation_z, scaling, translation, inverse
 # from ImageTracer.jl
 export at, fire_ray, fire_all_rays!
 # from Shapes.jl
-export ray_intersection, sphere_point_to_uv, sphere_normal, add_shape!
+export ray_intersection, sphere_point_to_uv, sphere_normal, add_shape!, add_light!, quick_ray_intersection
 # from Demo.jl
 export demo, demo_animation
 # from Renderers.jl
