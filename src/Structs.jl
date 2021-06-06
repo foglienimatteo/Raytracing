@@ -250,12 +250,6 @@ end
 
 abstract type Shape end
 
-<<<<<<< HEAD
-
-##########################################################################################92
-
-=======
->>>>>>> 4c8cfbe1e04eecf317a560fe8976f3d7b818e54b
 """
 A 2D vector used to represent a point on a surface.
 The fields are named `u` and `v` to distinguish them
