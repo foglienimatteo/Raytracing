@@ -232,13 +232,23 @@ abstract type Shape end
 
 
 """
-A point light (used by the point-light renderer)
-This class holds information about a point light (a Dirac's delta in the rendering equation). The class has
-the following fields:
--   `position`: a :class:`Point` object holding the position of the point light in 3D space
--   `color`: the color of the point light (an instance of :class:`.Color`)
--   `linear_radius`: a floating-point number. If non-zero, this «linear radius» `r` is used to compute the solid
-    angle subtended by the light at a given distance `d` through the formula `(r / d)²`.
+    PointLight(p::Point, c::Color, r::Float64 = 0.0)
+
+A point light (used by the point-light renderer).
+This class holds information about a point light (a Dirac's delta in the 
+rendering equation).
+
+## Arguments
+
+- `position::Point` : position of the point light in 3D space
+
+- `color::RGB{Float32}` : color of the point light
+
+- `linear_radius::Float64`: if non-zero, this «linear radius» `r` is 
+  used to compute the solid angle subtended by the light at a given 
+  distance `d` through the formula ``(r / d)^2``.
+
+See also: [`Point`](@ref), [`PointLightRenderer`](@ref)
 """
 struct PointLight
     position::Point
@@ -496,7 +506,28 @@ struct PathTracer <: Renderer
         new(w, bc, pcg, n, md, RRlim)
 end
 
-struct PointLightRenderer
+
+"""
+    PointLightRenderer(
+        world::World
+        background_color::RGB{Float32} = RGB{Float32}(0., 0., 0.)
+        ambient_color::RGB{Float32} = RGB{Float32}(0.1, 0.1, 0.1)
+    )
+
+A simple point-light tracing renderer.
+
+## Arguments
+
+- `world::World` : the world to be rendered
+
+- `background_color::RGB{Float32}` : default background color 
+  if the Ray doesn-t hit anything
+
+- `ambient_color::RGB{Float32}` : default ambient color 
+
+See also: [`World`](@ref)
+"""
+struct PointLightRenderer <: Renderer
     world::World
     background_color::RGB{Float32}
     ambient_color::RGB{Float32}

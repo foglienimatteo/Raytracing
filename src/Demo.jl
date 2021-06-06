@@ -128,8 +128,8 @@ function second_world()
 
 	add_light!(
 		world, 
-		PointLight(Point(-30.0, 30.0, 30.0), 
-		RGB{Float32}(1.0, 1.0, 1.0))
+		PointLight(Point(-1.0, 1.0, 1.0), 
+		RGB{Float32}(100.0, 100.0, 100.0))
 	)
 
 	return world
@@ -170,7 +170,7 @@ function demo(
 	world = select_world(type)
 
 	# Initialize a camera
-	observer_vec = Point(0., 0., 0.) - obs
+	observer_vec = obs - Point(0., 0., 0.)
 	camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec)
 	aspect_ratio = width / height
 	camera = orthogonal==true ? 

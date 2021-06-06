@@ -97,13 +97,13 @@ function (renderer::PointLightRenderer)(ray::Ray)
     hit_record = ray_intersection(renderer.world, ray)
     !isnothing(hit_record) || (return renderer.background_color)
 
-    hit_material = hit_record.material
+    hit_material = hit_record.shape.Material
     result_color = renderer.ambient_color
 
     for cur_light in renderer.world.point_lights
         if is_point_visible(renderer.world, cur_light.position, hit_record.world_point)
             distance_vec = hit_record.world_point - cur_light.position
-            distance = norm(distance)
+            distance = norm(distance_vec)
             in_dir = distance_vec * (1.0 / distance)
             cos_theta = max(0.0, -normalize(ray.dir)⋅hit_record.normal) 
 

@@ -162,13 +162,13 @@ Append a new shape to this world
 
 See also: [`Shape`](@ref), [`World`](@ref)
 """
-function add_shape!(W::World, S::Shape)
-    push!(W.shapes, S)
+function add_shape!(world::World, S::Shape)
+    push!(world.shapes, S)
     return nothing
 end
 
-function add_light!(W::World, PL::PointLight)
-    push!(W.pointlights, PL)
+function add_light!(world::World, PL::PointLight)
+    push!(world.point_lights, PL)
     return nothing
 end
 
@@ -196,19 +196,26 @@ function ray_intersection(world::World, ray::Ray)
 end
 
 ##########################################################################################92
+
 """
-    quick_ray_intersection(::Shape, ::Ray) -> Bool
-Determine whether a ray hits the shape or not
+    quick_ray_intersection(shape::Shape, ray::Ray) :: Bool
+
+Quickly determine whether a ray hits the shape or not.
+
+See also: [`Shape`](@ref), [`Ray`](@ref)
 """
 function quick_ray_intersection(shape::Shape, ray::Ray)
-    return ErrorException("quick_ray_intersection is an abstract method
-                           and cannot be called directly"
-    )
+    return ErrorException(
+            "quick_ray_intersection is an abstract method"*
+            "and cannot be called directlly")
 end
 
 """
-    quick_ray_intersection(::Sphere, ::Ray) -> Bool
-Quickly checks if a ray intersects the sphere
+    quick_ray_intersection(sphere::Sphere, ray::Ray) :: Bool
+
+Quickly checks if the `ray` intersects the `sphere`.
+
+See also: [`Sphere`](@ref), [`Ray`](@ref)
 """
 function quick_ray_intersection(sphere::Sphere, ray::Ray)
     inv_ray = inverse(sphere.T) * ray
@@ -228,8 +235,11 @@ function quick_ray_intersection(sphere::Sphere, ray::Ray)
 end
 
 """
-    quick_ray_intersection(::Plane, ::Ray) -> Bool
-Quickly checks if a ray intersects the plane
+    quick_ray_intersection(plane::Plane, ray::Ray) :: Bool
+
+Quickly checks if the `ray` intersects the `plane`.
+
+See also: [`Plane`](@ref), [`Ray`](@ref)
 """
 function quick_ray_intersection(plane::Plane, ray::Ray)
     inv_ray = inverse(plane.T) * ray
@@ -239,6 +249,20 @@ function quick_ray_intersection(plane::Plane, ray::Ray)
     return (inv_ray.tmin < t < inv_ray.tmax)
 end
 
+
+"""
+    is_point_visible(
+        world::World, 
+        point::Point, 
+        observer_pos::Point
+        ) :: Bool
+
+Return `true` if the straight line connecting `observer_pos` to `point`
+do not intersect any of the shapes of `world` between the two points,
+otherwise return `false`.
+
+See also: [`World`](@ref), [`Point`](@ref)
+"""
 function is_point_visible(world::World, point::Point, observer_pos::Point)
     direction = point - observer_pos
     dir_norm = norm(direction)
