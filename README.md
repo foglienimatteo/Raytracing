@@ -10,7 +10,7 @@
 ![CI-build](https://img.shields.io/github/workflow/status/cosmofico97/Raytracing/Unit%20tests)
 ![size](https://img.shields.io/github/repo-size/cosmofico97/Raytracing) 
 ![license]( https://img.shields.io/github/license/cosmofico97/Raytracing)
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://ziotom78.github.io/Healpix.jl/stable)   
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://cosmofico97.github.io/Raytracing/stable)   
 
 This software is a simple raytracing program written in the [Julia Programming Language](https://julialang.org).
 It's based on the lectures of the [*Numerical techniques for photorealistic image generation*]( https://www.unimi.it/en/education/degree-programme-courses/2021/numerical-tecniques-photorealistic-image-generation) curse (AY2020-2021), held by Associate Professor [Maurizio Tomasi](http://cosmo.fisica.unimi.it/persone/maurizio-tomasi) at University of Milan [Department of
