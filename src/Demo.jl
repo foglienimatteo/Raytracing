@@ -340,6 +340,7 @@ the rendering software, specifically the orientation upside-down and left-right.
   - `algorithm=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
   - `algorithm=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
   - `algorithm=="pathtracing"` -> [`PathTracer`](@ref) algorithm 
+  - `algorithm=="pointlight"` -> [`PointLightRenderer`](@ref) algorithm
 
 - `α::Float64 = 0.` : angle of rotation _*IN RADIANTS*_, relative to the vertical
   (i.e. z) axis, of the view direction
@@ -459,7 +460,8 @@ This function works following this steps:
 - `algorithm::String = "flat"` : algorithm to be used in the rendered:
   - `algorithm=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
   - `algorithm=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
-  - `algorithm=="pathtracing"` -> [`PathTracer`](@ref) algorithm 
+  - `algorithm=="pathtracing"` -> [`PathTracer`](@ref) algorithm
+  - `algorithm=="pointlight"` -> [`PointLightRenderer`](@ref) algorithm
 
 - `width::Int64 = 640` and `height::Int64 = 480` : pixel dimensions of the demo image
 
