@@ -47,12 +47,6 @@ end
      @test img ≈ img2
 end
 
-@testset "test_overturn" begin
-     M1 = [1 2 3 ; 4 5 6 ; 7 8 9]
-     M2 = [1 4 7 ; 2 5 8 ; 3 6 9]
-     @test M1 ≈ Raytracing.overturn(M2)
-end
-
 @testset "test_get_matrix" begin
      img = Raytracing.HDRimage(2, 3, [
                RGB(1.0, 2.0, 3.0), RGB(4.0, 5.0, 6.0), RGB(7.0, 8.0, 9.0), 

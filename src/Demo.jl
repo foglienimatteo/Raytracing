@@ -7,7 +7,18 @@
 
 
 
+"""
+	first_world() :: World
 
+Render the first world (identified with the string "A").
+
+This world consists in a set of 10 spheres of equal radius 0.1:
+8 brown spheres are placed at the verteces of a cube of side 1.0, one green-purple 
+checked sphere is in the center of the lower cube face and another multi-colored sphere is
+in the center of the left cube face.
+
+See also: [`World`](@ref), [`demo`](@ref), [`demo_animation`](@ref)
+"""
 function first_world()
 	material1 = Material(DiffuseBRDF(UniformPigment(RGB(0.7, 0.3, 0.2))))
     	material2 = Material(DiffuseBRDF(CheckeredPigment(RGB(0.2, 0.7, 0.3), 
@@ -60,6 +71,18 @@ function first_world()
 	return world
 end
 
+
+"""
+	second_world() :: World
+
+Render the second world (identified with the string "B").
+
+This world consists in a checked x-y plane, a blue opaque 
+sphere, a red reflecting sphere, and a green oblique reflecting plane, all
+inside a giant emetting sphere.
+
+See also: [`World`](@ref), [`demo`](@ref), [`demo_animation`](@ref)
+"""
 function second_world()
 	world = World()
 
@@ -144,42 +167,63 @@ end
 
 ##########################################################################################92
 
+#=
 demo() = demo(false, "onoff", 0., 640, 480, "demo.pfm", "demo.png")
 demo(ort::Bool) = demo(ort, "onoff", 0., 640, 480, "demo.pfm", "demo.png")
 demo(al::String) = demo(false, al, 0., 640, 480, "demo.pfm", "demo.png")
 demo(ort::Bool, al::String) = demo(ort, al, 0., 640, 480, "demo.pfm", "demo.png")
 demo(ort::Bool, α::Float64) = demo(ort, "onoff", α, 640, 480, "demo.pfm", "demo.png")
 demo(w::Int64, h::Int64) = demo(false, "onoff", 0., w, h, "demo.pfm", "demo.png")
+=#
+
+function demo(x::(Pair{T1,T2} where {T1,T2})...)
+	demo( parse_demo_settings(  Dict( pair for pair in [x...]) )... )
+end
 
 function demo(
-          orthogonal::Bool,
-		algorithm::String,
-          α::Float64, 
-          width::Int64, 
-          height::Int64, 
-          pfm_output::String, 
-          png_output::String,
-		bool_print::Bool=true,
-		bool_savepfm::Bool=true,
-		type::String = "A",
-		obs::Point = Point(-1., 0., 0.), 
+          camera_type::String = "per",
+		camera_position::Point = Point(-1.,0.,0.), 
+		algorithm::String = "flat",
+          α::Float64 = 0., 
+          width::Int64 = 640, 
+          height::Int64 = 480, 
+          pfm_output::String = "demo.pfm", 
+          png_output::String = "demo.png",
+		bool_print::Bool = true,
+		bool_savepfm::Bool = true,
+		world_type::String = "A",
 		init_state::Int64 = 45,
 		init_seq::Int64 = 54,
+		samples_per_pixel::Int64 = 0
           )
 
-	world = select_world(type)
+	samples_per_side = Int64(floor(√samples_per_pixel))
+     (samples_per_side^2 ≈ samples_per_pixel) ||
+		throw(ArgumentError(
+				"the number of samples per pixel "*
+				"$(samples_per_pixel) must be a perfect square")
+		)
 
-	# Initialize a camera
+	world = select_world(world_type)
+
 	observer_vec = obs - Point(0., 0., 0.)
+
 	camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec)
 	aspect_ratio = width / height
-	camera = orthogonal==true ? 
-			OrthogonalCamera(aspect_ratio, camera_tr) :
-			PerspectiveCamera(1., aspect_ratio, camera_tr)
+
+	if camera_type == "per"
+		(bool_print==true) && (println("Using perspective camera"))
+		camera = PerspectiveCamera(1., aspect_ratio, camera_tr)
+	elseif camera_type == "ort"
+		(bool_print==true) && (println("Using orthogonal camera"))
+		camera = OrthogonalCamera(aspect_ratio, camera_tr) 
+	else
+		throw(ArgumentError("Unknown camera: $camera_type"))
+	end
 	
 	# Run the ray-tracer
 	image = HDRimage(width, height)
-	tracer = ImageTracer(image, camera)
+	tracer = ImageTracer(image, camera, samples_per_side)
 
 	if algorithm == "onoff"
 		(bool_print==true) && (println("Using on/off renderer"))
@@ -204,7 +248,13 @@ function demo(
 		throw(ArgumentError("Unknown renderer: $algorithm"))
 	end
 
-	fire_all_rays!(tracer, renderer)
+	function print_progress(row::Int64, col::Int64)
+     	print("Rendered row $(image.height - row)/$(image.height) \t= ")
+		@printf "%.2f" 100*((image.height - row)/image.height)
+		print("%\n")
+	end
+
+	fire_all_rays!(tracer, renderer, print_progress)
 	img = tracer.img
 
 	# Save the HDR image
@@ -243,14 +293,22 @@ end
 
 
 """
-	function demo(
-          orthogonal::Bool, algorithm::String,
-          α::Float64, 
-          width::Int64, height::Int64, 
-          pfm_output::String, png_output::String,
-		bool_print::Bool=true, bool_savepfm::Bool=true
-		type::String = "A"
-          ) 
+	demo(
+          camera_type::String = "per",
+		camera_position::Point = Point(-1.,0.,0.), 
+		algorithm::String = "flat",
+          α::Float64 = 0., 
+          width::Int64 = 640, 
+          height::Int64 = 480, 
+          pfm_output::String = "demo.pfm", 
+          png_output::String = "demo.png",
+		bool_print::Bool = true,
+		bool_savepfm::Bool = true,
+		world_type::String = "A",
+		init_state::Int64 = 45,
+		init_seq::Int64 = 54,
+		samples_per_pixel::Int64 = 0
+          )
 
 Creates a demo image with the specified options. 
 
@@ -258,46 +316,62 @@ There are two possible demo image "world" to be rendered, specified through the
 input string `type`.
 
 The `type=="A"` demo image world consist in a set of 10 spheres of equal radius 0.1:
-8 spheres are placed at the verteces of a cube of side 1.0, one in the center of
-the lower cube face and the last one in the center of the left cube face.
+8 brown spheres are placed at the verteces of a cube of side 1.0, one green-purple 
+checked sphere is in the center of the lower cube face and another multi-colored sphere is
+in the center of the left cube face.
+
+The `type=="B"` demo image world consists in a checked x-y plane, a blue opaque 
+sphere, a red reflecting sphere, and a green oblique reflecting plane, all
+inside a giant emetting sphere.
 
 The creation of the demo image has the objective to check the correct behaviour of
 the rendering software, specifically the orientation upside-down and left-right.
 
 ## Arguments
 
-- `orthogonal::Bool` : bool variable tha set the perspective projection view:
-		- `orthogonal==false` -> set [`PerspectiveCamera`](@ref)  (default value)
-		- `orthogonal==true`  -> set [`OrthogonalCamera`](@ref)
+- `camera_type::String = "per"` : set the perspective projection view:
+  - `camera_type=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
+  - `camera_type=="ort"`  -> set [`OrthogonalCamera`](@ref)
 
-- `algorithm::String` : string specifing the algorithm to be used in the rendered
-  demo image prova:
-		- `algorithm==onoff` -> [`OnOffRenderer`](@ref) algorithm (default value)
-		- `algorithm==flat` -> [`FlatRenderer`](@ref) algorithm 
+- `camera_position::Point = Point(-1.,0.,0.)` : set the point of observation 
+  in (`X`,`Y,`Z`) coordinates
 
-- `α::Float64` : angle of rotation _*IN RADIANTS*_, relative to the vertical
+- `algorithm::String = "flat"` : algorithm to be used in the rendered:
+  - `algorithm=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
+  - `algorithm=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
+  - `algorithm=="pathtracing"` -> [`PathTracer`](@ref) algorithm 
+
+- `α::Float64 = 0.` : angle of rotation _*IN RADIANTS*_, relative to the vertical
   (i.e. z) axis, of the view direction
 
-- `width::Int64` and `height::Int64` : pixel dimensions of the demo image
+- `width::Int64 = 640` and `height::Int64 = 480` : pixel dimensions of the demo image
 
-- `pfm_output::String` : name of the output pfm file; default is `demo.pfm`
+- `pfm_output::String = "demo.pfm"` : name of the output pfm file
 
-- `png_output::String` : name of the output ldr file; default is `demo.png`
+- `png_output::String = "demo.png"` : name of the output LDR file
 
-- `bool_print::Bool=true` : bool that specifies if the WIP messages of the demo
+- `bool_print::Bool = true` : specifies if the WIP messages of the demo
   function should be printed or not (useful option for [`demo_animation`](@ref))
 
-- `bool_savepfm::Bool=true` : bool that specifies if the pfm file should be saved
+- `bool_savepfm::Bool = true` : bool that specifies if the pfm file should be saved
   or not (useful option for [`demo_animation`](@ref))
 
-- `type::String="A"` : specifies the type of world to be rendered ("A" or "B")
+- `world_type::String = "A"` : specifies the type of world to be rendered ("A" or "B")
 
-See also: [`OnOffRenderer`](@ref), [`FlatRenderer`](@ref), [`demo_animation`](@ref)
+- `init_state::Int64 = 45` : initial state of the PCG random number generator
+
+- `init_seq::Int64 = 54` : initial sequence of the PCG random number generator
+
+- `samples_per_pixel::Int64 = 0` : number of rays per pixel to be used (antialiasing)
+
+See also: [`Point`](@ref) ,[`OnOffRenderer`](@ref), [`FlatRenderer`](@ref), 
+[`PathTracer`](@ref), [`demo_animation`](@ref)
 """ 
 demo
 
 ##########################################################################################92
 
+#=
 demo_animation() = demo_animation(false, "onoff", 200, 150, "demo-animation.mp4")
 demo_animation(ort::Bool) = demo_animation(ort, "onoff", 200, 150, "demo-animation.mp4")
 demo_animation(al::String) = demo_animation(false, al, 200, 150, "demo-animation.mp4")
@@ -307,42 +381,60 @@ demo_animation(al::String, w::Int64, h::Int64) =
 					demo_animation(false, al, w, h, "demo-animation.mp4")
 demo_animation(ort::Bool, al::String, w::Float64, h::Float64) = 
 					demo_animation(ort, al, w, h, "demo-animation.mp4")
+=#
+
+function demo_animation(x::(Pair{T1,T2} where {T1,T2})...)
+	demo_animation( parse_demoanimation_settings(  Dict( pair for pair in [x...]) )... )
+end
 
 function demo_animation( 
-			ort::Bool,
-			algorithm::String,
-        		width::Int64, 
-        		height::Int64, 
-       		anim_output::String
+			camera_type::String = "per",
+			algorithm::String = "flat",
+        		width::Int64 = 200, 
+        		height::Int64 = 150, 
+       		anim_output::String = "demo-animation.mp4",
 		)
+
 	run(`rm -rf .wip_animation`)
 	run(`mkdir .wip_animation`)
 	
+	dict_gen = Dict(
+			"camera_type"=>camera_type,
+			"algorithm"=>algorithm, 
+			"width"=>width,
+			"height"=>height,
+			"bool_print"=>false,
+			"bool_savepfm"=>false,
+			"set_pfm_name"=>".wip_animation/demo.pfm"
+			)
+
 	iter = ProgressBar(0:359)
 	for angle in iter
 		angleNNN = @sprintf "%03d" angle
-		demo(ort, algorithm, 1.0*angle, width, height, ".wip_animation/demo.pfm",
-				".wip_animation/image$(angleNNN).png", false, false)
+		dict_spec = Dict(
+					"alpha"=>1.0*angle,
+					"set_png_name"=>".wip_animation/image$(angleNNN).png"
+					)
+		demo(parse_demo_settings(merge(dict_gen, dict_spec))...)
 		set_description(iter, string(@sprintf("Frame generated: ")))
 	end
 
 	# -r 25: Number of frames per second
-	name = anim_output
 	run(`ffmpeg -r 25 -f image2 -s $(width)x$(height) -i 
 	.wip_animation/image%03d.png -vcodec libx264 
-	-pix_fmt yuv420p $(name)`)
+	-pix_fmt yuv420p $(anim_output)`)
 
 	run(`rm -rf .wip_animation`)
 end
 
 """
-	function demo_animation( 
-				ort::Bool,
-				algorithm::String,
-        			width::Int64, 
-        			height::Int64, 
-       			anim_output::String
-			)
+	demo_animation( 
+			camera_type::String = "per",
+			algorithm::String = "flat",
+        		width::Int64 = 200, 
+        		height::Int64 = 150, 
+       		anim_output::String = "demo-animation.mp4",
+		)
 	
 Creates an animation of the demo image with the specified options. It's
 necessary to have istalled the ffmpeg software to run this function.
@@ -360,22 +452,25 @@ This function works following this steps:
 
 ## Arguments
 
-- `ort::Bool` : bool variable tha set the perspective projection view:
-		- `ort==false` -> set [`PerspectiveCamera`](@ref)  (default value)
-		- `ort==true`  -> set [`OrthogonalCamera`](@ref)
-
-- `algorithm::String` : string specifing the algorithm to be used in the rendered
-  demo image prova:
-		- `algorithm==onoff` -> [`OnOffRenderer`](@ref) algorithm (default value)
-		- `algorithm==flat` -> [`FlatRenderer`](@ref) algorithm
+- `camera_type::String = "per"` : set the perspective projection view:
+  - `camera_type=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
+  - `camera_type=="ort"`  -> set [`OrthogonalCamera`](@ref)
 		
-- `width::Int64` and `height::Int64` : pixel dimensions of the demo animation
+- `algorithm::String = "flat"` : algorithm to be used in the rendered:
+  - `algorithm=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
+  - `algorithm=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
+  - `algorithm=="pathtracing"` -> [`PathTracer`](@ref) algorithm 
 
-- `pfm_output::String` : name of the output animation file; default is "demo-animation.mp4"
+- `width::Int64 = 640` and `height::Int64 = 480` : pixel dimensions of the demo image
 
-See also: [`OnOffRenderer`](@ref), [`FlatRenderer`](@ref), [`demo`](@ref)
+- `anim_output::String = "demo-animation.mp4"` : name of the output animation file
+
+See also: [`OnOffRenderer`](@ref), [`FlatRenderer`](@ref), 
+[`PathTracer`](@ref), [`demo_animation`](@ref)
 """
 demo_animation
+
+
 #=
 for angle in $(seq 0 359); do
     angleNNN=$(printf "%03d" $angle)

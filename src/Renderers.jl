@@ -5,12 +5,11 @@
 # Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
 #
 
-
-
 """
     (renderer::OnOffRenderer)(ray::Ray) :: RGB{Float32}
 
-Return WHITE if the ray hit the object, else BLACK.
+Return the `renderer` color (default WHITE) if the ray hit an object, 
+else return the `renderer` background color (default BLACK).
 
 See also: [`OnOffRenderer`](@ref), [`Ray`](@ref)
 """
@@ -23,8 +22,9 @@ end
 """
     (renderer::FlatRenderer)(ray::Ray) :: RGB{Float32}
 
-Return BLACK if ray doesn't hit any objects, else evaluate 
-the color depending on the material and the self luminosity.
+Return the `renderer` background color (default BLACK) if ray 
+doesn't hit any objects, else evaluate the color depending on 
+the material and the self luminosity.
 
 See also: [`FlatRenderer`](@ref), [`Ray`](@ref)
 """
@@ -42,6 +42,13 @@ end
 """
     (renderer::PathTracer)(ray::Ray) :: RGB{Float32}
 
+A simple path-tracing renderer.
+
+Given the `renderer` parameters (`world`, `background_color`, `pcg`, 
+`num_of_rays`, `max_depth` and `russian_roulette_limit`) evaluate the 
+radiance contribute for each secondary `Ray` according to them.
+
+See also: [`PathTracer`](@ref), [`Ray`](@ref)
 """
 function (renderer::PathTracer)(ray::Ray)
     !(ray.depth > renderer.max_depth) || (return BLACK)

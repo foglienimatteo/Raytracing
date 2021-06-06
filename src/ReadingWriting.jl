@@ -324,124 +324,281 @@ end
     parse_tonemapping_settings(dict::Dict{String, Any}) 
         :: (String, String, Float64, Float64)
 
-Parse a `Dict{String, Any}` for the [`tone_mapping`](@ref) function.
-The keys for the input `Dict` are, respectively: "pfm_infile",
-"outfile", "alpha", "gamma", 
+Parse a `Dict{String, T} where {T}` for the [`tone_mapping`](@ref) function.
+
+## Input
+
+A `dict::Dict{String, T} where {T}`
 
 ## Returns
 
 A tuple `(pfm, png, a, γ)` containing:
-- `pfm::String` : input pfm filename
-- `png::String` : output LDR filename
-- `a::Float64` : scale factor
-- `γ::Float64` : gamma factor
+
+- `pfm::String = dict["pfm_infile"]` : input pfm filename (required)
+
+- `png::String = dict["outfile"]` : output LDR filename (required)
+
+- `a::Float64 = dict["alpha"]` : scale factor (default = 0.18)
+
+- `γ::Float64 = dict["gamma"]` : gamma factor (default = 1.0)
 
 See also:  [`tone_mapping`](@ref)
 """
-function parse_tonemapping_settings(dict::Dict{String, Any})
-    pfm::String = dict["pfm_infile"]
-    png::String = dict["outfile"]
-    a::Float64 = dict["alpha"]
-    γ::Float64 = dict["gamma"]
+function parse_tonemapping_settings(dict::Dict{String, T}) where {T}
+
+    keys = ["pfm_infile", "outfile", "alpha", "gamma"]
+
+    for pair in dict
+        if (pair[1] in keys) ==false
+            throw(ArgumentError(
+                "invalid key : $(pair[1])\n"*
+                "valid keys for tonemapping function are:\n "*
+                "$(["$(key)" for key in keys])"
+            ))
+        end
+    end
+
+    haskey(dict, "pfm_infile") ? 
+        pfm::String = dict["pfm_infile"] : 
+        throw(ArgumentError("need to specify the input pfm file to be tonemapped"))
+
+    haskey(dict, "outfile") ? 
+        png::String = dict["outfile"] : 
+        throw(ArgumentError("need to specify the output LDR filename to be saved"))
+
+    haskey(dict, "alpha") ? 
+        a::Float64 = dict["alpha"] : 
+        a = 0.18
+
+    haskey(dict, "gamma") ? 
+        γ::Float64 = dict["gamma"] : 
+        γ = 1.0
+
     return (pfm, png, a, γ)
 end
 
 """
-    parse_demo_settings(dict::Dict{String, Any}) 
-        :: (Bool, String, Float64, Int64, Int64, String, String)
+    parse_demo_settings(dict::Dict{String, T}) where {T}
+        :: (
+            String, Point, String, Float64, Int64, Int64, String, String,
+            Bool, Bool, String, Int64, Int64, Int64
+            )
 
-Parse a `Dict{String, Any}` for the [`demo`](@ref) function.
-The keys for the input `Dict` are, respectively: "camera-type", "algorithm",
-"alpha", "width", "height", "set-pfm-name", "set-png-name"
+Parse a `Dict{String, T} where {T}` for the [`demo`](@ref) function.
+
+## Input
+
+A `dict::Dict{String, T} where {T}
 
 ## Returns
 
-A tuple `(view_ort, alg, α, w, h, pfm, png)` containing:
-- `view_ort::Bool` : choosen point of view 
-  (`true`->Orthogonal, `false`->Perspective)
-- `alg::String` : choosen algorithm for the rendering image
-- `obs::String` : "X,Y,Z" coordinates of the choosen observation point of view 
-- `α::String` : choosen angle of rotation respect to vertical (i.e. z) axis
-- `w::Int64` and `h::Int64` : width and height of the rendered image
-- `pfm::String` : output pfm filename
-- `png::String` : output LDR filename
-- `type::String` : choosen world type to be rendered
+A tuple `(ct, cp, al, α, w, h, pfm, png, bp, bs, wt, ist, ise, spp)`
+containing the following variables; the corresponding keys are also showed:
 
+- `ct::String = dict["camera_type"]` : set the perspective projection view:
+  - `ct=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
+  - `ct=="ort"`  -> set [`OrthogonalCamera`](@ref)
 
-See also:  [`demo`](@ref)
+- `cp::String = dict["camera_position"]` : "X,Y,Z" coordinates of the 
+  choosen observation point of view 
+
+- `al::String = dict["algorithm"]` : algorithm to be used in the rendered:
+  - `al=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
+  - `al=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
+  - `al=="pathtracing"` -> [`PathTracer`](@ref) algorithm 
+
+- `α::String = dict["alpha"]` : choosen angle of rotation respect to vertical 
+  (i.e. z) axis
+
+- `w::Int64 = dict["width"]` : number of pixels on the horizontal axis to be rendered
+
+- `h::Int64 = dict["height"]` : number of pixels on the vertical axis to be rendered 
+
+- `pfm::String = dict["set_pfm_name"]` : output pfm filename
+
+- `png::String` = dict["set_png_name"]` : output LDR filename
+
+- `bp::Bool = dict["bool_print"]` : if `true`, WIP message of `demo` 
+  function are printed (otherwise no)
+
+- `bs::Bool = dict["bool_savepfm"]` : if `true`, `demo` function saves the 
+  pfm file to disk
+
+- `wt::String = dict["world_type"]` : type of the world to be rendered
+
+- `ist::Int64 = dict["init_state"]` : initial state of the PCG generator
+
+- `ise::Int64 = dict["init_seq"]` : initial sequence of the PCG generator
+
+- `spp::Int64  = dict["samples_per_pixel"]` : number of ray to be 
+  generated for each pixel
+
+See also:  [`demo`](@ref), [`Point`](@ref), [`PCG`](@ref)
 """
-function parse_demo_settings(dict::Dict{String, Any})
-    view::String = dict["camera-type"]
-    algorithm::String = dict["algorithm"]
-    α::Float64 = dict["alpha"]
-    width::Int64 = dict["width"]
-    height::Int64 = dict["height"]
-    pfm::String = dict["set-pfm-name"]
-    png::String = dict["set-png-name"]
+function parse_demo_settings(dict::Dict{String, T}) where {T}
 
-    world_type::String = dict["world-type"]
+    keys = [
+        "camera_type", "camera_position",
+        "algorithm", "alpha", "width", "height",
+        "set_pfm_name", "set_png_name", 
+        "bool_print", "bool_savepfm",  "world_type",
+        "init_state", "init_seq", "samples_per_pixel"
+    ]
 
-    obs::String = dict["camera-position"]
-    (x,y,z) = Tuple(parse.(Float64, split(obs, ",")))
-    camera_position = Point(x,y,z)
+    for pair in dict
+        if (pair[1] in keys) ==false
+            throw(ArgumentError(
+                "invalid key : $(pair[1])\n"*
+                "valid keys for demo function are:\n "*
+                "$(["$(key)" for key in keys])"
+            ))
+        end
+    end
 
-    init_state::Int64 = dict["init-state"]
-    init_seq::Int64 = dict["init-seq"]
+    haskey(dict, "camera_type") ? 
+        camera_type::String = dict["camera_type"] : 
+        camera_type = "per"
 
-    view_ort = nothing
-    view == "ort" ? view_ort = true : nothing
-    view == "per" ? view_ort = false : nothing
-    !(isnothing(view_ort)) || 
-        throw(ArgumentError("""view must be "ort" or "per" """*
-                            """but instead is equal to view=$view"""))
+    haskey(dict, "camera_position") ?
+        begin
+            obs::String = dict["camera_position"]
+            (x,y,z) = Tuple(parse.(Float64, split(obs, ","))) 
+            camera_position = Point(x,y,z)
+        end : 
+        camera_position =  Point(-1.0 , 0. , 0.)
+
+    haskey(dict, "algorithm") ? 
+        algorithm::String = dict["algorithm"] : 
+        algorithm = "flat"
+
+    haskey(dict, "alpha") ? 
+        α::Float64 = dict["alpha"] : 
+        α = 0.
+
+    haskey(dict, "width") ? 
+        width::Int64 = dict["width"] : 
+        width = 640
+
+    haskey(dict, "height") ? 
+        height::Int64 = dict["height"] : 
+        height= 480
+
+    haskey(dict, "set_pfm_name") ? 
+        pfm::String = dict["set_pfm_name"] : 
+        pfm = "demo.pfm"
+
+    haskey(dict, "set_png_name") ? 
+        png::String = dict["set_png_name"] : 
+        png = "demo.png"
+
+    haskey(dict, "bool_print") ? 
+        bool_print::Bool = dict["bool_print"] : 
+        bool_print = true
+    
+    haskey(dict, "bool_savepfm") ? 
+        bool_savepfm::Bool = dict["bool_savepfm"] : 
+        bool_savepfm = true
+
+    haskey(dict, "world_type") ? 
+        world_type::String = dict["world_type"] : 
+        world_type = "A"
+
+    haskey(dict, "init_state") ? 
+        init_state::Int64 = dict["init_state"] : 
+        init_state = 54
+
+    haskey(dict, "init_seq") ? 
+        init_seq::Int64 = dict["init_seq"] : 
+        init_seq = 45
+
+    haskey(dict, "samples_per_pixel") ? 
+        samples_per_pixel::Int64 = dict["samples_per_pixel"] : 
+        samples_per_pixel = 0
+
 
     return (
-            view_ort, 
+            camera_type,
+            camera_position, 
             algorithm, 
             α, 
             width, height, 
             pfm, png, 
-            true, true, 
-            world_type, 
-            camera_position, 
-            init_state, init_seq
+            bool_print, bool_savepfm, 
+            world_type,
+            init_state, init_seq,
+            samples_per_pixel
         )
 end
 
 
 """
-    parse_demoanimation_settings(dict::Dict{String, Any}) 
-        :: (Bool, String, Int64, Int64, String)
+    parse_demoanimation_settings(dict::Dict{String, T}) where {T}
+        :: (String, String, Int64, Int64, String)
 
-Parse a `Dict{String, Any}` for the [`demo_animation`](@ref) function.
-The keys for the input `Dict` are, respectively: "camera-type", "algorithm",
-"width", "height", "set-anim-name".
+Parse a `Dict{String, T} where {T}` for the [`demo_animation`](@ref) function.
+
+## Input
+
+A `dict::Dict{String, T} where {T}`
 
 ## Returns
 
-A tuple `(view_ort, alg, w, h, anim)` containing:
-- `view_ort::Bool` : choosen point of view 
-  (`true`->Orthogonal, `false`->Perspective)
-- `alg::String` : choosen algorithm for the rendering image
-- `w::Int64` and `h::Int64` : width and height of the rendered image
-- `anim::String` : output animation name
+A tuple `(ct, al, w, h, anim)` containing the following
+variables; the corresponding keys are also showed:
+
+- `ct::String = dict["camera_type"]` : set the perspective projection view:
+  - `ct=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
+- `ct=="ort"`  -> set [`OrthogonalCamera`](@ref)
+
+- `al::String = dict["algorithm"]` : algorithm to be used in the rendered:
+  - `al=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
+  - `al=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
+  - `al=="pathtracing"` -> [`PathTracer`](@ref) algorithm 
+
+- `w::Int64 = dict["width"]` : number of pixels on the horizontal axis to be rendered 
+
+- `h::Int64 = dict["height"]` : width and height of the rendered image
+
+- `anim::String = dict["set_anim_name"]` : output animation name
 
 See also:  [`demo_animation`](@ref), [`demo`](@ref)
 """
-function parse_demoanimation_settings(dict::Dict{String, Any})
-    view::String = dict["camera-type"]
-    alg::String = dict["algorithm"]
-    w::Int64 = dict["width"]
-    h::Int64 = dict["height"]
-    anim::String = dict["set-anim-name"]
+function parse_demoanimation_settings(dict::Dict{String, T}) where {T}
 
+    keys = [
+        "camera_type", "algorithm",
+        "width", "height", "set_anim_name", 
+    ]
 
-    view_ort = nothing
-    view == "ort" ? view_ort = true : nothing
-    view == "per" ? view_ort = false : nothing
-    !(isnothing(view_ort)) || 
-        throw(ArgumentError("""view must be "ort" or "per","""*
-                            """but instead is equal to view=$view"""))
+    for pair in dict
+        if (pair[1] in keys) ==false
+            throw(ArgumentError(
+                "invalid key : $(pair[1])\n"*
+                "valid keys for demo_animation function are:\n "*
+                "$(["$(key)" for key in keys])"
+            ))
+        end
+    end
 
-    return (view_ort, alg, w, h, anim)
+    haskey(dict, "camera_type") ? 
+        camera_type::String = dict["camera_type"] : 
+        camera_type = "per"
+
+    haskey(dict, "algorithm") ? 
+        algorithm::String = dict["algorithm"] : 
+        algorithm = "flat"
+
+    haskey(dict, "width") ? 
+        width::Int64 = dict["width"] : 
+        width = 200
+
+    haskey(dict, "height") ? 
+        height::Int64 = dict["height"] : 
+        height= 150
+
+    haskey(dict, "set_anim_name") ? 
+        anim::String = dict["set_anim_name"] : 
+        anim = "demo_animation.mp4"
+
+    return (camera_type, algorithm, width, height, anim)
 end
