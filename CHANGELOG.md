@@ -1,25 +1,10 @@
 # HEAD
-<<<<<<< HEAD
-- Added antialiasing algorithm
-
 
 - Added point-light tracing algorithm, see PR[#17](https://github.com/cosmofico97/Raytracing/pull/17)
 
 # VERSION 0.3.0
 
 - Added antialiasing algorithm, see PR[#16](https://github.com/cosmofico97/Raytracing/pull/16)
-=======
-- Added antialiasing algorithm, as default uses 9x9 rays in a pixel, missing command line option
->>>>>>> antialiasing
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> ddb98273ccf586f2bf52ed0b928d7a4851a59b77
-
-# VERSION 0.2.0
->>>>>>> pointlighttracing
 
 
 # VERSION 0.2.0
