@@ -10,7 +10,6 @@ end
 demo
 first_world
 second_world
-demo_animation
+select_world
 parse_demo_settings
-parse_demoanimation_settings
 ```

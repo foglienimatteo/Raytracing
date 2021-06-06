@@ -106,15 +106,19 @@ function γ_correction!(img::HDRimage, γ::Float64=1.0, k::Float64=1.)
                           floor(255 * cur_color.g^(1/γ)),
                           floor(255 * cur_color.b^(1/γ))
         )
-        set_pixel(img, x,y, k/255.0*new_col)
+        set_pixel(img, x, y, k/255.0*new_col)
     end
     nothing
-end
+end # γ_correction!
+
+##########################################################################################92
 
 function get_matrix(img::HDRimage)
     m = permutedims(reshape(img.rgb_m, (img.width,img.height)))
     return m
-end
+end # overturn
+
+##########################################################################################92
 
 ##########################################################################################92
 

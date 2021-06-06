@@ -21,15 +21,15 @@ See also: [`World`](@ref), [`demo`](@ref), [`demo_animation`](@ref)
 """
 function first_world()
 	material1 = Material(DiffuseBRDF(UniformPigment(RGB(0.7, 0.3, 0.2))))
-    	material2 = Material(DiffuseBRDF(CheckeredPigment(RGB(0.2, 0.7, 0.3), 
+    material2 = Material(DiffuseBRDF(CheckeredPigment(RGB(0.2, 0.7, 0.3), 
 	    											  RGB(0.3, 0.2, 0.7), 
 									                  4) )	)
 
 	sphere_texture = HDRimage(2, 2)
 	set_pixel(sphere_texture, 0, 0, RGB(0.1, 0.2, 0.3))
-    	set_pixel(sphere_texture, 0, 1, RGB(0.2, 0.1, 0.3))
+    set_pixel(sphere_texture, 0, 1, RGB(0.2, 0.1, 0.3))
 	set_pixel(sphere_texture, 1, 0, RGB(0.3, 0.2, 0.1))
-    	set_pixel(sphere_texture, 1, 1, RGB(0.3, 0.1, 0.2))
+    set_pixel(sphere_texture, 1, 1, RGB(0.3, 0.1, 0.2))
 
 	material3 = Material(DiffuseBRDF(ImagePigment(sphere_texture)))
 
@@ -158,9 +158,14 @@ function second_world()
 	return world
 end
 
-function select_world(type::String)
-	(type=="A") && (return first_world())
-	(type=="B") && (return second_world())
+"""
+	select_world(type_world::String) ::Function
+
+Select which demo world is used
+"""
+function select_world(type_world::String)
+	(type_world=="A") && (return first_world())
+	(type_world=="B") && (return second_world())
 
 	throw(ArgumentError("The input type of world $type does not exists"))
 end
@@ -181,28 +186,28 @@ function demo(x::(Pair{T1,T2} where {T1,T2})...)
 end
 
 function demo(
-          camera_type::String = "per",
+        camera_type::String = "per",
 		camera_position::Point = Point(-1.,0.,0.), 
 		algorithm::String = "flat",
-          α::Float64 = 0., 
-          width::Int64 = 640, 
-          height::Int64 = 480, 
-          pfm_output::String = "demo.pfm", 
-          png_output::String = "demo.png",
+        α::Float64 = 0., 
+        width::Int64 = 640, 
+        height::Int64 = 480, 
+        pfm_output::String = "demo.pfm", 
+        png_output::String = "demo.png",
 		bool_print::Bool = true,
 		bool_savepfm::Bool = true,
 		world_type::String = "A",
 		init_state::Int64 = 45,
 		init_seq::Int64 = 54,
 		samples_per_pixel::Int64 = 0
-          )
+    )
 
 	samples_per_side = Int64(floor(√samples_per_pixel))
-     (samples_per_side^2 ≈ samples_per_pixel) ||
+    (samples_per_side^2 ≈ samples_per_pixel) ||
 		throw(ArgumentError(
 				"the number of samples per pixel "*
 				"$(samples_per_pixel) must be a perfect square")
-		)
+	)
 
 	world = select_world(world_type)
 
@@ -324,14 +329,18 @@ The `type=="B"` demo image world consists in a checked x-y plane, a blue opaque
 sphere, a red reflecting sphere, and a green oblique reflecting plane, all
 inside a giant emetting sphere.
 
+The `type=="B"` demo image world consists in a checked x-y plane, a blue opaque 
+sphere, a red reflecting sphere, and a green oblique reflecting plane, all
+inside a giant emetting sphere.
+
 The creation of the demo image has the objective to check the correct behaviour of
 the rendering software, specifically the orientation upside-down and left-right.
 
 ## Arguments
 
 - `camera_type::String = "per"` : set the perspective projection view:
-  - `camera_type=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
-  - `camera_type=="ort"`  -> set [`OrthogonalCamera`](@ref)
+		- `camera_type=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
+		- `camera_type=="ort"`  -> set [`OrthogonalCamera`](@ref)
 
 - `camera_position::Point = Point(-1.,0.,0.)` : set the point of observation 
   in (`X`,`Y,`Z`) coordinates
@@ -391,8 +400,8 @@ end
 function demo_animation( 
 			camera_type::String = "per",
 			algorithm::String = "flat",
-        		width::Int64 = 200, 
-        		height::Int64 = 150, 
+        	width::Int64 = 200, 
+        	height::Int64 = 150, 
        		anim_output::String = "demo-animation.mp4",
 		)
 
@@ -454,8 +463,8 @@ This function works following this steps:
 ## Arguments
 
 - `camera_type::String = "per"` : set the perspective projection view:
-  - `camera_type=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
-  - `camera_type=="ort"`  -> set [`OrthogonalCamera`](@ref)
+		- `camera_type=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
+		- `camera_type=="ort"`  -> set [`OrthogonalCamera`](@ref)
 		
 - `algorithm::String = "flat"` : algorithm to be used in the rendered:
   - `algorithm=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 

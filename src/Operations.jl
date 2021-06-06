@@ -26,7 +26,7 @@ end
 function Base.:≈(a::HDRimage, b::HDRimage)
     (a.height == b.height) || return false
     (a.width == b.width) || return false
-    return a.rgb_m ≈ b.rgb_m
+    return (a.rgb_m ≈ b.rgb_m)
 end
 Base.:≈(a::Vec, b::Vec) = are_close(a.x, b.x) && are_close(a.y, b.y) && are_close(a.z, b.z)
 Base.:≈(a::Normal, b::Normal) = are_close(a.x, b.x) && are_close(a.y, b.y) && are_close(a.z, b.z)

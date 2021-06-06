@@ -1,4 +1,4 @@
-#!/usr/bin/env julia
+#!/usr/bin/env julia.exe
 
 # The MIT License (MIT)
 #
@@ -20,7 +20,7 @@
 using Pkg
 Pkg.activate(normpath(@__DIR__))
 
-using Colors, Images, ImageIO, ArgParse
+using Colors, Images, ImageIO, ArgParse, Polynomials, Documenter
 using ColorTypes:RGB
 import FileIO: @format_str, query
 using Raytracing

@@ -58,7 +58,7 @@ function println(img::HDRimage, n::Int64=5)
      h=img.height
      println("HDRImage to be printed")
      println("width = ", w, "\t height = ", h)
-     if w*h <= 2*n
+     if (w*h) <= (2*n)
           for c in img.rgb_m; println(c); end
      else
           for i in 1:n; println(img.rgb_m[n]);end

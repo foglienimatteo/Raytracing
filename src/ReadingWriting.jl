@@ -10,10 +10,8 @@
 
 """
     valid_coordinates(hdr::HDRimage, x::Int, y::Int) :: Bool
-
 Return `true` if (`x`, `y`) are valid coordinates for the 
 2D matrix of the `HDRimage`, else return `false`.
-
 See also: [`HDRimage`](@ref)
 """
 function valid_coordinates(hdr::HDRimage, x::Int, y::Int)
@@ -22,10 +20,8 @@ end
 
 """
     pixel_offset(hdr::HDRimage, x::Int, y::Int) :: Int64
-
 Return the index in the 1D array of the specified pixel (`x`, `y`) 
 for the given `HDRimage`.
-
 See also: [`valid_coordinates`](@ref), [`HDRimage`](@ref)
 """
 function pixel_offset(hdr::HDRimage, x::Int, y::Int)
@@ -35,7 +31,6 @@ end
 
 """
     get_pixel(hdr::HDRimage, x::Int, y::Int) :: RBG{Float32}
-
 Return the `RBG{Float32}` color for the (`x`, `y`) pixel in the 
 given [`HDRimage`](@ref). The indexes for a `HDRimage` pixel matrix 
 with `w` width and `h` height follow this sketch:
@@ -45,7 +40,6 @@ with `w` width and `h` height follow this sketch:
 |   ...      ...      ...    ...     ...    |
 | (h-1,0)  (h-1,1)  (h-1,2)  ...  (h-1,w-1) |
 ```
-
 See also: [`pixel_offset`](@ref), [`valid_coordinates`](@ref), 
 [`HDRimage`](@ref)
 """
@@ -66,7 +60,6 @@ end
 """
     set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{Float32})
     set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{T}) where {T}
-
 Set the new RGB color `c` for the (`x`, `y`) pixel in 
 the given [`HDRimage`](@ref). The indexes for a `HDRimage` pixel 
 matrix with `w` width and `h` height follow this sketch:
@@ -76,7 +69,6 @@ matrix with `w` width and `h` height follow this sketch:
 |   ...      ...      ...    ...     ...    |
 | (h-1,0)  (h-1,1)  (h-1,2)  ...  (h-1,w-1) |
 ```
-
 See also: [`pixel_offset`](@ref), [`valid_coordinates`](@ref), 
 [`HDRimage`](@ref)
 """
@@ -86,10 +78,8 @@ set_pixel
 
 """
     write(io::IO, img::HDRimage)
-
 Write the given [`HDRimage`](@ref) image using the given `IO` stream.
 The `endianness` used for writing the file is Little Endian (`-1.0`).
-
 See also: [`get_pixel`](@ref), [`HDRimage`](@ref)
 """
 function write(io::IO, img::HDRimage)
@@ -126,7 +116,6 @@ end
 
 """
     parse_img_size(line::String) :: (Int64, Int64)
-
 Return the size (width and height) parsed from a given `String`, throwing 
 `InvalidPfmFileFormat` exception if encounters invalid values.
 It works inside the [`read_line`](@ref)(::IO) function.
@@ -156,7 +145,6 @@ end
 
 """
     parse_endianness(ess::String) :: Float64
-
 Return the endianness  parsed from a given `String`, throwing 
 `InvalidPfmFileFormat` exception if encounters an invalid value.
 It works inside the [`read_line`](@ref)(::IO) function.
@@ -181,7 +169,6 @@ end
 Return a `Float32`, readed from the given IO stream `io` with the 
 (required) endianness `ess`; `ess` must be `+1.0` (Big Endian) or 
 `-1.0` (Little Endian).
-
 Controls also if there are enough bits in order to form a `Float32`, 
 otherwise throw `InvalidPfmFileFormat`.
 """
@@ -200,7 +187,6 @@ end
 
 """
     read_line(io::IO) :: String
-
 Reads a line from the file whose the given IO object `io` refers to. 
 Do understand when the file is ended and when a new line begins.
 Return the readed line as a `String`.
@@ -219,11 +205,9 @@ end
 
 """
     read(io::IO, ::Type{HDRimage}) :: HDRimage
-
 Read a PFM image from a stream object `io`, and return a `HDRimage` 
 object containing the image. If an error occurs, raise a
 `InvalidPfmFileFormat` exception.
-
 See also: [`read_line`](@ref)(`::IO`), [`parse_image_size`](@ref)(`::String`),
 [`parse_endianness`](@ref)(`::String`), [`read_float`](@ref)(`::IO, `::Float64`),
 [`HDRimage`](@ref)
@@ -263,10 +247,8 @@ end
 
 """
     parse_command_line((args::Vector{String}) :: (String, String, Float64, Float64)
-
 Interpret the command line when the main is executed, 
 and manage eventual argument errors.
-
 # Arguments
 An array of strings, with length 2, 3 or 4, cointaining:
 - first string (required): input file name, must be a PFM format
@@ -275,10 +257,8 @@ An array of strings, with length 2, 3 or 4, cointaining:
 used in [`normalize_image!`](@ref))
 - [`γ`] : gamma factor for screen correction (default 1.0, used in 
   [`γ_correction!`](@ref))
-
 # Returns
 A tuple `(infile, outfile, a, γ)`, with `a` and `γ` with type `Float64`
-
 See also : [`normalize_image!`](@ref), [`γ_correction!`](@ref)
 """
 function parse_command_line(args::Vector{String})
@@ -331,7 +311,6 @@ Parse a `Dict{String, T} where {T}` for the [`tone_mapping`](@ref) function.
 A `dict::Dict{String, T} where {T}`
 
 ## Returns
-
 A tuple `(pfm, png, a, γ)` containing:
 
 - `pfm::String = dict["pfm_infile"]` : input pfm filename (required)
@@ -378,7 +357,7 @@ function parse_tonemapping_settings(dict::Dict{String, T}) where {T}
 end
 
 """
-    parse_demo_settings(dict::Dict{String, T}) where {T}
+    parse_demo_settings(dict::Dict{String, Any}) 
         :: (
             String, Point, String, Float64, Int64, Int64, String, String,
             Bool, Bool, String, Int64, Int64, Int64
@@ -548,14 +527,20 @@ A tuple `(ct, al, w, h, anim)` containing the following
 variables; the corresponding keys are also showed:
 
 - `ct::String = dict["camera_type"]` : set the perspective projection view:
-  - `ct=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
-- `ct=="ort"`  -> set [`OrthogonalCamera`](@ref)
+		- `ct=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
+		- `ct=="ort"`  -> set [`OrthogonalCamera`](@ref)
 
 - `al::String = dict["algorithm"]` : algorithm to be used in the rendered:
+<<<<<<< HEAD
+		- `al=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
+		- `al=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
+		- `al=="pathtracing"` -> [`PathTracer`](@ref) algorithm 
+=======
   - `al=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
   - `al=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
   - `al=="pathtracing"` -> [`PathTracer`](@ref) algorithm 
   - `algorithm=="pointlight"` -> [`PointLightRenderer`](@ref) algorithm
+>>>>>>> ddb98273ccf586f2bf52ed0b928d7a4851a59b77
 
 - `w::Int64 = dict["width"]` : number of pixels on the horizontal axis to be rendered 
 

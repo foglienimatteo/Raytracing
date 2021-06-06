@@ -5,7 +5,6 @@
 # Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
 #
 
-
 ##########################################################################################92
 
 const BLACK = RGB{Float32}(0.0, 0.0, 0.0)
@@ -45,7 +44,7 @@ Define a image in the format 2D  High-Dynamic-Range.
 struct HDRimage
     width::Int64
     height::Int64
-    rgb_m::Array{RGB{Float32}}
+    rgb_m::Array{RGB{Float32}} # Array
     HDRimage(w,h) = new(w,h, fill(RGB(0.0, 0.0, 0.0), (w*h,)) )
     function HDRimage(w,h, rgb_m) 
         @assert size(rgb_m) == (w*h,)
@@ -373,6 +372,7 @@ The parameters defined in this struct are the following:
 - `surface_point`: a [`Vec2d`](@ref) object holding the position of the hit point on the surface of the object
 - `t`: a `Float64` value specifying the distance from the origin of the ray where the hit happened
 - `ray`: the [`Ray`](@ref) that hit the surface
+- `shape`: shape with which the intersection is calculated
 """
 struct HitRecord
     world_point::Point # obserator frame sistem
@@ -469,7 +469,7 @@ A class representing an ideal mirror BRDF
 struct SpecularBRDF <: BRDF
     pigment::Pigment
     theresold_angle_rad::Float64
-    SpecularBRDF(p=UniformPigment(WHITE), thAngle=π/180.) = new(p, thAngle)
+    SpecularBRDF(p=UniformPigment(WHITE), thAngle = π/180.) = new(p, thAngle)
 end
 
 """
@@ -598,11 +598,60 @@ struct PathTracer <: Renderer
         new(w, bc, pcg, n, md, RRlim)
 end
 
+#=
+"""
+A 3D unit sphere centered on the origin of the axes
+# Arguments
+- `T`: potentially [`Transformation`](@ref) associated to the sphere
+- `Material`: potentially [`Material`](@ref) associated to the sphere
+"""
+struct Sphere <: Shape
+    T::Transformation
+    Material::Material
+    Sphere(T=Transformation(), M=Material()) = new(T,M)
+end
+
+"""
+A 3D unit plane, i.e. the x-y plane (set of 3D points with z=0)
+# Arguments
+- `T`: potentially [`Transformation`](@ref) associated to the plane
+- `Material`: potentially [`Material`](@ref) associated to the plane
+"""
+struct Plane <: Shape
+    T::Transformation
+    Material::Material
+    Plane(T=Transformation(), M=Material()) = new(T,M)
+end
+=#
+
+"""
+A 3D unit torus, a ring with circular section; has origin in (0, 0, 0) and axis parallel to the y-axis.
+# Arguments
+- `T`: potentially [`Transformation`](@ref) associated to the plane
+- `Material`: potentially [`Material`](@ref) associated to the plane
+- `r`: radious of the circular section
+- `R`: distance between the torus center and the section center
+```ditaa
+^ ̂y                __-__
+|                 /     \\ 
+|---O------------(---o---)
+|                 \\__ __/
+|                    -
+      <--------R------><-r->
+```
+"""
+struct Torus <: Shape
+    T::Transformation
+    Material::Material
+    r::Float64
+    R::Float64
+    Torus(T=Transformation(), M=Material(), r=0.5, R=1.0) = new(T, M, r, R)
+end
 
 """
     PointLightRenderer(
-        world::World
-        background_color::RGB{Float32} = RGB{Float32}(0., 0., 0.)
+        world::World,
+        background_color::RGB{Float32} = RGB{Float32}(0., 0., 0.),
         ambient_color::RGB{Float32} = RGB{Float32}(0.1, 0.1, 0.1)
     )
 

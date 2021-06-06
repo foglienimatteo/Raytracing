@@ -77,10 +77,10 @@ function (renderer::PathTracer)(ray::Ray)
     # Monte Carlo integration
     
     cum_radiance =  RGB{Float32}(0.0, 0.0, 0.0)
-    
+    num_of_rays = renderer.num_of_rays
     # Only do costly recursions if it's worth it
     if hit_color_lum > 0.0
-        for ray_index in 1:renderer.num_of_rays
+        for ray_index in 1:num_of_rays
             new_ray = scatter_ray(
                             typeof(hit_material.brdf),
                             renderer.pcg,
@@ -97,7 +97,7 @@ function (renderer::PathTracer)(ray::Ray)
         end
     end
 
-    return emitted_radiance + cum_radiance * (1.0 / renderer.num_of_rays)
+    return emitted_radiance + cum_radiance * (1.0 / num_of_rays)
 end
 
 function (renderer::PointLightRenderer)(ray::Ray)
