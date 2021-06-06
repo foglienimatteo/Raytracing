@@ -43,13 +43,13 @@ get_color
 evaluate(b::BRDF, n::Normal, in::Vec, out::Vec, uv::Vec2d) = BLACK
 
 evaluate(b::DiffuseBRDF, n::Normal, in::Vec, out::Vec, uv::Vec2d) = 
-    get_color(b.pigment, uv) * (p.reflectance / pi)
+    get_color(b.pigment, uv) * (b.reflectance / pi)
 
 function evaluate(b::SpecularBRDF, n::Normal, in::Vec, out::Vec, uv::Vec2d)
     θ_in = acos(n ⋅ normalize(in))
     θ_out = acos(n ⋅ normalize(out))
 
-    if abs(θ_in - θ_out) < c.theresold_angle_rad
+    if abs(θ_in - θ_out) < b.theresold_angle_rad
         return get_color(b.pigment, uv)
     else
         return BLACK

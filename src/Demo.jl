@@ -62,6 +62,12 @@ function first_world()
 		)
 	)
 
+	add_light!(
+		world, 
+		PointLight(Point(-30.0, 30.0, 30.0), 
+		RGB{Float32}(1.0, 1.0, 1.0))
+	)
+
 	return world
 end
 
@@ -143,6 +149,12 @@ function second_world()
 		)
 	)
 
+	add_light!(
+		world, 
+		PointLight(Point(-1.0, 1.0, 1.0), 
+		RGB{Float32}(100.0, 100.0, 100.0))
+	)
+
 	return world
 end
 
@@ -194,8 +206,8 @@ function demo(
 
 	world = select_world(world_type)
 
-	# Initialize a camera
-	observer_vec = Point(0., 0., 0.) - camera_position
+	observer_vec = obs - Point(0., 0., 0.)
+
 	camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec)
 	aspect_ratio = width / height
 
@@ -229,6 +241,9 @@ function demo(
 					2, 
 					3
 				)
+	elseif algorithm == "pointlight"
+         print("Using a point-light tracer")
+         renderer = PointLightRenderer(world, BLACK)
 	else
 		throw(ArgumentError("Unknown renderer: $algorithm"))
 	end
@@ -252,6 +267,8 @@ function demo(
 	elseif algorithm == "flat"
 		normalize_image!(img, 0.18, 0.1)
 	elseif algorithm == "pathtracing"
+		normalize_image!(img, 0.18, 0.1)
+	elseif algorithm == "pointlight"
 		normalize_image!(img, 0.18, 0.1)
 	end
 	clamp_image!(img)

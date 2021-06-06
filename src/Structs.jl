@@ -171,6 +171,7 @@ struct Ray
     Ray(o, d, m=1e-5, M=Inf, n=0) = new(o, d, m, M, n)
 end
 
+
 ##########################################################################################92
 
 abstract type Camera end
@@ -251,6 +252,35 @@ end
 
 abstract type Shape end
 
+
+"""
+    PointLight(p::Point, c::Color, r::Float64 = 0.0)
+
+A point light (used by the point-light renderer).
+This class holds information about a point light (a Dirac's delta in the 
+rendering equation).
+
+## Arguments
+
+- `position::Point` : position of the point light in 3D space
+
+- `color::RGB{Float32}` : color of the point light
+
+- `linear_radius::Float64`: if non-zero, this «linear radius» `r` is 
+  used to compute the solid angle subtended by the light at a given 
+  distance `d` through the formula ``(r / d)^2``.
+
+See also: [`Point`](@ref), [`PointLightRenderer`](@ref)
+"""
+struct PointLight
+    position::Point
+    color::RGB{Float32}
+    linear_radius::Float64
+    PointLight(p::Point, c::Color, r::Float64 = 0.0) = new(p, c, r)
+end
+
+##########################################################################################92
+
 """
 A 2D vector used to represent a point on a surface.
 The fields are named `u` and `v` to distinguish them
@@ -294,8 +324,12 @@ to check whether a light ray intersects any of the shapes in the world.
 """
 struct World
     shapes::Array{Shape}
-    World(s::Shape) = new(s)
-    World() = new( Array{Shape,1}() )
+    point_lights::Array{PointLight}
+
+    World(s::Shape, pl::PointLight) = new(s, pl)
+    World(pl::PointLight) = new( Array{Shape,1}(), pl)
+    World(s::Shape) = new(s, Array{PointLight,1}())
+    World() = new( Array{Shape,1}(),  Array{PointLight,1}() )
 end
 
 ##########################################################################################92
@@ -486,6 +520,38 @@ struct PathTracer <: Renderer
     num_of_rays::Int64
     max_depth::Int64
     russian_roulette_limit::Int64
-    PathTracer(w, bc=BLACK, pcg=PCG(), n=10, md=2, RRlim=3) = 
+    PathTracer(w::World, bc=BLACK, pcg=PCG(), n=10, md=2, RRlim=3) = 
         new(w, bc, pcg, n, md, RRlim)
+end
+
+
+"""
+    PointLightRenderer(
+        world::World
+        background_color::RGB{Float32} = RGB{Float32}(0., 0., 0.)
+        ambient_color::RGB{Float32} = RGB{Float32}(0.1, 0.1, 0.1)
+    )
+
+A simple point-light tracing renderer.
+
+## Arguments
+
+- `world::World` : the world to be rendered
+
+- `background_color::RGB{Float32}` : default background color 
+  if the Ray doesn-t hit anything
+
+- `ambient_color::RGB{Float32}` : default ambient color 
+
+See also: [`World`](@ref)
+"""
+struct PointLightRenderer <: Renderer
+    world::World
+    background_color::RGB{Float32}
+    ambient_color::RGB{Float32}
+    PointLightRenderer(
+            w::World, 
+            bc=RGB{Float32}(0., 0., 0.), 
+            ac=RGB{Float32}(0.1, 0.1, 0.1)
+        ) = new(w, bc, ac)
 end

@@ -75,7 +75,19 @@ LinearAlgebra.:×(a::Vec, b::Normal) = Vec(a.y*b.z-a.z*b.y, b.x*a.z-a.x*b.z, a.x
 Base.:+(p::Point, v::Vec) = Point(p.x+v.x, p.y+v.y, p.z+v.z)
 Base.:+(v::Vec, p::Point) = Point(p.x+v.x, p.y+v.y, p.z+v.z)
 Base.:-(p::Point, v::Vec) = Point(p.x-v.x, p.y-v.y, p.z-v.z)
-Base.:-(a::Point, b::Point) = Vec(b.x-a.x, b.y-a.y, b.z-a.z)
+Base.:-(a::Point, b::Point) = Vec(a.x-b.x, a.y-b.y, a.z-b.z)
+
+#=
+"""
+Apply the dot product to the two arguments after having normalized them.
+The result is the cosine of the angle between the two vectors/normals.
+"""
+function normalized_dot(v1::Union{Vec,Normal}, v2::Union{Vec,Normal}) 
+    v1_vec = normalize(Vec(v1.x, v1.y, v1.z))
+    v2_vec = normalize(Vec(v2.x, v2.y, v2.z))
+    return v1_vec ⋅ v2_vec
+end
+=#
 
 # Operations for Transformations
 Base.:*(s::Transformation, t::Transformation) = Transformation(s.M*t.M, t.invM*s.invM)
