@@ -8,23 +8,10 @@
 
 ##########################################################################################92
 
-"""
-    ray_intersection(shape::Shape, ray::Ray) :: ErrorException
-
-Compute the intersection between a [`Ray`](@ref) and a [`Shape`](@ref)
-"""
-function ray_intersection(shape::Shape, ray::Ray)
-    return ErrorException("ray_intersection is an abstract method
-                           and cannot be called directly"
-    )
-end
-
-##########################################################################################92
-
 @doc raw"""
     sphere_point_to_uv(point::Point) :: Vec2d
 
-Convert a 3D `Point` ``point = (P_x, P_y, P_z)`` on the surface of the unit sphere
+Convert a 3D `point` ``P = (P_x, P_y, P_z)`` on the surface of the unit sphere
 into a 2D `Vec2d` using the following spherical coordinates:
 
 ```math
@@ -45,7 +32,7 @@ end
 @doc raw"""
     plane_point_to_uv(point::Point) :: Vec2d
 
-Convert a 3D `Point` ``point = (P_x, P_y, P_z)`` on the surface of the unit plane
+Convert a 3D `point` ``P = (P_x, P_y, P_z)`` on the surface of the unit plane
 into a 2D `Vec2d` using the following periodical coordinates:
 
 ```math
@@ -104,12 +91,28 @@ end
 
 ##########################################################################################92
 
+
 """
-    ray_intersection(sphere::Sphere, ray::Ray) -> HitRecord
+    ray_intersection(shape::Shape, ray::Ray) :: Union{HitRecord, Nothing}
 
-Check if a ray ([`Ray`](@ref)) intersects the sphere ([`Sphere`](@ref))
+Compute the intersection between a `Ray` and a `Shape`.
 
-Return a [`HitRecord`](@ref), or `nothing` if no intersection is found.
+See also: [`Ray`](@ref), [`Shape`](@ref)
+"""
+function ray_intersection(shape::Shape, ray::Ray)
+    return ErrorException(
+            "ray_intersection is an abstract method"*
+            "and cannot be called directly"
+            )
+end
+
+"""
+    ray_intersection(sphere::Sphere, ray::Ray) :: Union{HitRecord, Nothing}
+
+Check if the `ray` intersects the `sphere`.
+Return a `HitRecord`, or `nothing` if no intersection is found.
+
+See also: [`Ray`](@ref), [`Sphere`](@ref), [`HitRecord`](@ref)
 """
 function ray_intersection(sphere::Sphere, ray::Ray)
     inv_ray = inverse(sphere.T) * ray
@@ -147,11 +150,12 @@ end
 
 
 """
-    ray_intersection(plane::Plane, ray::Ray) -> HitRecord
+    ray_intersection(plane::Plane, ray::Ray) :: Union{HitRecord, Nothing}
 
-Check if a ray ([`Ray`](@ref)) intersects the plane ([`Plane`](@ref))
+Check if the `ray` intersects the `plane`.
+Return a `HitRecord`, or `nothing` if no intersection is found.
 
-Return a [`HitRecord`](@ref), or `nothing` if no intersection is found.
+See also: [`Ray`](@ref), [`Plane`](@ref), [`HitRecord`](@ref)
 """
 function ray_intersection(plane::Plane, ray::Ray)
     inv_ray = inverse(plane.T) * ray
@@ -175,31 +179,13 @@ function ray_intersection(plane::Plane, ray::Ray)
 end
 
 
-##########################################################################################92
-
 """
-    add_shape!(W::World, S::Shape)
+    ray_intersection(world::World, ray::Ray) :: Union{HitRecord, Nothing}
 
-Append a new shape to this world
+Determine whether the `ray` intersects any of the objects of the given `world`.
+Return a `HitRecord`, or `nothing` if no intersection is found.
 
-See also: [`Shape`](@ref), [`World`](@ref)
-"""
-function add_shape!(world::World, S::Shape)
-    push!(world.shapes, S)
-    return nothing
-end
-
-function add_light!(world::World, PL::PointLight)
-    push!(world.point_lights, PL)
-    return nothing
-end
-
-##########################################################################################92
-
-"""
-    ray_intersection(world::World, ray::Ray) -> HitRecord
-
-Determine whether a [`Ray`](@ref) intersects any of the objects in this [`World`](@ref)
+See also: [`Ray`](@ref), [`World`](@ref), [`HitRecord`](@ref)
 """
 function ray_intersection(world::World, ray::Ray)
     closest = nothing
@@ -220,9 +206,36 @@ end
 ##########################################################################################92
 
 """
+    add_shape!(world::World, shape::Shape)
+
+Append a new `shape` to the given `world`.
+
+See also: [`Shape`](@ref), [`World`](@ref)
+"""
+function add_shape!(world::World, S::Shape)
+    push!(world.shapes, S)
+    return nothing
+end
+
+
+"""
+    add_light!(world::World, pointlight::PointLight)
+
+Append a new `pointlight` to the given `world`.
+
+See also: [`PointLight`](@ref), [`World`](@ref)
+"""
+function add_light!(world::World, pointlight::PointLight)
+    push!(world.point_lights, pointlight)
+    return nothing
+end
+
+##########################################################################################92
+
+"""
     quick_ray_intersection(shape::Shape, ray::Ray) :: Bool
 
-Quickly determine whether a ray hits the shape or not.
+Quickly determine whether the `ray` hits the `shape` or not.
 
 See also: [`Shape`](@ref), [`Ray`](@ref)
 """
@@ -235,7 +248,7 @@ end
 """
     quick_ray_intersection(sphere::Sphere, ray::Ray) :: Bool
 
-Quickly checks if the `ray` intersects the `sphere`.
+Quickly checks if the `ray` intersects the `sphere` or not.
 
 See also: [`Sphere`](@ref), [`Ray`](@ref)
 """
@@ -259,7 +272,7 @@ end
 """
     quick_ray_intersection(plane::Plane, ray::Ray) :: Bool
 
-Quickly checks if the `ray` intersects the `plane`.
+Quickly checks if the `ray` intersects the `plane` or not.
 
 See also: [`Plane`](@ref), [`Ray`](@ref)
 """
@@ -274,10 +287,10 @@ end
 
 """
     is_point_visible(
-        world::World, 
-        point::Point, 
-        observer_pos::Point
-        ) :: Bool
+            world::World, 
+            point::Point, 
+            observer_pos::Point
+            ) :: Bool
 
 Return `true` if the straight line connecting `observer_pos` to `point`
 do not intersect any of the shapes of `world` between the two points,
