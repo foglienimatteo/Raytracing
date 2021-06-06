@@ -105,7 +105,7 @@ function (renderer::PointLightRenderer)(ray::Ray)
             distance_vec = hit_record.world_point - cur_light.position
             distance = norm(distance)
             in_dir = distance_vec * (1.0 / distance)
-            cos_theta = max(0.0, -ray.dir ⋅ hit_record.normal) # NORMALIZED DOT? 
+            cos_theta = max(0.0, -normalize(ray.dir)⋅hit_record.normal) 
 
             distance_factor =  
                 (cur_light.linear_radius > 0) ? 

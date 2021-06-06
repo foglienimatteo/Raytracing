@@ -51,6 +51,12 @@ function first_world()
 		)
 	)
 
+	add_light!(
+		world, 
+		PointLight(Point(-30.0, 30.0, 30.0), 
+		RGB{Float32}(1.0, 1.0, 1.0))
+	)
+
 	return world
 end
 
@@ -118,6 +124,12 @@ function second_world()
 			translation(Vec(0.4, 1.5, 0)) * scaling(Vec(s2, s2, s2)),
 			mirror_material,
 		)
+	)
+
+	add_light!(
+		world, 
+		PointLight(Point(-30.0, 30.0, 30.0), 
+		RGB{Float32}(1.0, 1.0, 1.0))
 	)
 
 	return world

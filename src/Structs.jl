@@ -244,7 +244,7 @@ struct PointLight
     position::Point
     color::RGB{Float32}
     linear_radius::Float64
-    PointLightRenderer(p, c, r = 0.0) = new(p, c, r)
+    PointLight(p::Point, c::Color, r::Float64 = 0.0) = new(p, c, r)
 end
 
 ##########################################################################################92
@@ -492,13 +492,17 @@ struct PathTracer <: Renderer
     num_of_rays::Int64
     max_depth::Int64
     russian_roulette_limit::Int64
-    PathTracer(w, bc=BLACK, pcg=PCG(), n=10, md=2, RRlim=3) = 
+    PathTracer(w::World, bc=BLACK, pcg=PCG(), n=10, md=2, RRlim=3) = 
         new(w, bc, pcg, n, md, RRlim)
 end
 
 struct PointLightRenderer
     world::World
-    background_color::RGB{Float64}
-    ambient_color::RGB{Float64}
-    PointLightRenderer(e, bc = RGB(0., 0., 0.), ac = (0.1, 0.1, 0.1)) = new(w, bc, ac)
+    background_color::RGB{Float32}
+    ambient_color::RGB{Float32}
+    PointLightRenderer(
+            w::World, 
+            bc=RGB{Float32}(0., 0., 0.), 
+            ac=RGB{Float32}(0.1, 0.1, 0.1)
+        ) = new(w, bc, ac)
 end

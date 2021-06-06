@@ -31,12 +31,14 @@ println(n::Normal) = println(stdout,n)
 
 # Ray print functions
 function println(io::IO, ray::Ray)
-     print("Ray with origin and direction: \t")
-     println(ray.origin, "  ,  ", ray.dir)
+     println(io, "Ray with origin-direction-tmin-tmax-depth:")
+     println(io, ray.origin, " \t  ", ray.dir)
+     println(io, "tmin = ", ray.tmin, " \t tmax = ", ray.tmax, " \t depth = ", ray.depth)
 end
 function print(io::IO, ray::Ray)
-     print("Ray with origin and direction: \t")
-     print(ray.origin, "  ,  ", ray.dir)
+     println(io, "Ray with origin-direction-tmin-tmax-depth:")
+     println(io, ray.origin, " \t  ", ray.dir)
+     println(io, "tmin = ", ray.tmin, " \t tmax = ", ray.tmax, " \t depth = ", ray.depth)
 end
 println(ray::Ray) = println(stdout, ray)
 print(ray::Ray) = print(stdout, ray)
