@@ -158,9 +158,14 @@ function second_world()
 	return world
 end
 
-function select_world(type::String)
-	(type=="A") && (return first_world())
-	(type=="B") && (return second_world())
+"""
+	select_world(type_world::String) ::Function
+
+Select which demo world is used
+"""
+function select_world(type_world::String)
+	(type_world=="A") && (return first_world())
+	(type_world=="B") && (return second_world())
 
 	throw(ArgumentError("The input type of world $type does not exists"))
 end
@@ -395,8 +400,8 @@ end
 function demo_animation( 
 			camera_type::String = "per",
 			algorithm::String = "flat",
-        		width::Int64 = 200, 
-        		height::Int64 = 150, 
+        	width::Int64 = 200, 
+        	height::Int64 = 150, 
        		anim_output::String = "demo-animation.mp4",
 		)
 

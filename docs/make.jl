@@ -15,6 +15,7 @@ Documenter.makedocs(
 	pages = [
 			"Introduction" => "index.md",
 			"Demo" => "demo.md",
+			"Demo animaiton" => "demo_animation.md",
 			],
 )
 
