@@ -156,7 +156,7 @@ end
 ##########################################################################################92
 
 """
-    add_shape!(W::World, S::Shape)
+    add_shape!(::World, ::Shape)
 
 Append a new shape to this world
 
@@ -167,6 +167,13 @@ function add_shape!(W::World, S::Shape)
     return nothing
 end
 
+"""
+    add_light!(::World, ::PointLight)
+
+Append a new light point to this world
+
+See also: [`LightPoint`](@ref), [`World`](@ref)
+"""
 function add_light!(W::World, PL::PointLight)
     push!(W.pointlights, PL)
     return nothing
