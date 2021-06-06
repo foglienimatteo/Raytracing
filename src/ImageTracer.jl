@@ -123,7 +123,51 @@ function fire_all_rays!(
     last_call_time = time()  # use if @elapsed doesn't work propely for our pourpose
 
     #isnothing(callback) || callback(0, 0)
-    
+
+    # need a command from line, remember must be a squared number
+    ImTr.samples_per_side <= 0 ? smp4side = 0 : smp4side = ImTr.samples_per_side
+    pcg = ImTr.pcg
+    if smp4side > 0
+        for row in ImTr.img.height-1:-1:0, col in 0:ImTr.img.width-1
+            cum_color = RGB{Float32}(0., 0., 0.)
+
+            for inter_pixel_row in 0:smp4side-1, inter_pixel_col in 0:smp4side-1
+                u_pixel = (inter_pixel_col + random(pcg)) / smp4side
+                v_pixel = (inter_pixel_row + random(pcg)) / smp4side
+                ray = fire_ray(ImTr, col, row, u_pixel, v_pixel)
+                cum_color += func(ray)
+            end
+
+            set_pixel(ImTr.img,
+                      col,
+                      row,
+                      cum_color * (1.0/smp4side^2)
+            )
+
+            # current_time = time() # use if @elapsed doesn't work propely for our pourpose
+            t = time() - last_call_time# current_time - last_call_time # use if @elapsed doesn't work propely for our pourpose
+
+            if (callback ≠ nothing) && (t > callback_time_s)
+                callback(row, col)
+                last_call_time = time() # use if @elapsed doesn't work propely for our pourpose
+            end
+        end
+    else
+        for row in ImTr.img.height-1:-1:0, col in 0:ImTr.img.width-1
+            ray = fire_ray(ImTr, col, row)
+            set_pixel(ImTr.img, col, row, func(ray))
+
+            # current_time = time() # use if @elapsed doesn't work propely for our pourpose
+            t = time() - last_call_time# current_time - last_call_time # use if @elapsed doesn't work propely for our pourpose
+
+            if (callback ≠ nothing) && (t > callback_time_s)
+                callback(row, col)
+                last_call_time = time()    # use if @elapsed doesn't work propely for our pourpose
+            end
+        end
+    end
+
+#=
     for row in ImTr.img.height-1:-1:0, col in 0:ImTr.img.width-1
         cum_color = RGB{Float32}(0., 0., 0.)
 
@@ -153,6 +197,7 @@ function fire_all_rays!(
         end
 
     end
+=#
 
     nothing
 end # fire_all_rays!

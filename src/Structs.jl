@@ -31,7 +31,7 @@ Define a image in format High-Dynamic-Range 2D image
 struct HDRimage
     width::Int64
     height::Int64
-    rgb_m::Array{RGB{Float32}}
+    rgb_m::Array{RGB{Float32}} # Array
     HDRimage(w,h) = new(w,h, fill(RGB(0.0, 0.0, 0.0), (w*h,)) )
     function HDRimage(w,h, rgb_m) 
         @assert size(rgb_m) == (w*h,)

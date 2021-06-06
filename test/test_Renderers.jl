@@ -5,9 +5,6 @@
 # Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
 #
 
-
-
-
 @testset "test_OnOffRenderer" begin
      sphere = Sphere(translation(Vec(2, 0, 0)) * scaling(Vec(0.2, 0.2, 0.2)),
                     Material(DiffuseBRDF(UniformPigment(WHITE))))

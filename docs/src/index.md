@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Example.jl Documentation
 
 
@@ -9,3 +10,10 @@ sphere_normal
 plane_normal
 demo
 ```
+=======
+# Example.jl Documentation
+
+```@docs
+demo
+```
+>>>>>>> antialiasing

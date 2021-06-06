@@ -357,7 +357,7 @@ function parse_tonemapping_settings(dict::Dict{String, T}) where {T}
 end
 
 """
-    parse_demo_settings(dict::Dict{String, T}) where {T}
+    parse_demo_settings(dict::Dict{String, Any}) 
         :: (
             String, Point, String, Float64, Int64, Int64, String, String,
             Bool, Bool, String, Int64, Int64, Int64
@@ -526,13 +526,13 @@ A tuple `(ct, al, w, h, anim)` containing the following
 variables; the corresponding keys are also showed:
 
 - `ct::String = dict["camera_type"]` : set the perspective projection view:
-  - `ct=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
-- `ct=="ort"`  -> set [`OrthogonalCamera`](@ref)
+		- `ct=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
+		- `ct=="ort"`  -> set [`OrthogonalCamera`](@ref)
 
 - `al::String = dict["algorithm"]` : algorithm to be used in the rendered:
-  - `al=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
-  - `al=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
-  - `al=="pathtracing"` -> [`PathTracer`](@ref) algorithm 
+		- `al=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
+		- `al=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
+		- `al=="pathtracing"` -> [`PathTracer`](@ref) algorithm 
 
 - `w::Int64 = dict["width"]` : number of pixels on the horizontal axis to be rendered 
 
