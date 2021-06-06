@@ -170,6 +170,7 @@ struct Ray
     Ray(o, d, m=1e-5, M=Inf, n=0) = new(o, d, m, M, n)
 end
 
+
 ##########################################################################################92
 
 abstract type Camera end
@@ -250,6 +251,27 @@ end
 
 abstract type Shape end
 
+
+
+"""
+A point light (used by the point-light renderer)
+This class holds information about a point light (a Dirac's delta in the rendering equation). 
+
+#Arguments
+-   `position`: a `Point` object holding the position of the point light in 3D space
+-   `color`: the color of the point light (an instance of `RGB{Float32}`)
+-   `linear_radius`: a floating-point number. If non-zero, this «linear radius» `r` is used to compute the solid
+    angle subtended by the light at a given distance `d` through the formula `(r / d)²`.
+"""
+struct PointLight
+    position::Point
+    color::RGB{Float32}
+    linear_radius::Float64
+    PointLightRenderer(p, c, r = 0.0) = new(p, c, r)
+end
+
+##########################################################################################92
+
 """
 A 2D vector used to represent a point on a surface.
 The fields are named `u` and `v` to distinguish them
@@ -294,8 +316,12 @@ to check whether a light ray intersects any of the shapes in the world.
 """
 struct World
     shapes::Array{Shape}
-    World(s::Shape) = new(s)
-    World() = new( Array{Shape,1}() )
+    point_lights::Array{PointLight}
+
+    World(s::Shape, pl::PointLight) = new(s, pl)
+    World(pl::PointLight) = new( Array{Shape,1}(), pl)
+    World(s::Shape) = new(s, Array{PointLight,1}())
+    World() = new( Array{Shape,1}(),  Array{PointLight,1}() )
 end
 
 ##########################################################################################92
@@ -538,4 +564,11 @@ struct Torus <: Shape
     r::Float64
     R::Float64
     Torus(T=Transformation(), M=Material(), r=0.5, R=1.0) = new(T, M, r, R)
+end
+
+struct PointLightRenderer
+    world::World
+    background_color::RGB{Float64}
+    ambient_color::RGB{Float64}
+    PointLightRenderer(e, bc = RGB(0., 0., 0.), ac = (0.1, 0.1, 0.1)) = new(w, bc, ac)
 end

@@ -247,7 +247,7 @@ end
 ##########################################################################################92
 
 """
-    add_shape!(W::World, S::Shape)
+    add_shape!(::World, ::Shape)
 
 Append a new shape to this world
 
@@ -255,6 +255,18 @@ See also: [`Shape`](@ref), [`World`](@ref)
 """
 function add_shape!(W::World, S::Shape)
     push!(W.shapes, S)
+    return nothing
+end
+
+"""
+    add_light!(::World, ::PointLight)
+
+Append a new light point to this world
+
+See also: [`LightPoint`](@ref), [`World`](@ref)
+"""
+function add_light!(W::World, PL::PointLight)
+    push!(W.pointlights, PL)
     return nothing
 end
 
@@ -279,4 +291,59 @@ function ray_intersection(world::World, ray::Ray)
     end
     
     return closest
+end
+
+##########################################################################################92
+"""
+    quick_ray_intersection(::Shape, ::Ray) -> Bool
+Determine whether a ray hits the shape or not
+"""
+function quick_ray_intersection(shape::Shape, ray::Ray)
+    return ErrorException("quick_ray_intersection is an abstract method
+                           and cannot be called directly"
+    )
+end
+
+"""
+    quick_ray_intersection(::Sphere, ::Ray) -> Bool
+Quickly checks if a ray intersects the sphere
+"""
+function quick_ray_intersection(sphere::Sphere, ray::Ray)
+        inv_ray = inverse(sphere.T) * ray
+        origin_vec = Vec(inv_ray.origin)
+        a = squared_norm(inv_ray.dir)
+        b = 2.0 * origin_vec ⋅ inv_ray.dir
+        c = squared_norm(origin_vec) - 1.0
+
+        Δ = b^2 - 4.0 * a * c
+        (Δ <= 0.0) && (return false)
+        sqrt_Δ = sqrt(Δ)
+        tmin = (-b - sqrt_Δ) / (2.0 * a)
+        tmax = (-b + sqrt_Δ) / (2.0 * a)
+
+        return ((inv_ray.tmin < tmin < inv_ray.tmax) || (inv_ray.tmin < tmax < inv_ray.tmax))
+end
+
+"""
+    quick_ray_intersection(::Plane, ::Ray) -> Bool
+Quickly checks if a ray intersects the plane
+"""
+function quick_ray_intersection(plane::Plane, ray::Ray)
+    inv_ray = inverse(plane.T) * ray
+    !(inv_ray.dir.z ≈ 0.) || (return false)
+
+    t = -inv_ray.origin.z / inv_ray.dir.z
+    return (inv_ray.tmin < t < inv_ray.tmax)
+end
+
+function is_point_visible(world::World, point::Point, observer_pos::Point)
+    direction = point - observer_pos
+    dir_norm = norm(direction)
+
+    ray = Ray(observer_pos, direction, 1e-2 / dir_norm, 1.0)
+    for shape in world.shapes
+        (quick_ray_intersection(shape, ray) == false) || (return false)
+    end
+
+    return true
 end

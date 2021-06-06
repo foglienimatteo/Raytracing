@@ -9,6 +9,11 @@
 - Added antialiasing algorithm, as default uses 9x9 rays in a pixel, missing command line option
 >>>>>>> antialiasing
 
+<<<<<<< HEAD
+=======
+
+# VERSION 0.2.0
+>>>>>>> pointlighttracing
 
 
 # VERSION 0.2.0
