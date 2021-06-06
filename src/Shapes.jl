@@ -189,3 +189,15 @@ function ray_intersection(world::World, ray::Ray)
     
     return closest
 end
+
+function is_point_visible(world::World, point::Point, observer_pos::Point)
+    direction = point - observer_pos
+    dir_norm = norm(direction)
+
+    ray = Ray(observer_pos, direction, 1e-2 / dir_norm, 1.0)
+    for shape in world.shapes
+        (quick_ray_intersection(shape, ray) == false) || (return false)
+    end
+
+    return true
+end

@@ -279,8 +279,12 @@ to check whether a light ray intersects any of the shapes in the world.
 """
 struct World
     shapes::Array{Shape}
-    World(s::Shape) = new(s)
-    World() = new( Array{Shape,1}() )
+    point_lights::Array{PointLight}
+
+    World(s::Shape, pl::PointLight) = new(s, pl)
+    World(pl::PointLight) = new( Array{Shape,1}(), pl)
+    World(s::Shape) = new(s, Array{PointLight,1}())
+    World() = new( Array{Shape,1}(),  Array{PointLight,1}() )
 end
 
 ##########################################################################################92
