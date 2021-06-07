@@ -22,4 +22,4 @@ Documenter.makedocs(
 			],
 )
 
-deploydocs(repo = "github.com/cosmofico97/Raytracing.git")
+deploydocs(repo = "github.com/cosmofico97/Raytracing.jl.git")
