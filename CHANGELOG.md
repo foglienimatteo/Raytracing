@@ -1,6 +1,7 @@
 # HEAD
 
-- Added antialiasing algorithm
+# VERSION 0.4.0
+
 - Added point-light tracing algorithm, see PR[#17](https://github.com/cosmofico97/Raytracing/pull/17)
 
 

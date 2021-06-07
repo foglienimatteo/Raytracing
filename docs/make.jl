@@ -7,6 +7,7 @@ Documenter.makedocs(
 	format = Documenter.HTML(prettyurls = get(ENV, "CI", nothing) == "true"),
 	modules = [Raytracing],
 	sitename = "Raytracer.jl",
+	devurl = "stable",
 	pages = [
 			"Introduction" => "index.md",
 			"Demo" => "demo.md",
