@@ -17,7 +17,6 @@
 
 name: Unit tests
 
-<<<<<<< HEAD
 on: [push]
 
 #on:
@@ -25,12 +24,6 @@ on: [push]
 #    branches:
 #      - demo
 
-=======
-on:
-  push:
-    branches:
-      - demo
->>>>>>> CLI
 
 jobs:
   test:

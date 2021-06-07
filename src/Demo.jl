@@ -186,14 +186,14 @@ function demo(x::(Pair{T1,T2} where {T1,T2})...)
 end
 
 function demo(
-        camera_type::String = "per",
+     	camera_type::String = "per",
 		camera_position::Point = Point(-1.,0.,0.), 
 		algorithm::String = "flat",
-        α::Float64 = 0., 
-        width::Int64 = 640, 
-        height::Int64 = 480, 
-        pfm_output::String = "demo.pfm", 
-        png_output::String = "demo.png",
+     	α::Float64 = 0., 
+     	width::Int64 = 640, 
+     	height::Int64 = 480, 
+     	pfm_output::String = "demo.pfm", 
+        	png_output::String = "demo.png",
 		bool_print::Bool = true,
 		bool_savepfm::Bool = true,
 		world_type::String = "A",
@@ -211,7 +211,7 @@ function demo(
 
 	world = select_world(world_type)
 
-	observer_vec = obs - Point(0., 0., 0.)
+	observer_vec = camera_position - Point(0., 0., 0.)
 
 	camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec)
 	aspect_ratio = width / height

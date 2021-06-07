@@ -11,6 +11,7 @@ using Colors, Images, ImageIO, FileIO, Polynomials
 using ColorTypes:RGB
 using LinearAlgebra, StaticArrays
 using Printf, ProgressBars
+using Documenter, DocStringExtensions
 
 import Base.:+; import Base.:-; import Base.:≈; import Base.:/; import Base.:*
 import Base: write, read, print, println;
@@ -19,7 +20,7 @@ import LinearAlgebra.:⋅; import LinearAlgebra.:×
 # from Structs.jl
 export BLACK, WHITE, to_RGB, HDRimage, get_matrix, Parameters
 export Point, Vec, Normal, VEC_X, VEC_Y, VEC_Z, Transformation
-export Ray, OrthogonalCamera, PerspectiveCamera, ImageTracer
+export Ray, Camera, OrthogonalCamera, PerspectiveCamera, ImageTracer
 export Pigment, UniformPigment, CheckeredPigment, ImagePigment
 export BRDF, DiffuseBRDF, SpecularBRDF, Material
 export Shape, Sphere, Plane, Torus
@@ -33,9 +34,11 @@ export print_not_black
 export parse_command_line, parse_demo_settings
 export parse_tonemapping_settings, parse_demoanimation_settings
 # from ToneMapping.jl
+export luminosity, lum_max, clamp, avr_lum
 export normalize_image!,  clamp_image!, γ_correction!, tone_mapping
 # from Transformations.jl
-export rotation_x, rotation_y, rotation_z, scaling, translation, inverse
+export rotation_x, rotation_y, rotation_z
+export scaling, translation, inverse, is_consistent
 # from ImageTracer.jl
 export at, fire_ray, fire_all_rays!
 # from Shapes.jl
@@ -47,7 +50,7 @@ export is_point_visible, quick_ray_intersection
 export first_world, second_world, select_world
 export demo, demo_animation
 # from Pigment.jl
-export get_color, eval
+export get_color, evaluate
 # from PCG.jl
 export PCG, random
 # from OrthoNormalBasis.jl
