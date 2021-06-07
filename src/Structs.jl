@@ -5,8 +5,6 @@
 # Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
 #
 
-##########################################################################################92
-
 const BLACK = RGB{Float32}(0.0, 0.0, 0.0)
 const WHITE = RGB{Float32}(1.0, 1.0, 1.0)
 
@@ -20,7 +18,9 @@ function to_RGB(r::Int64, g::Int64, b::Int64)
     return RGB{Float32}(r/255., g/255., b/255.)
 end
 
+
 ##########################################################################################92
+
 
 """ 
     HDRimage(
@@ -52,7 +52,9 @@ struct HDRimage
     end
 end # HDRimage
 
+
 ##########################################################################################92
+
 
 """ 
     Parameters(
@@ -84,7 +86,9 @@ struct Parameters
     Parameters(in, out, a=0.18, γ=1.0) = new(in, out, a, γ)
 end
 
+
 ##########################################################################################92
+
 
 """
     Point(x::Float64, y::Float64, z::Float64)
@@ -185,7 +189,9 @@ struct Normal
 end
 Vec(N::Normal) = Vec(N.x, N.y, N.z)
 
+
 ##########################################################################################92
+
 
 """
     Transformation(M::SMatrix{4,4,Float64}, invM::SMatrix{4,4,Float64})
@@ -221,7 +227,9 @@ struct Transformation
         )
 end
 
+
 ##########################################################################################92
+
 
 """
     Ray(
@@ -259,6 +267,7 @@ end
 
 
 ##########################################################################################92
+
 
 """
     abstract type Camera end
@@ -327,7 +336,9 @@ struct PerspectiveCamera <: Camera
     PerspectiveCamera(d=1., a=1., T=Transformation()) = new(d, a, T)
 end
 
+
 ##########################################################################################92
+
 
 """
     ImageTracer(
@@ -367,133 +378,9 @@ struct ImageTracer
     ImageTracer(img::HDRimage, cam::Camera) =  new(img, cam, 0, PCG()) 
 end
 
-##########################################################################################92
-
-
-"""
-    abstract type Shape end
-
-An abstract type with the following concrete sub-types,
-defining different types of shapes that can be created:
-
-- [`Sphere`](@ref)
-
-- [`Plane`](@ref)
-"""
-abstract type Shape end
-
-
-"""
-    PointLight(p::Point, c::Color, r::Float64 = 0.0)
-
-A point light (used by the point-light renderer).
-This class holds information about a point light (a Dirac's delta in the 
-rendering equation).
-
-## Arguments
-
-- `position::Point` : position of the point light in 3D space
-
-- `color::RGB{Float32}` : color of the point light
-
-- `linear_radius::Float64`: if non-zero, this «linear radius» `r` is 
-  used to compute the solid angle subtended by the light at a given 
-  distance `d` through the formula ``(r / d)^2``.
-
-See also: [`Point`](@ref), [`PointLightRenderer`](@ref)
-"""
-struct PointLight
-    position::Point
-    color::RGB{Float32}
-    linear_radius::Float64
-    PointLight(p::Point, c::Color, r::Float64 = 0.0) = new(p, c, r)
-end
 
 ##########################################################################################92
 
-"""
-    Vec2d(u::Float64, v::Float64)
-
-A 2D vector used to represent a point on a surface.
-The fields are named `u` and `v` to distinguish them
-from the usual 3D coordinates `x`, `y`, `z`.
-"""
-struct Vec2d
-    u::Float64
-    v::Float64
-end
-
-"""
-    HitRecord(
-        world_point::Point,
-        normal::Normal,
-        surface_point::Vec2d,
-        t::Float64,
-        ray::Ray,
-        shape::Union{Shape, Nothing} = nothing
-        )
-
-A struct holding information about a ray-shape intersection.
-
-## Arguments
-
-- `world_point::Point `: world coordinates of the hit point
-
-- `normal::Normal`: orientation of the normal to the surface where the hit happened
-
-- `surface_point::Vec2d` : position of the hit point on the surface of the object
-
-- `t::Float64` : distance from the origin of the ray where the hit happened
-
-- `ray::Ray` : the `ray` that hit the surface
-
-- `shape::Union{Shape, Nothing}`: shape on which the hit happened, or `nothing`
-  if no intersection happened
-
-See also: [`Point`](@ref), [`Normal`](@ref), [`Vec2d`](@ref)
-[`Ray`](@ref), [`Shape`](@ref)
-"""
-struct HitRecord
-    world_point::Point
-    normal::Normal
-    surface_point::Vec2d
-    t::Float64
-    ray::Ray
-    shape::Union{Shape, Nothing}
-
-    HitRecord(w,n,s,t,r, shp=nothing) =  new(w,n,s,t,r, shp)
-end
-
-"""
-    World(
-        shapes::Array{Shape} = Array{Shape,1}(),
-        point_lights::Array{PointLight} = Array{PointLight,1}()
-    )
-
-A struct holding a list of shapes, which make a «world».
-
-You can add shapes to a world using `add_shape!`, and call 
-`ray_intersection` to check whether a light ray intersects any of 
-the shapes in the world.
-
-For the `PointLightRenderer` algorithm, you can also add point-lights source
-using `add_light!`, and `world` will keep a list of all of them.
-
-See also: [`Shape`](@ref), [`add_shape!`](@ref),
-[`PointLight`](@ref), [`add_light`](@ref), [`PointLightRenderer`](@ref)
-[`ray_intersection`](@ref), [`Ray`](@ref)
-"""
-struct World
-    shapes::Array{Shape}
-    point_lights::Array{PointLight}
-
-    World(s::Shape, pl::PointLight) = new(s, pl)
-    World(pl::PointLight) = new( Array{Shape,1}(), pl)
-    World(s::Shape) = new(s, Array{PointLight,1}())
-    World() = new( Array{Shape,1}(),  Array{PointLight,1}() )
-end
-
-##########################################################################################92
 
 """
     abstract type Pigment end
@@ -565,7 +452,9 @@ struct ImagePigment <: Pigment
     ImagePigment(img = HDRimage(3, 2, fill(BLACK, (6,)))) = new(img)
 end
 
+
 ##########################################################################################92
+
 
 """
     abstract type BRDF end
@@ -628,7 +517,21 @@ struct Material
     Material(brdf = DiffuseBRDF(), er = UniformPigment()) = new(brdf, er)
 end
 
+
 ##########################################################################################92
+
+
+"""
+    abstract type Shape end
+
+An abstract type with the following concrete sub-types,
+defining different types of shapes that can be created:
+
+- [`Sphere`](@ref)
+
+- [`Plane`](@ref)
+"""
+abstract type Shape end
 
 """
     Sphere <: Shape(
@@ -686,7 +589,161 @@ struct Plane <: Shape
     #Plane(T=Transformation(), M=Material()) = new(T,M)
 end
 
+"""
+    Torus <: Shape(
+        T::Transformation = Transformation()
+        Material::Material = Material()
+        r::Float64 = 0.5
+        R::Float64 = 1.0
+    )
+
+A 3D unit torus, a ring with circular section; has origin 
+in `(0, 0, 0)` and axis parallel to the y-axis.
+
+## Arguments
+
+- `T::Transformation`: transformation associated to the torus.
+
+- `Material::Material` : material that constitutes the torus.
+
+- `r::Float64` : radius of the circular section.
+
+- `R::Float64` : distance between the torus center and the section center.
+
+```ditaa
+^ ̂y                __-__
+|                 /     \\ 
+|---O------------(---o---)
+|                 \\__ __/
+|                    -
+      <--------R------><-r->
+```
+
+See also: [`Shape`](@ref), [`Transformation`](@ref), [`Material`](@ref)
+"""
+struct Torus <: Shape
+    T::Transformation
+    Material::Material
+    r::Float64
+    R::Float64
+    Torus(T=Transformation(), M=Material(), r=0.5, R=1.0) = new(T, M, r, R)
+end
+
+
 ##########################################################################################92
+
+
+"""
+    Vec2d(u::Float64, v::Float64)
+
+A 2D vector used to represent a point on a surface.
+The fields are named `u` and `v` to distinguish them
+from the usual 3D coordinates `x`, `y`, `z`.
+"""
+struct Vec2d
+    u::Float64
+    v::Float64
+end
+
+"""
+    HitRecord(
+        world_point::Point,
+        normal::Normal,
+        surface_point::Vec2d,
+        t::Float64,
+        ray::Ray,
+        shape::Union{Shape, Nothing} = nothing
+        )
+
+A struct holding information about a ray-shape intersection.
+
+## Arguments
+
+- `world_point::Point `: world coordinates of the hit point
+
+- `normal::Normal`: orientation of the normal to the surface where the hit happened
+
+- `surface_point::Vec2d` : position of the hit point on the surface of the object
+
+- `t::Float64` : distance from the origin of the ray where the hit happened
+
+- `ray::Ray` : the `ray` that hit the surface
+
+- `shape::Union{Shape, Nothing}`: shape on which the hit happened, or `nothing`
+  if no intersection happened
+
+See also: [`Point`](@ref), [`Normal`](@ref), [`Vec2d`](@ref)
+[`Ray`](@ref), [`Shape`](@ref)
+"""
+struct HitRecord
+    world_point::Point
+    normal::Normal
+    surface_point::Vec2d
+    t::Float64
+    ray::Ray
+    shape::Union{Shape, Nothing}
+
+    HitRecord(w,n,s,t,r, shp=nothing) =  new(w,n,s,t,r, shp)
+end
+
+"""
+    PointLight(p::Point, c::Color, r::Float64 = 0.0)
+
+A point light (used by the point-light renderer).
+This class holds information about a point light (a Dirac's delta in the 
+rendering equation).
+
+## Arguments
+
+- `position::Point` : position of the point light in 3D space
+
+- `color::RGB{Float32}` : color of the point light
+
+- `linear_radius::Float64`: if non-zero, this «linear radius» `r` is 
+  used to compute the solid angle subtended by the light at a given 
+  distance `d` through the formula ``(r / d)^2``.
+
+See also: [`Point`](@ref), [`PointLightRenderer`](@ref)
+"""
+struct PointLight
+    position::Point
+    color::RGB{Float32}
+    linear_radius::Float64
+    PointLight(p::Point, c::Color, r::Float64 = 0.0) = new(p, c, r)
+end
+
+"""
+    World(
+        shapes::Array{Shape} = Array{Shape,1}(),
+        point_lights::Array{PointLight} = Array{PointLight,1}()
+    )
+
+A struct holding a list of shapes, which make a «world».
+
+You can add shapes to a world using `add_shape!`, and call 
+`ray_intersection` to check whether a light ray intersects any of 
+the shapes in the world.
+
+For the `PointLightRenderer` algorithm, you can also add point-lights source
+using `add_light!`, and `world` will keep a list of all of them.
+
+See also: [`Shape`](@ref), [`add_shape!`](@ref),
+[`PointLight`](@ref), [`add_light`](@ref), [`PointLightRenderer`](@ref)
+[`ray_intersection`](@ref), [`Ray`](@ref)
+"""
+struct World
+    shapes::Array{Shape}
+    point_lights::Array{PointLight}
+
+    World(s::Shape, pl::PointLight) = new(s, pl)
+    World(pl::PointLight) = new( Array{Shape,1}(), pl)
+    World(s::Shape) = new(s, Array{PointLight,1}())
+    World() = new( Array{Shape,1}(),  Array{PointLight,1}() )
+end
+
+
+##########################################################################################92
+
 
 """
     abstract type Renderer <: Function end
@@ -792,34 +849,6 @@ struct PathTracer <: Renderer
     russian_roulette_limit::Int64
     PathTracer(w::World, bc=BLACK, pcg=PCG(), n=10, md=2, RRlim=3) = 
         new(w, bc, pcg, n, md, RRlim)
-end
-
-
-
-
-
-"""
-A 3D unit torus, a ring with circular section; has origin in (0, 0, 0) and axis parallel to the y-axis.
-# Arguments
-- `T`: potentially [`Transformation`](@ref) associated to the plane
-- `Material`: potentially [`Material`](@ref) associated to the plane
-- `r`: radious of the circular section
-- `R`: distance between the torus center and the section center
-```ditaa
-^ ̂y                __-__
-|                 /     \\ 
-|---O------------(---o---)
-|                 \\__ __/
-|                    -
-      <--------R------><-r->
-```
-"""
-struct Torus <: Shape
-    T::Transformation
-    Material::Material
-    r::Float64
-    R::Float64
-    Torus(T=Transformation(), M=Material(), r=0.5, R=1.0) = new(T, M, r, R)
 end
 
 """
