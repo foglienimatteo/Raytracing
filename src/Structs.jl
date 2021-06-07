@@ -188,14 +188,27 @@ Vec(N::Normal) = Vec(N.x, N.y, N.z)
 ##########################################################################################92
 
 """
-    Transformation(
-        M::SMatrix{4,4,Float64}
-        invM::SMatrix{4,4,Float64}
-    )
+    Transformation(M::SMatrix{4,4,Float64}, invM::SMatrix{4,4,Float64})
 
 Contain two matrices 4x4 of `Float64`, one the inverse of the other.
 It's used to implement rotations, scaling and translations in 3D space 
 with homogenous formalism.
+
+**NOTE**: It does not check if `invM` is the inverse matrix of `M`, for
+computational efficiency purposes!
+In order to do that, looks at `is_consistent(T::Transformation)` function.
+
+
+## Constructors
+
+- `Transformation(m, invm) = new(m, invm)`
+
+- `Transformation() = new( 
+            SMatrix{4,4}( Diagonal(ones(4)) ),  
+            SMatrix{4,4}( Diagonal(ones(4)) ) 
+        )`
+
+See also: [`is_consistent`](@ref)
 """
 struct Transformation
     M::SMatrix{4,4,Float64}
@@ -247,17 +260,36 @@ end
 
 ##########################################################################################92
 
+"""
+    abstract type Camera end
+
+An abstract type with the following concrete sub-types,
+defining different types of perspective projections:
+
+- [`OrthogonalCamera`](@ref)
+
+- [`PerspectiveCamera`](@ref)
+"""
 abstract type Camera end
 
 """
-A camera implementing an orthogonal 3D → 2D projection
+    OrthogonalCamera <: Camera (
+        a::Float64 = 1.0,
+        T::Transformation = Transformation()
+    )
+
+A camera implementing an orthogonal 3D → 2D projection.
 This class implements an observer seeing the world through an orthogonal projection.
 
-# Arguments
-- `a`: the aspect ratio, defines how larger than the height is the image. For fullscreen
-images, you should probably set `a` to 16/9, as this is the most used aspect ratio
-used in modern monitors.
-- `T`: is an instance of the [`Transformation`](@ref) struct.
+## Arguments
+
+- `a::Float64` : aspect ratio, defines how larger than the height is the image. 
+  For fullscreen images, you should probably set `a` to 16/9, as this is the 
+  most used aspect ratio used in modern monitors.
+
+- `T::Transformation` : transformation that defines the position of the observer.
+
+See also: [`Transformation`](@ref), [`Camera`](@ref)
 """
 struct OrthogonalCamera <: Camera
     a::Float64 # aspect ratio
@@ -266,20 +298,31 @@ struct OrthogonalCamera <: Camera
 end
 
 """
-A camera implementing a perspective 3D → 2D projection
-    This class implements an observer seeing the world through a perspective projection.
+    PerspectiveCamera <: Camera (
+        d::Float64 = 1.0,
+        a::Float64 = 1.0,
+        T::Transformation = Transformation()
+        )
 
-# Arguments
-- `d`: tells how much far from the eye of the observer is the screen,
-and it influences the so-called «aperture» (the field-of-view angle along the horizontal direction).
-- `a`: the aspect ratio, defines how larger than the height is the image. For fullscreen
-images, you should probably set `a` to 16/9, as this is the most used aspect ratio
-used in modern monitors.
-- `T`: is an instance of the [`Transformation`](@ref) struct.
+A camera implementing a perspective 3D → 2D projection.
+This class implements an observer seeing the world through a perspective projection.
+
+## Arguments
+
+- `d::Float64`: distance between the observer and the screen, it influences 
+  the so-called «aperture» (the field-of-view angle along the horizontal direction).
+
+- `a::Float64` : aspect ratio, defines how larger than the height is the image. 
+  For fullscreen images, you should probably set `a` to 16/9, as this is the 
+  most used aspect ratio used in modern monitors.
+
+- `T::Transformation` : transformation that defines the position of the observer.
+
+See also: [`Transformation`](@ref), [`Camera`](@ref)
 """
 struct PerspectiveCamera <: Camera
-    d::Float64 # distance from the screen
-    a::Float64 # aspect ratio
+    d::Float64
+    a::Float64
     T::Transformation
     PerspectiveCamera(d=1., a=1., T=Transformation()) = new(d, a, T)
 end
@@ -288,23 +331,26 @@ end
 
 """
     ImageTracer(
-        img::HDRimage
-        cam::Camera
-        samples_per_side::Int64 = 0
+        img::HDRimage,
+        cam::Camera,
+        samples_per_side::Int64 = 0,
         pcg::PCG = PCG()
         )
 
-Implement the "screen".
+Implement the "screen" of the observer.
 
 Trace an image by shooting light rays through each of its pixels.
 
 ## Arguments
 
-- `img::HDRimage` : must be already initialized
-- `cam::Camera`
+- `img::HDRimage` : the image that will be rendered (required)
+
+- `cam::Camera` : camera type of the observer (required)
+
 - `samples_per_side::Int64 = 0` : if it is larger than zero, stratified sampling will 
   be applied to each pixel in the image, using the random number generator 
-  `pcg`, if not the value 4 will be used in `fire_all_rays!`
+  `pcg`; if not, antialiasing will be ignored in `fire_all_rays!`
+
 - `pcg::PCG = PCG()` : PCG random number generator
 
 See also: [`HDRimage`](@ref),[`Camera`](@ref), [`PCG`](@ref),
@@ -323,6 +369,17 @@ end
 
 ##########################################################################################92
 
+
+"""
+    abstract type Shape end
+
+An abstract type with the following concrete sub-types,
+defining different types of shapes that can be created:
+
+- [`Sphere`](@ref)
+
+- [`Plane`](@ref)
+"""
 abstract type Shape end
 
 
@@ -355,6 +412,8 @@ end
 ##########################################################################################92
 
 """
+    Vec2d(u::Float64, v::Float64)
+
 A 2D vector used to represent a point on a surface.
 The fields are named `u` and `v` to distinguish them
 from the usual 3D coordinates `x`, `y`, `z`.
@@ -365,36 +424,64 @@ struct Vec2d
 end
 
 """
-A struct holding information about a ray-shape intersection
-The parameters defined in this struct are the following:
-- `world_point`: a [`Point`](@ref) object holding the world coordinates of the hit point
-- `normal`: a [`Normal`](@ref) object holding the orientation of the normal to the surface where the hit happened
-- `surface_point`: a [`Vec2d`](@ref) object holding the position of the hit point on the surface of the object
-- `t`: a `Float64` value specifying the distance from the origin of the ray where the hit happened
-- `ray`: the [`Ray`](@ref) that hit the surface
-- `shape`: shape with which the intersection is calculated
+    HitRecord(
+        world_point::Point,
+        normal::Normal,
+        surface_point::Vec2d,
+        t::Float64,
+        ray::Ray,
+        shape::Union{Shape, Nothing} = nothing
+        )
+
+A struct holding information about a ray-shape intersection.
+
+## Arguments
+
+- `world_point::Point `: world coordinates of the hit point
+
+- `normal::Normal`: orientation of the normal to the surface where the hit happened
+
+- `surface_point::Vec2d` : position of the hit point on the surface of the object
+
+- `t::Float64` : distance from the origin of the ray where the hit happened
+
+- `ray::Ray` : the `ray` that hit the surface
+
+- `shape::Union{Shape, Nothing}`: shape on which the hit happened, or `nothing`
+  if no intersection happened
+
+See also: [`Point`](@ref), [`Normal`](@ref), [`Vec2d`](@ref)
+[`Ray`](@ref), [`Shape`](@ref)
 """
 struct HitRecord
-    world_point::Point # obserator frame sistem
+    world_point::Point
     normal::Normal
     surface_point::Vec2d
     t::Float64
     ray::Ray
     shape::Union{Shape, Nothing}
+
     HitRecord(w,n,s,t,r, shp=nothing) =  new(w,n,s,t,r, shp)
-    #=
-    function HitRecord(w,n,s,t,r) 
-        norm = normalize(n)
-        new(w,norm,s,t,r)
-    end
-    =#
 end
 
 """
-A struct holding a list of shapes, which make a «world»
-You can add shapes to a world using [`add_shape!`](@ref)([`World`](@ref), [`Shape`](@ref)).
-Typically, you call [`ray_intersection`](@ref)([`World`](@ref), [`Ray`](@ref))
-to check whether a light ray intersects any of the shapes in the world.
+    World(
+        shapes::Array{Shape} = Array{Shape,1}(),
+        point_lights::Array{PointLight} = Array{PointLight,1}()
+    )
+
+A struct holding a list of shapes, which make a «world».
+
+You can add shapes to a world using `add_shape!`, and call 
+`ray_intersection` to check whether a light ray intersects any of 
+the shapes in the world.
+
+For the `PointLightRenderer` algorithm, you can also add point-lights source
+using `add_light!`, and `world` will keep a list of all of them.
+
+See also: [`Shape`](@ref), [`add_shape!`](@ref),
+[`PointLight`](@ref), [`add_light`](@ref), [`PointLightRenderer`](@ref)
+[`ray_intersection`](@ref), [`Ray`](@ref)
 """
 struct World
     shapes::Array{Shape}
@@ -409,17 +496,33 @@ end
 ##########################################################################################92
 
 """
-A «pigment»
+    abstract type Pigment end
 
-This abstract class represents a pigment, i.e., a function that associates a color with
-each point on a parametric surface (u,v). Call the method :meth:`.Pigment.get_color` to
-retrieve the color of the surface given a :class:`.Vec2d` object.
+This abstract class represents a pigment, i.e., a function that associates 
+a color with each point on a parametric surface (u,v). Call the function
+`get_color` to retrieve the color of the surface given a `Vec2d` object.
+
+The concrete sub-types of this abstract class are:
+
+- [`UniformPigment`](@ref)
+
+- [`CheckeredPigment`](@ref)
+
+- [`ImagePigment`](@ref)
+
+See also: [`Vec2d`](@ref), [`get_color`](@ref)
 """
 abstract type Pigment end
 
 """
-A uniform pigment
+    UniformPigment <: Pigment(
+        color::RGB{Float32} = RGB{Float32}(0.0, 0.0, 0.0)
+    )
+
+A uniform pigment.
 This is the most boring pigment: a uniform hue over the whole surface.
+
+See also: [`Pigment`](@ref)
 """
 struct UniformPigment <: Pigment
     color::RGB{Float32}
@@ -427,9 +530,18 @@ struct UniformPigment <: Pigment
 end
 
 """
-A checkered pigment
-The number of rows/columns in the checkered pattern is tunable, but you cannot have a different number of
+    CheckeredPigment <: Pigment
+        color1::RGB{Float32} = RGB{Float32}(1.0, 1.0, 1.0),
+        color2::RGB{Float32} = RGB{Float32}(0.0, 0.0, 0.0),
+        num_steps::Int64 = 2
+    )
+
+A checkered pigment.
+The number of rows/columns in the checkered pattern is tunable through the
+integer value `num_steps`, but you cannot have a different number of 
 repetitions along the u/v directions.
+
+See also: [`Pigment`](@ref)
 """
 struct CheckeredPigment <: Pigment
     color1::RGB{Float32}
@@ -439,8 +551,14 @@ struct CheckeredPigment <: Pigment
 end
 
 """
-A textured pigment
+    ImagePigment <: Pigment(
+        image::HDRimage = HDRimage(3, 2, fill( BLACK, (6,) ) )
+    )
+
+A textured pigment.
 The texture is given through a PFM image.
+
+See also: [`Pigment`](@ref), [`HDRimage`](@ref)
 """
 struct ImagePigment <: Pigment
     image::HDRimage
@@ -450,12 +568,26 @@ end
 ##########################################################################################92
 
 """
-An abstract class representing a Bidirectional Reflectance Distribution Function
+    abstract type BRDF end
+
+An abstract class representing a Bidirectional Reflectance Distribution Function.
+The concrete sub-types of this abstract class are:
+
+- [`DiffuseBRDF`](@ref)
+
+- [`SpecularBRDF`](@ref)
 """
 abstract type BRDF end
 
 """
-A class representing an ideal diffuse BRDF (also called «Lambertian»)
+    DiffuseBRDF <: BRDF(
+        pigment::Pigment = UniformPigment(RGB{Float32}(1.0, 1.0, 1.0)),
+        reflectance::Float64 = 1.0
+    )
+
+A class representing an ideal diffuse BRDF (also called «Lambertian»).
+
+See also: [`Pigment`](@ref), [`UniformPigment`](@ref)
 """    
 struct DiffuseBRDF <: BRDF
     pigment::Pigment
@@ -464,7 +596,14 @@ struct DiffuseBRDF <: BRDF
 end
 
 """
-A class representing an ideal mirror BRDF
+    DiffuseBRDF <: BRDF(
+        pigment::Pigment = UniformPigment(RGB{Float32}(1.0, 1.0, 1.0)),
+        theresold_angle_rad::Float64 = π/180.
+    )
+
+A class representing an ideal mirror BRDF.
+
+See also: [`Pigment`](@ref), [`UniformPigment`](@ref)
 """
 struct SpecularBRDF <: BRDF
     pigment::Pigment
@@ -473,7 +612,15 @@ struct SpecularBRDF <: BRDF
 end
 
 """
-A material
+    Material(
+        brdf::BRDF = DiffuseBRDF(),
+        emitted_radiance::Pigment = UniformPigment()
+    )
+
+A struct representing a material.
+
+See also: [`BRDF`](@ref), [`DiffuseBRDF`](@ref), 
+[`Pigment`](@ref), [`UniformPigment`](@ref) 
 """
 struct Material
     brdf::BRDF
@@ -484,10 +631,21 @@ end
 ##########################################################################################92
 
 """
-A 3D unit sphere centered on the origin of the axes
-# Arguments
-- `T`: potentially [`Transformation`](@ref) associated to the sphere
-- `Material`: potentially [`Material`](@ref) associated to the sphere
+    Sphere <: Shape(
+        T::Transformation = Transformation(),
+        Material::Material = Material()
+    )
+
+A 3D unit sphere, i.e. centered on the origin of the axes
+and with radius 1.0.
+
+## Arguments
+
+- `T::Transformation` : transformation associated to the sphere.
+
+- `Material::Material` : material that constitutes the sphere.
+
+See also: [`Shape`](@ref), [`Transformation`](@ref), [`Material`](@ref)
 """
 struct Sphere <: Shape
     T::Transformation
@@ -498,15 +656,23 @@ struct Sphere <: Shape
     Sphere(T::Transformation) = new(T, Material())
     Sphere(M::Material) = new(Transformation(), M)
     Sphere() = new(Transformation(), Material())
-    
-    #Sphere(T=Transformation(), M=Material()) = new(T,M)
 end
 
 """
-A 3D unit plane, i.e. the x-y plane (set of 3D points with z=0)
-# Arguments
-- `T`: potentially [`Transformation`](@ref) associated to the plane
-- `Material`: potentially [`Material`](@ref) associated to the plane
+    Plane <: Shape(
+        T::Transformation = Transformation(),
+        Material::Material = Material()
+    )
+
+A 3D unit plane, i.e. the x-y plane (set of 3D points with z=0).
+
+## Arguments
+
+- `T::Transformation` : transformation associated to the plane.
+
+- `Material::Material` : material that constitutes the plane.
+
+See also: [`Shape`](@ref), [`Transformation`](@ref), [`Material`](@ref)
 """
 struct Plane <: Shape
     T::Transformation
@@ -523,15 +689,37 @@ end
 ##########################################################################################92
 
 """
-A class implementing a solver of the rendering equation.
-This is an abstract class; you should use a derived concrete class.
+    abstract type Renderer <: Function end
+
+An abstract class implementing a solver of the rendering equation.
+The concrete sub-types of this abstract class are:
+
+- [`OnOffRenderer`](@ref)
+
+- [`FlatRenderer`](@ref)
+
+- [`PathTracer`](@ref)
+
+- [`PointLightRenderer`](@ref)
 """
 abstract type Renderer <: Function end
 
 """
-A on/off renderer
+    OnOffRenderer <: Renderer(
+        world::World = World()
+        background_color::RGB{Float32} = RGB{Float32}(0.0, 0.0, 0.0)
+        color::RGB{Float32} = RGB{Float32}(1.0, 1.0, 1.0)
+    )
+
+A on/off renderer.
+If the ray intersecty anyone of the shape inside the given
+`world`, the returned color will be `color`; otherwise, if no shape
+is intersected, the returned color will be `background_color`.
+
 This renderer is mostly useful for debugging purposes, 
 as it is really fast, but it produces boring images.
+
+See also: [`Renderer`](@ref), [`World`](@ref)
 """
 struct OnOffRenderer <: Renderer
     world::World
@@ -541,9 +729,17 @@ struct OnOffRenderer <: Renderer
 end
 
 """
-A «flat» renderer
-This renderer estimates the solution of the rendering equation by neglecting any contribution of the light.
-It just uses the pigment of each surface to determine how to compute the final radiance.
+    FlatRenderer <: Renderer(
+        world::World = World()
+        background_color::RGB{Float32} = RGB{Float32}(0.0, 0.0, 0.0)
+    )
+
+A «flat» renderer.
+This renderer estimates the solution of the rendering equation by neglecting 
+any contribution of the light. It just uses the pigment of each surface to 
+determine how to compute the final radiance.
+
+See also: [`Renderer`](@ref), [`World`](@ref)
 """
 struct FlatRenderer <: Renderer
     world::World
@@ -552,9 +748,9 @@ struct FlatRenderer <: Renderer
 end
 
 """
-    PathTracer(
+    PathTracer <: Renderer(
             world::World, 
-            background_color::RGB{Float32} = BLACK,
+            background_color::RGB{Float32} = RGB{Float32}(0.0, 0.0, 0.0),
             pcg::PCG = PCG(),
             N::Int64 = 10,
             max_depth::Int64 = 2,
@@ -576,7 +772,7 @@ max_depth to `Inf`.
 - `background_color::RGB{Float32}` : default background color 
   if the Ray doesn-t hit anything
 
-- `pcg::PCG` :  PCG random number generator for evaluating integrals
+- `pcg::PCG` : PCG random number generator for evaluating integrals
 
 - `num_of_rays::Int64` : number of `Ray`s generated for each integral evaluation
 
@@ -585,7 +781,7 @@ max_depth to `Inf`.
 - `russian_roulette_limit::Int64`: depth at whitch the Russian 
   Roulette algorithm begins
 
-See also: [`Ray`](@ref), [`World`](@ref), [`PCG`](@ref)
+See also: [`Renderer`](@ref), [`Ray`](@ref), [`World`](@ref), [`PCG`](@ref)
 """
 struct PathTracer <: Renderer
     world::World
@@ -598,31 +794,9 @@ struct PathTracer <: Renderer
         new(w, bc, pcg, n, md, RRlim)
 end
 
-#=
-"""
-A 3D unit sphere centered on the origin of the axes
-# Arguments
-- `T`: potentially [`Transformation`](@ref) associated to the sphere
-- `Material`: potentially [`Material`](@ref) associated to the sphere
-"""
-struct Sphere <: Shape
-    T::Transformation
-    Material::Material
-    Sphere(T=Transformation(), M=Material()) = new(T,M)
-end
 
-"""
-A 3D unit plane, i.e. the x-y plane (set of 3D points with z=0)
-# Arguments
-- `T`: potentially [`Transformation`](@ref) associated to the plane
-- `Material`: potentially [`Material`](@ref) associated to the plane
-"""
-struct Plane <: Shape
-    T::Transformation
-    Material::Material
-    Plane(T=Transformation(), M=Material()) = new(T,M)
-end
-=#
+
+
 
 """
 A 3D unit torus, a ring with circular section; has origin in (0, 0, 0) and axis parallel to the y-axis.
@@ -649,7 +823,7 @@ struct Torus <: Shape
 end
 
 """
-    PointLightRenderer(
+    PointLightRenderer <: Renderer (
         world::World,
         background_color::RGB{Float32} = RGB{Float32}(0., 0., 0.),
         ambient_color::RGB{Float32} = RGB{Float32}(0.1, 0.1, 0.1)
@@ -666,7 +840,7 @@ A simple point-light tracing renderer.
 
 - `ambient_color::RGB{Float32}` : default ambient color 
 
-See also: [`World`](@ref)
+See also: [`Renderer`](@ref), [`World`](@ref)
 """
 struct PointLightRenderer <: Renderer
     world::World
