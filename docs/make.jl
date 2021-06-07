@@ -4,11 +4,6 @@ using Documenter
 using Raytracing
 
 Documenter.makedocs(
-	root="./",
-	source="src",
-	build="build",
-	clean=false,
-	doctest=true,
 	format = Documenter.HTML(prettyurls = get(ENV, "CI", nothing) == "true"),
 	modules = [Raytracing],
 	sitename = "Raytracer.jl",
@@ -16,6 +11,14 @@ Documenter.makedocs(
 			"Introduction" => "index.md",
 			"Demo" => "demo.md",
 			"Demo animaiton" => "demo_animation.md",
+			"Base Structs" => "base_structs.md",
+			"BRDFs and Pigments" => "brdfs_and_pigments.md",
+			"Cameras" => "cameras.md",
+			"Tone Mapping" => "tone_mapping.md",
+			"Renderers" => "renderers.md",
+			"Transformations" => "transformations.md",
+			"Plane" => "plane.md",
+			"Sphere" => "sphere.md",
 			],
 )
 
