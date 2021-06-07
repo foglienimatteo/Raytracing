@@ -5,18 +5,17 @@
 # Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
 #
 
-##########################################################################################92
-
 """
-    rotation_x(ϑ::Float64) -> Transformation
+    rotation_x(ϑ::Float64) :: Transformation
 
-Return a `Transformation` object encoding a rotation around the x-axis; 
-the parameter `ϑ` specifies the rotation angle _**in radiant**_. 
+Encoding a rotation around the x-axis of an angle `ϑ` _**in radiant**_. 
 
 The positive sign is given by the right-hand rule, therefore clockwise
 rotation for entering x-axis corresponds to a `ϑ>0` rotation angle. 
+
+See also: [`Transformation`](@ref)
 """
-function rotation_x(ϑ::Float64) # ϑ is in radiant
+function rotation_x(ϑ::Float64)
     Transformation(
         [1.0    0.0     0.0     0.0 ;   
          0.0    cos(ϑ)  -sin(ϑ) 0.0 ;
@@ -28,20 +27,19 @@ function rotation_x(ϑ::Float64) # ϑ is in radiant
          0.0    -sin(ϑ) cos(ϑ)  0.0 ;
          0.0    0.0     0.0     1.0]
     )
-end # rotation_x
-
-##########################################################################################92
+end
 
 """
-    rotation_y(ϑ::Float64) -> Transformation
+    rotation_y(ϑ::Float64) :: Transformation
 
-Return a `Transformation` object encoding a rotation around the y-axis; 
-the parameter `ϑ` specifies the rotation angle _**in radiant**_. 
+Encoding a rotation around the y-axis of an angle `ϑ` _**in radiant**_. 
 
 The positive sign is given by the right-hand rule, therefore clockwise
 rotation for entering y-axis corresponds to a `ϑ>0` rotation angle. 
+
+See also: [`Transformation`](@ref)
 """
-function rotation_y(ϑ::Float64) # ϑ is in radiant
+function rotation_y(ϑ::Float64)
     Transformation(
         [cos(ϑ)     0.0     sin(ϑ)  0.0 ;
          0.0        1.      0.0     0.0 ;
@@ -53,20 +51,19 @@ function rotation_y(ϑ::Float64) # ϑ is in radiant
          sin(ϑ)     0.0     cos(ϑ)  0.0 ;
          0.0        0.0     0.0     1.  ]
     )
-end # rotation_y
-
-##########################################################################################92
+end 
 
 """
-    rotation_z(ϑ::Float64) -> Transformation
+    rotation_z(ϑ::Float64) :: Transformation
 
-Return a `Transformation` object encoding a rotation around the z-axis; 
-the parameter `ϑ` specifies the rotation angle _**in radiant**_. 
+Encoding a rotation around the z-axis of an angle `ϑ` _**in radiant**_. 
 
 The positive sign is given by the right-hand rule, therefore clockwise
 rotation for entering z-axis corresponds to a `ϑ>0` rotation angle. 
+
+See also: [`Transformation`](@ref)
 """
-function rotation_z(ϑ::Float64) # ϑ is in radiant
+function rotation_z(ϑ::Float64)
     Transformation(
         [cos(ϑ) -sin(ϑ) 0.0     0.0 ;
          sin(ϑ) cos(ϑ)  0.0     0.0 ;
@@ -78,15 +75,19 @@ function rotation_z(ϑ::Float64) # ϑ is in radiant
          0.0        0.0     1.0     0.0 ;
          0.0        0.0     0.0     1.0]
     )
-end # rotation_z
+end 
 
 ##########################################################################################92
 
 """
-    scaling(v::Vec)
-    
-Check the internal consistency of the transformation.
-This method is useful when writing tests.
+    scaling(v::Vec) :: Transformation
+
+Encoding a scaling of the 3 spatial coordinates according to the
+vector `v` (negative values codify spatial reflections). 
+
+Each component of  `v` must be different from zero.
+
+See also: [`Transformation`](@ref)
 """
 function scaling(v::Vec)
     Transformation(
@@ -100,15 +101,17 @@ function scaling(v::Vec)
          0.0    0.0     1/v.z   0.0 ;
          0.0    0.0     0.0     1.0]
     )
-end # scaling
+end 
 
 ##########################################################################################92
 
 """
-    translation(v::Vec) -> Transformation
+    translation(v::Vec) :: Transformation
 
-Return a [`Transformation`](@ref) object encoding a rigid translation.
-The parameter [`Vec`](@ref) specifies the amount of shift to be applied along the three axes.
+Encoding a rigid translation of the 3 spatial coordinates according to the
+vector `v`, which specifies the amount of shift to be applied along the three axes.
+
+See also: [`Transformation`](@ref)
 """    
 function translation(v::Vec)
    Transformation(
@@ -122,31 +125,33 @@ function translation(v::Vec)
          0.0    0.0     1.0     -v.z ;
          0.0    0.0     0.0     1.0]
     )
-end # translation
+end 
 
 ##########################################################################################92
 
 """
-    inverse(T::Transformation) -> Transformation
+    inverse(T::Transformation) :: Transformation
 
-Return a `Transformation` object representing the inverse affine transformation.
+Return the inverse affine transformation of `T`.
 This method is very cheap to call.
+
+See also: [`Transformation`](@ref)
 """
 function inverse(T::Transformation)
     return Transformation(T.invM, T.M)
-end # inverse
-
-##########################################################################################92
+end 
 
 """
-    is_consistent(T::Transformation) -> Bool
+    is_consistent(T::Transformation) :: Bool
 
-Check the internal consistency of the [`Transformation`](@ref), returning a bool variable indicating
-whether `T.M==T.invM`.
+Check the internal consistency of the  input transformation, 
+returning a bool variable indicating whether `T.M==T.invM`.
 This method is useful when writing tests.
+
+See also: [`Transformation`](@ref)
 """
 function is_consistent(T::Transformation)
     p = T.M * T.invM
     I = SMatrix{4,4}( Diagonal(ones(4)) )
     return p ≈ I
-end # is_consistent
+end

@@ -17,12 +17,13 @@ import Base: write, read, print, println;
 import LinearAlgebra.:⋅; import LinearAlgebra.:×
 
 # from Structs.jl
-export BLACK, WHITE, to_RGB, HDRimage, Parameters
-export Point, Vec, Normal,VEC_X, VEC_Y, VEC_Z, Transformation
+export BLACK, WHITE, to_RGB, HDRimage, get_matrix, Parameters
+export Point, Vec, Normal, VEC_X, VEC_Y, VEC_Z, Transformation
 export Ray, OrthogonalCamera, PerspectiveCamera, ImageTracer
-export Shape, PointLight, Sphere, Plane, Torus, Vec2d, HitRecord, World
 export Pigment, UniformPigment, CheckeredPigment, ImagePigment
 export BRDF, DiffuseBRDF, SpecularBRDF, Material
+export Shape, Sphere, Plane, Torus
+export Vec2d, HitRecord, PointLight, World
 export Renderer, OnOffRenderer, FlatRenderer, PathTracer, PointLightRenderer
 # from Operations.jl
 export are_close, squared_norm, norm, normalize #, normalized_dot
@@ -32,7 +33,7 @@ export print_not_black
 export parse_command_line, parse_demo_settings
 export parse_tonemapping_settings, parse_demoanimation_settings
 # from ToneMapping.jl
-export normalize_image!,  clamp_image!, γ_correction!, get_matrix, tone_mapping
+export normalize_image!,  clamp_image!, γ_correction!, tone_mapping
 # from Transformations.jl
 export rotation_x, rotation_y, rotation_z, scaling, translation, inverse
 # from ImageTracer.jl
@@ -45,8 +46,6 @@ export is_point_visible, quick_ray_intersection
 # from Demo.jl
 export first_world, second_world, select_world
 export demo, demo_animation
-# from Renderers.jl
-export choose_renderer, call
 # from Pigment.jl
 export get_color, eval
 # from PCG.jl
