@@ -1,5 +1,6 @@
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+Raytracing = "38da103c-6e39-4dd2-83ef-ac48b06f016c"
 
 [compat]
 Documenter = "0.26"
