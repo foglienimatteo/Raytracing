@@ -54,8 +54,8 @@ end
 
 function torus_point_to_uv(point::Point)
     len_point = norm(point)
-    u = asin(point.y/len_point) / π
-    v = atan(point.z, point.x) / (2.0 * π)
+    u = atan(point.y/(point.x^2 + point.z^2)^0.5) / (2. * pi)    # asin(point.y/len_point) / (2.0 * π)
+    v =  atan(point.z/point.x) / (2. * pi)   # atan(point.z, point.x) / (2.0 * π)
     v>=0 ? nothing : v+= 1.0
     u>=0 ? nothing : u+= 1.0
     return Vec2d(u,v)
@@ -101,11 +101,13 @@ end
 """
     torus_normal(p::Point, ray_dir::Vec, R::Float64) -> Normal
 
-Compite the [`Normal`](@ref) of a torus
+Compite the normal of a torus
 
-The normal is computed for [`Point`](@ref) (a point on the surface of the
+The normal is computed for `p` (a point on the surface of the
 torus), and it is chosen so that it is always in the opposite
-direction with respect to `ray_dir` ([`Vec`](@ref)).
+direction with respect to `ray_dir`.
+
+See also: [`Normal`](@ref), [`Point`](@ref), ([`Vec`](@ref))
 """
 function torus_normal(p::Point, ray_dir::Vec, R::Float64)
     R_z = copysign(R / √(1+(p.x/p.z)^2), p.z)
@@ -205,37 +207,47 @@ function ray_intersection(plane::Plane, ray::Ray)
     )
 end
 
+"""
+    ray_intersection(torus::Torus, ray::Ray) :: Union{HitRecord, Nothing}
+
+Check if the `ray` intersects the `torus`.
+Return a `HitRecord`, or `nothing` if no intersection is found.
+
+See also: [`Ray`](@ref), [`Torus`](@ref), [`HitRecord`](@ref)
+"""
 function ray_intersection(torus::Torus, ray::Ray)
     inv_ray = inverse(torus.T) * ray
-
+    o = Vec(inv_ray.origin)
     d = normalize(inv_ray.dir)
-    o = inv_ray.origin
     norm²_d = squared_norm(d)
-    norm²_o = squared_norm(Vec(o))
+    norm²_o = squared_norm(o)
     r = torus.r
     R = torus.R
+
     c4 = norm²_d^2
-    c3 = 4 * norm²_d * (Vec(o) ⋅ d)
-    c2 = 2 * norm²_d * (norm²_o - r^2 - R^2) + 4 * (Vec(o) ⋅ d)^2 + 4 * R^2 * (d.y)^2
-    c1 = 4 * (norm²_o - r^2 - R^2) *  (Vec(o) ⋅ d) + 8 * R^2 * o.y * d.y
+    c3 = 4 * norm²_d * (o ⋅ d)
+    c2 = 2 * norm²_d * (norm²_o - r^2 - R^2) + 4 * (o ⋅ d)^2 + 4 * R^2 * (d.y)^2
+    c1 = 4 * (norm²_o - r^2 - R^2) * (o ⋅ d) + 8 * R^2 * o.y * d.y
     c0 = (norm²_o - r^2 - R^2)^2 - 4 * R^2 * (r^2 - (o.y)^2)
 
     t_ints = roots(Polynomial([c0, c1, c2, c3, c4]))
 
-    hit_t = Union{Float64, Nothing}
-    hit_t = nothing
-    for i in t_ints
-        if typeof(i) == Float64
-            if (i > inv_ray.tmin) && (i < inv_ray.tmax)
-                hit_t = i
-            end
-        end
-    end
+    (t_ints == nothing) && (return nothing)
 
-    if hit_t == nothing
-        return nothing
+    hit_ts = Vector{Float64}()
+#    println("\nt_ints: ", hit_ts)
+#    println("len of t_ints: ", length(hit_ts))
+    # println(t_ints)
+    for i in t_ints
+        (typeof(i) == ComplexF64) && return nothing
+        (inv_ray.tmin < i < inv_ray.tmax) ? push!(hit_ts, i) : nothing
     end
-    
+    (length(hit_ts) == 0) && return nothing
+#    println("t_min = ", inv_ray.tmin, "\tt_max = ", inv_ray.tmax)
+#    println("t_ints: ", hit_ts)
+#    println("len of t_ints: ", length(hit_ts), "\ttype: ", typeof(hit_ts))
+    hit_t = min(hit_ts...)
+#    println("t_hit: ", hit_t, "\n")
     hit_point = at(inv_ray, hit_t)
 
     return HitRecord(
