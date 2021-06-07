@@ -50,7 +50,21 @@ struct HDRimage
         @assert size(rgb_m) == (w*h,)
         new(w,h, rgb_m)
     end
-end # HDRimage
+end 
+
+"""
+    get_matrix(img::HDRimage) :: Matrix{RGB{Float32}}
+
+Return the color matrix of the input `img`.
+The order of the pixel as they are stored in the `HDRimage` format is
+corrected in order to get the "natural" pixel matrix. 
+
+See also: [`HDRimage`](@ref)
+"""
+function get_matrix(img::HDRimage)
+    m = permutedims(reshape(img.rgb_m, (img.width,img.height)))
+    return m
+end
 
 
 ##########################################################################################92

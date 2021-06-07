@@ -6,13 +6,26 @@
 #
 
 
-"""
-    luminosity(c::RGB{T}) -> Float64
+@doc raw"""
+    luminosity(c::RGB{T}) :: Float64
 
-Gives the best average luminosity of a Pixel.
-As input needs a `::RGB{T}` and returns a `::Float64`.
+Return the best average luminosity of a color ``c = (R_i, G_i, B_i)``, through
+the Shirley & Morley proposal:
+
+```math
+l_i = \frac{\max\{R_i, G_i, B_i \} + \min\{R_i, G_i, B_i \}}{2}
+```
 """
 luminosity(c::RGB{T}) where {T} = (max(c.r, c.g, c.b) + min(c.r, c.g, c.b))/2.
+
+"""
+    lum_max(img::HDRimage) :: Float64
+
+Return the maximum luminosity of the given `img` according to the
+`luminosity` function of a color.
+
+See also: [`HDRimage`](@ref), [`luminosity`](@ref)
+"""
 function lum_max(img::HDRimage) 
     lum_max=0.0
     for pix in img.rgb_m
@@ -22,10 +35,14 @@ function lum_max(img::HDRimage)
 end
 
 """
-    avg_lum(img::HDRimage, δ::Number=1e-10) -> Float64
+    avg_lum(img::HDRimage, δ::Number=1e-10) :: Float64
 
-Return the average luminosity of the image
-The `δ` parameter is used to prevent  numerical problems for underilluminated pixels
+Return the average luminosity of the `img` according to the
+`luminosity` function of a color.
+The `δ` parameter is used to prevent  numerical problems for 
+under-illuminated pixels.
+
+See also: [`HDRimage`](@ref), [`luminosity`](@ref)
 """
 function avg_lum(img::HDRimage, δ::Number=1e-10)
     cumsum=0.0
@@ -35,6 +52,29 @@ function avg_lum(img::HDRimage, δ::Number=1e-10)
     10^(cumsum/(img.width*img.height))
 end
 
+@doc raw"""
+    normalize_image!(  
+            img::HDRimage, 
+            a::Float64 = 0.18,
+            lum::Union{Number, Nothing} = nothing, 
+            δ::Number = 1e-10
+            )
+
+Normalize the `img` colors through the following formula: 
+
+```math
+\forall \; \mathrm{colors} \, c =(R_i, G_i, B_i) \; 
+\mathrm{of \, the \, image}   \\\\
+
+X_i \rightarrow \frac{a}{\langle l \rangle} X_i 
+    \quad , \quad  
+\forall X_i = R_i, G_i, B_i 
+```
+where ``\langle l \rangle`` is the average luminosity returned
+by the `avg_lum` function. 
+
+See also: [`HDRimage`](@ref), [`avg_lum`](@ref)
+"""
 function normalize_image!(  
             img::HDRimage, 
             a::Float64=0.18,
@@ -47,20 +87,14 @@ function normalize_image!(
     nothing
 end 
 
-"""
-    normalize_image!(img::HDRimage, a::Number=0.18, lum::Union{Number, Nothing}=nothing,
-    δ::Number=1e-10)
+@doc raw"""
+    clamp(x::Number) :: Float64
 
-Normalize all the RGB components of a [`HDRimage`](@ref) with its average luminosity
-(given by [`avg_lum`](@ref)(`::HDRimage`, `::Number`)) and the scale factor 'a' (by default a=0.18,
-can be changed).
-"""
-normalize_image!
+Clamping function:
 
-"""
-    clamp(x::Number) -> Float64
-
-Execute: x → x/(x+1)
+```math  
+x \rightarrow x/(x+1)
+```
 """
 clamp(x::Number) = x/(x+1)
 
@@ -68,9 +102,10 @@ clamp(x::Number) = x/(x+1)
 """
     clamp_image!(img::HDRimage)
 
-Adjust the color levels of the brightest pixels in the image.
+Adjust the color levels of the brightest pixels in the `img`
+through the `clamp` function.
 
-See also: [`HDRimage`](@ref)
+See also: [`HDRimage`](@ref), [`clamp`](@ref)
 """
 function clamp_image!(img::HDRimage)
     h=img.height
@@ -82,21 +117,21 @@ function clamp_image!(img::HDRimage)
         set_pixel(img, x,y, new_col)
     end
     nothing
-end # clamp_image
+end
 
 """
-    γ_correction!(img::HDRimage, γ::Float64=1.0, k::Float64=1.)
+    γ_correction!(img::HDRimage, γ::Float64=1.0, k::Float64=1.0)
 
-Corrects the image using the γ factor, assuming a potential dependence between the input
-and putput signals of a monitor/screen. 
+Corrects the image using the `γ` factor, assuming a potential dependence 
+between the input and output signals of a monitor/screen. 
 
-As third optional argument, you can pass the maximum value 'k' of the range you want the
-RGB colors may have. The default value is 'k=1.0', so the range RGB colors can span
-is '[0.0, 1.0]'
+As third optional argument, you can pass the maximum value 'k' of the range 
+you want the RGB colors may have. The default value is 'k=1.0', so the range 
+RGB colors can span is '[0.0, 1.0]'
 
-See also: [`HDRimage`](@ref), [`get_pixel`](@ref)(::HDRimage, ::Int, ::Int), [`set_pixel`](@ref)(::HDRimage, ::Int, ::Int, ::RGB{T})
+See also: [`HDRimage`](@ref)
 """
-function γ_correction!(img::HDRimage, γ::Float64=1.0, k::Float64=1.)
+function γ_correction!(img::HDRimage, γ::Float64=1.0, k::Float64=1.0)
     h=img.height
     w=img.width
     for y in h-1:-1:0, x in 0:w-1
@@ -109,16 +144,8 @@ function γ_correction!(img::HDRimage, γ::Float64=1.0, k::Float64=1.)
         set_pixel(img, x, y, k/255.0*new_col)
     end
     nothing
-end # γ_correction!
+end
 
-##########################################################################################92
-
-function get_matrix(img::HDRimage)
-    m = permutedims(reshape(img.rgb_m, (img.width,img.height)))
-    return m
-end # overturn
-
-##########################################################################################92
 
 ##########################################################################################92
 
@@ -141,8 +168,8 @@ function tone_mapping(args::Vector{String})
     if isempty(args) || length(args)==1 || length(args)>4
         throw(ArgumentError(correct_usage))
 		return nothing
-
     end
+
 	parameters = nothing
 	try
 		parameters =  Parameters(parse_command_line(args)...)
@@ -159,13 +186,30 @@ function tone_mapping(args::Vector{String})
 	normalize_image!(img, parameters.a)
 	clamp_image!(img)
 	Raytracing.γ_correction!(img, parameters.γ)
+
 	#println(img, 3)
 	
 	matrix = get_matrix(img)
 	Images.save(parameters.outfile, matrix)
-	#Images.save(Images.File(PNG,parameters.outfile), img.rgb_m)
-	#Images.save(File("PNG", parameters.outfile), img.rgb_m)
 
 	println("\nFile $(parameters.outfile) has been written into the disk.\n")
-
 end
+
+"""
+$(SIGNATURES)
+
+Tone-map the given input pfm file `infile` with luminosity
+normalisation `a` and gamma factor `γ`.
+Return a file with the input outfile name `outfile` and 
+of the specified LDR format, if possible.
+
+In order to do the tone-mapping, this function relies on the
+following three function, called in the presented order:
+
+- `normalize_image!` : normalize the image colors
+- `clamp_image!` : adjust the color levels of the brightest pixels
+- `γ_correction!` : corrects the image using the `γ` factor
+
+See also: [`normalize_image!`](@ref), [`clamp_image!`](@ref), [`γ_correction!`](@ref)
+"""
+tone_mapping
