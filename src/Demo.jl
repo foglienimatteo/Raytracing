@@ -262,7 +262,8 @@ function demo(
 	end
 
 	function print_progress(row::Int64, col::Int64)
-     	print("Rendered row $(image.height - row)/$(image.height) \t= ")
+     	printstyled("Rendered ", color=:light_cyan)
+		print("row\t $(image.height - row)/$(image.height) = ")
 		@printf "%.2f" 100*((image.height - row)/image.height)
 		print("%\r")
 	end

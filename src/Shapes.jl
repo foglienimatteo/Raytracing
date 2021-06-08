@@ -54,8 +54,10 @@ end
 
 function torus_point_to_uv(point::Point)
     len_point = norm(point)
-    u = atan(point.y/(point.x^2 + point.z^2)^0.5) / (2. * pi)    # asin(point.y/len_point) / (2.0 * π)
-    v =  atan(point.z/point.x) / (2. * pi)   # atan(point.z, point.x) / (2.0 * π)
+    # u = atan(point.y/(point.x^2 + point.z^2)^0.5) / (2. * pi)    # asin(point.y/len_point) / (2.0 * π)
+    # v = atan(point.z/point.x) / (2. * pi)   # atan(point.z, point.x) / (2.0 * π)
+    u = atan(point.y/point.x) / (2. * pi)
+    v = atan(point.z/(point.x^2 + point.z^2)^0.5) / (2. * pi)
     v>=0 ? nothing : v+= 1.0
     u>=0 ? nothing : u+= 1.0
     return Vec2d(u,v)
@@ -99,7 +101,7 @@ function plane_normal(point::Point, ray_dir::Vec)
 end
 
 """
-    torus_normal(p::Point, ray_dir::Vec, R::Float64) -> Normal
+    torus_normal(p::Point, ray_dir::Vec, r::Float64, O::Point) -> Normal
 
 Compite the normal of a torus
 
@@ -109,11 +111,20 @@ direction with respect to `ray_dir`.
 
 See also: [`Normal`](@ref), [`Point`](@ref), ([`Vec`](@ref))
 """
-function torus_normal(p::Point, ray_dir::Vec, R::Float64)
+function torus_normal(p::Point, ray_dir::Vec, r::Float64, O::Point)
+#=
     R_z = copysign(R / √(1+(p.x/p.z)^2), p.z)
-    R_x = copysign(p.x / p.z * R_z, p.x)
+    R_x = copysign(R_z * p.x / p.z, p.x)
     R_p = Vec(R_x, 0, R_z)
     result = Normal(Vec(p - R_p))
+    result ⋅ ray_dir < 0.0 ? nothing : result = -result
+=#
+    q = Point(O.x - p.x, O.y - p.y, O.z - p.z)
+    println("\npoint for normal: ", p, "\tq = ", q, "\tO = ", O)
+    (abs(p.x) < 1e-6) ? (N_x = 0.) : (N_x = copysign(((1 - (q.z/r)^2) / (1 + (q.y/q.x)^2))^0.5), q.x)
+    (abs(p.y) < 1e-6) ? (N_y = 0.) : (N_y = copysign(((1 - (q.z/r)^2) / (1 + (q.x/q.y)^2))^0.5), q.y)
+    N_z = q.z/r
+    result = Normal(N_x, N_y, N_z)
     result ⋅ ray_dir < 0.0 ? nothing : result = -result
     return result
 end
@@ -223,24 +234,48 @@ function ray_intersection(torus::Torus, ray::Ray)
     norm²_o = squared_norm(o)
     r = torus.r
     R = torus.R
-
+#=
+    # form http://blog.marcinchwedczuk.pl/ray-tracing-torus
     c4 = norm²_d^2
     c3 = 4 * norm²_d * (o ⋅ d)
     c2 = 2 * norm²_d * (norm²_o - r^2 - R^2) + 4 * (o ⋅ d)^2 + 4 * R^2 * (d.y)^2
     c1 = 4 * (norm²_o - r^2 - R^2) * (o ⋅ d) + 8 * R^2 * o.y * d.y
     c0 = (norm²_o - r^2 - R^2)^2 - 4 * R^2 * (r^2 - (o.y)^2)
+=#
+
+    # mine
+    c4 = norm²_d^2 - 4 * R^2 * (norm²_d - d.z^2)
+    c3 = 4 * norm²_d * (o ⋅ d) - 16 * R^2 * (norm²_d - d.z^2) * (o ⋅ d - o.z * d.z)
+    c2 = 4 * (o ⋅ d)^2 + 2 * norm²_d * norm²_o + 2 * norm²_d * (R^2 - r^2) + 8 * (2 * R^2 * (o ⋅ d - o.z * d.z)^2 - (norm²_o - o.z^2) * (norm²_d * d.z^2))
+    c1 = 4 * norm²_o * (o ⋅ d) + 4 * (R^2 - r^2) * (o ⋅ d) - 16 * R^2 * (norm²_o - o.z^2) * (o ⋅ d - o.z * d.z)
+    c0 = norm²_o^2 + (R^2 - r^2)^2 + 2 * norm²_o * (R^2 - r^2) - 4 * R^2 * (norm²_o - o.z^2)
+
+#=
+    #from site, but adjusted for z-axis symmetry (y -> z)
+    c4 = norm²_d^2
+    c3 = 4 * norm²_d * (o ⋅ d)
+    c2 = 2 * norm²_d * (norm²_o - r^2 - R^2) + 4 * (o ⋅ d)^2 + 4 * R^2 * (d.z)^2
+    c1 = 4 * (norm²_o - r^2 - R^2) * (o ⋅ d) + 8 * R^2 * o.z * d.z
+    c0 = (norm²_o - r^2 - R^2)^2 - 4 * R^2 * (r^2 - (o.z)^2)
+=#
 
     t_ints = roots(Polynomial([c0, c1, c2, c3, c4]))
-
     (t_ints == nothing) && (return nothing)
 
     hit_ts = Vector{Float64}()
 #    println("\nt_ints: ", hit_ts)
 #    println("len of t_ints: ", length(hit_ts))
-    # println(t_ints)
+#    println(t_ints)
     for i in t_ints
-        (typeof(i) == ComplexF64) && return nothing
-        (inv_ray.tmin < i < inv_ray.tmax) ? push!(hit_ts, i) : nothing
+        if (typeof(i) == ComplexF64)
+            continue
+        elseif (inv_ray.tmin < i < inv_ray.tmax)
+            push!(hit_ts, i)
+        else
+            nothing
+        end
+#        (typeof(i) == ComplexF64) && continue
+#        (inv_ray.tmin < i < inv_ray.tmax) ? push!(hit_ts, i) : nothing
     end
     (length(hit_ts) == 0) && return nothing
 #    println("t_min = ", inv_ray.tmin, "\tt_max = ", inv_ray.tmax)
@@ -252,7 +287,7 @@ function ray_intersection(torus::Torus, ray::Ray)
 
     return HitRecord(
         torus.T * hit_point,
-        torus.T * torus_normal(hit_point, inv_ray.dir, torus.R),
+        torus.T * torus_normal(hit_point, inv_ray.dir, torus.r, torus.O),
         torus_point_to_uv(hit_point), # manca la funzione
         hit_t,
         ray, 
