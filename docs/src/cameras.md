@@ -7,6 +7,6 @@ end
 # Cameras
 
 ```@docs
-OrthogonalCamera
-PerspectiveCamera
+Raytracing.OrthogonalCamera
+Raytracing.PerspectiveCamera
 ```

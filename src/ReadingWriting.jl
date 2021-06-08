@@ -388,7 +388,7 @@ A `dict::Dict{String, T} where {T}`
 
 A tuple `(pfm, png, a, γ)` containing:
 
-- `pfm::String = dict["pfm_infile"]` : input pfm filename (required)
+- `pfm::String = dict["infile"]` : input pfm filename (required)
 
 - `png::String = dict["outfile"]` : output LDR filename (required)
 
@@ -400,7 +400,7 @@ See also:  [`tone_mapping`](@ref)
 """
 function parse_tonemapping_settings(dict::Dict{String, T}) where {T}
 
-    keys = ["pfm_infile", "outfile", "alpha", "gamma"]
+    keys = ["infile", "outfile", "alpha", "gamma"]
 
     for pair in dict
         if (pair[1] in keys) ==false
@@ -412,8 +412,8 @@ function parse_tonemapping_settings(dict::Dict{String, T}) where {T}
         end
     end
 
-    haskey(dict, "pfm_infile") ? 
-        pfm::String = dict["pfm_infile"] : 
+    haskey(dict, "infile") ? 
+        pfm::String = dict["infile"] : 
         throw(ArgumentError("need to specify the input pfm file to be tonemapped"))
 
     haskey(dict, "outfile") ? 

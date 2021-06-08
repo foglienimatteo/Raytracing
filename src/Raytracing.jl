@@ -35,7 +35,6 @@ export parse_command_line, parse_demo_settings
 export parse_tonemapping_settings, parse_demoanimation_settings
 export load_image, ldr2pfm
 # from ToneMapping.jl
-export luminosity, lum_max, clamp, avr_lum
 export normalize_image!,  clamp_image!, γ_correction!, tone_mapping
 # from Transformations.jl
 export rotation_x, rotation_y, rotation_z
@@ -44,8 +43,6 @@ export scaling, translation, inverse, is_consistent
 export at, fire_ray, fire_all_rays!
 # from Shapes.jl
 export ray_intersection, add_shape!, add_light!
-export sphere_point_to_uv, sphere_normal
-export plane_point_to_uv, plane_normal
 export is_point_visible, quick_ray_intersection
 # from Demo.jl
 export first_world, second_world, select_world

@@ -16,7 +16,7 @@ Raytracing.parse_img_size
 Raytracing.parse_endianness
 Raytracing.read_float
 Raytracing.read_line
-read(::IO, ::Type{HDRimage})
-load_image
-ldr2pfm
+Raytracing.read(::IO, ::Type{HDRimage})
+Raytracing.load_image
+Raytracing.ldr2pfm
 ```

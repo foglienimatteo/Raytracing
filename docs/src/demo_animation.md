@@ -7,6 +7,6 @@ end
 # Demo
 
 ```@docs
-demo_animation
-parse_demoanimation_settings
+Raytracing.demo_animation
+Raytracing.parse_demoanimation_settings
 ```

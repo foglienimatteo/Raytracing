@@ -168,38 +168,62 @@ See also: [`World`](@ref), [`demo`](@ref), [`demo_animation`](@ref)
 function third_world()
 	world = World()
 
-	sky_material = 
-		Material(
-			DiffuseBRDF(UniformPigment(RGB{Float32}(0., 0., 0.))),
-			UniformPigment(RGB{Float32}(0.0, 0.0, 0.0)),
-		)
+	earth_pos = Point(0.5, -1.0, 0.0)
+	earth_radius = 1.0
+	earth_lum = 0.0
+	earth_brdf = DiffuseBRDF(ImagePigment(load_image("$(pwd())/images/earth.jpg")))
+	earth_radiance = UniformPigment(RGB{Float32}(earth_lum, earth_lum, earth_lum))
+	earth_material = Material(earth_brdf, earth_radiance)
 
-
-	img_path = "$(pwd())/images/earth.jpg"
-	img = load_image(img_path)
-	earth_material = 
-		Material(DiffuseBRDF(ImagePigment(img)))
+	sun_pos = Point(4.0, 3.0, 0.0)
+	sun_radius = 1.0
+	sun_lum = 0.0
+	sun_brdf = DiffuseBRDF(ImagePigment(load_image("$(pwd())/images/sun.jpg")))
+	sun_radiance = UniformPigment(RGB{Float32}(sun_lum, sun_lum, sun_lum))
+	sun_pointlight_lum = RGB{Float32}(sun_lum, sun_lum, sun_lum)
+	sun_material = Material(sun_brdf, sun_radiance)
 	
-	s1, s2 = 50, 1.0
+	milky_way_pos = Point(0.0, 0.0, 0.0)
+	milky_way_radius = 50.0
+	milky_way_lum = 0.00
+	milky_way_brdf = DiffuseBRDF(ImagePigment(load_image("$(pwd())/images/milky_way.jpg")))
+	milky_way_radiance = UniformPigment(RGB{Float32}(milky_way_lum, milky_way_lum, milky_way_lum))
+	milky_way_material = Material(milky_way_brdf, milky_way_radiance)
+
+	
 	add_shape!(
 		world,
 		Sphere(
-			scaling(Vec(s1, s1, s1)),
-			sky_material,
+			translation(Vec(earth_pos))
+			* scaling(Vec(earth_radius, earth_radius, earth_radius)),
+			earth_material,
 		)
 	)
+
 	add_shape!(
 		world,
 		Sphere(
-			translation(Vec(0, 0, 0)) * scaling(Vec(s2, s2, s2))* rotation_z(1.0*π),
-			earth_material,
+			translation(Vec(sun_pos))
+			* scaling(Vec(sun_radius, sun_radius, sun_radius)),
+			sun_material,
+		)
+	)
+
+	add_shape!(
+		world,
+		Sphere(
+			translation(Vec(milky_way_pos))
+			* scaling(Vec(milky_way_radius, milky_way_radius, milky_way_radius)),
+			milky_way_material,
 		)
 	)
 
 	add_light!(
 		world, 
-		PointLight(Point(2.0, 6.0, 3.0), 
-		RGB{Float32}(10.0, 10.0, 10.0))
+		PointLight(
+			sun_pos, 
+			sun_pointlight_lum
+		)
 	)
 
 	return world
@@ -319,7 +343,7 @@ function demo(
 	if algorithm == "onoff"
 		normalize_image!(img, 0.18, nothing)
 	elseif algorithm == "flat"
-		normalize_image!(img, 0.18, 0.1)
+		normalize_image!(img, 0.18, 0.5)
 	elseif algorithm == "pathtracing"
 		normalize_image!(img, 0.18, 0.1)
 	elseif algorithm == "pointlight"

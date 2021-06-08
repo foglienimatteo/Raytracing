@@ -36,12 +36,12 @@ or download the source code from the github repository https://github.com/cosmof
 
 ## Animation Tutorial
 
-To star of and checks the correct behavior of the software run one of (or both) the following command inside the main directory
+To star of and checks the correct behavior of the software run one of the following command inside the main directory
 ```bash
-./Raytracer.jl demo-animation --camera_type=per --algorithm=flat --width=640 --height=480
+./Raytracer.jl demo_animation --camera_type=per --algorithm=flat --width=640 --height=480
 ```
 ```bash
-./Raytracer.jl demo --world-type=B --camera-type=per --algorithm=pathtracing --camera-position=-1,0,1 --width=640 --height=480
+./Raytracer.jl demo --world_type=B --camera_type=per --algorithm=pathtracing --camera_position=-1,0,1 --width=640 --height=480
 ```
 and enjoy respectively the animation `demo/demo_anim_Flat_640x480x360.mp4` and the image `demo/demo_B_PathTracing_640x480.png`
 
@@ -53,8 +53,18 @@ Animation with FlatRenderer            | Image with PathTracing
 :-------------------------------------:|:-------------------------:
 ![](demo/demo_anim_Flat_640x480x360.gif)  |  ![](demo/demo_B_PathTracing_640x480.png)
 
-
 It may takes few minutes to renderer the animation; you might also gives smaller (integer and even) values to `--width` and `--height` in order to obtain the same animation in a smaller amount of time (the price to pay is a worse definition of the animation itself).
+
+Try also the fllowing sequence of instructions:
+```bash
+./Raytracer.jl demo --world_type=C --camera_type=per --algorithm=flat
+./Raytracer.jl tonemapping demo.pfm demo.png -a=0.18 -g=1.0
+```
+(it's possible you have to adjust the `-g` value to your computer monitor gamma value)
+
+Earth with FlatRenderer            | 
+:---------------------------------:|
+![](demo/demo_C_Flat_640x480.png) 
 
 ## Usage
 You can use Raytracer both form bash line and Julia repl. From bash you just need to type

@@ -9,18 +9,18 @@ end
 ## Sphere
 
 ```@docs
-Sphere
-sphere_point_to_uv
-sphere_normal
-ray_intersection(sphere::Sphere, ray::Ray)
+Raytracing.Sphere
+Raytracing.sphere_point_to_uv
+Raytracing.sphere_normal
+Raytracing.ray_intersection(::Sphere, ::Ray)
 ```
 
 
 ## Plane
 
 ```@docs
-Plane
-plane_point_to_uv
-plane_normal
-ray_intersection(plane::Plane, ray::Ray)
+Raytracing.Plane
+Raytracing.plane_point_to_uv
+Raytracing.plane_normal
+Raytracing.ray_intersection(::Plane, ::Ray)
 ```

@@ -7,11 +7,11 @@ end
 # Renderers
 
 ```@docs
-Renderer
-OnOffRenderer
-FlatRenderer
-PathTracer
-PointLightRenderer
-is_point_visible
-quick_ray_intersection
+Raytracing.Renderer
+Raytracing.OnOffRenderer
+Raytracing.FlatRenderer
+Raytracing.PathTracer
+Raytracing.PointLightRenderer
+Raytracing.is_point_visible
+Raytracing.quick_ray_intersection
 ```
