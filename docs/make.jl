@@ -12,7 +12,7 @@ Documenter.makedocs(
 			"Demo" => "demo.md",
 			"Demo animation" => "demo_animation.md",
 			"Base Structs" => "base_structs.md",
-			"Reading and Writing" => "reading_and_writing.md",
+			"Reading and Writing PFM files" => "readingwritingpfm.md",
 			"BRDFs and Pigments" => "brdfs_and_pigments.md",
 			"Cameras" => "cameras.md",
 			"Tone Mapping" => "tone_mapping.md",

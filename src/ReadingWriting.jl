@@ -56,18 +56,18 @@ function get_pixel(img::HDRimage, x::Int, y::Int)
 end
 
 function set_pixel(img::HDRimage, x::Int, y::Int, c::RGB{Float32}) 
-    hdr.rgb_m[pixel_offset(img, x,y)] = c
+    img.rgb_m[pixel_offset(img, x,y)] = c
     return nothing
 end
 
-function set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{T}) where {T}
-    hdr.rgb_m[pixel_offset(hdr,x,y)] = convert(RGB{Float32}, c)
+function set_pixel(img::HDRimage, x::Int, y::Int, c::RGB{T}) where {T}
+    img.rgb_m[pixel_offset(img,x,y)] = convert(RGB{Float32}, c)
     return nothing
 end
 
 """
-    set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{Float32})
-    set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{T}) where {T}
+    set_pixel(img::HDRimage, x::Int, y::Int, c::RGB{Float32})
+    set_pixel(img::HDRimage, x::Int, y::Int, c::RGB{T}) where {T}
 
 Set the new RGB color `c` for the (`x`, `y`) pixel in 
 the given `HDRimage`, acceded through the `pixel_offset` function.
