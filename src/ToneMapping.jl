@@ -83,7 +83,7 @@ function normalize_image!(
             )
 
     isnothing(lum) && (lum = avg_lum(img, δ))
-    img.rgb_m .= img.rgb_m .* a ./lum
+    img.rgb_m .= img.rgb_m .* a .* (1.0/lum)
     nothing
 end 
 

@@ -33,6 +33,7 @@ export print_not_black
 # from ReadingWriting.jl
 export parse_command_line, parse_demo_settings
 export parse_tonemapping_settings, parse_demoanimation_settings
+export load_image, ldr2pfm
 # from ToneMapping.jl
 export luminosity, lum_max, clamp, avr_lum
 export normalize_image!,  clamp_image!, γ_correction!, tone_mapping

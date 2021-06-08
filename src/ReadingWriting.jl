@@ -513,7 +513,7 @@ end
 
 """
     parse_demoanimation_settings(dict::Dict{String, T}) where {T}
-        :: (String, String, Int64, Int64, String)
+        :: (String, String, Int64, Int64, String, String, Int64)
 
 Parse a `Dict{String, T} where {T}` for the [`demo_animation`](@ref) function.
 
@@ -523,7 +523,7 @@ A `dict::Dict{String, T} where {T}`
 
 ## Returns
 
-A tuple `(ct, al, w, h, anim)` containing the following
+A tuple `(ct, al, w, h, wt, anim, spp)` containing the following
 variables; the corresponding keys are also showed:
 
 - `ct::String = dict["camera_type"]` : set the perspective projection view:
@@ -540,7 +540,12 @@ variables; the corresponding keys are also showed:
 
 - `h::Int64 = dict["height"]` : width and height of the rendered image
 
+- `wt::String = dict["world_type"]` : type of the world to be rendered
+
 - `anim::String = dict["set_anim_name"]` : output animation name
+
+- `spp::Int64  = dict["samples_per_pixel"]` : number of ray to be 
+  generated for each pixel
 
 See also:  [`demo_animation`](@ref), [`demo`](@ref)
 """
@@ -548,7 +553,8 @@ function parse_demoanimation_settings(dict::Dict{String, T}) where {T}
 
     keys = [
         "camera_type", "algorithm",
-        "width", "height", "set_anim_name", 
+        "width", "height",  "world_type",
+        "set_anim_name", "samples_per_pixel",
     ]
 
     for pair in dict
@@ -577,9 +583,48 @@ function parse_demoanimation_settings(dict::Dict{String, T}) where {T}
         height::Int64 = dict["height"] : 
         height= 150
 
+    haskey(dict, "world_type") ? 
+        world_type::String = dict["world_type"] : 
+        world_type = "A"
+
     haskey(dict, "set_anim_name") ? 
         anim::String = dict["set_anim_name"] : 
         anim = "demo_animation.mp4"
 
-    return (camera_type, algorithm, width, height, anim)
+    haskey(dict, "samples_per_pixel") ? 
+        samples_per_pixel::Int64 = dict["samples_per_pixel"] : 
+        samples_per_pixel = 0
+
+    return (camera_type, algorithm, 
+            width, height, world_type, 
+            anim, samples_per_pixel)
+end
+
+
+##########################################################################################92
+
+
+"""
+    load_image(path::String) :: HDRimage
+
+Load an image from the specified `path` in an HDR image format.
+
+See also: [`HDRimage`](@ref)
+"""
+function load_image(path::String)
+    img = load(path)
+    img_float32 = float32.(img)
+    width, height = size(img_float32)
+    vec = reshape(permutedims(img_float32), (width*height,))
+    #vec = reshape(reverse(permutedims(img_float32), dims=1), (width*height,))
+
+    return HDRimage(height, width, vec)
+end
+
+function ldr2pfm(path::String, outfile::String)
+    img = load_image(path)
+    open(outfile, "w") do outf; 
+        write(outf, img)
+    end
+    nothing
 end
