@@ -22,9 +22,9 @@ v = \frac{\theta}{\pi} = \frac{\arccos (P_z)}{\pi}
 See also: [`Point`](@ref), [`Vec2d`](@ref), [`Sphere`](@ref)
 """
 function sphere_point_to_uv(point::Point)
-    u = acos(point.z) / π
-    v = atan(point.y, point.x) / (2.0 * π)
-    v>=0 ? nothing : v+= 1.0
+    v = acos(point.z) / π
+    u = atan(point.y, point.x) / (2.0 * π)
+    u = u>=0 ? u : u + 1.0
     return Vec2d(u,v)
 end
 
