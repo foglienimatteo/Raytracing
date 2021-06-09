@@ -6,7 +6,7 @@
 
 module Raytracing
 
-using Base: Bool
+using Base: Bool, String, Int64
 using Colors, Images, ImageIO, FileIO, Polynomials
 using ColorTypes:RGB
 using LinearAlgebra, StaticArrays
