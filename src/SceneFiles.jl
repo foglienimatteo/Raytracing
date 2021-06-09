@@ -8,11 +8,11 @@
 WHITESPACE = [" ", "\t", "\n", "\r"]
 SYMBOLS = ["(", ")", "<", ">", "[", "]", "*"]
 CHARACTERS = [
-     "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", 
-     "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", 
-     "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", 
-     "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", 
-     "_",
+     'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 
+     'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 
+     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 
+     'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 
+     '_',
 ]
 
 function isdigit(a::String)
@@ -288,26 +288,26 @@ KEYWORDS = Dict{String, KeywordEnum}(
 ##########################################################################################92
 
 """
-    update_pos(InputS::InputStream, ch)
+    update_pos(inputstream::InputStream, ch)
 
 Update `location` after having read `ch` from the stream
 """
-function update_pos(InputS::InputStream, ch)
+function update_pos(inputstream::InputStream, ch)
     if ch == ""
         return nothing
     elseif ch == "\n"
-        InputS.location.line_num += 1
-        InputS.location.col_num = 1
+        inputstream.location.line_num += 1
+        inputstream.location.col_num = 1
     elseif ch == "\t"
-        InputS.location.col_num += InputS.tabulations
+        inputstream.location.col_num += inputstream.tabulations
     else
-        InputS.location.col_num += 1
+        inputstream.location.col_num += 1
     end
 end
 
 """
     parse_string_token(
-        InputS::InputStream,
+        inputstream::InputStream,
         token_location::SourceLocation
         ) ::Token(
                 ::SourceLocation,
@@ -316,10 +316,10 @@ end
 
 
 """
-function parse_string_token(InputS::InputStream, token_location::SourceLocation)
+function parse_string_token(inputstream::InputStream, token_location::SourceLocation)
     token = ""
     while true
-        ch = read_char(InputS)
+        ch = read_char(inputstream)
 
         if ch == `"`
             break
@@ -336,7 +336,7 @@ end
 
 """
     parse_keyword_or_identifier_token(
-        InputS::InputStream,
+        inputstream::InputStream,
         first_char::String,
         token_location::SourceLocation
         ) ::Union{
@@ -344,7 +344,7 @@ end
                 Token(::SourceLocation, ::IdentifierToken)
                 }
 """
-function parse_keyword_or_identifier_token(InputS::InputStream, first_char::String, token_location::SourceLocation)
+function parse_keyword_or_identifier_token(inputstream::InputStream, first_char::String, token_location::SourceLocation)
     token = first_char
 
     while true
@@ -468,7 +468,7 @@ function parse_float_token(inputstream::InputStream, first_char::String, token_l
      return LiteralNumberToken(token_location, value)
 end
 
-#=
+
 """
      read_token(inputstream::InputStream) :: Token
 
@@ -506,19 +506,22 @@ function read_token(inputstream::InputStream)
      elseif isdecimal(ch) || ch ∈ ["+", "-", "."]
           # A floating-point number
           return parse_float_token(inputstream, ch, token_location)
-     elseif ch.isalpha() or ch == "_":
-          # Since it begins with an alphabetic character, it must either be a keyword or a identifier
-          return self._parse_keyword_or_identifier_token(first_char=ch, token_location=token_location)
-     else:
+     elseif ( isalpha(ch) || (ch == "_") )
+          # Since it begins with an alphabetic character, it must either be 
+          # a keyword or a identifier
+          return parse_keyword_or_identifier_token(inputstream, ch, token_location)
+     else
           # We got some weird character, like '@` or `&`
-          raise GrammarError(self.location, f"Invalid character {ch}")
-=#
+          throw(GrammarError(inputstream.location, "Invalid character $(ch)"))
+     end
+end
+
 """
-    unread_token(InputS::InputStream, token::Token)
+    unread_token(inputstream::InputStream, token::Token)
 
 Make as if `token` were never read from `input_file`
 """
-function unread_token(InputS::InputStream, token::Token)
-    @assert isnothing(InputS.saved_token)
-    InputS.saved_token = token
+function unread_token(inputstream::InputStream, token::Token)
+    @assert isnothing(inputstream.saved_token)
+    inputstream.saved_token = token
 end
