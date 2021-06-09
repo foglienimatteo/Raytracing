@@ -7,11 +7,11 @@ end
 # Transformations
 
 ```@docs
-rotation_x
-rotation_y
-rotation_z
-scaling
-translation
-inverse
-is_consistent
+Raytracing.rotation_x
+Raytracing.rotation_y
+Raytracing.rotation_z
+Raytracing.scaling
+Raytracing.translation
+Raytracing.inverse
+Raytracing.is_consistent
 ```

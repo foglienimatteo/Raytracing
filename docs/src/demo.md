@@ -7,9 +7,10 @@ end
 # Demo
 
 ```@docs
-demo
-first_world
-second_world
-select_world
-parse_demo_settings
+Raytracing.demo
+Raytracing.first_world
+Raytracing.second_world
+Raytracing.third_world
+Raytracing.select_world
+Raytracing.parse_demo_settings
 ```

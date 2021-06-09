@@ -1,5 +1,9 @@
 # HEAD
 
+# VERSION 0.5.0
+
+- Added a third demo world and modified `sphere_to_point_uv`
+
 # VERSION 0.4.0
 
 - Added point-light tracing algorithm, see PR[#17](https://github.com/cosmofico97/Raytracing/pull/17)

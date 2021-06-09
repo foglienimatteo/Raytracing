@@ -35,6 +35,11 @@ using Dates # hide
 println("Documentation built on $(now()) using Julia $(VERSION).") # hide
 ```
 
+## Contents
+
+```@contents
+```
+
 ## Index
 
 ```@index

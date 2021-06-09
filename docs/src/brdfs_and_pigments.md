@@ -7,9 +7,10 @@ end
 # BRDFs and Pigments
 
 ```@docs
-UniformPigment
-CheckeredPigment
-ImagePigment
-DiffuseBRDF
-SpecularBRDF
+Raytracing.UniformPigment
+Raytracing.CheckeredPigment
+Raytracing.ImagePigment
+Raytracing.DiffuseBRDF
+Raytracing.SpecularBRDF
+Raytracing.evaluate
 ```

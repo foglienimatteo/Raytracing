@@ -9,30 +9,38 @@
 ##########################################################################################92
 
 """
-    valid_coordinates(hdr::HDRimage, x::Int, y::Int) :: Bool
+    valid_coordinates(img::HDRimage, x::Int, y::Int) :: Bool
+
 Return `true` if (`x`, `y`) are valid coordinates for the 
 2D matrix of the `HDRimage`, else return `false`.
+
 See also: [`HDRimage`](@ref)
 """
-function valid_coordinates(hdr::HDRimage, x::Int, y::Int)
-    x>=0 && y>=0 && x<hdr.width && y<hdr.height
+function valid_coordinates(img::HDRimage, x::Int, y::Int)
+    x>=0 && y>=0 && x<img.width && y<img.height
 end
 
 """
-    pixel_offset(hdr::HDRimage, x::Int, y::Int) :: Int64
+    pixel_offset(img::HDRimage, x::Int, y::Int) :: Int64
+
 Return the index in the 1D array of the specified pixel (`x`, `y`) 
 for the given `HDRimage`.
+Internally checks also if  (`x`, `y`)  are valid coordinates for `img` through
+the `valid_coordinates` function.
+
 See also: [`valid_coordinates`](@ref), [`HDRimage`](@ref)
 """
-function pixel_offset(hdr::HDRimage, x::Int, y::Int)
-    @assert valid_coordinates(hdr, x, y)
-    y*hdr.width + (x+1)
+function pixel_offset(img::HDRimage, x::Int, y::Int)
+    @assert valid_coordinates(img, x, y)
+    return y*img.width + (x+1)
 end
 
 """
-    get_pixel(hdr::HDRimage, x::Int, y::Int) :: RBG{Float32}
+    get_pixel(img::HDRimage, x::Int, y::Int) :: RBG{Float32}
+
 Return the `RBG{Float32}` color for the (`x`, `y`) pixel in the 
-given [`HDRimage`](@ref). The indexes for a `HDRimage` pixel matrix 
+given `HDRimage`, obtained through the `pixel_offset` function.
+The indexes for a `HDRimage` pixel matrix 
 with `w` width and `h` height follow this sketch:
 ```ditaa
 |  (0,0)    (0,1)    (0,2)   ...   (0,w-1)  |
@@ -40,28 +48,30 @@ with `w` width and `h` height follow this sketch:
 |   ...      ...      ...    ...     ...    |
 | (h-1,0)  (h-1,1)  (h-1,2)  ...  (h-1,w-1) |
 ```
-See also: [`pixel_offset`](@ref), [`valid_coordinates`](@ref), 
-[`HDRimage`](@ref)
+
+See also: [`pixel_offset`](@ref), [`HDRimage`](@ref)
 """
-function get_pixel(hdr::HDRimage, x::Int, y::Int)
-    return hdr.rgb_m[pixel_offset(hdr, x, y)]
+function get_pixel(img::HDRimage, x::Int, y::Int)
+    return img.rgb_m[pixel_offset(img, x, y)]
 end
 
-function set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{Float32}) 
-    hdr.rgb_m[pixel_offset(hdr, x,y)] = c
+function set_pixel(img::HDRimage, x::Int, y::Int, c::RGB{Float32}) 
+    img.rgb_m[pixel_offset(img, x,y)] = c
     return nothing
 end
 
-function set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{T}) where {T}
-    hdr.rgb_m[pixel_offset(hdr,x,y)] = convert(RGB{Float32}, c)
+function set_pixel(img::HDRimage, x::Int, y::Int, c::RGB{T}) where {T}
+    img.rgb_m[pixel_offset(img,x,y)] = convert(RGB{Float32}, c)
     return nothing
 end
 
 """
-    set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{Float32})
-    set_pixel(hdr::HDRimage, x::Int, y::Int, c::RGB{T}) where {T}
+    set_pixel(img::HDRimage, x::Int, y::Int, c::RGB{Float32})
+    set_pixel(img::HDRimage, x::Int, y::Int, c::RGB{T}) where {T}
+
 Set the new RGB color `c` for the (`x`, `y`) pixel in 
-the given [`HDRimage`](@ref). The indexes for a `HDRimage` pixel 
+the given `HDRimage`, acceded through the `pixel_offset` function.
+The indexes for a `HDRimage` pixel 
 matrix with `w` width and `h` height follow this sketch:
 ```ditaa
 |  (0,0)    (0,1)    (0,2)   ...   (0,w-1)  |
@@ -69,8 +79,12 @@ matrix with `w` width and `h` height follow this sketch:
 |   ...      ...      ...    ...     ...    |
 | (h-1,0)  (h-1,1)  (h-1,2)  ...  (h-1,w-1) |
 ```
-See also: [`pixel_offset`](@ref), [`valid_coordinates`](@ref), 
-[`HDRimage`](@ref)
+
+If `c` is of a type `RGB{T}` where `T ≠ Float32`, it's called the
+`convert(RGB{Float32}, c)` function, which raises an exception if the
+conversion is not possible.
+
+See also: [`pixel_offset`](@ref), [`HDRimage`](@ref)
 """
 set_pixel
 
@@ -78,8 +92,10 @@ set_pixel
 
 """
     write(io::IO, img::HDRimage)
-Write the given [`HDRimage`](@ref) image using the given `IO` stream.
+
+Write the given `HDRimage` image using the given `IO` stream as a PFM file.
 The `endianness` used for writing the file is Little Endian (`-1.0`).
+
 See also: [`get_pixel`](@ref), [`HDRimage`](@ref)
 """
 function write(io::IO, img::HDRimage)
@@ -110,15 +126,36 @@ end
 
 ##########################################################################################92
 
+"""
+    InvalidPfmFileFormat <: Exception (var::String)
+
+Self-made exception raised by thne following function
+in case a reading operation of a PFM file fails:
+
+- [`parse_img_size`](@ref)
+
+- [`parse_endianness`](@ref)
+
+- [`read_line`](@ref)
+
+- [`read_float`](@ref)
+
+- [`read(::IO, ::Type{HDRimage})`](@ref)
+
+"""
 struct InvalidPfmFileFormat <: Exception
     var::String
 end
 
 """
     parse_img_size(line::String) :: (Int64, Int64)
-Return the size (width and height) parsed from a given `String`, throwing 
+
+Return the size `(width, height)` parsed from a given `String`, throwing 
 `InvalidPfmFileFormat` exception if encounters invalid values.
-It works inside the [`read_line`](@ref)(::IO) function.
+It works inside the `read(::IO, ::Type{HDRimage})` function.
+
+See also: [`read(::IO, ::Type{HDRimage})`](@ref), 
+[`InvalidPfmFileFormat`](@ref)
 """
 function parse_img_size(line::String)
     elements = split(line, " ")
@@ -145,9 +182,13 @@ end
 
 """
     parse_endianness(ess::String) :: Float64
-Return the endianness  parsed from a given `String`, throwing 
+
+Return the endianness parsed from a given `String`, throwing 
 `InvalidPfmFileFormat` exception if encounters an invalid value.
-It works inside the [`read_line`](@ref)(::IO) function.
+It works inside the `read(::IO, ::Type{HDRimage})` function.
+
+See also: [`read(::IO, ::Type{HDRimage})`](@ref), 
+[`InvalidPfmFileFormat`](@ref)
 """
 function parse_endianness(ess::String)
     try
@@ -171,6 +212,10 @@ Return a `Float32`, readed from the given IO stream `io` with the
 `-1.0` (Little Endian).
 Controls also if there are enough bits in order to form a `Float32`, 
 otherwise throw `InvalidPfmFileFormat`.
+It works inside the `read(::IO, ::Type{HDRimage})` function.
+
+See also: [`read(::IO, ::Type{HDRimage})`](@ref), 
+[`InvalidPfmFileFormat`](@ref)
 """
 function read_float(io::IO, ess::Float64)
     # controllo che in ingresso abbia una stringa che sia cnovertibile in Float32
@@ -187,9 +232,14 @@ end
 
 """
     read_line(io::IO) :: String
+
 Reads a line from the file whose the given IO object `io` refers to. 
 Do understand when the file is ended and when a new line begins.
 Return the readed line as a `String`.
+It works inside the `read(::IO, ::Type{HDRimage})` function.
+
+See also: [`read(::IO, ::Type{HDRimage})`](@ref), 
+[`InvalidPfmFileFormat`](@ref)
 """
 function read_line(io::IO)
     result = b""
@@ -205,11 +255,22 @@ end
 
 """
     read(io::IO, ::Type{HDRimage}) :: HDRimage
+
 Read a PFM image from a stream object `io`, and return a `HDRimage` 
 object containing the image. If an error occurs, raise a
 `InvalidPfmFileFormat` exception.
-See also: [`read_line`](@ref)(`::IO`), [`parse_image_size`](@ref)(`::String`),
-[`parse_endianness`](@ref)(`::String`), [`read_float`](@ref)(`::IO, `::Float64`),
+Calls internally the following functions:
+
+- [`parse_img_size`](@ref)
+
+- [`parse_endianness`](@ref)
+
+- [`read_line`](@ref)
+
+- [`read_float`](@ref)
+
+See also:  [`parse_image_size`](@ref), [`parse_endianness`](@ref), 
+[`read_line`](@ref), [`read_float`](@ref), [`InvalidPfmFileFormat`](@ref),
 [`HDRimage`](@ref)
 """
 function read(io::IO, ::Type{HDRimage})
@@ -246,19 +307,32 @@ end
 ##########################################################################################92
 
 """
-    parse_command_line((args::Vector{String}) :: (String, String, Float64, Float64)
+    parse_command_line(args::Vector{String}) :: 
+        (String, String, Float64, Float64)
+
 Interpret the command line when the main is executed, 
 and manage eventual argument errors.
-# Arguments
-An array of strings, with length 2, 3 or 4, cointaining:
-- first string (required): input file name, must be a PFM format
-- second string (required): output filename, its format can be PNG or TIFF
-- [`a`] : scale  factor for luminosity correction (default 0.18, 
-used in [`normalize_image!`](@ref))
-- [`γ`] : gamma factor for screen correction (default 1.0, used in 
-  [`γ_correction!`](@ref))
-# Returns
-A tuple `(infile, outfile, a, γ)`, with `a` and `γ` with type `Float64`
+
+## Input
+
+A `args::Vector{String})` with length 2, 3 or 4.
+
+## Returns
+
+A tuple `(infile, outfile, a, γ)` containing:
+
+- `infile::String` : first string (required), is the input file 
+  name, which must be a PFM format.
+
+- `outfile::String` : second string (required), is the output filename; 
+  its format can be PNG or TIFF.
+
+- `a::Float64` : third argument (optional), is the scale factor for 
+  luminosity correction (default 0.18), passed to `normalize_image!`
+
+- `γ::Float64` : fourth argument (optional), is the gamma factor for 
+  screen correction (default 1.0), passed to `γ_correction!`
+
 See also : [`normalize_image!`](@ref), [`γ_correction!`](@ref)
 """
 function parse_command_line(args::Vector{String})
@@ -311,9 +385,10 @@ Parse a `Dict{String, T} where {T}` for the [`tone_mapping`](@ref) function.
 A `dict::Dict{String, T} where {T}`
 
 ## Returns
+
 A tuple `(pfm, png, a, γ)` containing:
 
-- `pfm::String = dict["pfm_infile"]` : input pfm filename (required)
+- `pfm::String = dict["infile"]` : input pfm filename (required)
 
 - `png::String = dict["outfile"]` : output LDR filename (required)
 
@@ -325,7 +400,7 @@ See also:  [`tone_mapping`](@ref)
 """
 function parse_tonemapping_settings(dict::Dict{String, T}) where {T}
 
-    keys = ["pfm_infile", "outfile", "alpha", "gamma"]
+    keys = ["infile", "outfile", "alpha", "gamma"]
 
     for pair in dict
         if (pair[1] in keys) ==false
@@ -337,8 +412,8 @@ function parse_tonemapping_settings(dict::Dict{String, T}) where {T}
         end
     end
 
-    haskey(dict, "pfm_infile") ? 
-        pfm::String = dict["pfm_infile"] : 
+    haskey(dict, "infile") ? 
+        pfm::String = dict["infile"] : 
         throw(ArgumentError("need to specify the input pfm file to be tonemapped"))
 
     haskey(dict, "outfile") ? 
@@ -513,7 +588,7 @@ end
 
 """
     parse_demoanimation_settings(dict::Dict{String, T}) where {T}
-        :: (String, String, Int64, Int64, String)
+        :: (String, String, Int64, Int64, String, String, Int64)
 
 Parse a `Dict{String, T} where {T}` for the [`demo_animation`](@ref) function.
 
@@ -523,7 +598,7 @@ A `dict::Dict{String, T} where {T}`
 
 ## Returns
 
-A tuple `(ct, al, w, h, anim)` containing the following
+A tuple `(ct, al, w, h, wt, anim, spp)` containing the following
 variables; the corresponding keys are also showed:
 
 - `ct::String = dict["camera_type"]` : set the perspective projection view:
@@ -540,7 +615,12 @@ variables; the corresponding keys are also showed:
 
 - `h::Int64 = dict["height"]` : width and height of the rendered image
 
+- `wt::String = dict["world_type"]` : type of the world to be rendered
+
 - `anim::String = dict["set_anim_name"]` : output animation name
+
+- `spp::Int64  = dict["samples_per_pixel"]` : number of ray to be 
+  generated for each pixel
 
 See also:  [`demo_animation`](@ref), [`demo`](@ref)
 """
@@ -548,7 +628,8 @@ function parse_demoanimation_settings(dict::Dict{String, T}) where {T}
 
     keys = [
         "camera_type", "algorithm",
-        "width", "height", "set_anim_name", 
+        "width", "height",  "world_type",
+        "set_anim_name", "samples_per_pixel",
     ]
 
     for pair in dict
@@ -577,9 +658,58 @@ function parse_demoanimation_settings(dict::Dict{String, T}) where {T}
         height::Int64 = dict["height"] : 
         height= 150
 
+    haskey(dict, "world_type") ? 
+        world_type::String = dict["world_type"] : 
+        world_type = "A"
+
     haskey(dict, "set_anim_name") ? 
         anim::String = dict["set_anim_name"] : 
         anim = "demo_animation.mp4"
 
-    return (camera_type, algorithm, width, height, anim)
+    haskey(dict, "samples_per_pixel") ? 
+        samples_per_pixel::Int64 = dict["samples_per_pixel"] : 
+        samples_per_pixel = 0
+
+    return (camera_type, algorithm, 
+            width, height, world_type, 
+            anim, samples_per_pixel)
+end
+
+
+##########################################################################################92
+
+
+"""
+    load_image(path::String) :: HDRimage
+
+Load an image from the specified `path` in an HDR image format.
+
+See also: [`HDRimage`](@ref)
+"""
+function load_image(path::String)
+    img = load(path)
+    img_float32 = float32.(img)
+    width, height = size(img_float32)
+    vec = reshape(permutedims(img_float32), (width*height,))
+    #vec = reshape(reverse(permutedims(img_float32), dims=1), (width*height,))
+
+    return HDRimage(height, width, vec)
+end
+
+"""
+    ldr2pfm(path::String, outfile::String)
+
+Load an image from the specified `path`, convert it in a pfm file format
+and save it as `outfile`.
+It works through the `load_image` and the  `write(::IO, ::HDRimage)` function.
+
+See also: [`HDRimage`](@ref), [`load_image`](@ref),  
+[`write(::IO, ::HDRimage)`](@ref)
+"""
+function ldr2pfm(path::String, outfile::String)
+    img = load_image(path)
+    open(outfile, "w") do outf; 
+        write(outf, img)
+    end
+    nothing
 end

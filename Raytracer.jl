@@ -1,4 +1,4 @@
-#!/usr/bin/env julia.exe
+#!/usr/bin/env julia
 
 # The MIT License (MIT)
 #
@@ -76,6 +76,16 @@ function ArgParse_command_line(arguments)
 	end
 
 	s["tonemapping"].description = "Apply tone mapping to a pfm image and save it as a ldr file"
+	add_arg_group!(s["tonemapping"], "tonemapping filenames");
+	@add_arg_table! s["tonemapping"] begin
+		"infile"
+			help = "path to input file, it must be a PFM file"
+			#range_tester = input -> (typeof(query(input))<:File{format"PFM"})
+			required = true
+		"outfile"
+			help = "output file name"
+			required = true
+	end
 	add_arg_group!(s["tonemapping"], "tonemapping settings");
 	@add_arg_table! s["tonemapping"] begin
 		"--alpha", "-a"
@@ -86,16 +96,6 @@ function ArgParse_command_line(arguments)
 			help = "gamma value for the tone mapping process"
 			arg_type = Float64
 			default = 1.27
-	end
-	add_arg_group!(s["tonemapping"], "tonemapping filenames");
-	@add_arg_table! s["tonemapping"] begin
-		"pfm_infile"
-			help = "path to input file, it must be a PFM file"
-			#range_tester = input -> (typeof(query(input))<:File{format"PFM"})
-			required = true
-		"outfile"
-			help = "output file name"
-			required = true
 	end
 
 	s["demo"].description = 
@@ -128,7 +128,7 @@ function ArgParse_command_line(arguments)
 			help = "flag for the world to be rendered"
           	arg_type = String
 			default = "A"
-			range_tester = input -> (input ∈ ["A", "B"])
+			range_tester = input -> (input ∈ ["A", "B", "C"])
     		"--init_state"
     			arg_type = Int64
     			help = "Initial seed for the random number generator (positive number)."

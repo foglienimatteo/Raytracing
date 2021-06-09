@@ -159,6 +159,78 @@ function second_world()
 end
 
 """
+	third_world() :: World
+
+Render the third world (identified with the string "C").
+
+See also: [`World`](@ref), [`demo`](@ref), [`demo_animation`](@ref)
+"""
+function third_world()
+	world = World()
+
+	earth_pos = Point(0.5, -1.0, 0.0)
+	earth_radius = 1.0
+	earth_lum = 0.0
+	earth_brdf = DiffuseBRDF(ImagePigment(load_image("$(pwd())/images/earth.jpg")))
+	earth_radiance = UniformPigment(RGB{Float32}(earth_lum, earth_lum, earth_lum))
+	earth_material = Material(earth_brdf, earth_radiance)
+
+	sun_pos = Point(4.0, 3.0, 0.0)
+	sun_radius = 1.0
+	sun_lum = 0.0
+	sun_brdf = DiffuseBRDF(ImagePigment(load_image("$(pwd())/images/sun.jpg")))
+	sun_radiance = UniformPigment(RGB{Float32}(sun_lum, sun_lum, sun_lum))
+	sun_pointlight_lum = RGB{Float32}(sun_lum, sun_lum, sun_lum)
+	sun_material = Material(sun_brdf, sun_radiance)
+	
+	milky_way_pos = Point(0.0, 0.0, 0.0)
+	milky_way_radius = 50.0
+	milky_way_lum = 0.00
+	milky_way_brdf = DiffuseBRDF(ImagePigment(load_image("$(pwd())/images/milky_way.jpg")))
+	milky_way_radiance = UniformPigment(RGB{Float32}(milky_way_lum, milky_way_lum, milky_way_lum))
+	milky_way_material = Material(milky_way_brdf, milky_way_radiance)
+
+	
+	add_shape!(
+		world,
+		Sphere(
+			translation(Vec(earth_pos))
+			* scaling(Vec(earth_radius, earth_radius, earth_radius)),
+			earth_material,
+		)
+	)
+
+	add_shape!(
+		world,
+		Sphere(
+			translation(Vec(sun_pos))
+			* scaling(Vec(sun_radius, sun_radius, sun_radius)),
+			sun_material,
+		)
+	)
+
+	add_shape!(
+		world,
+		Sphere(
+			translation(Vec(milky_way_pos))
+			* scaling(Vec(milky_way_radius, milky_way_radius, milky_way_radius)),
+			milky_way_material,
+		)
+	)
+
+	add_light!(
+		world, 
+		PointLight(
+			sun_pos, 
+			sun_pointlight_lum
+		)
+	)
+
+	return world
+end
+
+
+"""
 	select_world(type_world::String) ::Function
 
 Select which demo world is used
@@ -166,6 +238,7 @@ Select which demo world is used
 function select_world(type_world::String)
 	(type_world=="A") && (return first_world())
 	(type_world=="B") && (return second_world())
+	(type_world=="C") && (return third_world())
 
 	throw(ArgumentError("The input type of world $type does not exists"))
 end
@@ -270,7 +343,7 @@ function demo(
 	if algorithm == "onoff"
 		normalize_image!(img, 0.18, nothing)
 	elseif algorithm == "flat"
-		normalize_image!(img, 0.18, 0.1)
+		normalize_image!(img, 0.18, 0.5)
 	elseif algorithm == "pathtracing"
 		normalize_image!(img, 0.18, 0.1)
 	elseif algorithm == "pointlight"
@@ -329,9 +402,7 @@ The `type=="B"` demo image world consists in a checked x-y plane, a blue opaque
 sphere, a red reflecting sphere, and a green oblique reflecting plane, all
 inside a giant emetting sphere.
 
-The `type=="B"` demo image world consists in a checked x-y plane, a blue opaque 
-sphere, a red reflecting sphere, and a green oblique reflecting plane, all
-inside a giant emetting sphere.
+The `type=="C"` demo image world consists in... discover yourself!
 
 The creation of the demo image has the objective to check the correct behaviour of
 the rendering software, specifically the orientation upside-down and left-right.
@@ -366,7 +437,7 @@ the rendering software, specifically the orientation upside-down and left-right.
 - `bool_savepfm::Bool = true` : bool that specifies if the pfm file should be saved
   or not (useful option for [`demo_animation`](@ref))
 
-- `world_type::String = "A"` : specifies the type of world to be rendered ("A" or "B")
+- `world_type::String = "A"` : specifies the type of world to be rendered ("A", "B" or "C")
 
 - `init_state::Int64 = 45` : initial state of the PCG random number generator
 
@@ -400,9 +471,11 @@ end
 function demo_animation( 
 			camera_type::String = "per",
 			algorithm::String = "flat",
-        	width::Int64 = 200, 
-        	height::Int64 = 150, 
+        		width::Int64 = 200, 
+        		height::Int64 = 150,
+			world_type::String = "A",
        		anim_output::String = "demo-animation.mp4",
+			samples_per_pixel::Int64 = 0  
 		)
 
 	run(`rm -rf .wip_animation`)
@@ -413,9 +486,11 @@ function demo_animation(
 			"algorithm"=>algorithm, 
 			"width"=>width,
 			"height"=>height,
+			"world_type" => world_type,
+			"samples_per_pixel"=>samples_per_pixel,
 			"bool_print"=>false,
 			"bool_savepfm"=>false,
-			"set_pfm_name"=>".wip_animation/demo.pfm"
+			"set_pfm_name"=>".wip_animation/demo.pfm",
 			)
 
 	iter = ProgressBar(0:359)
@@ -442,7 +517,8 @@ end
 			camera_type::String = "per",
 			algorithm::String = "flat",
         		width::Int64 = 200, 
-        		height::Int64 = 150, 
+        		height::Int64 = 150,
+			world_type::String = "A",
        		anim_output::String = "demo-animation.mp4",
 		)
 	
@@ -474,10 +550,14 @@ This function works following this steps:
 
 - `width::Int64 = 640` and `height::Int64 = 480` : pixel dimensions of the demo image
 
+- `world_type::String = "A"` : specifies the type of world to be rendered ("A", "B" or "C")
+
 - `anim_output::String = "demo-animation.mp4"` : name of the output animation file
 
+- `samples_per_pixel::Int64 = 0` : number of rays per pixel to be used (antialiasing)
+
 See also: [`OnOffRenderer`](@ref), [`FlatRenderer`](@ref), 
-[`PathTracer`](@ref), [`demo_animation`](@ref)
+[`PathTracer`](@ref), [`demo`](@ref)
 """
 demo_animation
 

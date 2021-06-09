@@ -49,4 +49,7 @@ Manifest.toml
 *.code-workspace
 *.png
 *.mp4
-demo.pfm
+*.pfm
+*.jpg
+*.jpeg
+*.tiff
