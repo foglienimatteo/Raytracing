@@ -5,6 +5,9 @@
 # Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
 #
 
+WHITESPACE = [" ", "\t", "\n", "\r"]
+SYMBOLS = ["(", ")", "<", ">", "[", "]", "*"]
+
 
 """
     SourceLocation(file_name::String, line_num::Int64, col_num::Int64)
@@ -324,4 +327,105 @@ function parse_keyword_or_identifier_token(InputS::InputStream, first_char::Stri
         # If we got KeyError, it is not a keyword and thus it must be an identifier
         return Token(token_location, IdentifierToken(token))
     end
+end
+
+"""
+     read_char(inputstream::InputStream) :: String
+
+Read a new character from the stream.
+
+See also: [`InputStream`](@ref)
+"""
+function read_char(inputstream::InputStream)
+     if inputstream.saved_char != ""
+          ch = inputstream.saved_char
+          inputstream.saved_char = ""
+     else
+          ch = read(inputstream.stream, 1)
+     end
+
+     inputstream.saved_location = copy(inputstream.location)
+     update_pos(inputstream, ch)
+
+     return ch
+end
+
+"""
+     unread_char(inputstream::InputStream, ch::String)
+
+Push a character back to the stream.
+
+See also: [`InputStream`](@ref)
+"""
+function unread_char(inputstream::InputStream, ch::String)
+     @assert inputstream.saved_char == ""
+     inputstream.saved_char = ch
+     inputstream.location = copy(inputstream.saved_location)
+end
+
+
+"""
+     skip_whitespaces_and_comments(inputstream::InputStream)
+
+Keep reading characters until a non-whitespace/non-comment character is found.
+
+See also: [`InputStream`](@ref)
+"""        
+function skip_whitespaces_and_comments(inputstream::InputStream)
+     ch = read_char(inputstream)
+     while ( (ch in WHITESPACE) || (ch == "#") )
+          if ch == "#"
+               # It's a comment! Keep reading until the end of the line 
+               #(include the case "", the end-of-file)
+               while read_char(inputstream) ∉ ["\r", "\n", ""]
+                    nothing
+               end
+          end
+          ch = read_char(inputstream)
+          !(ch == "") || (return nothing)
+     end
+     
+     # Put the non-whitespace character back
+     unread_char(inputstream, ch)
+     nothing
+end
+
+"""
+     parse_float_token(
+          inputstream::InputStream, 
+          first_char::String, 
+          token_location::SourceLocation
+          ) :: Token{SourceLocation, LiteralNumberToken}
+
+Parse a token as a float number.
+
+See also: [`InputStream`](@ref), [`SourceLocation`](@ref), 
+[`LiteralNumberToken`](@ref)
+"""
+function parse_float_token(inputstream::InputStream, first_char::String, token_location::SourceLocation) :: LiteralNumberToken
+     token = first_char
+
+     while true
+          ch = read_char(inputstream)
+
+          if !( isa(ch, Int) || (ch == ".") || (ch ∈ ["e", "E"]) )
+               unread_char(inputstream, ch)
+               break
+          end
+
+          token *= ch
+     end
+
+     try
+          value = float(token)
+     catch ValueError
+          throw(
+               GrammarError(
+                    token_location, 
+                    """ "$(token)" is an invalid floating-point number"""
+               )
+          )
+     end
+
+     return LiteralNumberToken(token_location, value)
 end
