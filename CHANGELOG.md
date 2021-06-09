@@ -1,5 +1,7 @@
 # HEAD
 
+Implementing the lexer.
+
 # VERSION 0.5.0
 
 - Added a third demo world and modified `sphere_to_point_uv`
