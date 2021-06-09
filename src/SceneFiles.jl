@@ -406,7 +406,9 @@ end
      skip_whitespaces_and_comments(inputstream::InputStream)
 
 Keep reading characters until a non-whitespace/non-comment character is found.
-
+Calls internally [`read_char`](@ref) and [`unread_char`](@ref), and it's used
+inside the main function [`read_token`](@ref).
+     
 See also: [`InputStream`](@ref)
 """        
 function skip_whitespaces_and_comments(inputstream::InputStream)
@@ -436,6 +438,8 @@ end
           ) :: Token{SourceLocation, LiteralNumberToken}
 
 Parse a token as a float number.
+Calls internally [`read_char`](@ref) and [`unread_char`](@ref), and it's used
+inside the main function [`read_token`](@ref).
 
 See also: [`InputStream`](@ref), [`SourceLocation`](@ref), 
 [`LiteralNumberToken`](@ref)
@@ -474,6 +478,14 @@ end
 
 Read a token from the stream, raising `GrammarError` if a 
 lexical error is found.
+Calls internally the following functions:
+- [`skip_whitespaces_and_comments`](@ref)
+- [`read_char`](@ref)
+- [`isdecimal`](@ref)
+- [`isalpha`](@ref)
+- [`parse_string_token`](@ref)
+- [`parse_float_token`](@ref)
+- [`parse_keyword_or_identifier_token`](@ref)
 """
 function read_token(inputstream::InputStream)
 
