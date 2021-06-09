@@ -121,6 +121,7 @@ struct Token
     loc::SourceLocation
     value::Union{LiteralNumber, LiteralString, Keyword, Identifier, Symbol}
 end
+
 """
      GrammarError <: Exception(
           location::SourceLocation
@@ -144,6 +145,46 @@ struct GrammarError <: Exception
     message::String
 end
 
+"""
+    InputStream(
+        stream::IO,
+        location::SourceLocation,
+        saved_char::String,
+        saved_location::SourceLocation,
+        tabulations::Int64,
+        saved_token::Union{Token, Nothing},
+    )
+
+A high-level wrapper around a stream, used to parse scene files
+This class implements a wrapper around a stream, with the following additional capabilities:
+    - It tracks the line number and column number;
+    - It permits to "un-read" characters and tokens.
+
+## Arguments
+
+- `stream`: 
+
+- `location`: memorize the current location in the file
+
+- `saved_char`: the last char read
+
+- `saved_location`: the location where `saved_char` is in the file
+
+- `tabulations`: number of space a tab command gives
+
+- `saved_token`: the last token found
+"""
+struct InputStream
+    stream::IO
+    location::SourceLocation
+    saved_char::String
+    saved_location::SourceLocation
+    tabulations::Int64
+    saved_token::Union{Token, Nothing}
+
+    InputStream(stream::IO, file_name::String = "", tabulations::Int64 = 8) = 
+        new(stream, SourceLocation(file_name, 1, 0), "", location, tabulations)
+end
 
 """
      @enum KeywordEnum
@@ -204,3 +245,72 @@ KEYWORDS = Dict{String, KeywordEnum}(
     "perspective" => KeywordEnum.PERSPECTIVE,
     "float" => KeywordEnum.FLOAT,
 )
+
+"""
+    update_pos(InputS::InputStream, ch)
+
+Update `location` after having read `ch` from the stream
+"""
+function update_pos(InputS::InputStream, ch)
+    if ch == ""
+        return nothing
+    elseif ch == "\n"
+        InputS.location.line_num += 1
+        InputS.location.col_num = 1
+    elseif ch == "\t"
+        InputS.location.col_num += InputS.tabulations
+    else
+        InputS.location.col_num += 1
+    end
+end
+
+"""
+    parse_string_token(
+        InputS::InputStream,
+        token_location::SourceLocation
+        ) ::Token(
+                ::SourceLocation,
+                ::LiteralStringToken
+                )
+
+
+"""
+function parse_string_token(InputS::InputStream, token_location::SourceLocation)
+    token = ""
+    while true
+        ch = read_char(InputS)
+
+        if ch == `"`
+            break
+        end
+        if ch == ""
+            throw(GrammarError(token_location, "unterminated string"))
+        end
+
+        token += ch
+    end
+
+    return Token(token_location, token)
+end
+
+"""
+    parse_keyword_or_identifier_token(
+        InputS::InputStream,
+        first_char::String,
+        token_location::SourceLocation
+        ) ::Union{
+                Token(::SourceLocation, ::KeywordToken),
+                Token(::SourceLocation, ::IdentifierToken)
+                }
+"""
+function parse_keyword_or_identifier_token(InputS::InputStream, first_char::String, token_location::SourceLocation)
+    token = first_char
+
+    while true
+        read_char(ch)
+
+        if a==0
+            f=0
+        end
+    end
+end
