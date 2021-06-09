@@ -7,7 +7,40 @@
 
 WHITESPACE = [" ", "\t", "\n", "\r"]
 SYMBOLS = ["(", ")", "<", ">", "[", "]", "*"]
+CHARACTERS = [
+     "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", 
+     "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", 
+     "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", 
+     "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", 
+     "_",
+]
 
+function isdigit(a::String)
+     !isnothing(tryparse(Int64, a)) || (return false)
+     val = parse(Int64, a)
+     bool = 0≤val≤9 ? true : false
+     return bool
+end
+
+function isdecimal(a::String)
+     !isnothing(tryparse(Int64, a)) || (return false)
+     val = parse(Int64, a)
+     bool = val≥0 ? true : false
+     return bool
+end
+
+function isalpha(a::String)
+     for ch in a
+          (ch ∈ CHARACTERS) || (return false)
+     end
+     return true 
+end
+     
+     !isnothing(tryparse(Int64, a)) || (return false)
+     val = parse(Int64, a)
+     bool = val≥0 ? true : false
+     return bool
+end
 
 """
     SourceLocation(file_name::String, line_num::Int64, col_num::Int64)
@@ -287,7 +320,7 @@ function parse_float_token(inputstream::InputStream, first_char::String, token_l
      while true
           ch = read_char(inputstream)
 
-          if !( isa(ch, Int) || (ch == ".") || (ch ∈ ["e", "E"]) )
+          if !( isdigit(ch) || (ch == ".") || (ch ∈ ["e", "E"]) )
                unread_char(inputstream, ch)
                break
           end
@@ -309,39 +342,45 @@ function parse_float_token(inputstream::InputStream, first_char::String, token_l
      return LiteralNumberToken(token_location, value)
 end
 
-
 #=
-function read_token(self) -> Token:
-     """Read a token from the stream
+"""
+     read_token(inputstream::InputStream) :: Token
 
-     Raise :class:`.ParserError` if a lexical error is found."""
-     if self.saved_token:
-          result = self.saved_token
-          self.saved_token = None
+Read a token from the stream, raising `GrammarError` if a 
+lexical error is found.
+"""
+function read_token(inputstream::InputStream)
+
+     if !isnothing(inputstream.saved_token)
+          result = inputstream.saved_token
+          inputstream.saved_token = nothing
           return result
+     end
 
-     self.skip_whitespaces_and_comments()
+     skip_whitespaces_and_comments(inputstream)
 
      # At this point we're sure that ch does *not* contain a whitespace character
-     ch = self.read_char()
-     if ch == "":
+     ch = read_char(inputstream)
+     if ch == ""
           # No more characters in the file, so return a StopToken
-          return StopToken(location=self.location)
+          return StopToken(inputstream.location)
+     end
 
-     # At this point we must check what kind of token begins with the "ch" character (which has been
-     # put back in the stream with self.unread_char). First, we save the position in the stream
-     token_location = copy(self.location)
+     # At this point we must check what kind of token begins with the "ch" character 
+     # (which has been put back in the stream with self.unread_char). First, we save 
+     # the position in the stream.
+     token_location = copy(inputstream.location)
 
-     if ch in SYMBOLS:
+     if ch ∈ SYMBOLS
           # One-character symbol, like '(' or ','
           return SymbolToken(token_location, ch)
-     elif ch == '"':
+     elseif ch == '"'
           # A literal string (used for file names)
-          return self._parse_string_token(token_location=token_location)
-     elif ch.isdecimal() or ch in ["+", "-", "."]:
+          return parse_string_token(inputstream, token_location)
+     elseif isdecimal(ch) || ch ∈ ["+", "-", "."]
           # A floating-point number
-          return self._parse_float_token(first_char=ch, token_location=token_location)
-     elif ch.isalpha() or ch == "_":
+          return parse_float_token(inputstream, ch, token_location)
+     elseif ch.isalpha() or ch == "_":
           # Since it begins with an alphabetic character, it must either be a keyword or a identifier
           return self._parse_keyword_or_identifier_token(first_char=ch, token_location=token_location)
      else:
