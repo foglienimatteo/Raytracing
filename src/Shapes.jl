@@ -119,11 +119,11 @@ function torus_normal(p::Point, ray_dir::Vec, r::Float64, O::Point)
     result = Normal(Vec(p - R_p))
     result ⋅ ray_dir < 0.0 ? nothing : result = -result
 =#
-    q = Point(O.x - p.x, O.y - p.y, O.z - p.z)
-    println("\npoint for normal: ", p, "\tq = ", q, "\tO = ", O)
-    (abs(p.x) < 1e-6) ? (N_x = 0.) : (N_x = copysign(((1 - (q.z/r)^2) / (1 + (q.y/q.x)^2))^0.5), q.x)
-    (abs(p.y) < 1e-6) ? (N_y = 0.) : (N_y = copysign(((1 - (q.z/r)^2) / (1 + (q.x/q.y)^2))^0.5), q.y)
-    N_z = q.z/r
+#    q = Point(O.x - p.x, O.y - p.y, O.z - p.z)
+#    println("\npoint for normal: ", p, "\tq = ", q, "\tO = ", O)
+    (abs(p.x) < 1e-6) ? (N_x = 0.) : (N_x = copysign(((1 - (p.z/r)^2) / (1 + (p.y/p.x)^2))^0.5), p.x)
+    (abs(p.y) < 1e-6) ? (N_y = 0.) : (N_y = copysign(((1 - (p.z/r)^2) / (1 + (p.x/p.y)^2))^0.5), p.y)
+    N_z = p.z/r
     result = Normal(N_x, N_y, N_z)
     result ⋅ ray_dir < 0.0 ? nothing : result = -result
     return result
@@ -229,11 +229,20 @@ See also: [`Ray`](@ref), [`Torus`](@ref), [`HitRecord`](@ref)
 function ray_intersection(torus::Torus, ray::Ray)
     inv_ray = inverse(torus.T) * ray
     o = Vec(inv_ray.origin)
-    d = normalize(inv_ray.dir)
-    norm²_d = squared_norm(d)
-    norm²_o = squared_norm(o)
+#    d = normalize(inv_ray.dir)
+    d = inv_ray.dir
+    norm2_d = squared_norm(d)
+    norm2_o = squared_norm(o)
+    scalar_od = o ⋅ d
     r = torus.r
     R = torus.R
+
+    c4 = norm2_d^2
+    c3 = 4 * norm2_d * scalar_od
+    c2 = 4 * scalar_od^2 + 2 * norm2_d * norm2_o - 4 * R^2 * (norm2_d - d.z^2) + 2 * norm2_d * (R^2 - r^2)
+    c1 = 4 * norm2_o * scalar_od + 4 * scalar_od * (R^2 - r^2) - 8 * (scalar_od - o.z * d.z)
+    c0 = norm2_o^2 + (R^2 - r^2)^2 + 2 * norm2_o * (R^2 - r^2) - 4 * R^2 * (norm2_o - o.z^2)
+
 #=
     # form http://blog.marcinchwedczuk.pl/ray-tracing-torus
     c4 = norm²_d^2
@@ -242,14 +251,14 @@ function ray_intersection(torus::Torus, ray::Ray)
     c1 = 4 * (norm²_o - r^2 - R^2) * (o ⋅ d) + 8 * R^2 * o.y * d.y
     c0 = (norm²_o - r^2 - R^2)^2 - 4 * R^2 * (r^2 - (o.y)^2)
 =#
-
+#=
     # mine
     c4 = norm²_d^2 - 4 * R^2 * (norm²_d - d.z^2)
     c3 = 4 * norm²_d * (o ⋅ d) - 16 * R^2 * (norm²_d - d.z^2) * (o ⋅ d - o.z * d.z)
     c2 = 4 * (o ⋅ d)^2 + 2 * norm²_d * norm²_o + 2 * norm²_d * (R^2 - r^2) + 8 * (2 * R^2 * (o ⋅ d - o.z * d.z)^2 - (norm²_o - o.z^2) * (norm²_d * d.z^2))
     c1 = 4 * norm²_o * (o ⋅ d) + 4 * (R^2 - r^2) * (o ⋅ d) - 16 * R^2 * (norm²_o - o.z^2) * (o ⋅ d - o.z * d.z)
     c0 = norm²_o^2 + (R^2 - r^2)^2 + 2 * norm²_o * (R^2 - r^2) - 4 * R^2 * (norm²_o - o.z^2)
-
+=#
 #=
     #from site, but adjusted for z-axis symmetry (y -> z)
     c4 = norm²_d^2
