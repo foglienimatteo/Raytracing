@@ -85,3 +85,7 @@ end
 @testset "test_OrthoNormalBasis" begin
 	include("test_OrthoNormalBasis.jl")
 end
+
+@testset "test_Antialiasing" begin
+	include("test_Antialiasing.jl")
+end

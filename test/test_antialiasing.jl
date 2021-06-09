@@ -6,14 +6,14 @@
 #
 
 @testset "test_Antialiasing" begin
-    num_of_rays = 0
+    global num_of_rays = 0
     small_image = HDRimage(1, 1)
     camera = OrthogonalCamera(1.0)
-    tracer = ImageTracer(small_image, camera, 10, pcg=PCG())
+    tracer = ImageTracer(small_image, camera, 10, PCG())
 
-    function trace_ray(ray::Ray, number_rays::Int64)
-        num_of_rays = number_rays
-        point = ray.at(1)
+    function trace_ray(ray::Ray)
+        # num_of_rays
+        point = at(ray, 1.)
 
         # Check that all the rays intersect the screen within the region [−1, 1] × [−1, 1]
         @test abs(point.x) < 1e-5

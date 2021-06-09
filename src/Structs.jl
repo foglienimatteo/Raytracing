@@ -7,7 +7,9 @@
 
 const BLACK = RGB{Float32}(0.0, 0.0, 0.0)
 const WHITE = RGB{Float32}(1.0, 1.0, 1.0)
-
+mutable struct mutable_for_test
+    num_rays::Int64
+end
 
 """
     to_RGB(r::Int64, g::Int64, b::Int64) :: RGB{Float32}
