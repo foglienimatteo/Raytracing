@@ -309,8 +309,19 @@ function parse_keyword_or_identifier_token(InputS::InputStream, first_char::Stri
     while true
         read_char(ch)
 
-        if a==0
-            f=0
+        if !(isa(ch, Int8) || ch == "_")
+            unread_char(ch)
+            break
         end
+
+        token += ch
+    end
+
+    try
+        # If it is a keyword, it must be listed in the KEYWORDS dictionary
+        return Token(token_location, KeywordToken(KEYWORDS[token]))
+    catch KeyError
+        # If we got KeyError, it is not a keyword and thus it must be an identifier
+        return Token(token_location, IdentifierToken(token))
     end
 end
