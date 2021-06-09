@@ -56,7 +56,9 @@ export create_onb_from_z
 #from ScatterRay.jl
 export scatter_ray
 #from SceneFiles.jl
-export GrammarError
+export GrammarError, InputStream
+export Token, IdentifierToken, StringToken, SymbolToken, IdentifierToken
+export read_token, skip_whitespaces_and_comments
 
 include("PCG.jl")
 include("Structs.jl")

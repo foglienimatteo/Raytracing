@@ -85,3 +85,7 @@ end
 @testset "test_OrthoNormalBasis" begin
 	include("test_OrthoNormalBasis.jl")
 end
+
+@testset "test_SceneFiles" begin
+	include("test_SceneFiles.jl")
+end
