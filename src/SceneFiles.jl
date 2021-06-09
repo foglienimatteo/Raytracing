@@ -204,7 +204,7 @@ This class implements a wrapper around a stream, with the following additional c
 
 - `saved_token`: the last token found
 """
-struct InputStream
+mutable struct InputStream
     stream::IO
     location::SourceLocation
     saved_char::String
@@ -215,7 +215,16 @@ struct InputStream
     InputStream(stream::IO, file_name::String = "", tabulations::Int64 = 8) = 
         new(stream, SourceLocation(file_name, 1, 0), "", location, tabulations)
 end
-
+#=
+struct Scene
+    materials::Dict{String, Material}
+    objects::Vector{Shape}
+    camera::Union{Camera, Nothing}
+    float_variables::Dict{String, Float64}
+    Scene(materials, objects, camera, float_variables) =
+        new()
+end
+=#
 """
      @enum KeywordEnum
 
@@ -275,6 +284,8 @@ KEYWORDS = Dict{String, KeywordEnum}(
     "perspective" => KeywordEnum.PERSPECTIVE,
     "float" => KeywordEnum.FLOAT,
 )
+
+##########################################################################################92
 
 """
     update_pos(InputS::InputStream, ch)
@@ -502,3 +513,12 @@ function read_token(inputstream::InputStream)
           # We got some weird character, like '@` or `&`
           raise GrammarError(self.location, f"Invalid character {ch}")
 =#
+"""
+    unread_token(InputS::InputStream, token::Token)
+
+Make as if `token` were never read from `input_file`
+"""
+function unread_token(InputS::InputStream, token::Token)
+    @assert isnothing(InputS.saved_token)
+    InputS.saved_token = token
+end
