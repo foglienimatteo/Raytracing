@@ -56,10 +56,14 @@ function torus_point_to_uv(point::Point)
     len_point = norm(point)
     # u = atan(point.y/(point.x^2 + point.z^2)^0.5) / (2. * pi)    # asin(point.y/len_point) / (2.0 * π)
     # v = atan(point.z/point.x) / (2. * pi)   # atan(point.z, point.x) / (2.0 * π)
+#    printstyled("point_uv :", point, "\n", color=:light_magenta)
+#    printstyled("\ty/x = ", point.y/point.x, " -> ", atan(point.y/point.x), "\n", color=:light_green)
+#    printstyled("\ty/x' = ", point.y/((point.x^2 + point.y^2)^0.5), " -> ", atan(point.y/((point.x^2 + point.y^2)^0.5)), "\n", color=:light_green)
     u = atan(point.y/point.x) / (2. * pi)
     v = atan(point.z/(point.x^2 + point.y^2)^0.5) / (2. * pi)
     v>=0 ? nothing : v+= 1.0
     u>=0 ? nothing : u+= 1.0
+#    printstyled("\tVec2d = ", Vec2d(u,v), "\n", color=:light_green)
     return Vec2d(u,v)
 end
 
@@ -121,7 +125,7 @@ function torus_normal(p::Point, ray_dir::Vec, r::Float64)
 =#
 #    q = Point(O.x - p.x, O.y - p.y, O.z - p.z)
 #    println("\npoint for normal: ", p, "\tq = ", q, "\tO = ", O)
-    printstyled("point = ", p, color=:red, "\n")
+#   printstyled("point = ", p, color=:red, "\n")
     (abs(p.x) < 1e-6) ? (N_x = 0.) : (N_x = copysign( ((1 - (p.z/r)^2) / (1 + (p.y/p.x)^2))^0.5, p.x))
     (abs(p.y) < 1e-6) ? (N_y = 0.) : (N_y = copysign( ((1 - (p.z/r)^2) / (1 + (p.x/p.y)^2))^0.5, p.y))
     N_z = p.z/r
@@ -243,16 +247,16 @@ function ray_intersection(torus::Torus, ray::Ray)
     c2 = 4 * scalar_od^2 + 2 * norm2_d * norm2_o - 4 * R^2 * (norm2_d - d.z^2) + 2 * norm2_d * (R^2 - r^2)
     c1 = 4 * norm2_o * scalar_od + 4 * scalar_od * (R^2 - r^2) - 8 * R^2 * (scalar_od - (o.z * d.z))
     c0 = norm2_o^2 + (R^2 - r^2)^2 + 2 * norm2_o * (R^2 - r^2) - 4 * R^2 * (norm2_o - o.z^2)
-    printstyled("inv_ray.origin = ", inv_ray.origin, color=:light_magenta)
-    printstyled("\tnorm2_origin = ", squared_norm(inv_ray.origin), color=:light_magenta, "\n")
-    printstyled("o = ", o, color=:light_cyan)
-    printstyled("\tnorm2_o = ", norm2_o, " -> ", norm2_o^2, " -> ", norm2_o * norm2_o, color=:light_cyan, "\n")
-    printstyled("o ⋅ d = ", scalar_od, color=:yellow, "\n")
-    printstyled("c4 = ", c4, color=:green)
-    printstyled("\tc3 = ", c3, color=:green)
-    printstyled("\tc2 = ", c2, color=:green)
-    printstyled("\tc1 = ", c1, color=:green)
-    printstyled("\tc0 = ", c0, color=:green, "\n")
+#    printstyled("inv_ray.origin = ", inv_ray.origin, color=:light_magenta)
+#    printstyled("\tnorm2_origin = ", squared_norm(inv_ray.origin), color=:light_magenta, "\n")
+#    printstyled("o = ", o, color=:light_cyan)
+#    printstyled("\tnorm2_o = ", norm2_o, " -> ", norm2_o^2, " -> ", norm2_o * norm2_o, color=:light_cyan, "\n")
+#    printstyled("o ⋅ d = ", scalar_od, color=:yellow, "\n")
+#    printstyled("c4 = ", c4, color=:green)
+#    printstyled("\tc3 = ", c3, color=:green)
+#    printstyled("\tc2 = ", c2, color=:green)
+#    printstyled("\tc1 = ", c1, color=:green)
+#    printstyled("\tc0 = ", c0, color=:green, "\n")
 #=
     # form http://blog.marcinchwedczuk.pl/ray-tracing-torus
     c4 = norm²_d^2
@@ -280,22 +284,24 @@ function ray_intersection(torus::Torus, ray::Ray)
 
     t_ints = roots(Polynomial([c0, c1, c2, c3, c4]))
     (t_ints == nothing) && (return nothing)
-
+#    printstyled("\tt_ints = ", t_ints * 1im, color=:green, "\n")
     hit_ts = Vector{Float64}()
 #    println("\nt_ints: ", hit_ts)
 #    println("len of t_ints: ", length(hit_ts))
 #    println(t_ints)
     for i in t_ints
-        if (typeof(i) == ComplexF64)
+        if (typeof(i) == ComplexF64) && (abs(i.im) > 1e-8)
             continue
-        elseif (inv_ray.tmin < i < inv_ray.tmax)
-            push!(hit_ts, i)
+        elseif ((typeof(i) == Float64) && (inv_ray.tmin < i < inv_ray.tmax)) || ((typeof(i) == ComplexF64) && (abs(i.im) < 1e-8))
+            (typeof(i) == Float64) && push!(hit_ts, i)
+            (typeof(i) == ComplexF64) && push!(hit_ts, i.re)
         else
             nothing
         end
 #        (typeof(i) == ComplexF64) && continue
 #        (inv_ray.tmin < i < inv_ray.tmax) ? push!(hit_ts, i) : nothing
     end
+#    printstyled("\thit_ts = ", hit_ts, color=:green, "\n")
     (length(hit_ts) == 0) && return nothing
 #    println("t_min = ", inv_ray.tmin, "\tt_max = ", inv_ray.tmax)
 #    println("t_ints: ", hit_ts)
