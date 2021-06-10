@@ -10,7 +10,7 @@
 ![CI-build](https://img.shields.io/github/workflow/status/cosmofico97/Raytracing/Unit%20tests)
 ![size](https://img.shields.io/github/repo-size/cosmofico97/Raytracing) 
 ![license]( https://img.shields.io/github/license/cosmofico97/Raytracing)
-![Codecov](https://coveralls/github/cosmofico97/Raytracing/master)
+[![codecov](https://codecov.io/gh/cosmofico97/Raytracing/branch/master/graph/badge.svg?token=67GIZ9RA8Y)](https://codecov.io/gh/cosmofico97/Raytracing)
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://cosmofico97.github.io/Raytracing/stable) 
 [![Dev](https://img.shields.io/badge/docs-dev-blue?style=flat)](https://cosmofico97.github.io/Raytracing/dev)  
 
