@@ -64,10 +64,6 @@ end
 	include("test_Plane.jl")
 end
 
-@testset "test_Triangle" begin
-	include("test_Triangle.jl")
-end
-
 @testset "test_Shapes-World" begin
 	include("test_Shapes-World.jl")
 end
