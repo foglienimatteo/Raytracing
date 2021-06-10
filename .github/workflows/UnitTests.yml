@@ -22,7 +22,7 @@ on: [push]
 #on:
 #  push:
 #    branches:
-#      - demo
+#      - torus
 
 
 jobs:

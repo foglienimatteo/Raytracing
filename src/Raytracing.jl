@@ -45,6 +45,7 @@ export at, fire_ray, fire_all_rays!
 export ray_intersection, add_shape!, add_light!
 export sphere_point_to_uv, sphere_normal
 export plane_point_to_uv, plane_normal
+export torus_point_to_uv, torus_normal
 export is_point_visible, quick_ray_intersection
 # from Demo.jl
 export first_world, second_world, select_world

@@ -642,12 +642,11 @@ struct Torus <: Shape
     Material::Material
     r::Float64
     R::Float64
-    O::Point
-    Torus(T=Transformation(),
-          M = Material(),
-          r = 0.5, 
-          R = 1.0
-        ) = new(T, M, r, R, T*Point(0., 0., 0.))
+    Torus(T::Transformation=Transformation(),
+          M::Material = Material(),
+          r::Float64 = 0.5, 
+          R::Float64 = 1.0
+        ) = new(T, M, r, R)
 end
 
 

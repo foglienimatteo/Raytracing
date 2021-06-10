@@ -111,7 +111,7 @@ direction with respect to `ray_dir`.
 
 See also: [`Normal`](@ref), [`Point`](@ref), ([`Vec`](@ref))
 """
-function torus_normal(p::Point, ray_dir::Vec, r::Float64, O::Point)
+function torus_normal(p::Point, ray_dir::Vec, r::Float64)
 #=
     R_z = copysign(R / √(1+(p.x/p.z)^2), p.z)
     R_x = copysign(R_z * p.x / p.z, p.x)
@@ -121,8 +121,9 @@ function torus_normal(p::Point, ray_dir::Vec, r::Float64, O::Point)
 =#
 #    q = Point(O.x - p.x, O.y - p.y, O.z - p.z)
 #    println("\npoint for normal: ", p, "\tq = ", q, "\tO = ", O)
-    (abs(p.x) < 1e-6) ? (N_x = 0.) : (N_x = copysign(((1 - (p.z/r)^2) / (1 + (p.y/p.x)^2))^0.5), p.x)
-    (abs(p.y) < 1e-6) ? (N_y = 0.) : (N_y = copysign(((1 - (p.z/r)^2) / (1 + (p.x/p.y)^2))^0.5), p.y)
+    printstyled("point = ", p, color=:red, "\n")
+    (abs(p.x) < 1e-6) ? (N_x = 0.) : (N_x = copysign( ((1 - (p.z/r)^2) / (1 + (p.y/p.x)^2))^0.5, p.x))
+    (abs(p.y) < 1e-6) ? (N_y = 0.) : (N_y = copysign( ((1 - (p.z/r)^2) / (1 + (p.x/p.y)^2))^0.5, p.y))
     N_z = p.z/r
     result = Normal(N_x, N_y, N_z)
     result ⋅ ray_dir < 0.0 ? nothing : result = -result
@@ -232,7 +233,7 @@ function ray_intersection(torus::Torus, ray::Ray)
 #    d = normalize(inv_ray.dir)
     d = inv_ray.dir
     norm2_d = squared_norm(d)
-    norm2_o = squared_norm(o)
+    norm2_o =  squared_norm(inv_ray.origin) # squared_norm(o)
     scalar_od = o ⋅ d
     r = torus.r
     R = torus.R
@@ -240,9 +241,18 @@ function ray_intersection(torus::Torus, ray::Ray)
     c4 = norm2_d^2
     c3 = 4 * norm2_d * scalar_od
     c2 = 4 * scalar_od^2 + 2 * norm2_d * norm2_o - 4 * R^2 * (norm2_d - d.z^2) + 2 * norm2_d * (R^2 - r^2)
-    c1 = 4 * norm2_o * scalar_od + 4 * scalar_od * (R^2 - r^2) - 8 * (scalar_od - o.z * d.z)
+    c1 = 4 * norm2_o * scalar_od + 4 * scalar_od * (R^2 - r^2) - 8 * R^2 * (scalar_od - (o.z * d.z))
     c0 = norm2_o^2 + (R^2 - r^2)^2 + 2 * norm2_o * (R^2 - r^2) - 4 * R^2 * (norm2_o - o.z^2)
-
+    printstyled("inv_ray.origin = ", inv_ray.origin, color=:light_magenta)
+    printstyled("\tnorm2_origin = ", squared_norm(inv_ray.origin), color=:light_magenta, "\n")
+    printstyled("o = ", o, color=:light_cyan)
+    printstyled("\tnorm2_o = ", norm2_o, " -> ", norm2_o^2, " -> ", norm2_o * norm2_o, color=:light_cyan, "\n")
+    printstyled("o ⋅ d = ", scalar_od, color=:yellow, "\n")
+    printstyled("c4 = ", c4, color=:green)
+    printstyled("\tc3 = ", c3, color=:green)
+    printstyled("\tc2 = ", c2, color=:green)
+    printstyled("\tc1 = ", c1, color=:green)
+    printstyled("\tc0 = ", c0, color=:green, "\n")
 #=
     # form http://blog.marcinchwedczuk.pl/ray-tracing-torus
     c4 = norm²_d^2
@@ -296,7 +306,7 @@ function ray_intersection(torus::Torus, ray::Ray)
 
     return HitRecord(
         torus.T * hit_point,
-        torus.T * torus_normal(hit_point, inv_ray.dir, torus.r, torus.O),
+        torus.T * torus_normal(hit_point, inv_ray.dir, torus.r),
         torus_point_to_uv(hit_point), # manca la funzione
         hit_t,
         ray, 
