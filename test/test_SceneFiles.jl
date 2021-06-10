@@ -21,7 +21,7 @@ function assert_is_identifier(token::Token, identifier::String)
      if token.identifier == identifier
           @test token.identifier == identifier
      else 
-          throw(Exception("expecting identifier '$(identifier})' instead of '$(token})'"))
+          throw(Exception("expecting identifier '$(identifier)' instead of '$(token)'"))
      end
 end
 
@@ -43,56 +43,60 @@ function assert_is_number(token::Token, number::Float64)
      end
 end
 
-function assert_is_string(token::Token, s::String) 
-    @test isa(token, StringToken)
-    @test token.string == s, f"Token '{token}' is not equal to string '{s}'"
+function assert_is_string(token::Token, string::String) 
+     @test isa(token, StringToken)
+     if token.value == string
+          @test token.value == string
+     else
+          throw(Exception("Token '$(token)' is not equal to string '$(string)'"))
+     end
 end
 
 @testset "test_input_file" begin
-     stream = InputStream(StringIO("abc   \nd\nef"))
+     stream = InputStream(IOBuffer("abc   \nd\nef"))
 
      @test stream.location.line_num == 1
      @test stream.location.col_num == 1
 
-     @test read_char(stream) == "a"
+     @test Raytracing.read_char(stream) == "a"
      @test stream.location.line_num == 1
      @test stream.location.col_num == 2
 
-     unread_char(stream, "A")
+     Raytracing.unread_char(stream, "A")
      @test stream.location.line_num == 1
      @test stream.location.col_num == 1
 
-     @test read_char(stream) == "A"
+     @test Raytracing.read_char(stream) == "A"
      @test stream.location.line_num == 1
      @test stream.location.col_num == 2
 
-     @test read_char(stream) == "b"
+     @test Raytracing.read_char(stream) == "b"
      @test stream.location.line_num == 1
      @test stream.location.col_num == 3
 
-     @test read_char(stream) == "c"
+     @test Raytracing.read_char(stream) == "c"
      @test stream.location.line_num == 1
      @test stream.location.col_num == 4
 
      skip_whitespaces_and_comments(stream)
 
-     @test read_char(stream) == "d"
+     @test Raytracing.read_char(stream) == "d"
      @test stream.location.line_num == 2
      @test stream.location.col_num == 2
 
-     @test read_char(stream) == "\n"
+     @test Raytracing.read_char(stream) == "\n"
      @test stream.location.line_num == 3
      @test stream.location.col_num == 1
 
-     @test read_char(stream) == "e"
+     @test Raytracing.read_char(stream) == "e"
      @test stream.location.line_num == 3
      @test stream.location.col_num == 2
 
-     @test read_char(stream) == "f"
+     @test Raytracing.read_char(stream) == "f"
      @test stream.location.line_num == 3
      @test stream.location.col_num == 3
 
-     @test read_char(stream) == ""
+     @test Raytracing.read_char(stream) == ""
 end
 
 @testset "test_lexer" begin

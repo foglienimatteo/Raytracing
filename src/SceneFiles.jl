@@ -7,13 +7,14 @@
 
 WHITESPACE = [" ", "\t", "\n", "\r"]
 SYMBOLS = ["(", ")", "<", ">", "[", "]", "*"]
-CHARACTERS = [
+LETTERS = [
      'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 
      'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 
      'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 
      'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 
      '_',
 ]
+NUMBERS = ['0', '1', '2', '3', '4', '5', '6','7', '8', '9']
 
 function isdigit(a::String)
      !isnothing(tryparse(Int64, a)) || (return false)
@@ -30,6 +31,13 @@ function isdecimal(a::String)
 end
 
 function isalpha(a::String)
+     for ch in a
+          (ch ∈ LETTERS || ch ∈ NUMBERS) || (return false)
+     end
+     return true 
+end
+
+function isalnum(a::String)
      for ch in a
           (ch ∈ CHARACTERS) || (return false)
      end
@@ -50,7 +58,7 @@ A specific position in a source file
 
 - `col_num`: number of the column (starting from 1)
 """
-struct SourceLocation
+mutable struct SourceLocation
     file_name::String
     line_num::Int64
     col_num::Int64
@@ -71,7 +79,7 @@ struct LiteralNumberToken
 end
 
 """
-    LiteralStringToken(sentence::String)
+     StringToken(sentence::String)
 
 A token containing a literal string
 
@@ -79,7 +87,7 @@ A token containing a literal string
 
 - `sentence`: sentence between two `"` symbols
 """
-struct LiteralStringToken
+struct  StringToken
     sentence::String
 end
 
@@ -137,7 +145,7 @@ end
 
 """
     Token(loc::SourceLocation,
-          value::Union{LiteralNumber, LiteralString, Keyword, Identifier, Symbol})
+          value::Union{LiteralNumber,  String, Keyword, Identifier, Symbol})
 
 A lexical token, used when parsing a scene file
 
@@ -148,8 +156,14 @@ A lexical token, used when parsing a scene file
 - `value`: specify the type of token between 6 types
 """
 struct Token
-    loc::SourceLocation
-    value::Union{LiteralNumber, LiteralString, Keyword, Identifier, Symbol}
+     loc::SourceLocation
+     value::Union{
+          LiteralNumberToken, 
+          StringToken, 
+          KeywordToken, 
+          IdentifierToken, 
+          SymbolToken, 
+          StopToken}
 end
 
 """
@@ -175,56 +189,6 @@ struct GrammarError <: Exception
     message::String
 end
 
-"""
-    InputStream(
-        stream::IO,
-        location::SourceLocation,
-        saved_char::String,
-        saved_location::SourceLocation,
-        tabulations::Int64,
-        saved_token::Union{Token, Nothing},
-    )
-
-A high-level wrapper around a stream, used to parse scene files
-This class implements a wrapper around a stream, with the following additional capabilities:
-    - It tracks the line number and column number;
-    - It permits to "un-read" characters and tokens.
-
-## Arguments
-
-- `stream`: 
-
-- `location`: memorize the current location in the file
-
-- `saved_char`: the last char read
-
-- `saved_location`: the location where `saved_char` is in the file
-
-- `tabulations`: number of space a tab command gives
-
-- `saved_token`: the last token found
-"""
-mutable struct InputStream
-    stream::IO
-    location::SourceLocation
-    saved_char::String
-    saved_location::SourceLocation
-    tabulations::Int64
-    saved_token::Union{Token, Nothing}
-
-    InputStream(stream::IO, file_name::String = "", tabulations::Int64 = 8) = 
-        new(stream, SourceLocation(file_name, 1, 0), "", location, tabulations)
-end
-#=
-struct Scene
-    materials::Dict{String, Material}
-    objects::Vector{Shape}
-    camera::Union{Camera, Nothing}
-    float_variables::Dict{String, Float64}
-    Scene(materials, objects, camera, float_variables) =
-        new()
-end
-=#
 """
      @enum KeywordEnum
 
@@ -264,108 +228,99 @@ Enumeration for all the possible keywords recognized by the lexer:
 end
 
 KEYWORDS = Dict{String, KeywordEnum}(
-    "new" => KeywordEnum.NEW,
-    "material" => KeywordEnum.MATERIAL,
-    "plane" => KeywordEnum.PLANE,
-    "sphere" => KeywordEnum.SPHERE,
-    "diffuse" => KeywordEnum.DIFFUSE,
-    "specular" => KeywordEnum.SPECULAR,
-    "uniform" => KeywordEnum.UNIFORM,
-    "checkered" => KeywordEnum.CHECKERED,
-    "image" => KeywordEnum.IMAGE,
-    "identity" => KeywordEnum.IDENTITY,
-    "translation" => KeywordEnum.TRANSLATION,
-    "rotation_x" => KeywordEnum.ROTATION_X,
-    "rotation_y" => KeywordEnum.ROTATION_Y,
-    "rotation_z" => KeywordEnum.ROTATION_Z,
-    "scaling" => KeywordEnum.SCALING,
-    "camera" => KeywordEnum.CAMERA,
-    "orthogonal" => KeywordEnum.ORTHOGONAL,
-    "perspective" => KeywordEnum.PERSPECTIVE,
-    "float" => KeywordEnum.FLOAT,
+    "new" => KeywordEnum[NEW][1],
+    "material" => KeywordEnum[MATERIAL][1],
+    "plane" => KeywordEnum[PLANE][1],
+    "sphere" => KeywordEnum[SPHERE][1],
+    "diffuse" => KeywordEnum[DIFFUSE][1],
+    "specular" => KeywordEnum[SPECULAR][1],
+    "uniform" => KeywordEnum[UNIFORM][1],
+    "checkered" => KeywordEnum[CHECKERED][1],
+    "image" => KeywordEnum[IMAGE][1],
+    "identity" => KeywordEnum[IDENTITY][1],
+    "translation" => KeywordEnum[TRANSLATION][1],
+    "rotation_x" => KeywordEnum[ROTATION_X][1],
+    "rotation_y" => KeywordEnum[ROTATION_Y][1],
+    "rotation_z" => KeywordEnum[ROTATION_Z][1],
+    "scaling" => KeywordEnum[SCALING][1],
+    "camera" => KeywordEnum[CAMERA][1],
+    "orthogonal" => KeywordEnum[ORTHOGONAL][1],
+    "perspective" => KeywordEnum[PERSPECTIVE][1],
+    "float" => KeywordEnum[FLOAT][1],
 )
+
+"""
+    InputStream(
+        stream::IO,
+        location::SourceLocation,
+        saved_char::String,
+        saved_location::SourceLocation,
+        tabulations::Int64,
+        saved_token::Union{Token, Nothing},
+    )
+
+A high-level wrapper around a stream, used to parse scene files
+This class implements a wrapper around a stream, with the following additional capabilities:
+    - It tracks the line number and column number;
+    - It permits to "un-read" characters and tokens.
+
+## Arguments
+
+- `stream`: 
+
+- `location`: memorize the current location in the file
+
+- `saved_char`: the last char read
+
+- `saved_location`: the location where `saved_char` is in the file
+
+- `tabulations`: number of space a tab command gives
+
+- `saved_token`: the last token found
+"""
+mutable struct InputStream
+     stream::IO
+     location::SourceLocation
+     saved_char::String
+     saved_location::SourceLocation
+     tabulations::Int64
+     saved_token::Union{Token, Nothing}
+
+     InputStream(
+          stream::IO, 
+          file_name::String = "", 
+          tabulations::Int64 = 8
+          ) = new(
+               stream, 
+               SourceLocation(file_name, 1, 1), 
+               "", 
+               SourceLocation(file_name, 1, 1), 
+               tabulations, 
+               nothing
+               )
+end
+
 
 ##########################################################################################92
 
 """
-    update_pos(inputstream::InputStream, ch)
+    update_pos(inputstream::InputStream, ch::String)
 
 Update `location` after having read `ch` from the stream
 """
-function update_pos(inputstream::InputStream, ch)
-    if ch == ""
-        return nothing
-    elseif ch == "\n"
-        inputstream.location.line_num += 1
-        inputstream.location.col_num = 1
-    elseif ch == "\t"
-        inputstream.location.col_num += inputstream.tabulations
-    else
-        inputstream.location.col_num += 1
-    end
+function update_pos(inputstream::InputStream, ch::String)
+     if ch == ""
+          nothing
+     elseif ch == "\n"
+          inputstream.location.line_num += 1
+          inputstream.location.col_num = 1
+     elseif ch == "\t"
+          inputstream.location.col_num += inputstream.tabulations
+     else
+          inputstream.location.col_num += 1
+     end
 end
 
-"""
-    parse_string_token(
-        inputstream::InputStream,
-        token_location::SourceLocation
-        ) ::Token(
-                ::SourceLocation,
-                ::LiteralStringToken
-                )
-
-
-"""
-function parse_string_token(inputstream::InputStream, token_location::SourceLocation)
-    token = ""
-    while true
-        ch = read_char(inputstream)
-
-        if ch == `"`
-            break
-        end
-        if ch == ""
-            throw(GrammarError(token_location, "unterminated string"))
-        end
-
-        token += ch
-    end
-
-    return Token(token_location, token)
-end
-
-"""
-    parse_keyword_or_identifier_token(
-        inputstream::InputStream,
-        first_char::String,
-        token_location::SourceLocation
-        ) ::Union{
-                Token(::SourceLocation, ::KeywordToken),
-                Token(::SourceLocation, ::IdentifierToken)
-                }
-"""
-function parse_keyword_or_identifier_token(inputstream::InputStream, first_char::String, token_location::SourceLocation)
-    token = first_char
-
-    while true
-        read_char(ch)
-
-        if !(isa(ch, Int8) || ch == "_")
-            #unread_char(ch)
-            break
-        end
-
-        token += ch
-    end
-
-    try
-        # If it is a keyword, it must be listed in the KEYWORDS dictionary
-        return Token(token_location, KeywordToken(KEYWORDS[token]))
-    catch KeyError
-        # If we got KeyError, it is not a keyword and thus it must be an identifier
-        return Token(token_location, IdentifierToken(token))
-    end
-end
 
 """
      read_char(inputstream::InputStream) :: String
@@ -375,14 +330,14 @@ Read a new character from the stream.
 See also: [`InputStream`](@ref)
 """
 function read_char(inputstream::InputStream)
-     if inputstream.saved_char != ""
+     if inputstream.saved_char ≠ ""
           ch = inputstream.saved_char
           inputstream.saved_char = ""
      else
-          ch = read(inputstream.stream, 1)
+          ch = String([read(inputstream.stream, UInt8)])
      end
 
-     inputstream.saved_location = copy(inputstream.location)
+     inputstream.saved_location = inputstream.location  # shallow copy ?
      update_pos(inputstream, ch)
 
      return ch
@@ -398,9 +353,8 @@ See also: [`InputStream`](@ref)
 function unread_char(inputstream::InputStream, ch::String)
      @assert inputstream.saved_char == ""
      inputstream.saved_char = ch
-     inputstream.location = copy(inputstream.saved_location)
+     inputstream.location = inputstream.saved_location # shallow copy ?
 end
-
 
 """
      skip_whitespaces_and_comments(inputstream::InputStream)
@@ -408,7 +362,7 @@ end
 Keep reading characters until a non-whitespace/non-comment character is found.
 Calls internally [`read_char`](@ref) and [`unread_char`](@ref), and it's used
 inside the main function [`read_token`](@ref).
-     
+
 See also: [`InputStream`](@ref)
 """        
 function skip_whitespaces_and_comments(inputstream::InputStream)
@@ -429,6 +383,36 @@ function skip_whitespaces_and_comments(inputstream::InputStream)
      unread_char(inputstream, ch)
      nothing
 end
+
+"""
+    parse_string_token(
+        inputstream::InputStream,
+        token_location::SourceLocation
+        ) ::Token(
+                ::SourceLocation,
+                :: StringToken
+                )
+
+
+"""
+function parse_string_token(inputstream::InputStream, token_location::SourceLocation)
+     token = ""
+     while true
+          ch = read_char(inputstream)
+
+          if ch == '"'
+               break
+          end
+          if ch == ""
+               throw(GrammarError(token_location, "unterminated string"))
+          end
+
+          token += ch
+     end
+
+    return Token(token_location, token)
+end
+
 
 """
      parse_float_token(
@@ -472,6 +456,43 @@ function parse_float_token(inputstream::InputStream, first_char::String, token_l
      return LiteralNumberToken(token_location, value)
 end
 
+"""
+     parse_keyword_or_identifier_token(
+          inputstream::InputStream,
+          first_char::String,
+          token_location::SourceLocation
+          ) ::Union{
+                    Token(::SourceLocation, ::KeywordToken),
+                    Token(::SourceLocation, ::IdentifierToken)
+                    }
+"""
+function parse_keyword_or_identifier_token(
+               inputstream::InputStream, 
+               first_char::String, 
+               token_location::SourceLocation
+          )
+     
+     token = first_char
+
+     while true
+          ch = read_char(inputstream)
+
+          if !isalnum(ch)
+               unread_char(inputstream, ch)
+               break
+          end
+
+          token *= ch
+     end
+
+     try
+          # If it is a keyword, it must be listed in the KEYWORDS dictionary
+          return Token(token_location, KeywordToken(KEYWORDS[token]))
+     catch KeyError
+          # If we got KeyError, it is not a keyword and thus it must be an identifier
+          return Token(token_location, IdentifierToken(token))
+     end
+end
 
 """
      read_token(inputstream::InputStream) :: Token
@@ -507,7 +528,7 @@ function read_token(inputstream::InputStream)
      # At this point we must check what kind of token begins with the "ch" character 
      # (which has been put back in the stream with self.unread_char). First, we save 
      # the position in the stream.
-     token_location = copy(inputstream.location)
+     token_location = inputstream.location  # shallow copy ?
 
      if ch ∈ SYMBOLS
           # One-character symbol, like '(' or ','
