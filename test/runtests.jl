@@ -87,5 +87,5 @@ end
 end
 
 @testset "test_Antialiasing" begin
-	include("test_Antialiasing.jl")
+	include("test_antialiasing.jl")
 end
