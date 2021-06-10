@@ -57,7 +57,7 @@ function torus_point_to_uv(point::Point)
     # u = atan(point.y/(point.x^2 + point.z^2)^0.5) / (2. * pi)    # asin(point.y/len_point) / (2.0 * π)
     # v = atan(point.z/point.x) / (2. * pi)   # atan(point.z, point.x) / (2.0 * π)
     u = atan(point.y/point.x) / (2. * pi)
-    v = atan(point.z/(point.x^2 + point.z^2)^0.5) / (2. * pi)
+    v = atan(point.z/(point.x^2 + point.y^2)^0.5) / (2. * pi)
     v>=0 ? nothing : v+= 1.0
     u>=0 ? nothing : u+= 1.0
     return Vec2d(u,v)
