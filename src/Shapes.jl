@@ -157,6 +157,12 @@ function triangle_normal(triangle::Triangle, ray_dir::Vec)
     return Normal(result)
 end
 
+function triangle_barycenter(triangle::Triangle)
+    A, B, C = Tuple(P for P in triangle.vertexes)
+    result = Point(A.x+B.x+C.x, A.y+B.y+C.y, A.z+B.z+C.z)*1/3
+    return result
+end
+
 ##########################################################################################92
 
 
@@ -301,29 +307,27 @@ See also: [`Ray`](@ref), [`Triangle`](@ref), [`HitRecord`](@ref)
 function ray_intersection(triangle::Triangle, ray::Ray)
 
     A, B, C = Tuple(P for P in triangle.vertexes)
-    O = [ray.origin.x ray.origin.y ray.origin.z]
+    m = [ray.origin.x-A.x ray.origin.y-A.y ray.origin.z-A.z]
     M = [
-        B.x-A.x C.x-A.x A.x ;
-        B.y-A.y C.y-A.y A.y ;
-        B.z-A.z C.z-A.z A.z ;
+        B.x-A.x C.x-A.x -ray.dir.x ;
+        B.y-A.y C.y-A.y -ray.dir.y ;
+        B.z-A.z C.z-A.z -ray.dir.z ;
     ]
 
-    try
-        w = m / M
-        u, v, hit_t = Tuple(x for x in w)
-        ( (hit_t > ray.tmin) && (hit_t < ray.tmax) ) || (return nothing)
-        hit_point = at(ray, hit_t)
-        return HitRecord(
-            hit_point,
-            triangle_normal(triangle, ray.dir),
-            Vec2d(u,v),
-            hit_t,
-            ray,
-            triangle
-        )
-    catch Excep
-        return nothing
-    end
+    println(m, "\n\n", M)
+
+    w = m / M
+    u, v, hit_t = Tuple(x for x in w)
+    ( (hit_t > ray.tmin) && (hit_t < ray.tmax) ) || (return nothing)
+    hit_point = at(ray, hit_t)
+    return HitRecord(
+        hit_point,
+        triangle_normal(triangle, ray.dir),
+        Vec2d(u,v),
+        hit_t,
+        ray,
+        triangle
+    )
 end
 
 

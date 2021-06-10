@@ -607,7 +607,7 @@ end
 
 
 
-VERTEXES = SVector{Point}(Point(√3/2, 0, 0), Point(0, 0.5, 0), Point(0, -0.5, 0))
+VERTEXES = SVector{3}(Point(√3/2, 0, 0), Point(0, 0.5, 0), Point(0, -0.5, 0))
 """
     Triangle <: Shape(
         vertexes::SVector{3, Point} = 
