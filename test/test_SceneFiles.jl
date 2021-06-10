@@ -6,6 +6,40 @@
 #
 
 
+@testset "test_isdigit" begin
+     @test Raytracing.isdigit("2")
+     @test Raytracing.isdigit("1")
+     @test !Raytracing.isdigit("10")
+     @test !Raytracing.isdigit("a")
+     @test !Raytracing.isdigit("")
+end
+
+@testset "test_isdecimal" begin
+     @test Raytracing.isdecimal("2")
+     @test Raytracing.isdecimal("1123129")
+     @test !Raytracing.isdecimal("10.9")
+     @test !Raytracing.isdecimal("ag")
+     @test !Raytracing.isdecimal("10ag")
+     @test !Raytracing.isdecimal("")
+end
+
+@testset "test_isalpha" begin
+     @test Raytracing.isalpha("a")
+     @test Raytracing.isalpha("ADcLopnb__o")
+     @test !Raytracing.isalpha("1")
+     @test !Raytracing.isalpha("aD1sd")
+     @test !Raytracing.isalpha("")
+end
+
+@testset "test_isalnum" begin
+     @test Raytracing.isalnum("adf_g")
+     @test Raytracing.isalnum("1239")
+     @test Raytracing.isalnum("A1__Def98")
+     @test !Raytracing.isalnum("78KO.b")
+     @test !Raytracing.isalnum("78KO@b")
+     @test !Raytracing.isalnum("")
+end
+
 
 function assert_is_keyword(token::Token, keyword::KeywordEnum) 
      @test isa(token, KeywordToken)

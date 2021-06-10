@@ -32,15 +32,17 @@ end
 
 function isalpha(a::String)
      for ch in a
-          (ch ∈ LETTERS || ch ∈ NUMBERS) || (return false)
+          (ch ∈ LETTERS) || (return false)
      end
+     !(a=="") || (return false)
      return true 
 end
 
 function isalnum(a::String)
      for ch in a
-          (ch ∈ CHARACTERS) || (return false)
+          (ch ∈ LETTERS || ch ∈ NUMBERS) || (return false)
      end
+     !(a=="") || (return false)
      return true 
 end
 
