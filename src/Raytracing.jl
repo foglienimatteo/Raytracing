@@ -14,7 +14,7 @@ using Printf, ProgressBars
 using Documenter, DocStringExtensions
 
 import Base.:+; import Base.:-; import Base.:≈; import Base.:/; import Base.:*
-import Base: write, read, print, println;
+import Base: write, read, print, println, copy;
 import LinearAlgebra.:⋅; import LinearAlgebra.:×
 
 # from Structs.jl
@@ -57,7 +57,8 @@ export create_onb_from_z
 export scatter_ray
 #from SceneFiles.jl
 export KeywordEnum, GrammarError, InputStream
-export Token, IdentifierToken, StringToken, SymbolToken, IdentifierToken
+export Token, KeywordToken, IdentifierToken, StringToken
+export LiteralNumberToken, SymbolToken, StopToken
 export read_token, skip_whitespaces_and_comments
 
 include("PCG.jl")

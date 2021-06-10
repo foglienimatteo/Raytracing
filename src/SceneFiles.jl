@@ -68,128 +68,24 @@ mutable struct SourceLocation
 end
 
 """
-    LiteralNumberToken(number::Float64)
+     copy(location::SourceLocation) :: SourceLocation
 
-A token containing a literal number
-
-## Arguments
-
-- `number`: value of the token
-"""
-struct LiteralNumberToken
-    number::Float64
-end
-
-"""
-     StringToken(sentence::String)
-
-A token containing a literal string
-
-## Arguments
-
-- `sentence`: sentence between two `"` symbols
-"""
-struct  StringToken
-    sentence::String
-end
-
-"""
-    KeywordToken(keyword::String)
-
-A token containing a keyword
-
-## Arguments
-
-- `keyword`: string containing a keyword of Photorealistic Object Applications language
-"""
-struct KeywordToken
-    keyword::String
-end
-
-"""
-    IdentifierToken(variable::String)
-
-A token containing an identifier
-
-## Arguments
-
-- `variable`: name of a variable
-"""
-struct IdentifierToken
-    variable::String
-end
-
-"""
-    SymbolToken(symbol::String)
-
-A token containing a symbol (i.e., a variable name)
-
-## Arguments
-
-- `symbol`: string containing a recognised symbol by Photorealistic Object Applications language
-"""
-struct SymbolToken
-    symbol::String
-end
-
-"""
-    StopToken(stop::String)
-
-A token signalling the end of a file
-
-## Arguments
-
-- `stop`: the string `""`, meaning the end of the file
-"""
-struct StopToken
-    stop::String
-end
-
-"""
-    Token(loc::SourceLocation,
-          value::Union{LiteralNumber,  String, Keyword, Identifier, Symbol})
-
-A lexical token, used when parsing a scene file
-
-## Arguments
-
-- `loc`: the location of the last char read
-
-- `value`: specify the type of token between 6 types
-"""
-struct Token
-     loc::SourceLocation
-     value::Union{
-          LiteralNumberToken, 
-          StringToken, 
-          KeywordToken, 
-          IdentifierToken, 
-          SymbolToken, 
-          StopToken}
-end
-
-"""
-     GrammarError <: Exception(
-          location::SourceLocation
-          message::str
-     )
-
-An error found by the lexer/parser while reading a scene file
-
-## Arguments
-
-- `location::SourceLocation` : a struct containing the name of the file 
-  (or the empty string if there is no real file) and the line and column 
-  number where the error was discovered (both starting from 1)
-
-- `message::String` : a user-frendly error message
+Return a shallow copy of the input source location.
 
 See also: [`SourceLocation`](@ref)
 """
-struct GrammarError <: Exception 
-    location::SourceLocation
-    message::String
+function copy(location::SourceLocation)
+     copy = SourceLocation(
+               location.file_name,
+               location.line_num,
+               location.col_num
+          )
+     return copy
 end
+
+
+##########################################################################################92
+
 
 """
      @enum KeywordEnum
@@ -230,26 +126,143 @@ Enumeration for all the possible keywords recognized by the lexer:
 end
 
 KEYWORDS = Dict{String, KeywordEnum}(
-    "new" => KeywordEnum[NEW][1],
-    "material" => KeywordEnum[MATERIAL][1],
-    "plane" => KeywordEnum[PLANE][1],
-    "sphere" => KeywordEnum[SPHERE][1],
-    "diffuse" => KeywordEnum[DIFFUSE][1],
-    "specular" => KeywordEnum[SPECULAR][1],
-    "uniform" => KeywordEnum[UNIFORM][1],
-    "checkered" => KeywordEnum[CHECKERED][1],
-    "image" => KeywordEnum[IMAGE][1],
-    "identity" => KeywordEnum[IDENTITY][1],
-    "translation" => KeywordEnum[TRANSLATION][1],
-    "rotation_x" => KeywordEnum[ROTATION_X][1],
-    "rotation_y" => KeywordEnum[ROTATION_Y][1],
-    "rotation_z" => KeywordEnum[ROTATION_Z][1],
-    "scaling" => KeywordEnum[SCALING][1],
-    "camera" => KeywordEnum[CAMERA][1],
-    "orthogonal" => KeywordEnum[ORTHOGONAL][1],
-    "perspective" => KeywordEnum[PERSPECTIVE][1],
-    "float" => KeywordEnum[FLOAT][1],
+    "new" => NEW,
+    "material" => MATERIAL,
+    "plane" => PLANE,
+    "sphere" => SPHERE,
+    "diffuse" => DIFFUSE,
+    "specular" => SPECULAR,
+    "uniform" => UNIFORM,
+    "checkered" => CHECKERED,
+    "image" => IMAGE,
+    "identity" => IDENTITY,
+    "translation" => TRANSLATION,
+    "rotation_x" => ROTATION_X,
+    "rotation_y" => ROTATION_Y,
+    "rotation_z" => ROTATION_Z,
+    "scaling" => SCALING,
+    "camera" => CAMERA,
+    "orthogonal" => ORTHOGONAL,
+    "perspective" => PERSPECTIVE,
+    "float" => FLOAT,
 )
+
+
+"""
+    KeywordToken(keyword::KeywordEnum)
+
+A token containing a keyword of the Photorealistic Object Applications Language.
+
+See also: [`KeywordEnum`](@ref)
+"""
+struct KeywordToken
+    keyword::KeywordEnum
+end
+
+
+"""
+    IdentifierToken(identifier::String)
+
+A token containing an identifier, i.e. a name of a variable.
+"""
+struct IdentifierToken
+    identifier::String
+end
+
+
+"""
+     StringToken(string::String)
+
+A token containing a literal string, i.e. a sentence placed inside
+two  double quotes ("...") symbols.
+"""
+struct StringToken
+    string::String
+end
+
+
+"""
+    LiteralNumberToken(number::Float64)
+
+A token containing a literal number.
+"""
+struct LiteralNumberToken
+    number::Float64
+end
+
+
+"""
+    SymbolToken(symbol::String)
+
+A token containing a recognised symbol by the Photorealistic Object 
+Applications Language.
+"""
+struct SymbolToken
+    symbol::String
+end
+
+
+"""
+    StopToken()
+
+A token signalling the end of a file.
+"""
+struct StopToken
+end
+
+"""
+    Token(
+          location::SourceLocation,
+          value::Union{  
+               KeywordToken, 
+               IdentifierToken, 
+               StringToken,
+               LiteralNumberToken,
+               SymbolToken, 
+               StopToken}
+          )
+
+A lexical token, used when parsing a scene file
+
+## Arguments
+
+- `location::SourceLocation`: location of the last char readed
+
+- `value` : specify the type of token between 6 types
+"""
+struct Token
+     location::SourceLocation
+     value::Union{  
+          KeywordToken, 
+          IdentifierToken, 
+          StringToken,
+          LiteralNumberToken,
+          SymbolToken, 
+          StopToken}
+end
+
+"""
+     GrammarError <: Exception(
+          location::SourceLocation
+          message::str
+     )
+
+An error found by the lexer/parser while reading a scene file
+
+## Arguments
+
+- `location::SourceLocation` : a struct containing the name of the file 
+  (or the empty string if there is no real file) and the line and column 
+  number where the error was discovered (both starting from 1)
+
+- `message::String` : a user-frendly error message
+
+See also: [`SourceLocation`](@ref)
+"""
+struct GrammarError <: Exception 
+    location::SourceLocation
+    message::String
+end
 
 """
     InputStream(
@@ -335,11 +348,13 @@ function read_char(inputstream::InputStream)
      if inputstream.saved_char ≠ ""
           ch = inputstream.saved_char
           inputstream.saved_char = ""
+     elseif eof(inputstream.stream)
+          ch = ""
      else
           ch = String([read(inputstream.stream, UInt8)])
      end
 
-     inputstream.saved_location = inputstream.location  # shallow copy ?
+     inputstream.saved_location = copy(inputstream.location)  # shallow copy ?
      update_pos(inputstream, ch)
 
      return ch
@@ -355,7 +370,7 @@ See also: [`InputStream`](@ref)
 function unread_char(inputstream::InputStream, ch::String)
      @assert inputstream.saved_char == ""
      inputstream.saved_char = ch
-     inputstream.location = inputstream.saved_location # shallow copy ?
+     inputstream.location = copy(inputstream.saved_location) # shallow copy ?
 end
 
 """
@@ -402,17 +417,17 @@ function parse_string_token(inputstream::InputStream, token_location::SourceLoca
      while true
           ch = read_char(inputstream)
 
-          if ch == '"'
+          if ch == "\""
                break
           end
           if ch == ""
                throw(GrammarError(token_location, "unterminated string"))
           end
 
-          token += ch
+          token *= ch
      end
 
-    return Token(token_location, token)
+    return Token(token_location, StringToken(token))
 end
 
 
@@ -455,7 +470,7 @@ function parse_float_token(inputstream::InputStream, first_char::String, token_l
           )
      end
 
-     return LiteralNumberToken(token_location, value)
+     return Token(token_location, LiteralNumberToken(value))
 end
 
 """
@@ -486,6 +501,7 @@ function parse_keyword_or_identifier_token(
 
           token *= ch
      end
+
 
      try
           # If it is a keyword, it must be listed in the KEYWORDS dictionary
@@ -524,24 +540,24 @@ function read_token(inputstream::InputStream)
      ch = read_char(inputstream)
      if ch == ""
           # No more characters in the file, so return a StopToken
-          return StopToken(inputstream.location)
+          return Token(inputstream.location, StopToken())
      end
 
      # At this point we must check what kind of token begins with the "ch" character 
      # (which has been put back in the stream with self.unread_char). First, we save 
      # the position in the stream.
-     token_location = inputstream.location  # shallow copy ?
+     token_location = copy(inputstream.location)  # shallow copy ?
 
      if ch ∈ SYMBOLS
           # One-character symbol, like '(' or ','
-          return SymbolToken(token_location, ch)
-     elseif ch == '"'
+          return Token(token_location, SymbolToken(ch))
+     elseif ch == "\"" 
           # A literal string (used for file names)
           return parse_string_token(inputstream, token_location)
-     elseif isdecimal(ch) || ch ∈ ["+", "-", "."]
+     elseif ( isdecimal(ch) || (ch ∈ ["+", "-", "."]) )
           # A floating-point number
           return parse_float_token(inputstream, ch, token_location)
-     elseif ( isalpha(ch) || (ch == "_") )
+     elseif isalpha(ch)
           # Since it begins with an alphabetic character, it must either be 
           # a keyword or a identifier
           return parse_keyword_or_identifier_token(inputstream, ch, token_location)
@@ -557,6 +573,6 @@ end
 Make as if `token` were never read from `input_file`
 """
 function unread_token(inputstream::InputStream, token::Token)
-    @assert isnothing(inputstream.saved_token)
+    @assert isnothing(inputstream.saved_token) "$(inputstream.saved_token) ≠ nothing "
     inputstream.saved_token = token
 end

@@ -42,48 +42,28 @@ end
 
 
 function assert_is_keyword(token::Token, keyword::KeywordEnum) 
-     @test isa(token, KeywordToken)
-     if token.keyword == keyword 
-          @test token.keyword == keyword
-     else
-          throw(Exception("Token '$(token)' is not equal to keyword '$(keyword)'"))
-     end
+     @assert isa(token.value, KeywordToken) "Token '$(token.value)' is not a KeywordToken"
+     @assert token.value.keyword == keyword "Token '$(token.value)' is not equal to keyword '$(keyword)'"
 end
 
 function assert_is_identifier(token::Token, identifier::String) 
-     @test isa(token, IdentifierToken)
-     if token.identifier == identifier
-          @test token.identifier == identifier
-     else 
-          throw(Exception("expecting identifier '$(identifier)' instead of '$(token)'"))
-     end
+     @assert isa(token.value, IdentifierToken) "Token '$(token.value)' is not a IdentifierToken"
+     @assert token.value.identifier == identifier "expecting identifier '$(identifier)' instead of '$(token.value)'"
 end
 
 function assert_is_symbol(token::Token, symbol::String) 
-     @test isa(token, SymbolToken)
-     if token.symbol == symbol
-          @test token.symbol == symbol
-     else 
-          throw(Exception("expecting symbol '$(symbol)' instead of '$(token)'"))
-     end
+     @assert isa(token.value, SymbolToken) "Token '$(token.value)' is not a SymbolToken"
+     @assert token.value.symbol == symbol "expecting symbol '$(symbol)' instead of '$(token.value)'"
 end
 
 function assert_is_number(token::Token, number::Float64) 
-     @test isa(token, LiteralNumberToken)
-     if token.value == number
-          @test token.value == number
-     else
-          throw(Exception("Token '$(token)' is not equal to number '$(number)'"))
-     end
+     @assert isa(token.value, LiteralNumberToken) "Token '$(token.value)' is not a LiteralNumberToken"
+     @assert token.value.number == number "Token '$(token.value)' is not equal to number '$(number)'"
 end
 
 function assert_is_string(token::Token, string::String) 
-     @test isa(token, StringToken)
-     if token.value == string
-          @test token.value == string
-     else
-          throw(Exception("Token '$(token)' is not equal to string '$(string)'"))
-     end
+     @assert isa(token.value, StringToken) "Token '$(token.value)' is not a StringToken"
+     @assert token.value.string == string "Token '$(token.value)' is not equal to string '$(string)'"
 end
 
 @testset "test_input_file" begin
@@ -146,13 +126,13 @@ end
 
      input_file = InputStream(stream)
 
-     assert_is_keyword(read_token(input_file), KeywordEnum.NEW)
-     assert_is_keyword(read_token(input_file), KeywordEnum.MATERIAL)
+     assert_is_keyword(read_token(input_file), Raytracing.NEW)
+     assert_is_keyword(read_token(input_file), Raytracing.MATERIAL)
      assert_is_identifier(read_token(input_file), "sky_material")
      assert_is_symbol(read_token(input_file), "(")
-     assert_is_keyword(read_token(input_file), KeywordEnum.DIFFUSE)
+     assert_is_keyword(read_token(input_file), Raytracing.DIFFUSE)
      assert_is_symbol(read_token(input_file), "(")
-     assert_is_keyword(read_token(input_file), KeywordEnum.IMAGE)
+     assert_is_keyword(read_token(input_file), Raytracing.IMAGE)
      assert_is_symbol(read_token(input_file), "(")
      assert_is_string(read_token(input_file), "my file.pfm")
      assert_is_symbol(read_token(input_file), ")")
