@@ -108,16 +108,16 @@ function second_world()
 		Material(SpecularBRDF(UniformPigment(to_RGB(232, 10, 10))))
 	mirror_material_2 = 
 		Material(SpecularBRDF(UniformPigment(to_RGB(178, 255, 102))))
-#=	
+	
 	add_shape!(
 		world,
-		Torus(translation(Vec(0.4, 1.5, 2.)),
-		Material(DiffuseBRDF(CheckeredPigment(RGB(0.0, 0.0, 0.0), RGB(0., 0., 10.), 4))),
+		Torus(translation(Vec(0.4, 1.5, 2.)) * rotation_y(pi/6) * rotation_x(pi/6),
+		Material(DiffuseBRDF(CheckeredPigment(RGB(10.0, 0.0, 10.0), RGB(0., 0., 10.), 16))),
 		0.2,
 		1.1
 		)
 	)
-=#	
+	
 	add_shape!(
 		world,
 		Sphere(
