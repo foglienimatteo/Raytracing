@@ -45,7 +45,6 @@ export at, fire_ray, fire_all_rays!
 export ray_intersection, add_shape!, add_light!
 export is_point_visible, quick_ray_intersection
 # from Demo.jl
-export first_world, second_world, select_world
 export demo, demo_animation
 # from Pigment.jl
 export get_color, evaluate

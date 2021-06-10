@@ -11,6 +11,7 @@ Documenter.makedocs(
 			"Introduction" => "index.md",
 			"Demo" => "demo.md",
 			"Demo animation" => "demo_animation.md",
+			"Scene Files" => "scene_files.md",
 			"Base Structs" => "base_structs.md",
 			"Reading and Writing PFM files" => "readingwritingpfm.md",
 			"BRDFs and Pigments" => "brdfs_and_pigments.md",

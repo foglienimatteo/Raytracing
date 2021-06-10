@@ -269,7 +269,7 @@ Calls internally the following functions:
 
 - [`read_float`](@ref)
 
-See also:  [`parse_image_size`](@ref), [`parse_endianness`](@ref), 
+See also:  [`parse_img_size`](@ref), [`parse_endianness`](@ref), 
 [`read_line`](@ref), [`read_float`](@ref), [`InvalidPfmFileFormat`](@ref),
 [`HDRimage`](@ref)
 """

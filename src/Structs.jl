@@ -742,7 +742,7 @@ For the `PointLightRenderer` algorithm, you can also add point-lights source
 using `add_light!`, and `world` will keep a list of all of them.
 
 See also: [`Shape`](@ref), [`add_shape!`](@ref),
-[`PointLight`](@ref), [`add_light`](@ref), [`PointLightRenderer`](@ref)
+[`PointLight`](@ref), [`add_light!`](@ref), [`PointLightRenderer`](@ref)
 [`ray_intersection`](@ref), [`Ray`](@ref)
 """
 struct World
