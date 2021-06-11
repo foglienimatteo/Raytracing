@@ -60,7 +60,7 @@ into a 2D `Vec2d` using the following periodical coordinates:
 ```math
 u = \frac{\arctan P_y/P_x}{2\pi}, 
     \quad 
-v = \frac{\arctan \bigg(P_z/(\sqrt{{P_x}^2 + {P_y}^2})\bigg)}{2\pi}
+v = \frac{\arctan \bigg(P_z / \sqrt{{P_x}^2 + {P_y}^2}\bigg)}{2\pi}
 ```
 
 

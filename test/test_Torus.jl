@@ -12,13 +12,9 @@
     ray3 = Ray(Point(0., 1., 2.), -VEC_Z)
     ray4 = Ray(Point(0., 4., 0.), -VEC_Y)
 
-#    printstyled("\nintersection1 :", color=:light_green, "\n")
     intersection1 = ray_intersection(torus, ray1)
-#    printstyled("\nintersection2 :", color=:light_green, "\n")
     intersection2 = ray_intersection(torus, ray2)
-#    printstyled("\nintersection3 :", color=:light_green, "\n")
     intersection3 = ray_intersection(torus, ray3)
-#    printstyled("\nintersection4 :", color=:light_green, "\n")
     intersection4 = ray_intersection(torus, ray4)
     
     @test isnothing(intersection1)
