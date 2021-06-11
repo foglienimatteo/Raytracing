@@ -61,6 +61,23 @@ function torus_point_to_uv(point::Point)
     return Vec2d(u,v)
 end
 
+
+@doc raw"""
+    triangle_point_to_uv(triangle::Triangle, point::Point) :: Vec2d
+
+Return the barycentic coordinates of the given `point` for the input
+`triangle`.
+
+If the triangle is made of the vertexes ``(A,B,C)`` (memorized in this order),
+then the point ``P`` has coordinates ``(u,v) = (\beta, \gamma)`` such that:
+```math
+    P(\beta, \gamma) = A + \beta \,(B - A) + \gamma \,(C-A)
+```
+**NOTE**: this function do not check if ``P`` is on the plane defined by ``(A,B,C)``, 
+neither if ``P`` is inside the triangle made of them!
+
+See also: [`Triangle`](@ref), [`Vec2d`](@ref), [`Point`](@ref)
+"""
 function triangle_point_to_uv(triangle::Triangle, point::Point)
     A, B, C = Tuple(P for P in triangle.vertexes)
     P = point
@@ -152,6 +169,14 @@ function triangle_normal(triangle::Triangle, ray_dir::Vec)
     return Normal(result)
 end
 
+
+"""
+    triangle_barycenter(triangle::Triangle) :: Point
+
+Return the barycenter of the given `triangle`.
+
+See also: [`Triangle`](@ref), [`Point`](@ref)
+"""
 function triangle_barycenter(triangle::Triangle)
     A, B, C = Tuple(P for P in triangle.vertexes)
     result = Point(A.x+B.x+C.x, A.y+B.y+C.y, A.z+B.z+C.z)*1/3
@@ -312,7 +337,7 @@ function ray_intersection(triangle::Triangle, ray::Ray)
     try
         w = transpose(m) / transpose(M)
         u, v, hit_t = Tuple(x for x in w)
-        ( (hit_t > ray.tmin) && (hit_t < ray.tmax) ) || (return nothing)
+        ( ray.tmin < hit_t < ray.tmax ) || (return nothing)
         hit_point = at(ray, hit_t)
         return HitRecord(
             hit_point,
