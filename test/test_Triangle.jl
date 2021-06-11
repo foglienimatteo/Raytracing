@@ -45,7 +45,7 @@ end
      intersection2 = ray_intersection(triangle, ray2)
      @test isnothing(intersection2)
 
-     ray3 = Ray(Point(10, 0, -1), -VEC_Y)
+     ray3 = Ray(Point(10, 0, 1), -VEC_Z)
      intersection3 = ray_intersection(triangle, ray3)
      @test isnothing(intersection3)
 end

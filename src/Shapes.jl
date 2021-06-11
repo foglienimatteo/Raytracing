@@ -338,6 +338,7 @@ function ray_intersection(triangle::Triangle, ray::Ray)
         w = transpose(m) / transpose(M)
         u, v, hit_t = Tuple(x for x in w)
         ( ray.tmin < hit_t < ray.tmax ) || (return nothing)
+        ( (u>0.) && (v>0.) && (1-u-v>0.) ) || (return nothing)
         hit_point = at(ray, hit_t)
         return HitRecord(
             hit_point,
