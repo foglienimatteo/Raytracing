@@ -73,6 +73,22 @@ then the point ``P`` has coordinates ``(u,v) = (\beta, \gamma)`` such that:
 ```math
     P(\beta, \gamma) = A + \beta \,(B - A) + \gamma \,(C-A)
 ```
+The analitic resolution of this linear system is:
+```math
+\begin{aligned}
+&\beta = \frac{
+            (P_x - A_x)(C_y - A_y) - (P_y - A_y)(C_x - A_x)
+        }{
+            (B_x - A_x)(C_y - A_y) - (B_y - A_y)(C_x - A_x)
+        } \\
+&\gamma = \frac{
+            (P_x - A_x)(B_y - A_y) - (P_y - A_y)(B_x - A_x)
+        }{
+            (C_x - A_x)(B_y - A_y) - (C_y - A_y)(B_x - A_x)
+        }
+\end{aligned}
+```
+
 **NOTE**: this function do not check if ``P`` is on the plane defined by ``(A,B,C)``, 
 neither if ``P`` is inside the triangle made of them!
 
@@ -170,10 +186,16 @@ function triangle_normal(triangle::Triangle, ray_dir::Vec)
 end
 
 
-"""
+@doc raw"""
     triangle_barycenter(triangle::Triangle) :: Point
 
 Return the barycenter of the given `triangle`.
+
+For a triangle with vertexes ``(A, B, C)``, the barycenter
+is ``M``:
+```math
+    M = \frac{A + B + C}{3}
+```
 
 See also: [`Triangle`](@ref), [`Point`](@ref)
 """
@@ -316,11 +338,35 @@ function ray_intersection(torus::Torus, ray::Ray)
 end
 
 
-"""
+@doc raw"""
     ray_intersection(triangle::Triangle, ray::Ray) :: Union{HitRecord, Nothing}
 
 Check if the `ray` intersects the `triangle`.
 Return a `HitRecord`, or `nothing` if no intersection is found.
+
+For a triangle with vertexes ``(A, B, C)`` and a ray defined with the
+simple equation ``r(t) = O + t \, \vec{d}``, the coordinates ``(u,v) = (\beta, \gamma)``
+and the `t` value of intersection are obtained solving this linear system:
+```math
+
+\begin{bmatrix}
+    B_x-A_x & C_x-A_x & -d_x \\
+    B_y-A_y & C_y-A_y & -d_y \\
+    B_z-A_z & C_z-A_z & -d_z 
+\end{bmatrix}
+
+\begin{bmatrix}
+u \\
+v \\
+t
+\end{bmatrix}
+= 
+\begin{bmatrix}
+O_x - A_x\\
+O_z - A_z\\
+O_z - A_z
+\end{bmatrix}
+```
 
 See also: [`Ray`](@ref), [`Triangle`](@ref), [`HitRecord`](@ref)
 """
