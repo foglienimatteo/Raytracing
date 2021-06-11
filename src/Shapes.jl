@@ -424,7 +424,6 @@ function ray_intersection(world::World, ray::Ray)
     return closest
 end
 
-
 ##########################################################################################92
 
 """
