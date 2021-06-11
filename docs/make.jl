@@ -19,6 +19,7 @@ Documenter.makedocs(
 			"Transformations" => "transformations.md",
 			"Plane" => "plane.md",
 			"Sphere" => "sphere.md",
+			"Torus" => "torus.md"
 			],
 )
 

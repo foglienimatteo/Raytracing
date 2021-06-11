@@ -1,4 +1,5 @@
 # HEAD
+- Improved torus documentation
 - New struct from Shape: `Torus`, with its functions and tests
 - Added antialiasing algorithm
 - Added point-light tracing algorithm, see PR[#17](https://github.com/cosmofico97/Raytracing/pull/17)

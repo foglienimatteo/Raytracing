@@ -51,16 +51,30 @@ function plane_point_to_uv(point::Point)
     return Vec2d(u,v)
 end
 
+@doc raw"""
+    plane_point_to_uv(P::Point) :: Vec2d
 
-function torus_point_to_uv(point::Point)
-    len_point = norm(point)
+Convert a 3D `point` ``P = (P_x, P_y, P_z)`` on the surface of the torus
+into a 2D `Vec2d` using the following periodical coordinates:
+
+```math
+u = \frac{\arctan P_y/P_x}{2\pi}, 
+    \quad 
+v = \frac{\arctan \bigg(P_z/(\sqrt{{P_x}^2 + {P_y}^2})\bigg)}{2\pi}
+```
+
+
+See also: [`Point`](@ref), [`Vec2d`](@ref), [`Plane`](@ref)
+"""
+function torus_point_to_uv(P::Point)
+#   len_point = norm(point)
     # u = atan(point.y/(point.x^2 + point.z^2)^0.5) / (2. * pi)    # asin(point.y/len_point) / (2.0 * π)
     # v = atan(point.z/point.x) / (2. * pi)   # atan(point.z, point.x) / (2.0 * π)
 #    printstyled("point_uv :", point, "\n", color=:light_magenta)
 #    printstyled("\ty/x = ", point.y/point.x, " -> ", atan(point.y/point.x), "\n", color=:light_green)
 #    printstyled("\ty/x' = ", point.y/((point.x^2 + point.y^2)^0.5), " -> ", atan(point.y/((point.x^2 + point.y^2)^0.5)), "\n", color=:light_green)
-    u = atan(point.y/point.x) / (2. * pi)
-    v = atan(point.z/(point.x^2 + point.y^2)^0.5) / (2. * pi)
+    u = atan(P.y/P.x) / (2. * pi)
+    v = atan(P.z/(P.x^2 + P.y^2)^0.5) / (2. * pi)
     v>=0 ? nothing : v+= 1.0
     u>=0 ? nothing : u+= 1.0
 #    printstyled("\tVec2d = ", Vec2d(u,v), "\n", color=:light_green)
@@ -104,30 +118,31 @@ function plane_normal(point::Point, ray_dir::Vec)
     return result
 end
 
-"""
+@doc raw"""
     torus_normal(p::Point, ray_dir::Vec, r::Float64, O::Point) -> Normal
 
-Compite the normal of a torus
+Compute the `Normal` of a torus
 
 The normal is computed for `p` (a point on the surface of the
 torus), and it is chosen so that it is always in the opposite
 direction with respect to `ray_dir`.
 
+Labelling the surface point with ``p = (p_x, p_y, p_z)`` and ``r`` the radious of the
+circular section, the normal vector is obtained by:
+- ``N_x = \sqrt{\frac{1-\big(p_z/r\big)^2}{1+\big(p_y/p_x\big)^2}}``
+- ``N_y = \sqrt{\frac{1-\big(p_z/r\big)^2}{1+\big(p_x/p_y\big)^2}}``
+- ``N_z = p_z/r``
+
 See also: [`Normal`](@ref), [`Point`](@ref), ([`Vec`](@ref))
 """
 function torus_normal(p::Point, ray_dir::Vec, r::Float64)
-#=
-    R_z = copysign(R / √(1+(p.x/p.z)^2), p.z)
-    R_x = copysign(R_z * p.x / p.z, p.x)
-    R_p = Vec(R_x, 0, R_z)
-    result = Normal(Vec(p - R_p))
-    result ⋅ ray_dir < 0.0 ? nothing : result = -result
-=#
-#    q = Point(O.x - p.x, O.y - p.y, O.z - p.z)
-#    println("\npoint for normal: ", p, "\tq = ", q, "\tO = ", O)
-#   printstyled("point = ", p, color=:red, "\n")
-    (abs(p.x) < 1e-6) ? (N_x = 0.) : (N_x = copysign( ((1 - (p.z/r)^2) / (1 + (p.y/p.x)^2))^0.5, p.x))
-    (abs(p.y) < 1e-6) ? (N_y = 0.) : (N_y = copysign( ((1 - (p.z/r)^2) / (1 + (p.x/p.y)^2))^0.5, p.y))
+    if abs((1 - (p.z/r)^2)) < 1e-10
+        N_x = 0.
+        N_y = 0.
+    else
+        (abs(p.x) < 1e-6) ? (N_x = 0.) : (N_x = copysign( ((1 - (p.z/r)^2) / (1 + (p.y/p.x)^2))^0.5, p.x))
+        (abs(p.y) < 1e-6) ? (N_y = 0.) : (N_y = copysign( ((1 - (p.z/r)^2) / (1 + (p.x/p.y)^2))^0.5, p.y))
+    end
     N_z = p.z/r
     result = Normal(N_x, N_y, N_z)
     result ⋅ ray_dir < 0.0 ? nothing : result = -result
@@ -223,12 +238,29 @@ function ray_intersection(plane::Plane, ray::Ray)
     )
 end
 
-"""
+@doc raw"""
     ray_intersection(torus::Torus, ray::Ray) :: Union{HitRecord, Nothing}
 
 Check if the `ray` intersects the `torus`.
 Return a `HitRecord`, or `nothing` if no intersection is found.
 
+From the system between the torus and the ray:
+- ``F(x, y, z) = (x^2 + y^2 + z^2 + R^2 - r^2)^2 - 4R^2(x^2+y^2)``
+- ``\vec{r} = (r_x, r_y, r_z) = \vec{o} + \vec{d}\cdot t = (o_x, o_y, o_z) + (d_x, d_y, d_z)\cdot t``
+where ``\vec{o}`` is the origin of the ray, ``\vec{d}`` its direction and ``t`` the parameter of the ray.
+
+When one substitutes ``x_i \to r_i = o_i + d_i t`` and asks the result to be equal to zero, obrains:
+```math
+c_4t^4 + c_3t^3 + c_2t^2 + c_1t + c_0 = 0,
+```
+with:
+- ``c_4 = (||\vec{d}||^2)^2``
+- ``c_3 = 4||\vec{d}||^2(\vec{o}\cdot\vec{d})``
+- ``c_2 = 4(\vec{o}\cdot\vec{d})^2 + 2 ||\vec{o}||^2 ||\vec{d}||^2 -4R^2(||\vec{d}||^2 - {d_z}^2) + 2||\vec{d}||^2(R^2-r^2)``
+- ``c_1 = 4||\vec{o}||^2 (\vec{d}\cdot\vec{o}) + 4 (\vec{d}\cdot\vec{o}) (R^2 - r^2) -8R^2 (\vec{d}\cdot\vec{o} - o_zd_z)``
+- ``c_0 = (||\vec{o}||^2)^2 + (R^2 - r^2)^2 + 2||\vec{o}||(R^2 - r^2) - 4R^2(||\vec{o}||^2 - {o_z}^2)``
+
+The intersection we need is given by the minor acceptable value of ``t``.
 See also: [`Ray`](@ref), [`Torus`](@ref), [`HitRecord`](@ref)
 """
 function ray_intersection(torus::Torus, ray::Ray)
@@ -247,40 +279,12 @@ function ray_intersection(torus::Torus, ray::Ray)
     c2 = 4 * scalar_od^2 + 2 * norm2_d * norm2_o - 4 * R^2 * (norm2_d - d.z^2) + 2 * norm2_d * (R^2 - r^2)
     c1 = 4 * norm2_o * scalar_od + 4 * scalar_od * (R^2 - r^2) - 8 * R^2 * (scalar_od - (o.z * d.z))
     c0 = norm2_o^2 + (R^2 - r^2)^2 + 2 * norm2_o * (R^2 - r^2) - 4 * R^2 * (norm2_o - o.z^2)
-#    printstyled("inv_ray.origin = ", inv_ray.origin, color=:light_magenta)
-#    printstyled("\tnorm2_origin = ", squared_norm(inv_ray.origin), color=:light_magenta, "\n")
-#    printstyled("o = ", o, color=:light_cyan)
-#    printstyled("\tnorm2_o = ", norm2_o, " -> ", norm2_o^2, " -> ", norm2_o * norm2_o, color=:light_cyan, "\n")
-#    printstyled("o ⋅ d = ", scalar_od, color=:yellow, "\n")
+
 #    printstyled("c4 = ", c4, color=:green)
 #    printstyled("\tc3 = ", c3, color=:green)
 #    printstyled("\tc2 = ", c2, color=:green)
 #    printstyled("\tc1 = ", c1, color=:green)
 #    printstyled("\tc0 = ", c0, color=:green, "\n")
-#=
-    # form http://blog.marcinchwedczuk.pl/ray-tracing-torus
-    c4 = norm²_d^2
-    c3 = 4 * norm²_d * (o ⋅ d)
-    c2 = 2 * norm²_d * (norm²_o - r^2 - R^2) + 4 * (o ⋅ d)^2 + 4 * R^2 * (d.y)^2
-    c1 = 4 * (norm²_o - r^2 - R^2) * (o ⋅ d) + 8 * R^2 * o.y * d.y
-    c0 = (norm²_o - r^2 - R^2)^2 - 4 * R^2 * (r^2 - (o.y)^2)
-=#
-#=
-    # mine
-    c4 = norm²_d^2 - 4 * R^2 * (norm²_d - d.z^2)
-    c3 = 4 * norm²_d * (o ⋅ d) - 16 * R^2 * (norm²_d - d.z^2) * (o ⋅ d - o.z * d.z)
-    c2 = 4 * (o ⋅ d)^2 + 2 * norm²_d * norm²_o + 2 * norm²_d * (R^2 - r^2) + 8 * (2 * R^2 * (o ⋅ d - o.z * d.z)^2 - (norm²_o - o.z^2) * (norm²_d * d.z^2))
-    c1 = 4 * norm²_o * (o ⋅ d) + 4 * (R^2 - r^2) * (o ⋅ d) - 16 * R^2 * (norm²_o - o.z^2) * (o ⋅ d - o.z * d.z)
-    c0 = norm²_o^2 + (R^2 - r^2)^2 + 2 * norm²_o * (R^2 - r^2) - 4 * R^2 * (norm²_o - o.z^2)
-=#
-#=
-    #from site, but adjusted for z-axis symmetry (y -> z)
-    c4 = norm²_d^2
-    c3 = 4 * norm²_d * (o ⋅ d)
-    c2 = 2 * norm²_d * (norm²_o - r^2 - R^2) + 4 * (o ⋅ d)^2 + 4 * R^2 * (d.z)^2
-    c1 = 4 * (norm²_o - r^2 - R^2) * (o ⋅ d) + 8 * R^2 * o.z * d.z
-    c0 = (norm²_o - r^2 - R^2)^2 - 4 * R^2 * (r^2 - (o.z)^2)
-=#
 
     t_ints = roots(Polynomial([c0, c1, c2, c3, c4]))
     (t_ints == nothing) && (return nothing)
@@ -290,7 +294,7 @@ function ray_intersection(torus::Torus, ray::Ray)
 #    println("len of t_ints: ", length(hit_ts))
 #    println(t_ints)
     for i in t_ints
-        if (typeof(i) == ComplexF64) && (abs(i.im) > 1e-8)
+        if (typeof(i) == ComplexF64) && (abs(i.im) > 1e-10) #1e-8
             continue
         elseif ((typeof(i) == Float64) && (inv_ray.tmin < i < inv_ray.tmax)) || ((typeof(i) == ComplexF64) && (abs(i.im) < 1e-8))
             (typeof(i) == Float64) && push!(hit_ts, i)

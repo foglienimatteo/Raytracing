@@ -603,7 +603,7 @@ struct Plane <: Shape
     #Plane(T=Transformation(), M=Material()) = new(T,M)
 end
 
-"""
+@doc raw"""
     Torus <: Shape(
         T::Transformation = Transformation()
         Material::Material = Material()
@@ -613,6 +613,13 @@ end
 
 A 3D unit torus, a ring with circular section; has origin 
 in `(0, 0, 0)` and axis parallel to the z-axis.
+
+The equation representing the torus is:
+
+```math
+(\sqrt{x^2 + y^2} - R)^2 + z^2 = r^2
+```
+
 
 ## Arguments
 
@@ -628,11 +635,11 @@ in `(0, 0, 0)` and axis parallel to the z-axis.
 
 ```ditaa
 ^ ̂z                __-__
-|                 /     \\ 
+|                 /     \ 
 |---O------------(---o---)
-|                 \\__ __/
+|                 \__ __/
 |                    -
-      <--------R------><-r->
+    <--------R------><-r->
 ```
 
 See also: [`Shape`](@ref), [`Transformation`](@ref), [`Material`](@ref)
