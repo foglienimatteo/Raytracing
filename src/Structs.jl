@@ -605,6 +605,39 @@ struct Plane <: Shape
     #Plane(T=Transformation(), M=Material()) = new(T,M)
 end
 
+
+
+VERTEXES = SVector{3}(Point(√3/2, 0, 0), Point(0, 0.5, 0), Point(0, -0.5, 0))
+"""
+    Triangle <: Shape(
+        vertexes::SVector{3, Point} = 
+            SVector{3, Point}(Point(√3/2, 0, 0), Point(0, 0.5, 0), Point(0, -0.5, 0)),
+        Material::Material = Material()
+    )
+
+A 3D triangle.
+
+## Arguments
+
+- `vertexes::SVector{3, Point}` : points associated to the triangle.
+
+- `Material::Material` : material that constitutes the triangle.
+
+See also: [`Shape`](@ref), [`Material`](@ref)
+"""
+struct Triangle <: Shape
+    vertexes::SVector{3, Point}
+    Material::Material
+    
+    Triangle(v::SVector{3, Point}, M::Material) = new(v, M)
+    Triangle(P1::Point, P2::Point, P3::Point,  M::Material) = new(SVector{3}(P1,P2,P3), M)
+    Triangle(M::Material, v::SVector{3, Point}) = new(v, M)
+    Triangle(v::SVector{3, Point}) = new(v, Material())
+    Triangle(P1::Point, P2::Point, P3::Point) = new(SVector{3}(P1,P2,P3), Material())
+    Triangle(M::Material) = new(VERTEXES, M)
+    Triangle() = new(VERTEXES, Material())
+end
+
 """
     Torus <: Shape(
         T::Transformation = Transformation()

@@ -21,15 +21,14 @@ See also: [`World`](@ref), [`demo`](@ref), [`demo_animation`](@ref)
 """
 function first_world()
 	material1 = Material(DiffuseBRDF(UniformPigment(RGB(0.7, 0.3, 0.2))))
-    material2 = Material(DiffuseBRDF(CheckeredPigment(RGB(0.2, 0.7, 0.3), 
-	    											  RGB(0.3, 0.2, 0.7), 
-									                  4) )	)
+    	material2 = Material(DiffuseBRDF(
+		    		CheckeredPigment(RGB(0.2, 0.7, 0.3), RGB(0.3, 0.2, 0.7), 4) )	)
 
 	sphere_texture = HDRimage(2, 2)
 	set_pixel(sphere_texture, 0, 0, RGB(0.1, 0.2, 0.3))
-    set_pixel(sphere_texture, 0, 1, RGB(0.2, 0.1, 0.3))
+    	set_pixel(sphere_texture, 0, 1, RGB(0.2, 0.1, 0.3))
 	set_pixel(sphere_texture, 1, 0, RGB(0.3, 0.2, 0.1))
-    set_pixel(sphere_texture, 1, 1, RGB(0.3, 0.1, 0.2))
+    	set_pixel(sphere_texture, 1, 1, RGB(0.3, 0.1, 0.2))
 
 	material3 = Material(DiffuseBRDF(ImagePigment(sphere_texture)))
 
@@ -64,7 +63,7 @@ function first_world()
 
 	add_light!(
 		world, 
-		PointLight(Point(-30.0, 30.0, 30.0), 
+		PointLight(Point(5.0, 0.0, 10.0), 
 		RGB{Float32}(1.0, 1.0, 1.0))
 	)
 
@@ -104,6 +103,8 @@ function second_world()
 
 	sphere_material = 
 		Material(DiffuseBRDF(UniformPigment(to_RGB(0, 128, 240))))
+	triangle_material = 
+		Material(DiffuseBRDF(UniformPigment(to_RGB(190, 24, 120))))
 	mirror_material = 
 		Material(SpecularBRDF(UniformPigment(to_RGB(232, 10, 10))))
 	mirror_material_2 = 
@@ -146,6 +147,14 @@ function second_world()
 		Sphere(
 			translation(Vec(0.4, 1.5, 0)) * scaling(Vec(s2, s2, s2)),
 			mirror_material,
+		)
+	)
+
+	add_shape!(
+		world, 
+		Triangle( 
+			Point(2.0, 1.0, 0.0), Point(3.0, -1.0, 0.0), Point(2.5, 0.0, 1.0),
+			triangle_material
 		)
 	)
 

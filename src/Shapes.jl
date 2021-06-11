@@ -61,6 +61,54 @@ function torus_point_to_uv(point::Point)
     return Vec2d(u,v)
 end
 
+
+@doc raw"""
+    triangle_point_to_uv(triangle::Triangle, point::Point) :: Vec2d
+
+Return the barycentic coordinates of the given `point` for the input
+`triangle`.
+
+If the triangle is made of the vertexes ``(A,B,C)`` (memorized in this order),
+then the point ``P`` has coordinates ``(u,v) = (\beta, \gamma)`` such that:
+```math
+    P(\beta, \gamma) = A + \beta \,(B - A) + \gamma \,(C-A)
+```
+The analitic resolution of this linear system is:
+```math
+\begin{aligned}
+&\beta = \frac{
+            (P_x - A_x)(C_y - A_y) - (P_y - A_y)(C_x - A_x)
+        }{
+            (B_x - A_x)(C_y - A_y) - (B_y - A_y)(C_x - A_x)
+        } \\
+&\gamma = \frac{
+            (P_x - A_x)(B_y - A_y) - (P_y - A_y)(B_x - A_x)
+        }{
+            (C_x - A_x)(B_y - A_y) - (C_y - A_y)(B_x - A_x)
+        }
+\end{aligned}
+```
+
+**NOTE**: this function do not check if ``P`` is on the plane defined by ``(A,B,C)``, 
+neither if ``P`` is inside the triangle made of them!
+
+See also: [`Triangle`](@ref), [`Vec2d`](@ref), [`Point`](@ref)
+"""
+function triangle_point_to_uv(triangle::Triangle, point::Point)
+    A, B, C = Tuple(P for P in triangle.vertexes)
+    P = point
+    
+    β_num = (P.x - A.x)*(C.y - A.y) - (P.y - A.y)*(C.x - A.x)
+    β_den = (B.x - A.x)*(C.y - A.y) - (B.y - A.y)*(C.x - A.x)
+    β = β_num/β_den
+
+    γ_num = (P.x - A.x)*(B.y - A.y) - (P.y - A.y)*(B.x - A.x)
+    γ_den = (C.x - A.x)*(B.y - A.y) - (C.y - A.y)*(B.x - A.x)
+    γ = γ_num/γ_den
+
+    Vec2d(β, γ)
+end
+
 ##########################################################################################92
 
 @doc raw"""
@@ -113,6 +161,47 @@ function torus_normal(p::Point, ray_dir::Vec, R::Float64)
     R_p = Vec(R_x, 0, R_z)
     result = Normal(Vec(p - R_p))
     result ⋅ ray_dir < 0.0 ? nothing : result = -result
+    return result
+end
+
+@doc raw"""
+    triangle_normal(triangle::Triangle, ray_dir::Vec) :: Normal
+
+Compute the `Normal` of a given triangle.
+
+The normal for a triangle with vertexes ``(A, B, C)`` is computed as follows:
+```math
+    n = \pm (B-A) \times (C-A)
+```
+where the sign is chosen so that it is always in the opposite
+direction with respect to the given `ray_dir`.
+
+See also: [`Point`](@ref), [`Ray`](@ref), [`Normal`](@ref), [`Triangle`](@ref)
+"""
+function triangle_normal(triangle::Triangle, ray_dir::Vec)
+    result = (triangle.vertexes[2] -  triangle.vertexes[1]) ×
+                (triangle.vertexes[3] -  triangle.vertexes[1])
+    result ⋅ ray_dir < 0.0 ? nothing : result = -result
+    return Normal(result)
+end
+
+
+@doc raw"""
+    triangle_barycenter(triangle::Triangle) :: Point
+
+Return the barycenter of the given `triangle`.
+
+For a triangle with vertexes ``(A, B, C)``, the barycenter
+is ``M``:
+```math
+    M = \frac{A + B + C}{3}
+```
+
+See also: [`Triangle`](@ref), [`Point`](@ref)
+"""
+function triangle_barycenter(triangle::Triangle)
+    A, B, C = Tuple(P for P in triangle.vertexes)
+    result = Point(A.x+B.x+C.x, A.y+B.y+C.y, A.z+B.z+C.z)*1/3
     return result
 end
 
@@ -247,6 +336,69 @@ function ray_intersection(torus::Torus, ray::Ray)
         torus
     )
 end
+
+
+@doc raw"""
+    ray_intersection(triangle::Triangle, ray::Ray) :: Union{HitRecord, Nothing}
+
+Check if the `ray` intersects the `triangle`.
+Return a `HitRecord`, or `nothing` if no intersection is found.
+
+For a triangle with vertexes ``(A, B, C)`` and a ray defined with the
+simple equation ``r(t) = O + t \, \vec{d}``, the coordinates ``(u,v) = (\beta, \gamma)``
+and the `t` value of intersection are obtained solving this linear system:
+```math
+
+\begin{bmatrix}
+    B_x-A_x & C_x-A_x & -d_x \\
+    B_y-A_y & C_y-A_y & -d_y \\
+    B_z-A_z & C_z-A_z & -d_z 
+\end{bmatrix}
+
+\begin{bmatrix}
+u \\
+v \\
+t
+\end{bmatrix}
+= 
+\begin{bmatrix}
+O_x - A_x\\
+O_z - A_z\\
+O_z - A_z
+\end{bmatrix}
+```
+
+See also: [`Ray`](@ref), [`Triangle`](@ref), [`HitRecord`](@ref)
+"""
+function ray_intersection(triangle::Triangle, ray::Ray)
+
+    A, B, C = Tuple(P for P in triangle.vertexes)
+    m = [ray.origin.x-A.x;  ray.origin.y-A.y; ray.origin.z-A.z]
+    M = [
+        B.x-A.x C.x-A.x -ray.dir.x ;
+        B.y-A.y C.y-A.y -ray.dir.y ;
+        B.z-A.z C.z-A.z -ray.dir.z ;
+    ]
+
+    try
+        w = transpose(m) / transpose(M)
+        u, v, hit_t = Tuple(x for x in w)
+        ( ray.tmin < hit_t < ray.tmax ) || (return nothing)
+        ( (u>0.) && (v>0.) && (1-u-v>0.) ) || (return nothing)
+        hit_point = at(ray, hit_t)
+        return HitRecord(
+            hit_point,
+            triangle_normal(triangle, ray.dir),
+            Vec2d(u,v),
+            hit_t,
+            ray,
+            triangle
+        )
+    catch Excep
+        return nothing
+    end
+end
+
 
 """
     ray_intersection(world::World, ray::Ray) :: Union{HitRecord, Nothing}
