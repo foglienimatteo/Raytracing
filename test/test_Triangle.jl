@@ -7,14 +7,24 @@
 
 @testset "test_triangle_barycenter" begin
      triangle1 = Triangle()
-     @test Raytracing.triangle_barycenter(triangle1) == Point(√3/6, 0.0, 0.0)
+     @test Raytracing.triangle_barycenter(triangle1) ≈ Point(√3/6, 0.0, 0.0)
+
+     P1 = Point(1.0, 1.0, 1.0)
+     P2 = Point(3.0, -1.0, 1.0)
+     P3 = Point(2.0, 0.0, 4.0)
+     triangle2 = Triangle(P1,P2,P3)
+
+     @test Raytracing.triangle_barycenter(triangle2) ≈ Point(2.0, 0.0, 2.0)
 end
 
 @testset "test_Hit" begin
      triangle = Triangle()
-     ray1 = Ray(Point(1/3, 0.0, 2.0), -VEC_Z)
+     barycenter =  Raytracing.triangle_barycenter(triangle) 
+     ray1 = Ray(barycenter + 2.0*VEC_Z, -VEC_Z)
 
      intersection1 = ray_intersection(triangle, ray1)
+
+     println(intersection1)
      @test typeof(intersection1) == HitRecord
      @test HitRecord(
           Raytracing.triangle_barycenter(triangle), 
@@ -42,72 +52,76 @@ end
 end
 
 @testset "test_general_triangle" begin
-     P1 = Point(1.0, 1.0, 1.0)
-     P2 = Point(3.0, -1.0, 1.0)
-     P3 = Point(2.0, 0.0, 4.0)
+     P1 = Point(1.0, 0.5, 0.0)
+     P2 = Point(1.0, -0.5, 0.0)
+     P3 = Point(1.0, 0.0, √3/2)
      triangle = Triangle(SVector{3}(P1,P2, P3))
 
-     ray1 = Ray(Point(0, 0, 4/3), VEC_X)
+     ray1 = Ray(Point(0, 0,  √3/6), VEC_X)
      intersection1 = ray_intersection(triangle, ray1)
      @test typeof(intersection1) == HitRecord
      @test HitRecord(
-          Point(2.0, 0.0, 4/3),
-          Normal(-√2/2, -√2/2, 1.0),
-          Vec2d(1/3, 1/3),
-          2.0,
-          ray1
-          ) ≈ intersection1
-
-     ray2 = Ray(Point(2.0, 1.0, 0.), VEC_Z)
-     intersection2 = ray_intersection(plane, ray2)
-     @test typeof(intersection2) == HitRecord
-     @test HitRecord(
-          Point(2.0, 0.0, 4/3),
-          Normal(√2/2, √2/2, 1.0),
+          Raytracing.triangle_barycenter(triangle),
+          Normal(-1.0, 0.0, 0.0),
           Vec2d(1/3, 1/3),
           1.0,
-          ray2
-          ) ≈ intersection2
+          ray1
+          ) ≈ intersection1
 
      # Check if the triangle failed to move by trying to hit the basic shape
      @test isnothing( ray_intersection(triangle, Ray( Point(0.5, 0, 1), -VEC_Z ) ) )
 end
 
 @testset "test_Normals" begin
-     plane1 = Plane(rotation_y(-π/4))
-     P = Point(0, 0, 1)
-     Q = Point(1, 0, 0)
-     ray1 = Ray(P, Q-P)
-     intersection1 = ray_intersection(plane1, ray1)
+     P1 = Point(1.0, 1.0, 1.0)
+     P2 = Point(3.0, -1.0, 1.0)
+     P3 = Point(2.0, 0.0, √6+1)
+     triangle = Triangle(SVector{3}(P1,P2,P3))
 
-     @test intersection1.normal ≈ Normal(-1.0, 0.0, 1.0)
+     ray1 = Ray(Point(0, 0, (2+√6)/3), VEC_X)
+     intersection1 = ray_intersection(triangle, ray1)
+     @test typeof(intersection1) == HitRecord
+     @test HitRecord(
+          Raytracing.triangle_barycenter(triangle),
+          Normal(-√2/2, -√2/2, 1.0),
+          Vec2d(1/3, 1/3),
+          2.0,
+          ray1
+          ) ≈ intersection1
 
-     plane2 = Plane(rotation_y(π/2))
-     ray2 = Ray(Point(-1.0, 0.0, 0.0), Vec(1., 0., 0.))
-     intersection2 = ray_intersection(plane2, ray2)
-     @test intersection2.normal ≈ Normal(-1.0, 0.0, 0.0)
+     ray2 = Ray(Point(2.0, 1.0, (2+√6)/3), -VEC_Y)
+     intersection2 = ray_intersection(triangle, ray2)
+     @test typeof(intersection2) == HitRecord
+     @test HitRecord(
+          Raytracing.triangle_barycenter(triangle),
+          Normal(√2/2, √2/2, 1.0),
+          Vec2d(1/3, 1/3),
+          1.0,
+          ray2
+          ) ≈ intersection2
 end
 
-@testset "test_Normal_direction" begin
-     # Scaling a plane by -1 keeps the plane the same but reverses its
-     # reference frame
-     plane = Plane(scaling(Vec(-1.0, -1.0, -1.0)))
-
-     ray = Ray(Point(0.0, 0.0, 2.0), -VEC_Z)
-     intersection = ray_intersection(plane, ray)
-
-     @test intersection.normal ≈ Normal(0.0, 0.0, 1.0)
-end
 
 @testset "test_UV_Coordinates" begin
-     plane = Plane()
+     triangle = Triangle()
 
-     ray1 = Ray(Point(0.0, 0.0, 1.0), -VEC_Z)
-     @test ray_intersection(plane, ray1).surface_point ≈ Vec2d(0.0, 0.0)
+     barycenter = Raytracing.triangle_barycenter(triangle) 
+     @test Raytracing.triangle_point_to_uv(triangle, barycenter) ≈ Vec2d(1/3, 1/3)
+     ray1 = Ray(Point(barycenter.x, 0.0, 1.0), -VEC_Z)
+     @test ray_intersection(triangle, ray1).surface_point ≈ Vec2d(1/3, 1/3)
 
-     ray2 = Ray(Point(0.5, 0.25, 1.0), -VEC_Z)
-     @test ray_intersection(plane, ray2).surface_point ≈ Vec2d(0.5, 0.25)
+     P2 = Point(2/3, 0.0, 0.0)
+     @test Raytracing.triangle_point_to_uv(triangle, P2) ≈ Vec2d(1/6, 1/6)
+     ray2 = Ray(Point(P2.x, 0.0, 1.0), -VEC_Z)
+     @test ray_intersection(triangle, ray2).surface_point ≈ Vec2d(1/6, 1/6)
+     
+     #=
+     P3 = Point(√3/4 -1/3, 1/4, 0.0)
+     @test Raytracing.triangle_point_to_uv(triangle, P3) ≈ Vec2d(2/3, 1/6)
+     ray2 = Ray(Point(P3.x, P3.y, 1.0), -VEC_Z)
+     @test ray_intersection(triangle, ray2).surface_point ≈ Vec2d(2/3, 1/6)
+     =#
 
-     ray3 = Ray(Point(-2.25, 1.6, -1.0), VEC_Z)
-     @test ray_intersection(plane, ray3).surface_point ≈ Vec2d(0.75, 0.6)
+     P4 = Point(0.0, 0.5, 0.0)
+     @test Raytracing.triangle_point_to_uv(triangle, P4) ≈ Vec2d(1.0, 0.0)
 end

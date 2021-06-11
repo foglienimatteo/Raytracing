@@ -63,20 +63,17 @@ end
 
 function triangle_point_to_uv(triangle::Triangle, point::Point)
     A, B, C = Tuple(P for P in triangle.vertexes)
-    m = [point.x point.y point.z]
-    M = [
-        B.x-A.x C.x-A.x A.x ;
-        B.y-A.y C.y-A.y A.y ;
-        B.z-A.z C.z-A.z A.z ;
-    ]
+    P = point
+    
+    β_num = (P.x - A.x)*(C.y - A.y) - (P.y - A.y)*(C.x - A.x)
+    β_den = (B.x - A.x)*(C.y - A.y) - (B.y - A.y)*(C.x - A.x)
+    β = β_num/β_den
 
-    try
-        w = m / M
-        @assert w[3] ≈ 1.0
-        Vec2d(w[1], w[2])
-    catch Excep
-        throw(Exception("not possible to solve sistem"))
-    end
+    γ_num = (P.x - A.x)*(B.y - A.y) - (P.y - A.y)*(B.x - A.x)
+    γ_den = (C.x - A.x)*(B.y - A.y) - (C.y - A.y)*(B.x - A.x)
+    γ = γ_num/γ_den
+
+    Vec2d(β, γ)
 end
 
 ##########################################################################################92
@@ -149,10 +146,8 @@ direction with respect to the given `ray_dir`.
 See also: [`Point`](@ref), [`Ray`](@ref), [`Normal`](@ref), [`Triangle`](@ref)
 """
 function triangle_normal(triangle::Triangle, ray_dir::Vec)
-    result = cross( 
-                (triangle.vertexes[2] -  triangle.vertexes[1]), 
+    result = (triangle.vertexes[2] -  triangle.vertexes[1]) ×
                 (triangle.vertexes[3] -  triangle.vertexes[1])
-    )
     result ⋅ ray_dir < 0.0 ? nothing : result = -result
     return Normal(result)
 end
@@ -307,27 +302,29 @@ See also: [`Ray`](@ref), [`Triangle`](@ref), [`HitRecord`](@ref)
 function ray_intersection(triangle::Triangle, ray::Ray)
 
     A, B, C = Tuple(P for P in triangle.vertexes)
-    m = [ray.origin.x-A.x ray.origin.y-A.y ray.origin.z-A.z]
+    m = [ray.origin.x-A.x;  ray.origin.y-A.y; ray.origin.z-A.z]
     M = [
         B.x-A.x C.x-A.x -ray.dir.x ;
         B.y-A.y C.y-A.y -ray.dir.y ;
         B.z-A.z C.z-A.z -ray.dir.z ;
     ]
 
-    println(m, "\n\n", M)
-
-    w = m / M
-    u, v, hit_t = Tuple(x for x in w)
-    ( (hit_t > ray.tmin) && (hit_t < ray.tmax) ) || (return nothing)
-    hit_point = at(ray, hit_t)
-    return HitRecord(
-        hit_point,
-        triangle_normal(triangle, ray.dir),
-        Vec2d(u,v),
-        hit_t,
-        ray,
-        triangle
-    )
+    try
+        w = transpose(m) / transpose(M)
+        u, v, hit_t = Tuple(x for x in w)
+        ( (hit_t > ray.tmin) && (hit_t < ray.tmax) ) || (return nothing)
+        hit_point = at(ray, hit_t)
+        return HitRecord(
+            hit_point,
+            triangle_normal(triangle, ray.dir),
+            Vec2d(u,v),
+            hit_t,
+            ray,
+            triangle
+        )
+    catch Excep
+        return nothing
+    end
 end
 
 

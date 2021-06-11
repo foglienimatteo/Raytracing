@@ -630,8 +630,10 @@ struct Triangle <: Shape
     Material::Material
     
     Triangle(v::SVector{3, Point}, M::Material) = new(v, M)
+    Triangle(P1::Point, P2::Point, P3::Point,  M::Material) = new(SVector{3}(P1,P2,P3), M)
     Triangle(M::Material, v::SVector{3, Point}) = new(v, M)
     Triangle(v::SVector{3, Point}) = new(v, Material())
+    Triangle(P1::Point, P2::Point, P3::Point) = new(SVector{3}(P1,P2,P3), Material())
     Triangle(M::Material) = new(VERTEXES, M)
     Triangle() = new(VERTEXES, Material())
 end
