@@ -158,6 +158,14 @@ function second_world()
 		)
 	)
 
+	add_shape!(
+		world, 
+		Cube( 
+			translation(Vec(0.3, -1.5, 0)) * scaling(Vec(s2, s2, s2)),
+			mirror_material
+		)
+	)
+
 	add_light!(
 		world, 
 		PointLight(Point(-1.0, 1.0, 1.0), 
