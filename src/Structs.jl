@@ -606,6 +606,34 @@ struct Plane <: Shape
 end
 
 
+"""
+    Cube <: Shape(
+        T::Transformation = Transformation(),
+        Material::Material = Material()
+    )
+
+A 3D unit cube, i.e. an axis aligned cube with side 1 centered in the origin.
+
+## Arguments
+
+- `T::Transformation` : transformation associated to the cube.
+
+- `Material::Material` : material that constitutes the cube.
+
+See also: [`Shape`](@ref), [`Transformation`](@ref), [`Material`](@ref)
+"""
+struct Cube <: Shape
+    T::Transformation
+    Material::Material
+    
+    Cube(T::Transformation, M::Material) = new(T,M)
+    Cube(M::Material, T::Transformation) = new(T,M)
+    Cube(T::Transformation) = new(T, Material())
+    Cube(M::Material) = new(Transformation(), M)
+    Cube() = new(Transformation(), Material())
+end
+
+
 
 VERTEXES = SVector{3}(Point(√3/2, 0, 0), Point(0, 0.5, 0), Point(0, -0.5, 0))
 """
