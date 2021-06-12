@@ -79,16 +79,6 @@ end
 
 ##########################################################################################92
 
-"""
-    scaling(v::Vec) :: Transformation
-
-Encoding a scaling of the 3 spatial coordinates according to the
-vector `v` (negative values codify spatial reflections). 
-
-Each component of  `v` must be different from zero.
-
-See also: [`Transformation`](@ref)
-"""
 function scaling(v::Vec)
     Transformation(
         [v.x    0.0     0.0     0.0 ;
@@ -103,16 +93,25 @@ function scaling(v::Vec)
     )
 end 
 
-##########################################################################################92
+scaling(x::Float64, y::Float64, z::Float64) = scaling(Vec(x,y,z))
+
 
 """
-    translation(v::Vec) :: Transformation
+    scaling(v::Vec) :: Transformation
+    scaling(x::Float64, y::Float64, z::Float64) = scaling(Vec(x,y,z))
 
-Encoding a rigid translation of the 3 spatial coordinates according to the
-vector `v`, which specifies the amount of shift to be applied along the three axes.
+Encoding a scaling of the 3 spatial coordinates according to the
+vector `v` (negative values codify spatial reflections). 
+
+Each component of  `v` must be different from zero.
 
 See also: [`Transformation`](@ref)
-"""    
+"""
+scaling
+
+##########################################################################################92
+
+
 function translation(v::Vec)
    Transformation(
         [1.0    0.0     0.0     v.x ;
@@ -126,6 +125,19 @@ function translation(v::Vec)
          0.0    0.0     0.0     1.0]
     )
 end 
+
+translation(x::Float64, y::Float64, z::Float64) = translation(Vec(x,y,z))
+
+"""
+    translation(v::Vec) :: Transformation
+    translation(x::Float64, y::Float64, z::Float64) = translation(Vec(x,y,z))
+
+Encoding a rigid translation of the 3 spatial coordinates according to the
+vector `v`, which specifies the amount of shift to be applied along the three axes.
+
+See also: [`Transformation`](@ref)
+"""
+translation
 
 ##########################################################################################92
 

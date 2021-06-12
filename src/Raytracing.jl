@@ -23,7 +23,7 @@ export Point, Vec, Normal, VEC_X, VEC_Y, VEC_Z, Transformation
 export Ray, Camera, OrthogonalCamera, PerspectiveCamera, ImageTracer
 export Pigment, UniformPigment, CheckeredPigment, ImagePigment
 export BRDF, DiffuseBRDF, SpecularBRDF, Material
-export Shape, Sphere, Plane, Torus, Triangle
+export Shape, Sphere, Plane, Torus, Triangle, Cube
 export Vec2d, HitRecord, PointLight, World
 export Renderer, OnOffRenderer, FlatRenderer, PathTracer, PointLightRenderer
 # from Operations.jl

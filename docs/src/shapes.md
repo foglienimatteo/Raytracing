@@ -7,6 +7,7 @@ end
 # Avaiable shapes
 
 ```@index
+Pages = ["shapes.md"]
 ```
 
 ## Sphere
@@ -26,6 +27,15 @@ Raytracing.Plane
 Raytracing.plane_point_to_uv
 Raytracing.plane_normal
 Raytracing.ray_intersection(::Plane, ::Ray)
+```
+
+## Cube
+
+```@docs
+Raytracing.Cube
+Raytracing.cube_point_to_uv
+Raytracing.cube_normal
+Raytracing.ray_intersection(::Cube, ::Ray)
 ```
 
 ## Triangle

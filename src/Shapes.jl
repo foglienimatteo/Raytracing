@@ -51,6 +51,37 @@ function plane_point_to_uv(point::Point)
     return Vec2d(u,v)
 end
 
+@doc raw"""
+    cube_point_to_uv(point::Point) :: Vec2d
+
+Convert a 3D `point` ``P = (P_x, P_y, P_z)`` on the surface of the unit cube
+into a 2D `Vec2d` using the following  coordinates:
+
+```math
+u = P_x - \lfloor P_x \rfloor,
+    \quad 
+v = P_y - \lfloor P_y \rfloor,
+```
+    
+where ``\lfloor \cdot \rfloor`` indicates the rounding down approximation,
+in order to guarantee that ``u, v \in [0, 1)``.
+
+See also: [`Point`](@ref), [`Vec2d`](@ref), [`Cube`](@ref)
+"""
+function cube_point_to_uv(point::Point)
+    if (point.x ≈ 0.5 || point.x ≈ -0.5)
+        u, v  = point.y + 0.5, point.z + 0.5
+    elseif (point.y ≈ 0.5 || point.y ≈ -0.5)
+        u, v  = point.x + 0.5, point.z + 0.5
+    elseif (point.z ≈ 0.5 || point.z ≈ -0.5) 
+        u, v  = point.x + 0.5, point.y + 0.5 
+    else
+        throw(ArgumentError("the given point do not belong to the unit cube."))
+    end   
+
+    return Vec2d(u,v)
+end
+
 
 function torus_point_to_uv(point::Point)
     len_point = norm(point)
@@ -143,6 +174,32 @@ See also: [`Point`](@ref), [`Ray`](@ref), [`Normal`](@ref), [`Plane`](@ref)
 function plane_normal(point::Point, ray_dir::Vec)
     result = Normal(0., 0., 1.)
     Vec(0., 0., 1.) ⋅ ray_dir < 0.0 ? nothing : result = -result
+    return result
+end
+
+@doc raw"""
+    cube_normal(point::Point, ray_dir::Vec) :: Normal
+
+Compute the `Normal` of a unit cube.
+
+The normal is computed for the given `Point` ``point = (P_x, P_y, 0)`` on the 
+surface of the cube, and it is chosen so that it is always in the opposite
+direction with respect to the given `Vec` `ray_dir`.
+
+See also: [`Point`](@ref), [`Ray`](@ref), [`Normal`](@ref), [`Cube`](@ref)
+"""
+function cube_normal(point::Point, ray_dir::Vec)
+    if (point.x ≈ 0.5 || point.x ≈ -0.5)
+        result = Normal(1., 0., 0.)
+    elseif (point.y ≈ 0.5 || point.y ≈ -0.5)
+        result = Normal(0., 1., 0.)
+    elseif (point.z ≈ 0.5 || point.z ≈ -0.5) 
+        result = Normal(0., 0., 1.)
+    else
+        throw(ArgumentError("the given point do not belong to the unit cube."))
+    end 
+
+    result ⋅ ray_dir < 0.0 ? nothing : result = -result
     return result
 end
 
@@ -292,6 +349,101 @@ function ray_intersection(plane::Plane, ray::Ray)
         ray,
         plane
     )
+end
+
+"""
+    ray_intersection(cube::Cube, ray::Ray) :: Union{HitRecord, Nothing}
+
+Check if the `ray` intersects the `cube`.
+Return a `HitRecord`, or `nothing` if no intersection is found.
+
+See also: [`Ray`](@ref), [`Cube`](@ref), [`HitRecord`](@ref)
+"""
+function ray_intersection(cube::Cube, ray::Ray)
+    inv_ray = inverse(cube.T) * ray
+    d = inv_ray.dir
+    O = inv_ray.origin
+
+    hit_ts = [Inf for i in 1:6]
+    points = [Point() for i in 1:6]
+
+    if !(d.z ≈ 0.) 
+
+        hit_t_1, hit_t_2 = (0.5 - O.z)/ d.z, (-0.5 - O.z)/ d.z
+
+        if  ( inv_ray.tmin < hit_t_1 < inv_ray.tmax )
+            P1 = at(inv_ray, hit_t_1) 
+            if ( (-0.5 < P1.x < 0.5) && (-0.5 < P1.y < 0.5) )
+                points[1] = P1
+                hit_ts[1] = hit_t_1
+            end
+        end
+
+        if ( inv_ray.tmin < hit_t_2 < inv_ray.tmax )
+            P2 = at(inv_ray, hit_t_2) 
+            if ( (-0.5 < P2.x < 0.5) && (-0.5 < P2.y < 0.5) )
+                points[2] = P2
+                hit_ts[2] = hit_t_2
+            end
+        end
+    end
+
+    if !(d.y ≈ 0.) 
+
+        hit_t_3, hit_t_4 = (0.5 - O.y)/ d.y, (-0.5 - O.y)/ d.y
+
+        if  ( inv_ray.tmin < hit_t_3 < inv_ray.tmax )
+            P3 = at(inv_ray, hit_t_3) 
+            if ( (-0.5 < P3.x < 0.5) && (-0.5 < P3.z < 0.5) )
+                points[3] = P3
+                hit_ts[3] = hit_t_3
+            end
+        end
+
+        if ( inv_ray.tmin < hit_t_4 < inv_ray.tmax )
+            P4 = at(inv_ray, hit_t_4) 
+            if ( (-0.5 < P4.x < 0.5) && (-0.5 < P4.z < 0.5) )
+                points[4] = P4
+                hit_ts[4] = hit_t_4
+            end
+        end
+    end
+
+    if !(d.x ≈ 0.) 
+
+        hit_t_5, hit_t_6 = (0.5 - O.x)/ d.x, (-0.5 - O.x)/ d.x
+
+        if  ( inv_ray.tmin < hit_t_5 < inv_ray.tmax )
+            P5 = at(inv_ray, hit_t_5) 
+            if ( (-0.5 < P5.y < 0.5) && (-0.5 < P5.z < 0.5) )
+                points[5] = P5
+                hit_ts[5] = hit_t_5
+            end
+        end
+
+        if ( inv_ray.tmin < hit_t_6 < inv_ray.tmax )
+            P6 = at(inv_ray, hit_t_6) 
+            if ( (-0.5 < P6.y < 0.5) && (-0.5 < P6.z < 0.5) )
+                points[6] = P6
+                hit_ts[6] = hit_t_6
+            end
+        end
+    end
+
+    hit_t = min(hit_ts...)
+    if hit_t ≠ Inf
+        hit_point = at(inv_ray, hit_t)
+        return HitRecord(
+            cube.T * hit_point,
+            cube.T * cube_normal(hit_point, inv_ray.dir),
+            cube_point_to_uv(hit_point),
+            hit_t,
+            ray,
+            cube
+        )
+    else
+        return nothing
+    end
 end
 
 function ray_intersection(torus::Torus, ray::Ray)
