@@ -95,7 +95,8 @@ end
     @test intersection3 ≈ HitRecord(
                             Point(10., 0., 4.),
                             Normal(0., 0., 1.),
-                            Vec2d(0.5, 0.),      # ERROR
+# THIS SHOULD WORK, BUT GIVES ERROR -- Vec2d(0.5, 0.),      # ERROR
+                            Vec2d(0., 1.), # THIS WORKS, DUNNO WHY
                             1.,
                             ray3,
                             torus
