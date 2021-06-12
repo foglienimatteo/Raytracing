@@ -70,11 +70,11 @@ See also: [`Point`](@ref), [`Vec2d`](@ref), [`Cube`](@ref)
 """
 function cube_point_to_uv(point::Point)
     if (point.x ≈ 0.5 || point.x ≈ -0.5)
-        u, v  = y + 0.5, z + 0.5
+        u, v  = point.y + 0.5, point.z + 0.5
     elseif (point.y ≈ 0.5 || point.y ≈ -0.5)
-        u, v  = x + 0.5, z + 0.5
+        u, v  = point.x + 0.5, point.z + 0.5
     elseif (point.z ≈ 0.5 || point.z ≈ -0.5) 
-        u, v  = x + 0.5, y + 0.5 
+        u, v  = point.x + 0.5, point.y + 0.5 
     else
         throw(ArgumentError("the given point do not belong to the unit cube."))
     end   
