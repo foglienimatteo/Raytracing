@@ -58,13 +58,27 @@ Convert a 3D `point` ``P = (P_x, P_y, P_z)`` on the surface of the unit cube
 into a 2D `Vec2d` using the following  coordinates:
 
 ```math
-u = P_x - \lfloor P_x \rfloor,
-    \quad 
-v = P_y - \lfloor P_y \rfloor,
+P_x = \frac{1}{2} \lor P_x = -\frac{1}{2} 
+\quad \Rightarrow \quad 
+u = P_y +  \frac{1}{2} \; , \;   v = P_z +  \frac{1}{2}
 ```
-    
-where ``\lfloor \cdot \rfloor`` indicates the rounding down approximation,
-in order to guarantee that ``u, v \in [0, 1)``.
+```math
+P_y = \frac{1}{2} \lor P_y = -\frac{1}{2} 
+\quad \Rightarrow \quad 
+u = P_x +  \frac{1}{2} \; , \;   v = P_z +  \frac{1}{2}
+```
+```math
+P_z = \frac{1}{2} \lor P_z = -\frac{1}{2} 
+\quad \Rightarrow \quad 
+u = P_x +  \frac{1}{2} \; , \;   v = P_y +  \frac{1}{2}
+```
+```math
+P_x \neq \frac{1}{2},  -\frac{1}{2} \land
+P_y \neq \frac{1}{2},  -\frac{1}{2} \land
+P_z \neq \frac{1}{2},  -\frac{1}{2} 
+\quad \Rightarrow \quad 
+\mathrm{throw Exception}
+```
 
 See also: [`Point`](@ref), [`Vec2d`](@ref), [`Cube`](@ref)
 """
@@ -165,7 +179,7 @@ end
 
 Compute the `Normal` of a unit plane.
 
-The normal is computed for the given `Point` ``point = (P_x, P_y, 0)`` on the 
+The normal is computed for the given `point` ``P = (P_x, P_y, 0)`` on the 
 surface of the plane, and it is chosen so that it is always in the opposite
 direction with respect to the given `Vec` `ray_dir`.
 
@@ -182,7 +196,7 @@ end
 
 Compute the `Normal` of a unit cube.
 
-The normal is computed for the given `Point` ``point = (P_x, P_y, 0)`` on the 
+The normal is computed for the given `point` on the 
 surface of the cube, and it is chosen so that it is always in the opposite
 direction with respect to the given `Vec` `ray_dir`.
 
@@ -356,6 +370,9 @@ end
 
 Check if the `ray` intersects the `cube`.
 Return a `HitRecord`, or `nothing` if no intersection is found.
+
+The implementation is only a long boring list of `if`-`else` block statements,
+and may have to be optimized.
 
 See also: [`Ray`](@ref), [`Cube`](@ref), [`HitRecord`](@ref)
 """
