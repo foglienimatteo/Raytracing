@@ -24,6 +24,8 @@
   
 - Implemented `demo` function: two possible world versions can be rendered
 
+- Impleented an ortho-normal basis (ONB) generator algorithm based on [Duff et al. 2017](https://graphics.pixar.com/library/OrthonormalB/paper.pdf) 
+  
 - Implemented `PCG` random number generator (see Melissa E. O’Neill (2014), ["PCG: A Family of Simple Fast Space-Efficient Statistically Good Algorithms for Random Number Generation"](https://www.pcg-random.org/paper.html)
 
 - Implemented Renderers: `OnOffRenderer`, `FlatRRenderer`, `PathTracer`
