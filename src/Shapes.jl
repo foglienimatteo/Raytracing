@@ -294,6 +294,18 @@ function ray_intersection(shape::Shape, ray::Ray)
 end
 
 """
+    ray_intersection(AABB::AABB, ray::Ray) :: Union{HitRecord, Nothing}
+
+Check if the `ray` intersects the `AABB`.
+Return a `HitRecord`, or `nothing` if no intersection is found.
+
+See also: [`Ray`](@ref), [`AABB`](@ref), [`HitRecord`](@ref)
+"""
+function ray_intersection(AABB::AABB, ray::Ray)
+    return nothing
+end
+
+"""
     ray_intersection(sphere::Sphere, ray::Ray) :: Union{HitRecord, Nothing}
 
 Check if the `ray` intersects the `sphere`.
@@ -302,6 +314,7 @@ Return a `HitRecord`, or `nothing` if no intersection is found.
 See also: [`Ray`](@ref), [`Sphere`](@ref), [`HitRecord`](@ref)
 """
 function ray_intersection(sphere::Sphere, ray::Ray)
+
     inv_ray = inverse(sphere.T) * ray
     origin_vec = Vec(inv_ray.origin)
 

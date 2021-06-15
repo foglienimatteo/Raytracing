@@ -1,6 +1,6 @@
 # HEAD
 
-- Added the shape AABB, 
+- Added the shape AABB, see PR[#22](https://github.com/cosmofico97/Raytracing/pull/22)
   
 - Added the shape Cube, see PR[#21](https://github.com/cosmofico97/Raytracing/pull/21)
 

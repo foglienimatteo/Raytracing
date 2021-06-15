@@ -46,7 +46,7 @@ Define a image in the format 2D  High-Dynamic-Range.
 struct HDRimage
     width::Int64
     height::Int64
-    rgb_m::Array{RGB{Float32}} # Array
+    rgb_m::Array{RGB{Float32}}
     HDRimage(w,h) = new(w,h, fill(RGB(0.0, 0.0, 0.0), (w*h,)) )
     function HDRimage(w,h, rgb_m) 
         @assert size(rgb_m) == (w*h,)
@@ -549,6 +549,62 @@ defining different types of shapes that can be created:
 """
 abstract type Shape end
 
+
+
+
+"""
+    AABB <: Shape(
+        vertexes::SVector{6, Float32}
+    )
+
+An Axis-Aligned Boundary Box.
+
+This shape is not conceived to be rendered in the image, it has the only purpose
+to optimize the various `ray_intersection` functions.
+
+## Arguments
+
+- `vertexes::SVector{6, Float32}` : the 6 coordinates of the exterior vertexes
+  defining the AABB
+
+
+See also: [`Shape`](@ref), [`ray_intersection`](@ref)
+"""
+struct AABB <: Shape
+    vertexes::SVector{6, Float32}
+
+    AABB(P1::Point, P2::Point) = new(SVector{6, Float32}(P1.x, P1.y, P1.z, P2.x, P2.y, P2.z))
+    AABB(p1x::Float32, p1y::Float32, p1z::Float32, p2x::Float32, p2y::Float32, p2z::Float32) = 
+        new(SVector{6, Float32}(p1x, p1y, p1z, p2x, p2y, p2z))
+
+    function AABB(::Type{Sphere}, T::Transformation)
+        v1 = SVector{8, Point}(
+            Point(1.0, 1.0, 1.0),
+            Point(-1.0, 1.0, 1.0),
+            Point(1.0, -1.0, 1.0),
+            Point(1.0, 1.0, -1.0),
+            Point(1.0, -1.0, -1.0),
+            Point(-1.0, 1.0, -1.0),
+            Point(-1.0, -1.0, 1.0),
+            Point(-1.0, -1.0, -1.0),
+        )
+
+        v2 = SVector{8, Point}([T*p for p in v1])
+        P1 = Point(
+            maximum([v2[i].x for i in eachindex(v2)]),
+            maximum([v2[i].y for i in eachindex(v2)]),
+            maximum([v2[i].z for i in eachindex(v2)]) 
+        )
+        P2 = Point(
+            minimum([v2[i].x for i in eachindex(v2)]),
+            minimum([v2[i].y for i in eachindex(v2)]),
+            minimum([v2[i].z for i in eachindex(v2)]) 
+        )
+         new(P1, P2)
+    end
+end
+
+
 """
     Sphere <: Shape(
         T::Transformation = Transformation(),
@@ -569,12 +625,13 @@ See also: [`Shape`](@ref), [`Transformation`](@ref), [`Material`](@ref)
 struct Sphere <: Shape
     T::Transformation
     Material::Material
+    AABB::AABB
     
-    Sphere(T::Transformation, M::Material) = new(T,M)
-    Sphere(M::Material, T::Transformation) = new(T,M)
-    Sphere(T::Transformation) = new(T, Material())
-    Sphere(M::Material) = new(Transformation(), M)
-    Sphere() = new(Transformation(), Material())
+    Sphere(T::Transformation, M::Material) = new(T,M, AABB(Sphere, T))
+    Sphere(M::Material, T::Transformation) = new(T,M, AABB(Sphere, T))
+    Sphere(T::Transformation) = new(T, Material(), AABB(Sphere, T))
+    Sphere(M::Material) = new(Transformation(), M, AABB(Sphere, Transformation()))
+    Sphere() = new(Transformation(), Material(), AABB(Sphere, Transformation()))
 end
 
 """
