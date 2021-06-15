@@ -46,7 +46,7 @@ Define a image in the format 2D  High-Dynamic-Range.
 struct HDRimage
     width::Int64
     height::Int64
-    rgb_m::Array{RGB{Float32}} # Array
+    rgb_m::Array{RGB{Float32}}
     HDRimage(w,h) = new(w,h, fill(RGB(0.0, 0.0, 0.0), (w*h,)) )
     function HDRimage(w,h, rgb_m) 
         @assert size(rgb_m) == (w*h,)
@@ -156,6 +156,8 @@ struct Vec
     Vec(P::Point) = new(P.x, P.y, P.z)
     Vec(v::SVector{4, Float64}) = new(v[1], v[2], v[3])
 end
+
+length(::Vec) = 3
 
 const VEC_X = Vec(1.0, 0.0, 0.0)
 const VEC_Y = Vec(0.0, 1.0, 0.0)
@@ -549,6 +551,37 @@ defining different types of shapes that can be created:
 """
 abstract type Shape end
 
+
+
+
+"""
+    AABB <: Shape(
+        vertexes::SVector{6, Float32}
+    )
+
+An Axis-Aligned Boundary Box.
+
+This shape is not conceived to be rendered in the image, it has the only purpose
+to optimize the various `ray_intersection` functions.
+
+## Arguments
+
+- `vertexes::SVector{6, Float32}` : the 6 coordinates of the exterior vertexes
+  defining the AABB
+
+
+See also: [`Shape`](@ref), [`ray_intersection`](@ref)
+"""
+struct AABB <: Shape
+    m::Point
+    M::Point
+    AABB(P1::Point, P2::Point) = new(P1, P2)
+    AABB(p1x::Float64, p1y::Float64, p1z::Float64, p2x::Float64, p2y::Float64, p2z::Float64) = 
+        new(Point(p1x, p1y, p1z), Point(p2x, p2y, p2z))
+    AABB() = new(Point(-1.0, -1.0, -1.0), Point(1.0, 1.0, 1.0))
+end
+
+
 """
     Sphere <: Shape(
         T::Transformation = Transformation(),
@@ -569,12 +602,39 @@ See also: [`Shape`](@ref), [`Transformation`](@ref), [`Material`](@ref)
 struct Sphere <: Shape
     T::Transformation
     Material::Material
+    AABB::AABB
     
-    Sphere(T::Transformation, M::Material) = new(T,M)
-    Sphere(M::Material, T::Transformation) = new(T,M)
-    Sphere(T::Transformation) = new(T, Material())
-    Sphere(M::Material) = new(Transformation(), M)
-    Sphere() = new(Transformation(), Material())
+    Sphere(T::Transformation, M::Material) = new(T,M, AABB(Sphere, T))
+    Sphere(M::Material, T::Transformation) = new(T,M, AABB(Sphere, T))
+    Sphere(T::Transformation) = new(T, Material(), AABB(Sphere, T))
+    Sphere(M::Material) = new(Transformation(), M, AABB(Sphere, Transformation()))
+    Sphere() = new(Transformation(), Material(), AABB(Sphere, Transformation()))
+end
+
+function AABB(::Type{Sphere}, T::Transformation)
+    v1 = SVector{8, Point}(
+        Point(1.0, 1.0, 1.0),
+        Point(-1.0, 1.0, 1.0),
+        Point(1.0, -1.0, 1.0),
+        Point(1.0, 1.0, -1.0),
+        Point(1.0, -1.0, -1.0),
+        Point(-1.0, 1.0, -1.0),
+        Point(-1.0, -1.0, 1.0),
+        Point(-1.0, -1.0, -1.0),
+    )
+
+    v2 = SVector{8, Point}([T*p for p in v1])
+    P2 = Point(
+        maximum([v2[i].x for i in eachindex(v2)]),
+        maximum([v2[i].y for i in eachindex(v2)]),
+        maximum([v2[i].z for i in eachindex(v2)]) 
+    )
+    P1 = Point(
+        minimum([v2[i].x for i in eachindex(v2)]),
+        minimum([v2[i].y for i in eachindex(v2)]),
+        minimum([v2[i].z for i in eachindex(v2)]) 
+    )
+    AABB(P1, P2)
 end
 
 """
@@ -625,12 +685,40 @@ See also: [`Shape`](@ref), [`Transformation`](@ref), [`Material`](@ref)
 struct Cube <: Shape
     T::Transformation
     Material::Material
+    AABB::AABB
     
-    Cube(T::Transformation, M::Material) = new(T,M)
-    Cube(M::Material, T::Transformation) = new(T,M)
-    Cube(T::Transformation) = new(T, Material())
-    Cube(M::Material) = new(Transformation(), M)
-    Cube() = new(Transformation(), Material())
+    Cube(T::Transformation, M::Material) = new(T,M, AABB(Cube, T))
+    Cube(M::Material, T::Transformation) = new(T,M,  AABB(Cube, T))
+    Cube(T::Transformation) = new(T, Material(),  AABB(Cube, T))
+    Cube(M::Material) = new(Transformation(), M,  AABB(Cube, Transformation()))
+    Cube() = new(Transformation(), Material(), AABB(Cube, Transformation()))
+end
+
+
+function AABB(::Type{Cube}, T::Transformation)
+    v1 = SVector{8, Point}(
+        Point(0.5, 0.5, 0.5),
+        Point(-0.5, 0.5, 0.5),
+        Point(0.5, -0.5, 0.5),
+        Point(0.5, 0.5, -0.5),
+        Point(0.5, -0.5, -0.5),
+        Point(-0.5, 0.5, -0.5),
+        Point(-0.5, -0.5, 0.5),
+        Point(-0.5, -0.5, -0.5),
+    )
+
+    v2 = SVector{8, Point}([T*p for p in v1])
+    P2 = Point(
+        maximum([v2[i].x for i in eachindex(v2)]),
+        maximum([v2[i].y for i in eachindex(v2)]),
+        maximum([v2[i].z for i in eachindex(v2)]) 
+    )
+    P1 = Point(
+        minimum([v2[i].x for i in eachindex(v2)]),
+        minimum([v2[i].y for i in eachindex(v2)]),
+        minimum([v2[i].z for i in eachindex(v2)]) 
+    )
+    AABB(P1, P2)
 end
 
 

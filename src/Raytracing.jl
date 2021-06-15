@@ -11,10 +11,10 @@ using Colors, Images, ImageIO, FileIO, Polynomials
 using ColorTypes:RGB
 using LinearAlgebra, StaticArrays
 using Printf, ProgressBars
-using Documenter, DocStringExtensions
+using Documenter, DocStringExtensions, Intervals
 
 import Base.:+; import Base.:-; import Base.:≈; import Base.:/; import Base.:*
-import Base: write, read, print, println;
+import Base: write, read, print, println, length;
 import LinearAlgebra.:⋅; import LinearAlgebra.:×
 
 # from Structs.jl
@@ -23,7 +23,7 @@ export Point, Vec, Normal, VEC_X, VEC_Y, VEC_Z, Transformation
 export Ray, Camera, OrthogonalCamera, PerspectiveCamera, ImageTracer
 export Pigment, UniformPigment, CheckeredPigment, ImagePigment
 export BRDF, DiffuseBRDF, SpecularBRDF, Material
-export Shape, Sphere, Plane, Torus, Triangle, Cube
+export Shape, Sphere, Plane, Torus, Triangle, Cube, AABB
 export Vec2d, HitRecord, PointLight, World
 export Renderer, OnOffRenderer, FlatRenderer, PathTracer, PointLightRenderer
 # from Operations.jl

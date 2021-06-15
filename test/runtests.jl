@@ -56,6 +56,10 @@ end
 
 ##########################################################################################92
 
+@testset "test_AABB" begin
+	include("test_AABB.jl")
+end
+
 @testset "test_Sphere" begin
 	include("test_Sphere.jl")
 end
