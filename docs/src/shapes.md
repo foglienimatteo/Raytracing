@@ -38,6 +38,13 @@ Raytracing.cube_normal
 Raytracing.ray_intersection(::Cube, ::Ray)
 ```
 
+## Axis-Aligned Bounding Box
+
+```@docs
+Raytracing.AABB
+Raytracing.ray_intersection(::AABB, ::Ray)
+```
+
 ## Triangle
 
 ```@docs

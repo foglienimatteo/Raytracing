@@ -11,10 +11,10 @@ using Colors, Images, ImageIO, FileIO, Polynomials
 using ColorTypes:RGB
 using LinearAlgebra, StaticArrays
 using Printf, ProgressBars
-using Documenter, DocStringExtensions
+using Documenter, DocStringExtensions, Intervals
 
 import Base.:+; import Base.:-; import Base.:≈; import Base.:/; import Base.:*
-import Base: write, read, print, println;
+import Base: write, read, print, println, length;
 import LinearAlgebra.:⋅; import LinearAlgebra.:×
 
 # from Structs.jl
