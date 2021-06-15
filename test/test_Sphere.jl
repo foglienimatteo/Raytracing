@@ -84,7 +84,6 @@ end
 
 @testset "test_Normals" begin
      sphere = Sphere(scaling(Vec(2.0, 1.0, 1.0)))
-     println(sphere.AABB)
      ray = Ray(Point(1.0, 1.0, 0.0), Vec(-1.0, -1.0, 0.0))
      intersection = ray_intersection(sphere, ray)
 

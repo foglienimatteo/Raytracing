@@ -276,6 +276,7 @@ function triangle_barycenter(triangle::Triangle)
     return result
 end
 
+
 ##########################################################################################92
 
 
@@ -293,113 +294,9 @@ function ray_intersection(shape::Shape, ray::Ray)
             )
 end
 
-#=
-function ray_intersection(AABB::AABB, ray::Ray)
-    d = ray.dir
-    O = ray.origin
-    (tmin, tmax) = (ray.tmin, ray.tmax)
-
-    if (AABB.m.x ≤ O.x ≤ AABB.M.x) && (AABB.m.y ≤ O.y ≤ AABB.M.y) && (AABB.m.z ≤ O.z ≤ AABB.M.z)
-        return true
-    end
-
-
-    hit_ts = [Inf for i in 1:6]
-    points = [Point() for i in 1:6]
-
-    if !(d.x ≈ 0.) 
-        tx1, tx2 = Tuple( sort( [(AABB.m.x - O.x ) / d.x, (AABB.M.x - O.x ) / d.x]) )
-
-        if  ( tmin < tx1 < tmax )
-            P1 = at(ray, tx1) 
-            if ( (AABB.m.y < P1.y < AABB.M.y) && (AABB.m.z < P1.z < AABB.M.z) )
-                points[1] = P1
-                hit_ts[1] = tx1
-            end
-        end
-
-        if ( tmin < tx2 < tmax )
-            P2 = at(ray, tx2) 
-            if ( (AABB.m.y < P2.y < AABB.M.y) && (AABB.m.z < P2.z < AABB.M.z) )
-                points[2] = P2
-                hit_ts[2] = tx2
-            end
-        end
-    end
-
-    if !(d.y ≈ 0.) 
-        ty1, ty2 = Tuple( sort( [(AABB.m.y - O.y ) / d.y, (AABB.M.y - O.y ) / d.y]) )
-
-        if  ( tmin < ty1 < tmax )
-            P3 = at(ray, ty1) 
-            if ( (AABB.m.x < P3.x < AABB.M.x) && (AABB.m.z < P3.z < AABB.M.z) )
-                points[3] = P3
-                hit_ts[3] = ty1
-            end
-        end
-
-        if ( tmin < ty2 < tmax )
-            P4 = at(ray, ty2) 
-            if ( (AABB.m.y < P4.y < AABB.M.y) && (AABB.m.z < P4.z < AABB.M.z) )
-                points[4] = P4
-                hit_ts[4] = ty2
-            end
-        end
-    end
-
-    if !(d.z ≈ 0.) 
-        tz1, tz2 = Tuple( sort( [(AABB.m.z - O.z ) / d.z, (AABB.M.z - O.z ) / d.z]) )
-
-        if  ( tmin < tz1 < tmax )
-            P5 = at(ray, tz1) 
-            if ( (AABB.m.y < P5.y < AABB.M.y) && (AABB.m.x < P5.x < AABB.M.x) )
-                points[5] = P5
-                hit_ts[5] = tz1
-            end
-        end
-
-        if ( tmin < tz2 < tmax )
-            P6 = at(ray, tz2) 
-            if ( (AABB.m.y < P6.y < AABB.M.y) && (AABB.m.x < P6.x < AABB.M.x) )
-                points[6] = P6
-                hit_ts[6] = tz2
-            end
-        end
-    end
-
-    return (min(hit_ts...) ≠ Inf ? true : false)
-    #=
-    (d.x ≈ 0.) ? 
-        (tx1, tx2) = (-Inf, Inf) : 
-        (tx1, tx2) = Tuple( sort( [(AABB.A.x - O.x ) / d.x, (AABB.B.x - O.x ) / d.x]) )
-
-    (d.y ≈ 0.) ? 
-        (ty1, ty2) = (-Inf, Inf) : 
-        (ty1, ty2) = Tuple( sort( [(AABB.A.y - O.y ) / d.y, (AABB.B.y - O.y ) / d.y]) )
-
-    (d.z ≈ 0.) ? 
-        (tz1, tz2) = (-Inf, Inf) : 
-        (tz1, tz2) = Tuple( sort( [(AABB.A.z - O.z ) / d.z, (AABB.B.z - O.z ) / d.z]) )
-
-
-    println("tx1,  tx2: ", tx1, "\t", tx2)
-    println("ty1,  ty2: ", ty1, "\t", ty2)
-    println("tz1,  tz2: ", tz1, "\t", tz2)
-
-    if ( max(ty1, tmin) < min(tx2, tmax)  && 
-         max(tx1, tmin) < min(tz2, tmax) && 
-         max(tz1, tmin) < min(ty2, tmax) )
-
-        return true
-    else
-        return false
-    end
-    =#
-end
-=#
 
 """
-    ray_intersection(AABB::AABB, ray::Ray) :: Boolr
+    ray_intersection(AABB::AABB, ray::Ray) :: Bool
 
 Check if the `ray` intersects the `AABB`.
 Return `true` if intersection occurs, `false` otherwise.
@@ -431,22 +328,13 @@ function ray_intersection(AABB::AABB, ray::Ray)
     (tzmin > tmin) && (tmin = tzmin)
     (tzmax < tmax) && (tmax = tzmax)
  
-    if ( ray.tmin ≤ tmin ≤ ray.tmax) || ( ray.tmin ≤ tmax ≤ ray.tmax)
+    if (ray.tmin ≤ tmin ≤ ray.tmax) || ( ray.tmin ≤ tmax ≤ ray.tmax)
         return true
     else
         return false
     end
 end
 
-#=
-function ray_intersection(AABB::AABB, ray::Ray)
-    dir = ray.dir
-    v1 = SVector{3, Float64}(AABB.A.x, AABB.A.y, AABB.A.z)
-    v2 = SVector{3, Float64}(AABB.B.x, AABB.B.y, AABB.B.z)
-    overlap = reduce(intersect, map(t -> Interval(t...), zip(-v1 ./ dir, -v2 ./ dir)))
-    isempty(overlap) ? (return Inf) : overlap.first
-end
-=#
 
 """
     ray_intersection(sphere::Sphere, ray::Ray) :: Union{HitRecord, Nothing}
@@ -523,6 +411,7 @@ function ray_intersection(plane::Plane, ray::Ray)
     )
 end
 
+
 """
     ray_intersection(cube::Cube, ray::Ray) :: Union{HitRecord, Nothing}
 
@@ -535,87 +424,44 @@ and may have to be optimized.
 See also: [`Ray`](@ref), [`Cube`](@ref), [`HitRecord`](@ref)
 """
 function ray_intersection(cube::Cube, ray::Ray)
-
     (ray_intersection(cube.AABB, ray) == true) || (return nothing)
 
     inv_ray = inverse(cube.T) * ray
     d = inv_ray.dir
     O = inv_ray.origin
 
-    hit_ts = [Inf for i in 1:6]
-    points = [Point() for i in 1:6]
+    (tmin, tmax) = Tuple( sort( [ (-0.5 - O.x) / d.x, (0.5 - O.x) / d.x ]) )
+    (tymin, tymax) = Tuple( sort( [ (-0.5 - O.y) / d.y, (0.5 - O.y) / d.y ]) )
+ 
+    ((tmin > tymax) || (tymin > tmax)) && (return false)
+ 
+    (tymin > tmin) && (tmin = tymin)
+    (tymax < tmax) && (tmax = tymax)
 
-    if !(d.z ≈ 0.) 
-
-        hit_t_1, hit_t_2 = (0.5 - O.z)/ d.z, (-0.5 - O.z)/ d.z
-
-        if  ( inv_ray.tmin < hit_t_1 < inv_ray.tmax )
-            P1 = at(inv_ray, hit_t_1) 
-            if ( (-0.5 < P1.x < 0.5) && (-0.5 < P1.y < 0.5) )
-                points[1] = P1
-                hit_ts[1] = hit_t_1
-            end
-        end
-
-        if ( inv_ray.tmin < hit_t_2 < inv_ray.tmax )
-            P2 = at(inv_ray, hit_t_2) 
-            if ( (-0.5 < P2.x < 0.5) && (-0.5 < P2.y < 0.5) )
-                points[2] = P2
-                hit_ts[2] = hit_t_2
-            end
-        end
-    end
-
-    if !(d.y ≈ 0.) 
-
-        hit_t_3, hit_t_4 = (0.5 - O.y)/ d.y, (-0.5 - O.y)/ d.y
-
-        if  ( inv_ray.tmin < hit_t_3 < inv_ray.tmax )
-            P3 = at(inv_ray, hit_t_3) 
-            if ( (-0.5 < P3.x < 0.5) && (-0.5 < P3.z < 0.5) )
-                points[3] = P3
-                hit_ts[3] = hit_t_3
-            end
-        end
-
-        if ( inv_ray.tmin < hit_t_4 < inv_ray.tmax )
-            P4 = at(inv_ray, hit_t_4) 
-            if ( (-0.5 < P4.x < 0.5) && (-0.5 < P4.z < 0.5) )
-                points[4] = P4
-                hit_ts[4] = hit_t_4
-            end
-        end
-    end
-
-    if !(d.x ≈ 0.) 
-
-        hit_t_5, hit_t_6 = (0.5 - O.x)/ d.x, (-0.5 - O.x)/ d.x
-
-        if  ( inv_ray.tmin < hit_t_5 < inv_ray.tmax )
-            P5 = at(inv_ray, hit_t_5) 
-            if ( (-0.5 < P5.y < 0.5) && (-0.5 < P5.z < 0.5) )
-                points[5] = P5
-                hit_ts[5] = hit_t_5
-            end
-        end
-
-        if ( inv_ray.tmin < hit_t_6 < inv_ray.tmax )
-            P6 = at(inv_ray, hit_t_6) 
-            if ( (-0.5 < P6.y < 0.5) && (-0.5 < P6.z < 0.5) )
-                points[6] = P6
-                hit_ts[6] = hit_t_6
-            end
-        end
-    end
-
-    hit_t = min(hit_ts...)
-    if hit_t ≠ Inf
-        hit_point = at(inv_ray, hit_t)
+    (tzmin, tzmax) = Tuple( sort( [ (-0.5 - O.z) / d.z, (0.5 - O.z) / d.z ]) )
+ 
+    ((tmin > tzmax) || (tzmin > tmax)) && (return false)
+ 
+    (tzmin > tmin) && (tmin = tzmin)
+    (tzmax < tmax) && (tmax = tzmax)
+ 
+    if (inv_ray.tmin ≤ tmin ≤ inv_ray.tmax) 
+        hit_point = at(inv_ray, tmin)
         return HitRecord(
             cube.T * hit_point,
             cube.T * cube_normal(hit_point, inv_ray.dir),
             cube_point_to_uv(hit_point),
-            hit_t,
+            tmin,
+            ray,
+            cube
+        )
+    elseif ( inv_ray.tmin ≤ tmax ≤ inv_ray.tmax)
+        hit_point = at(inv_ray, tmax)
+        return HitRecord(
+            cube.T * hit_point,
+            cube.T * cube_normal(hit_point, inv_ray.dir),
+            cube_point_to_uv(hit_point),
+            tmax,
             ray,
             cube
         )
@@ -623,6 +469,7 @@ function ray_intersection(cube::Cube, ray::Ray)
         return nothing
     end
 end
+
 
 function ray_intersection(torus::Torus, ray::Ray)
     inv_ray = inverse(torus.T) * ray
