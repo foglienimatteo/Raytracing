@@ -742,3 +742,27 @@ function expect_keywords(input_file::InputStream, keywords::Vector{KeywordEnum})
 
      return token.keyword
 end
+
+
+"""
+     expect_number(input_file::InputStream, scene::Scene) :: Float64
+
+Read a token from `input_file` and check that it is either a literal number 
+or a variable in `scene`, and return the number value.
+
+See also: [`InputStream`](@ref), [`Scene`](@ref), [`Token`](@ref)
+"""
+function expect_number(input_file::InputStream, scene::Scene)
+     token = read_token(input_file)
+     if !isa(token, LiteralNumberToken)
+          return token.value
+     elseif !isa(token, IdentifierToken)
+          variable_name = token.identifier
+          if variable_name ∉ scene.float_variables
+               throw(GrammarError(token.location, "unknown variable \"$(token)\""))
+          end
+          return scene.float_variables[variable_name]
+     end
+
+     throw(GrammarError(token.location, "got \"$(token)\" instead of a number"))
+end
