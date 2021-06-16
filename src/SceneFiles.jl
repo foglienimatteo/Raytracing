@@ -1106,3 +1106,75 @@ function parse_camera(input_file::InputStream, scene::Scene)
      return result
 end
 
+
+"""
+     parse_scene(
+          input_file::InputStream, 
+          variables::Dict{String, Float64} = Dict()
+          ) :: Scene
+
+Read a scene description from the given input `inputstream` and return a `Scene` object.
+Call internally the following parsing functions:
+- [`read_token`](@ref)
+- [`StopToken`](@ref)
+- [`expect_identifier`](@ref)
+- [`expect_symbol`](@ref)
+- [`parse_number`](@ref)
+- [`parse_sphere`](@ref)
+- [`parse_plane`](@ref)
+- [`parse_camera`](@ref)
+- [`parse_material`](@ref)
+Call internally the following functions and structs of the program
+- [`add_shape!`](@ref)
+
+See also: [`InputStream`](@ref), [`Scene`](@ref), [`Token`](@ref)
+"""    
+function parse_scene(input_file::InputStream, variables::Dict{String, Float64} = Dict())
+     scene = Scene()
+     scene.float_variables = copy(variables)
+     scene.overridden_variables = keys(variables)
+
+     while true
+          what = read_token(input_file)
+          isa(what, StopToken) && (break)
+
+          if !isa(what, KeywordToken)
+               throw(GrammarError(what.location, "expected a keyword instead of \"$(what)\""))
+          end
+
+          if what.keyword == KeywordEnum.FLOAT
+               variable_name = expect_identifier(input_file)
+
+               # Save this for the error message
+               variable_loc = input_file.location
+
+               expect_symbol(input_file, "(")
+               variable_value = expect_number(input_file, scene)
+               expect_symbol(input_file, ")")
+
+               if (variable_name ∈ scene.float_variables) && !(variable_name ∈ scene.overridden_variables)
+                    throw(GrammarError(variable_loc, "variable «$(variable_name)» cannot be redefined"))
+               end
+
+               if variable_name not in scene.overridden_variables
+                    # Only define the variable if it was not defined by the user *outside* the scene file
+                    # (e.g., from the command line)
+                    scene.float_variables[variable_name] = variable_value
+               end
+
+          elseif what.keyword == KeywordEnum.SPHERE
+               add_shape!(scene.world, parse_sphere(input_file, scene))
+          elseif what.keyword == KeywordEnum.PLANE
+               add_shape!(scene.world, parse_plane(input_file, scene))
+          elseif what.keyword == KeywordEnum.CAMERA
+               if !isnothing(scene.camera)
+                    throw(GrammarError(what.location, "You cannot define more than one camera"))
+               end
+               scene.camera = parse_camera(input_file, scene)
+          elseif what.keyword == KeywordEnum.MATERIAL
+               name, material = parse_material(input_file, scene)
+               scene.materials[name] = material
+          end
+
+     return scene
+end

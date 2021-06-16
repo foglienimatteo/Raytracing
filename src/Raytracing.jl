@@ -59,6 +59,8 @@ export KeywordEnum, GrammarError, InputStream
 export Token, KeywordToken, IdentifierToken, StringToken
 export LiteralNumberToken, SymbolToken, StopToken
 export read_token, skip_whitespaces_and_comments
+export parse_camera, parse_plane, parse_sphere
+export parse_scene
 
 include("PCG.jl")
 include("Structs.jl")

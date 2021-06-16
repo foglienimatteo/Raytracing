@@ -41,29 +41,29 @@ end
 end
 
 
-function assert_is_keyword(token::Token, keyword::KeywordEnum) 
-     @assert isa(token.value, KeywordToken) "Token '$(token.value)' is not a KeywordToken"
-     @assert token.value.keyword == keyword "Token '$(token.value)' is not equal to keyword '$(keyword)'"
+function @test_is_keyword(token::Token, keyword::KeywordEnum) 
+     @@test isa(token.value, KeywordToken) "Token '$(token.value)' is not a KeywordToken"
+     @@test token.value.keyword == keyword "Token '$(token.value)' is not equal to keyword '$(keyword)'"
 end
 
-function assert_is_identifier(token::Token, identifier::String) 
-     @assert isa(token.value, IdentifierToken) "Token '$(token.value)' is not a IdentifierToken"
-     @assert token.value.identifier == identifier "expecting identifier '$(identifier)' instead of '$(token.value)'"
+function @test_is_identifier(token::Token, identifier::String) 
+     @@test isa(token.value, IdentifierToken) "Token '$(token.value)' is not a IdentifierToken"
+     @@test token.value.identifier == identifier "expecting identifier '$(identifier)' instead of '$(token.value)'"
 end
 
-function assert_is_symbol(token::Token, symbol::String) 
-     @assert isa(token.value, SymbolToken) "Token '$(token.value)' is not a SymbolToken"
-     @assert token.value.symbol == symbol "expecting symbol '$(symbol)' instead of '$(token.value)'"
+function @test_is_symbol(token::Token, symbol::String) 
+     @@test isa(token.value, SymbolToken) "Token '$(token.value)' is not a SymbolToken"
+     @@test token.value.symbol == symbol "expecting symbol '$(symbol)' instead of '$(token.value)'"
 end
 
-function assert_is_number(token::Token, number::Float64) 
-     @assert isa(token.value, LiteralNumberToken) "Token '$(token.value)' is not a LiteralNumberToken"
-     @assert token.value.number == number "Token '$(token.value)' is not equal to number '$(number)'"
+function @test_is_number(token::Token, number::Float64) 
+     @@test isa(token.value, LiteralNumberToken) "Token '$(token.value)' is not a LiteralNumberToken"
+     @@test token.value.number == number "Token '$(token.value)' is not equal to number '$(number)'"
 end
 
-function assert_is_string(token::Token, string::String) 
-     @assert isa(token.value, StringToken) "Token '$(token.value)' is not a StringToken"
-     @assert token.value.string == string "Token '$(token.value)' is not equal to string '$(string)'"
+function @test_is_string(token::Token, string::String) 
+     @@test isa(token.value, StringToken) "Token '$(token.value)' is not a StringToken"
+     @@test token.value.string == string "Token '$(token.value)' is not equal to string '$(string)'"
 end
 
 @testset "test_input_file" begin
@@ -126,14 +126,131 @@ end
 
      input_file = InputStream(stream)
 
-     assert_is_keyword(read_token(input_file), Raytracing.NEW)
-     assert_is_keyword(read_token(input_file), Raytracing.MATERIAL)
-     assert_is_identifier(read_token(input_file), "sky_material")
-     assert_is_symbol(read_token(input_file), "(")
-     assert_is_keyword(read_token(input_file), Raytracing.DIFFUSE)
-     assert_is_symbol(read_token(input_file), "(")
-     assert_is_keyword(read_token(input_file), Raytracing.IMAGE)
-     assert_is_symbol(read_token(input_file), "(")
-     assert_is_string(read_token(input_file), "my file.pfm")
-     assert_is_symbol(read_token(input_file), ")")
+     @test_is_keyword(read_token(input_file), Raytracing.NEW)
+     @test_is_keyword(read_token(input_file), Raytracing.MATERIAL)
+     @test_is_identifier(read_token(input_file), "sky_material")
+     @test_is_symbol(read_token(input_file), "(")
+     @test_is_keyword(read_token(input_file), Raytracing.DIFFUSE)
+     @test_is_symbol(read_token(input_file), "(")
+     @test_is_keyword(read_token(input_file), Raytracing.IMAGE)
+     @test_is_symbol(read_token(input_file), "(")
+     @test_is_string(read_token(input_file), "my file.pfm")
+     @test_is_symbol(read_token(input_file), ")")
+end
+
+@testset "test_parser" begin
+     stream = IOBuffer("""
+     float clock(150)
+
+     material sky_material(
+          diffuse(uniform(<0, 0, 0>)),
+          uniform(<0.7, 0.5, 1>)
+     )
+
+     # Here is a comment
+
+     material ground_material(
+          diffuse(checkered(<0.3, 0.5, 0.1>,
+                              <0.1, 0.2, 0.5>, 4)),
+          uniform(<0, 0, 0>)
+     )
+
+     material sphere_material(
+          specular(uniform(<0.5, 0.5, 0.5>)),
+          uniform(<0, 0, 0>)
+     )
+
+     plane (sky_material, translation([0, 0, 100]) * rotation_y(clock))
+     plane (ground_material, identity)
+
+     sphere(sphere_material, translation([0, 0, 1]))
+
+     camera(perspective, rotation_z(30) * translation([-4, 0, 1]), 1.0, 2.0)
+     """)
+
+     scene = parse_scene(InputStream(stream))
+
+     # Check that the float variables are ok
+
+     @test length(scene.float_variables) == 1
+     @test "clock" ∈ keys(scene.float_variables)
+     @test scene.float_variables["clock"] == 150.0
+
+     # Check that the materials are ok
+
+     @test length(scene.materials) == 3
+     @test "sphere_material" ∈ scene.materials
+     @test "sky_material" ∈ scene.materials
+     @test "ground_material" ∈ scene.materials
+
+     sphere_material = scene.materials["sphere_material"]
+     sky_material = scene.materials["sky_material"]
+     ground_material = scene.materials["ground_material"]
+
+     @test isa(sky_material.brdf, DiffuseBRDF)
+     @test isa(sky_material.brdf.pigment, UniformPigment)
+     @test sky_material.brdf.pigment.color ≈ RGB(0., 0., 0.)
+
+     @test isa(ground_material.brdf, DiffuseBRDF)
+     @test isa(ground_material.brdf.pigment, CheckeredPigment)
+     @test ground_material.brdf.pigment.color1 ≈ RGB(0.3, 0.5, 0.1)
+     @test ground_material.brdf.pigment.color2 ≈ RGB(0.1, 0.2, 0.5)
+     @test ground_material.brdf.pigment.num_of_steps == 4
+
+     @test isa(sphere_material.brdf, SpecularBRDF)
+     @test isa(sphere_material.brdf.pigment, UniformPigment)
+     @test sphere_material.brdf.pigment.color ≈ RGB(0.5, 0.5, 0.5)
+
+     @test isa(sky_material.emitted_radiance, UniformPigment)
+     @test sky_material.emitted_radiance.color ≈ RGB(0.7, 0.5, 1.0)
+     @test isa(ground_material.emitted_radiance, UniformPigment)
+     @test ground_material.emitted_radiance.color ≈ RGB(0, 0, 0)
+     @test isa(sphere_material.emitted_radiance, UniformPigment)
+     @test sphere_material.emitted_radiance.color ≈ RGB(0, 0, 0)
+
+     # Check that the shapes are ok
+
+     @test length(scene.world.shapes) == 3
+     @test isa(scene.world.shapes[0], Plane)
+     @test scene.world.shapes[0].transformation ≈ translation(Vec(0, 0, 100)) * rotation_y(150.0)
+     @test isa(scene.world.shapes[1], Plane)
+     @test scene.world.shapes[1].transformation ≈ Transformation()
+     @test isa(scene.world.shapes[2], Sphere)
+     @test scene.world.shapes[2].transformation ≈ translation(Vec(0, 0, 1))
+
+     # Check that the camera is ok
+
+     @test isa(scene.camera, PerspectiveCamera)
+     @test scene.camera.transformation ≈ rotation_z(30) * translation(Vec(-4, 0, 1))
+     @test 1.0 ≈ scene.camera.aspect_ratio
+     @test 2.0 ≈ scene.camera.screen_distance
+end
+
+@testset "test_parser_undefined_material" begin
+     # Check that unknown materials raises a GrammarError
+     stream = IOBuffer("""
+     plane(this_material_does_not_exist, identity)
+     """)
+
+     try
+          _ = parse_scene(InputStream(stream))
+          @assert false "the code did not throw an exception"
+     catch except
+          @test isa(except, GrammarError)
+     end
+end
+
+@testset "test_parser_double_camera" begin
+     # Check that defining two cameras in the same file raises a GrammarError
+     stream = IOBuffer("""
+     camera(perspective, rotation_z(30) * translation([-4, 0, 1]), 1.0, 1.0)
+     camera(orthogonal, identity, 1.0, 1.0)
+     """)
+
+     try
+          _ = parse_scene(input_file=InputStream(stream))
+          @assert false "the code did not throw an exception"
+     catch except
+          @test isa(except, GrammarError)
+     end
 end
