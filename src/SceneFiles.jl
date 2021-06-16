@@ -6,7 +6,7 @@
 #
 
 WHITESPACE = [" ", "\t", "\n", "\r"]
-SYMBOLS = ["(", ")", "<", ">", "[", "]", "*"]
+SYMBOLS = ["(", ")", "<", ">", "[", "]", ",", "*"]
 LETTERS = [
      'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 
      'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 
@@ -98,24 +98,9 @@ mutable struct SourceLocation
     SourceLocation(fn::String, ln::Int64 = 0, cn::Int64 = 0) = new(fn, ln, cn)
 end
 
-"""
-     copy(location::SourceLocation) :: SourceLocation
-
-Return a shallow copy of the input source location.
-
-See also: [`SourceLocation`](@ref)
-"""
-function copy(location::SourceLocation)
-     copy = SourceLocation(
-               location.file_name,
-               location.line_num,
-               location.col_num
-          )
-     return copy
-end
+copy(location::SourceLocation) = SourceLocation(location.file_name, location.line_num, location.col_num)
 
 
-##########################################################################################92
 
 
 """
@@ -201,6 +186,7 @@ struct IdentifierToken
 end
 
 
+
 """
      StringToken(string::String)
 
@@ -274,6 +260,14 @@ struct Token
      location::SourceLocation
      value::Union{KeywordToken, IdentifierToken, StringToken, LiteralNumberToken, SymbolToken,StopToken}
 end
+
+copy(token::KeywordToken) = KeywordToken(token.keyword)
+copy(token::IdentifierToken) = IdentifierToken(token.identifier)
+copy(token::StringToken) = StringToken(token.string)
+copy(token::LiteralNumberToken) = LiteralNumberToken(token.number)
+copy(token::SymbolToken) = SymbolToken(token.symbol)
+copy(token::StopToken) = StopToken()
+copy(token::Token) = Token(token.location, copy(token.value))
 
 """
      GrammarError <: Exception(
@@ -680,7 +674,7 @@ See also: [`InputStream`](@ref), [`Token`](@ref), [`read_token`](@ref)
 """
 function unread_token(inputstream::InputStream, token::Token)
     @assert isnothing(inputstream.saved_token) "$(inputstream.saved_token) ≠ nothing "
-    inputstream.saved_token = token
+    inputstream.saved_token = copy(token)
 end
 
 ##########################################################################################92
@@ -714,10 +708,15 @@ mutable struct Scene
      ) = new(m,w,c,fv,ov)
 end
 
+
 """
      expect_symbol(inputstream::InputStream, symbol::String)
 
-Read a token from `input_file` and check that it matches `symbol`.
+Read a token from `inputstream` and check that its type is `SymbolToken` 
+and its value is `symbol`, throwing `GrammarError` otherwise.
+Call internally [`read_token`](@ref).
+
+See also: [`InputStream`](@ref), [`KeywordEnum`](@ref), [`SymbolToken`](@ref)
 """
 function expect_symbol(inputstream::InputStream, symbol::String)
      token = read_token(inputstream)
@@ -726,45 +725,53 @@ function expect_symbol(inputstream::InputStream, symbol::String)
      end
 end
 
-"""
-     expect_keywords(input_file::InputStream, keywords::Vector{KeywordEnum}) :: KeywordEnum
 
-Read a token from `input_file` and check that it is one of the keywords in `keywords`.
-
-See also: [`InputStream`](@ref), [`KeywordEnum`](@ref), [`Token`](@ref)
 """
-function expect_keywords(input_file::InputStream, keywords::Vector{KeywordEnum})
-     token = read_token(input_file)
+     expect_keywords(inputstream::InputStream, keywords::Vector{KeywordEnum}) :: KeywordEnum
+
+Read a token from `inputstream` and check that its type is `KeywordToken` 
+and its value is one of the keywords in `keywords`, throwing `GrammarError` otherwise.
+Call internally [`read_token`](@ref).
+
+See also: [`InputStream`](@ref), [`KeywordEnum`](@ref), [`KeywordToken`](@ref)
+"""
+function expect_keywords(inputstream::InputStream, keywords::Vector{KeywordEnum})
+     token = read_token(inputstream)
      if typeof(token.value) ≠ KeywordToken
           throw(GrammarError(token.location, "expected a keyword instead of '$(token)' "))
      end
 
-     if token.keyword ∉ keywords
+     if token.value.keyword ∉ keywords
           throw(GrammarError(
                token.location,
                "expected one of the keywords $([String(x)*"," for x in keywords]...)) instead of '$(token)'"
           ))
      end
 
-     return token.keyword
+     return token.value.keyword
 end
 
 
 """
-     expect_number(input_file::InputStream, scene::Scene) :: Float64
+     expect_number(inputstream::InputStream, scene::Scene) :: Float64
 
-Read a token from `input_file` and check that it is either a literal number 
-or a variable in `scene`, and return the number value.
+Read a token from `inputstream` and check that its type is `LiteralNumberToken` 
+(i.e. a number) or `IdentifierToken` (i.e. a variable defined in `scene`), 
+throwing  `GrammarError` otherwise.
+Return the float64-parsed number or the identifier associated float64-parsed 
+number, respectively.
+Call internally [`read_token`](@ref).
 
-See also: [`InputStream`](@ref), [`Scene`](@ref), [`Token`](@ref)
+See also: [`InputStream`](@ref), [`Scene`](@ref), [`LiteralNumberToken`](@ref), 
+[`IdentifierToken`](@ref)
 """
-function expect_number(input_file::InputStream, scene::Scene)
-     token = read_token(input_file)
+function expect_number(inputstream::InputStream, scene::Scene)
+     token = read_token(inputstream)
      if typeof(token.value) == LiteralNumberToken
           return token.value.number
      elseif typeof(token.value) == IdentifierToken
           variable_name = token.value.identifier
-          if variable_name ∉ scene.float_variables
+          if variable_name ∉ keys(scene.float_variables)
                throw(GrammarError(token.location, "unknown variable '$(token)'"))
           end
           return scene.float_variables[variable_name]
@@ -775,15 +782,17 @@ end
 
 
 """
-     expect_string(input_file::InputStream) :: String
+     expect_string(inputstream::InputStream) :: String
 
-Read a token from `input_file` and check that it is a literal string.
-Return the value of the string (a ``str``).
+Read a token from `inputstream` and check that its type is `StringToken`,
+throwing  `GrammarError` otherwise.
+Return the string associated with the readed `StringToken`.
+Call internally [`read_token`](@ref).
 
-See also: [`InputStream`](@ref), [`Scene`](@ref), [`Token`](@ref)
+See also: [`InputStream`](@ref), [`Scene`](@ref), [`StringToken`](@ref), 
 """
-function expect_string(input_file::InputStream)
-    token = read_token(input_file)
+function expect_string(inputstream::InputStream)
+    token = read_token(inputstream)
     if (typeof(token.value) ≠ StringToken)
           throw(GrammarError(token.location, "got $(token) instead of a string"))
     end
@@ -791,14 +800,22 @@ function expect_string(input_file::InputStream)
     return token.value.string
 end
 
-"""
-     expect_identifier(input_file::InputStream)
 
-Read a token from `input_file` and check that it is an identifier.
-Return the name of the identifier.
 """
-function expect_identifier(input_file::InputStream)
-     token = read_token(input_file)
+     expect_identifier(inputstream::InputStream) :: String
+
+Read a token from `inputstream` and check that it is an identifier.
+Return the name of the identifier.
+
+Read a token from `inputstream` and check that its type is `IdentifierToken`,
+throwing  `GrammarError` otherwise.
+Return the name of the identifier as a `String`.
+Call internally [`read_token`](@ref).
+
+See also: [`InputStream`](@ref), [`Scene`](@ref), [`IdentifierToken`](@ref), 
+"""
+function expect_identifier(inputstream::InputStream)
+     token = read_token(inputstream)
      if (typeof(token.value) ≠ IdentifierToken)
           throw(GrammarError(token.location, "got $(token) instead of an identifier"))
      end
@@ -808,109 +825,114 @@ end
 
 
 """
-    parse_vector(input_file::InputStream, scene::Scene) :: Vec
+    parse_vector(inputstream::InputStream, scene::Scene) :: Vec
 
-Parse a vector from the given input `inputstream`.
+Parse a vector from the given `inputstream` and return it.
 Call internally [`expect_number`](@ref) and [`expect_symbol`](@ref).
     
-See also: [`InputStream`](@ref), [`Scene`](@ref), [`Token`](@ref)
+See also: [`InputStream`](@ref), [`Scene`](@ref), [`Vec`](@ref)
 """
-function parse_vector(input_file::InputStream, scene::Scene)
-     expect_symbol(input_file, "[")
-     x = expect_number(input_file, scene)
-     expect_symbol(input_file, ",")
-     y = expect_number(input_file, scene)
-     expect_symbol(input_file, ",")
-     z = expect_number(input_file, scene)
-     expect_symbol(input_file, "]")
+function parse_vector(inputstream::InputStream, scene::Scene)
+     expect_symbol(inputstream, "[")
+     x = expect_number(inputstream, scene)
+     expect_symbol(inputstream, ",")
+     y = expect_number(inputstream, scene)
+     expect_symbol(inputstream, ",")
+     z = expect_number(inputstream, scene)
+     expect_symbol(inputstream, "]")
 
      return Vec(x, y, z)
 end
 
-"""
-     parse_color(input_file::InputStream, scene::Scene) :: RGB{Float32}
 
-Read the color `input_file` and return it
-Call internally ['expect_symbol'](@ref), ['expect_number'](@ref)
-
-See also: ['InputStream'](@ref), ['Scene'](@ref), ['Token'](@ref)
 """
-function parse_color(input_file::InputStream, scene::Scene)
-    expect_symbol(input_file, "<")
-    red = expect_number(input_file, scene)
-    expect_symbol(input_file, ",")
-    green = expect_number(input_file, scene)
-    expect_symbol(input_file, ",")
-    blue = expect_number(input_file, scene)
-    expect_symbol(input_file, ">")
+     parse_color(inputstream::InputStream, scene::Scene) :: RGB{Float32}
+
+Read the color from the given `inputstream` and return it.
+Call internally ['expect_symbol'](@ref) and ['expect_number'](@ref).
+
+See also: ['InputStream'](@ref), ['Scene'](@ref)
+"""
+function parse_color(inputstream::InputStream, scene::Scene)
+    expect_symbol(inputstream, "<")
+    red = expect_number(inputstream, scene)
+    expect_symbol(inputstream, ",")
+    green = expect_number(inputstream, scene)
+    expect_symbol(inputstream, ",")
+    blue = expect_number(inputstream, scene)
+    expect_symbol(inputstream, ">")
 
     return RGB{Float32}(red, green, blue)
 end
 
 
 """
-     parse_pigment(input_file::InputStream, scene::Scene) :: Pigment
+     parse_pigment(inputstream::InputStream, scene::Scene) :: Pigment
 
-Parse a pigment from the given input `inputstream`.
+Parse a pigment from the given `inputstream` and return it.
+
 Call internally the following parsing functions:
 - [`expect_keywords`](@ref)
 - [`expect_symbol`](@ref)
 - [`parse_color`](@ref)
 - [`expect_number`](@ref)
 - [`expect_string`](@ref)
-Call internally the following functions and structs of the program
+
+Call internally the following functions and structs of the program:
 - [`UniformPigment`](@ref)
 - [`CheckeredPigment`](@ref)
 - [`ImagePigment`](@ref)
 - [`load_image`](@ref)
     
-See also: [`InputStream`](@ref), [`Scene`](@ref), [`Token`](@ref), [`Pigment`](@ref)
+See also: [`InputStream`](@ref), [`Scene`](@ref), [`Pigment`](@ref)
 """
-function parse_pigment(input_file::InputStream, scene::Scene)
-     keyword = expect_keywords(input_file, [ UNIFORM,  CHECKERED,  IMAGE])
+function parse_pigment(inputstream::InputStream, scene::Scene)
+     keyword = expect_keywords(inputstream, [ UNIFORM,  CHECKERED,  IMAGE])
 
-     expect_symbol(input_file, "(")
+     expect_symbol(inputstream, "(")
      if keyword ==  UNIFORM
-          color = parse_color(input_file, scene)
+          color = parse_color(inputstream, scene)
           result = UniformPigment(color)
      elseif keyword ==  CHECKERED
-          color1 = parse_color(input_file, scene)
-          expect_symbol(input_file, ",")
-          color2 = parse_color(input_file, scene)
-          expect_symbol(input_file, ",")
-          num_of_steps = Int(expect_number(input_file, scene))
+          color1 = parse_color(inputstream, scene)
+          expect_symbol(inputstream, ",")
+          color2 = parse_color(inputstream, scene)
+          expect_symbol(inputstream, ",")
+          num_of_steps = Int(expect_number(inputstream, scene))
           result = CheckeredPigment(color1, color2, num_of_steps)
      elseif keyword ==  IMAGE
-          file_name = expect_string(input_file)
+          file_name = expect_string(inputstream)
           image = open(file_name, "r") do image_file; load_image(image_file); end
           result = ImagePigment(image)
      else
           @assert false "This line should be unreachable"
      end
 
-     expect_symbol(input_file, ")")
+     expect_symbol(inputstream, ")")
      return result
 end
 
 """
-     parse_brdf(input_file::InputStream, scene::Scene) :: BRDF
+     parse_brdf(inputstream::InputStream, scene::Scene) :: BRDF
 
-Parse a BRDF from the given input `inputstream`.
+Parse a BRDF from the given `inputstream` and return it.
+
 Call internally the following parsing functions:
 - [`expect_keywords`](@ref)
 - [`expect_symbol`](@ref)
 - [`parse_pigment`](@ref)
-Call internally the following functions and structs of the program
+
+Call internally the following functions and structs of the program:
 - [`DiffuseBRDF`](@ref)
 - [`SpecularBRDF`](@ref)
     
-See also: [`InputStream`](@ref), [`Scene`](@ref), [`Token`](@ref), [`BRDF`](@ref)
+See also: [`InputStream`](@ref), [`Scene`](@ref), [`BRDF`](@ref)
 """
-function parse_brdf(input_file::InputStream, scene::Scene)
-     brdf_keyword = expect_keywords(input_file, [ DIFFUSE,  SPECULAR])
-     expect_symbol(input_file, "(")
-     pigment = parse_pigment(input_file, scene)
-     expect_symbol(input_file, ")")
+function parse_brdf(inputstream::InputStream, scene::Scene)
+     brdf_keyword = expect_keywords(inputstream, [ DIFFUSE,  SPECULAR])
+     expect_symbol(inputstream, "(")
+     pigment = parse_pigment(inputstream, scene)
+     expect_symbol(inputstream, ")")
 
      if (brdf_keyword ==  DIFFUSE)
           return DiffuseBRDF(pigment)
@@ -921,36 +943,42 @@ function parse_brdf(input_file::InputStream, scene::Scene)
      end
 end
 
-"""
-     parse_material(input_file::InputStream, scene::Scene) :: (String, Material)
 
-Parse a Material from the given input `inputstream`.
+"""
+     parse_material(inputstream::InputStream, scene::Scene) :: (String, Material)
+
+Parse a Material from the given `inputstream` and return a tuple with the
+identifier name of the material and the material itself.
+
 Call internally the following parsing functions:
 - [`expect_identifier`](@ref)
 - [`expect_symbol`](@ref)
 - [`parse_brdf`](@ref)
 - [`parse_pigment`](@ref)
-Call internally the following functions and structs of the program
+
+Call internally the following functions and structs of the program:
 - [`Material`](@ref)
     
 See also: [`InputStream`](@ref), [`Scene`](@ref), [`Token`](@ref), [`Material`](@ref)
 """
-function parse_material(input_file::InputStream, scene::Scene)
-     name = expect_identifier(input_file)
+function parse_material(inputstream::InputStream, scene::Scene)
+     name = expect_identifier(inputstream)
 
-     expect_symbol(input_file, "(")
-     brdf = parse_brdf(input_file, scene)
-     expect_symbol(input_file, ",")
-     emitted_radiance = parse_pigment(input_file, scene)
-     expect_symbol(input_file, ")")
+     expect_symbol(inputstream, "(")
+     brdf = parse_brdf(inputstream, scene)
+     expect_symbol(inputstream, ",")
+     emitted_radiance = parse_pigment(inputstream, scene)
+     expect_symbol(inputstream, ")")
 
      return name, Material(brdf, emitted_radiance)
 end
 
-"""
-     parse_transformation(input_file::InputStream, scene::Scene) :: Transformation
 
-Parse a transformation from the given input `inputstream`.
+"""
+     parse_transformation(inputstream::InputStream, scene::Scene) :: Transformation
+
+Parse a Transformation from the given `inputstream` and return it.
+
 Call internally the following parsing functions:
 - [`expect_keywords`](@ref)
 - [`expect_symbol`](@ref)
@@ -958,59 +986,59 @@ Call internally the following parsing functions:
 - [`parse_vector`](@ref)
 - [`read_token`](@ref)
 - [`unread_token`](@ref)
-Call internally the following functions and structs of the program
-- [`Transformation`](@ref)
+
+Call internally the following functions and structs of the program:
 - [`translation`](@ref)
 - [`rotation_x`](@ref)
 - [`rotation_y`](@ref)
 - [`rotation_z`](@ref)
 - [`scaling`](@ref)
 
-See also: [`InputStream`](@ref), [`Scene`](@ref), [`Token`](@ref)
+See also: [`InputStream`](@ref), [`Scene`](@ref), [`Transformation`](@ref)
 """
-function parse_transformation(input_file::InputStream, scene::Scene)
+function parse_transformation(inputstream::InputStream, scene::Scene)
      result = Transformation()
 
      while true
-          transformation_kw = expect_keywords(input_file, [
-                IDENTITY,
-                TRANSLATION,
-                ROTATION_X,
-                ROTATION_Y,
-                ROTATION_Z,
-                SCALING,
+          transformation_kw = expect_keywords(inputstream, [
+               IDENTITY,
+               TRANSLATION,
+               ROTATION_X,
+               ROTATION_Y,
+               ROTATION_Z,
+               SCALING,
           ])
 
-          if transformation_kw ==  IDENTITY
+          if transformation_kw == IDENTITY
                nothing # Do nothing (this is a primitive form of optimization!)
-          elseif transformation_kw ==  TRANSLATION
-               expect_symbol(input_file, "(")
-               result *= translation(parse_vector(input_file, scene))
-               expect_symbol(input_file, ")")
-          elseif transformation_kw ==  ROTATION_X
-               expect_symbol(input_file, "(")
-               result *= rotation_x(expect_number(input_file, scene))
-               expect_symbol(input_file, ")")
-          elseif transformation_kw ==  ROTATION_Y
-               expect_symbol(input_file, "(")
-               result *= rotation_y(expect_number(input_file, scene))
-               expect_symbol(input_file, ")")
-          elseif transformation_kw ==  ROTATION_Z
-               expect_symbol(input_file, "(")
-               result *= rotation_z(expect_number(input_file, scene))
-               expect_symbol(input_file, ")")
-          elseif transformation_kw ==  SCALING
-               expect_symbol(input_file, "(")
-               result *= scaling(parse_vector(input_file, scene))
-               expect_symbol(input_file, ")")
+          elseif transformation_kw == TRANSLATION
+               expect_symbol(inputstream, "(")
+               result *= translation(parse_vector(inputstream, scene))
+               expect_symbol(inputstream, ")")
+          elseif transformation_kw == ROTATION_X
+               expect_symbol(inputstream, "(")
+               result *= rotation_x(expect_number(inputstream, scene))
+               expect_symbol(inputstream, ")")
+          elseif transformation_kw == ROTATION_Y
+               expect_symbol(inputstream, "(")
+               result *= rotation_y(expect_number(inputstream, scene))
+               expect_symbol(inputstream, ")")
+          elseif transformation_kw == ROTATION_Z
+               expect_symbol(inputstream, "(")
+               result *= rotation_z(expect_number(inputstream, scene))
+               expect_symbol(inputstream, ")")
+          elseif transformation_kw == SCALING
+               expect_symbol(inputstream, "(")
+               result *= scaling(parse_vector(inputstream, scene))
+               expect_symbol(inputstream, ")")
           end
 
           # We must peek the next token to check if there is another transformation that is being
           # chained or if the sequence ends. Thus, this is a LL(1) parser.
-          next_kw = read_token(input_file)
-          if !isa(next_kw, SymbolToken) || (next_kw.symbol != "*")
+          next_kw = read_token(inputstream)
+          if (typeof(next_kw.value) ≠ SymbolToken) || (next_kw.value.symbol ≠ "*")
                # Pretend you never read this token and put it back!
-               unread_token(input_file, next_kw)
+               unread_token(inputstream, next_kw)
                break
           end
      end
@@ -1020,84 +1048,92 @@ end
 
 
 """
-     parse_sphere(input_file::InputStream, scene::Scene) :: Sphere
+     parse_sphere(inputstream::InputStream, scene::Scene) :: Sphere
 
-Parse a sphere from the given input `inputstream`.
+Parse a Sphere from the given `inputstream` and return it.
+Throws `GrammarError` if the specified `Material` does not exist.
+
 Call internally the following parsing functions:
 - [`expect_symbol`](@ref)
 - [`expect_identifier`](@ref)
 - [`parse_transformation`](@ref)
 
-See also: [`InputStream`](@ref), [`Scene`](@ref), [`Token`](@ref), [`Sphere`](@ref)
+See also: [`InputStream`](@ref), [`Scene`](@ref), [`Sphere`](@ref)
+[`Material`](@ref)
 """
-function parse_sphere(input_file::InputStream, scene::Scene)
-     expect_symbol(input_file, "(")
+function parse_sphere(inputstream::InputStream, scene::Scene)
+     expect_symbol(inputstream, "(")
 
-     material_name = expect_identifier(input_file)
+     material_name = expect_identifier(inputstream)
      if material_name ∉ keys(scene.materials)
-          # We raise the exception here because input_file is pointing to the end of the wrong identifier
-          throw(GrammarError(input_file.location, "unknown material $(material_name)"))
+          # We raise the exception here because inputstream is pointing to the end of the wrong identifier
+          throw(GrammarError(inputstream.location, "unknown material $(material_name)"))
      end
-
-     expect_symbol(input_file, ",")
-     transformation = parse_transformation(input_file, scene)
-     expect_symbol(input_file, ")")
+     expect_symbol(inputstream, ",")
+     transformation = parse_transformation(inputstream, scene)
+     expect_symbol(inputstream, ")")
 
      return Sphere(transformation, scene.materials[material_name])
 end
 
-"""
-     parse_plane(input_file::InputStream, scene::Scene) :: Plane
 
-Parse a plane from the given input `inputstream`.
+"""
+     parse_plane(inputstream::InputStream, scene::Scene) :: Plane
+
+Parse a Plane from the given `inputstream` and return it.
+Throws `GrammarError` if the specified `Material` does not exist.
+
 Call internally the following parsing functions:
 - [`expect_symbol`](@ref)
 - [`expect_identifier`](@ref)
 - [`parse_transformation`](@ref)
 
-See also: [`InputStream`](@ref), [`Scene`](@ref), [`Token`](@ref), [`Plane`](@ref)
+See also: [`InputStream`](@ref), [`Scene`](@ref), [`Plane`](@ref),
+[`Material`](@ref)
 """
-function parse_plane(input_file::InputStream, scene::Scene)
-     expect_symbol(input_file, "(")
+function parse_plane(inputstream::InputStream, scene::Scene)
+     expect_symbol(inputstream, "(")
 
-     material_name = expect_identifier(input_file)
+     material_name = expect_identifier(inputstream)
      if material_name ∉ keys(scene.materials)
-          # We raise the exception here because input_file is pointing to the end of the wrong identifier
-          throw(GrammarError(input_file.location, "unknown material $(material_name)"))
+          # We raise the exception here because inputstream is pointing to the end of the wrong identifier
+          throw(GrammarError(inputstream.location, "unknown material $(material_name)"))
      end
-     expect_symbol(input_file, ",")
-     transformation = parse_transformation(input_file, scene)
-     expect_symbol(input_file, ")")
+     expect_symbol(inputstream, ",")
+     transformation = parse_transformation(inputstream, scene)
+     expect_symbol(inputstream, ")")
 
      return Plane(transformation, scene.materials[material_name])
 end
 
 
 """
-     parse_camera(input_file::InputStream, scene::Scene) :: Camera
+     parse_camera(inputstream::InputStream, scene::Scene) :: Camera
 
-Parse a camera from the given input `inputstream`.
+Parse a Camera from the given `inputstream` and return it.
+
 Call internally the following parsing functions:
 - [`expect_symbol`](@ref)
 - [`expect_keywords`](@ref)
 - [`expect_number`](@ref)
 - [`parse_transformation`](@ref)
-Call internally the following functions and structs of the program
+
+Call internally the following functions and structs of the program:
 - [`OrthogonalCamera`](@ref)
 - [`PerspectiveCamera`](@ref)
 
-See also: [`InputStream`](@ref), [`Scene`](@ref), [`Token`](@ref), [`Camera`](@ref)
+See also: [`InputStream`](@ref), [`Scene`](@ref),  [`Camera`](@ref)
 """
-function parse_camera(input_file::InputStream, scene::Scene)
-     expect_symbol(input_file, "(")
-     type_kw = expect_keywords(input_file, [ PERSPECTIVE,  ORTHOGONAL])
-     expect_symbol(input_file, ",")
-     transformation = parse_transformation(input_file, scene)
-     expect_symbol(input_file, ",")
-     aspect_ratio = expect_number(input_file, scene)
-     expect_symbol(input_file, ",")
-     distance = expect_number(input_file, scene)
-     expect_symbol(input_file, ")")
+function parse_camera(inputstream::InputStream, scene::Scene)
+     expect_symbol(inputstream, "(")
+     type_kw = expect_keywords(inputstream, [ PERSPECTIVE,  ORTHOGONAL])
+     expect_symbol(inputstream, ",")
+     transformation = parse_transformation(inputstream, scene)
+     expect_symbol(inputstream, ",")
+     aspect_ratio = expect_number(inputstream, scene)
+     expect_symbol(inputstream, ",")
+     distance = expect_number(inputstream, scene)
+     expect_symbol(inputstream, ")")
 
      if type_kw ==  PERSPECTIVE
           result = PerspectiveCamera(distance, aspect_ratio, transformation)
@@ -1111,11 +1147,14 @@ end
 
 """
      parse_scene(
-          input_file::InputStream, 
+          inputstream::InputStream, 
           variables::Dict{String, Float64} = Dict()
           ) :: Scene
 
-Read a scene description from the given input `inputstream` and return a `Scene` object.
+Read a scene description from the given `inputstream` and 
+return a `Scene` object.
+Throws `GrammarError` if an error occurs.
+
 Call internally the following parsing functions:
 - [`read_token`](@ref)
 - [`StopToken`](@ref)
@@ -1126,19 +1165,20 @@ Call internally the following parsing functions:
 - [`parse_plane`](@ref)
 - [`parse_camera`](@ref)
 - [`parse_material`](@ref)
-Call internally the following functions and structs of the program
+
+Call internally the following functions and structs of the program:
 - [`add_shape!`](@ref)
 
-See also: [`InputStream`](@ref), [`Scene`](@ref), [`Token`](@ref)
+See also: [`InputStream`](@ref), [`Scene`](@ref)
 """
-function parse_scene(input_file::InputStream, variables::Dict{String, Float64} = Dict{String, Float64}())
-#function parse_scene(input_file::InputStream, variables::Dict{T1, T2} = Dict{T1, T2}()) where {T1, T2}
+function parse_scene(inputstream::InputStream, variables::Dict{String, Float64} = Dict{String, Float64}())
+#function parse_scene(inputstream::InputStream, variables::Dict{T1, T2} = Dict{T1, T2}()) where {T1, T2}
      scene = Scene()
      scene.float_variables = copy(variables)
      scene.overridden_variables = keys(variables)
 
      while true
-          what = read_token(input_file)
+          what = read_token(inputstream)
           isa(what.value, StopToken) && (break)
 
           if !isa(what.value, KeywordToken)
@@ -1146,14 +1186,14 @@ function parse_scene(input_file::InputStream, variables::Dict{String, Float64} =
           end
 
           if what.value.keyword ==  FLOAT
-               variable_name = expect_identifier(input_file)
+               variable_name = expect_identifier(inputstream)
 
                # Save this for the error message
-               variable_loc = input_file.location
+               variable_loc = inputstream.location
 
-               expect_symbol(input_file, "(")
-               variable_value = expect_number(input_file, scene)
-               expect_symbol(input_file, ")")
+               expect_symbol(inputstream, "(")
+               variable_value = expect_number(inputstream, scene)
+               expect_symbol(inputstream, ")")
 
                if (variable_name ∈ keys(scene.float_variables)) && !(variable_name ∈ scene.overridden_variables)
                     throw(GrammarError(variable_loc, "variable «$(variable_name)» cannot be redefined"))
@@ -1162,21 +1202,20 @@ function parse_scene(input_file::InputStream, variables::Dict{String, Float64} =
                if variable_name ∉ scene.overridden_variables
                     # Only define the variable if it was not defined by the user *outside* the scene file
                     # (e.g., from the command line)
-                    println(variable_name)
                     scene.float_variables[variable_name] = variable_value
                end
 
           elseif what.value.keyword ==  SPHERE
-               add_shape!(scene.world, parse_sphere(input_file, scene))
+               add_shape!(scene.world, parse_sphere(inputstream, scene))
           elseif what.value.keyword ==  PLANE
-               add_shape!(scene.world, parse_plane(input_file, scene))
+               add_shape!(scene.world, parse_plane(inputstream, scene))
           elseif what.value.keyword ==  CAMERA
                if !isnothing(scene.camera)
                     throw(GrammarError(what.location, "You cannot define more than one camera"))
                end
-               scene.camera = parse_camera(input_file, scene)
+               scene.camera = parse_camera(inputstream, scene)
           elseif what.value.keyword ==  MATERIAL
-               name, material = parse_material(input_file, scene)
+               name, material = parse_material(inputstream, scene)
                scene.materials[name] = material
           end
      end

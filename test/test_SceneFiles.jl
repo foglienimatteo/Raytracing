@@ -179,9 +179,9 @@ end
      # Check that the materials are ok
 
      @test length(scene.materials) == 3
-     @test "sphere_material" ∈ scene.materials
-     @test "sky_material" ∈ scene.materials
-     @test "ground_material" ∈ scene.materials
+     @test "sphere_material" ∈ keys(scene.materials)
+     @test "sky_material" ∈ keys(scene.materials)
+     @test "ground_material" ∈ keys(scene.materials)
 
      sphere_material = scene.materials["sphere_material"]
      sky_material = scene.materials["sky_material"]
@@ -195,7 +195,7 @@ end
      @test isa(ground_material.brdf.pigment, CheckeredPigment)
      @test ground_material.brdf.pigment.color1 ≈ RGB(0.3, 0.5, 0.1)
      @test ground_material.brdf.pigment.color2 ≈ RGB(0.1, 0.2, 0.5)
-     @test ground_material.brdf.pigment.num_of_steps == 4
+     @test ground_material.brdf.pigment.num_steps == 4
 
      @test isa(sphere_material.brdf, SpecularBRDF)
      @test isa(sphere_material.brdf.pigment, UniformPigment)
@@ -211,19 +211,19 @@ end
      # Check that the shapes are ok
 
      @test length(scene.world.shapes) == 3
-     @test isa(scene.world.shapes[0], Plane)
-     @test scene.world.shapes[0].transformation ≈ translation(Vec(0, 0, 100)) * rotation_y(150.0)
      @test isa(scene.world.shapes[1], Plane)
-     @test scene.world.shapes[1].transformation ≈ Transformation()
-     @test isa(scene.world.shapes[2], Sphere)
-     @test scene.world.shapes[2].transformation ≈ translation(Vec(0, 0, 1))
+     @test scene.world.shapes[1].T ≈ translation(Vec(0, 0, 100)) * rotation_y(150.0)
+     @test isa(scene.world.shapes[2], Plane)
+     @test scene.world.shapes[2].T ≈ Transformation()
+     @test isa(scene.world.shapes[3], Sphere)
+     @test scene.world.shapes[3].T ≈ translation(Vec(0, 0, 1))
 
      # Check that the camera is ok
 
      @test isa(scene.camera, PerspectiveCamera)
-     @test scene.camera.transformation ≈ rotation_z(30) * translation(Vec(-4, 0, 1))
-     @test 1.0 ≈ scene.camera.aspect_ratio
-     @test 2.0 ≈ scene.camera.screen_distance
+     @test scene.camera.T ≈ rotation_z(30.0) * translation(Vec(-4, 0, 1))
+     @test 1.0 ≈ scene.camera.a
+     @test 2.0 ≈ scene.camera.d
 end
 
 @testset "test_parser_undefined_material" begin
