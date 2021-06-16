@@ -1069,3 +1069,40 @@ function parse_plane(input_file::InputStream, scene::Scene)
 
      return Plane(transformation, scene.materials[material_name])
 end
+
+
+"""
+     parse_camera(input_file::InputStream, scene::Scene) :: Camera
+
+Parse a camera from the given input `inputstream`.
+Call internally the following parsing functions:
+- [`expect_symbol`](@ref)
+- [`expect_keywords`](@ref)
+- [`expect_number`](@ref)
+- [`parse_transformation`](@ref)
+Call internally the following functions and structs of the program
+- [`OrthogonalCamera`](@ref)
+- [`PerspectiveCamera`](@ref)
+
+See also: [`InputStream`](@ref), [`Scene`](@ref), [`Token`](@ref), [`Camera`](@ref)
+"""
+function parse_camera(input_file::InputStream, scene::Scene)
+     expect_symbol(input_file, "(")
+     type_kw = expect_keywords(input_file, [KeywordEnum.PERSPECTIVE, KeywordEnum.ORTHOGONAL])
+     expect_symbol(input_file, ",")
+     transformation = parse_transformation(input_file, scene)
+     expect_symbol(input_file, ",")
+     aspect_ratio = expect_number(input_file, scene)
+     expect_symbol(input_file, ",")
+     distance = expect_number(input_file, scene)
+     expect_symbol(input_file, ")")
+
+     if type_kw == KeywordEnum.PERSPECTIVE
+          result = PerspectiveCamera(distance, aspect_ratio, transformation)
+     elseif type_kw == KeywordEnum.ORTHOGONAL
+          result = OrthogonalCamera(aspect_ratio, transformation)
+     end
+
+     return result
+end
+
