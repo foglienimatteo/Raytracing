@@ -754,6 +754,69 @@ function expect_keywords(input_file::InputStream, keywords::Vector{KeywordEnum})
      return token.keyword
 end
 
+"""
+     expect_string(input_file::InputStream) :: String
+
+Read a token from `input_file` and check that it is a literal string.
+Return the value of the string (a ``str``).
+"""
+function expect_string(input_file::InputStream)
+    token = read_token(input_file)
+    if (typeof(token.value) ≠ StringToken)
+          throw(GrammarError(token.location, "got $(token) instead of a string"))
+    end
+    return token.value.string
+end
+
+"""
+Read a token from `input_file` and check that it is an identifier.
+Return the name of the identifier.
+"""
+function expect_identifier(input_file::InputStream)
+     token = read_token(input_file)
+     if (typeof(token.value) ≠ IdentifierToken)
+          throw(GrammarError(token.location, "got $(token) instead of an identifier"))
+    end
+end
+
+"""
+     parse_color(input_file::InputStream, scene::Scene) :: RGB{Float32}
+
+Read the color `input_file` and return it
+Call internally ['expect_symbol'](@ref), ['expect_number'](@ref)
+
+See also: ['InputStream'](@ref), ['Scene'](@ref), ['Token'](@ref)
+"""
+function parse_color(input_file::InputStream, scene::Scene)
+    expect_symbol(input_file, "<")
+    red = expect_number(input_file, scene)
+    expect_symbol(input_file, ",")
+    green = expect_number(input_file, scene)
+    expect_symbol(input_file, ",")
+    blue = expect_number(input_file, scene)
+    expect_symbol(input_file, ">")
+
+    return RGB{Float32}(red, green, blue)
+end
+
+"""
+     parse_brdf(input_file::InputStream, scene::Scene) :: BRDF
+
+
+"""
+function parse_brdf(input_file::InputStream, scene::Scene)
+    brdf_keyword = expect_keywords(input_file, [KeywordEnum.DIFFUSE, KeywordEnum.SPECULAR])
+    expect_symbol(input_file, "(")
+    pigment = parse_pigment(input_file, scene)
+    expect_symbol(input_file, ")")
+
+     if (brdf_keyword == KeywordEnum.DIFFUSE)
+          return DiffuseBRDF(pigment)
+     elseif (brdf_keyword == KeywordEnum.SPECULAR)
+          return SpecularBRDF(pigment)
+     end
+     @assert false "This line should be unreachable"
+end
 
 """
      expect_number(input_file::InputStream, scene::Scene) :: Float64
@@ -798,8 +861,6 @@ function parse_vector(input_file::InputStream, scene::Scene)
 
      return Vec(x, y, z)
 end
-
-
 
 """
      parse_pigment(input_file::InputStream, scene::Scene) :: Pigment
