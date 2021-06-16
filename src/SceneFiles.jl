@@ -272,13 +272,7 @@ See also: [`SourceLocation`](@ref)
 """
 struct Token
      location::SourceLocation
-     value::Union{  
-          KeywordToken, 
-          IdentifierToken, 
-          StringToken,
-          LiteralNumberToken,
-          SymbolToken, 
-          StopToken}
+     value::Union{KeywordToken, IdentifierToken, StringToken, LiteralNumberToken, SymbolToken,StopToken}
 end
 
 """
@@ -534,7 +528,7 @@ inside the main function [`read_token`](@ref).
 See also: [`InputStream`](@ref), [`SourceLocation`](@ref)
 [`Token`](@ref), [`LiteralNumberToken`](@ref), [`GrammarError`](@ref)
 """
-function parse_float_token(inputstream::InputStream, first_char::String, token_location::SourceLocation) :: LiteralNumberToken
+function parse_float_token(inputstream::InputStream, first_char::String, token_location::SourceLocation)
      token = first_char
 
      while true
@@ -549,7 +543,8 @@ function parse_float_token(inputstream::InputStream, first_char::String, token_l
      end
 
      try
-          value = float(token)
+          value = parse(Float64, token)
+          return Token(token_location, LiteralNumberToken(value)) 
      catch ValueError
           throw(
                GrammarError(
@@ -559,7 +554,7 @@ function parse_float_token(inputstream::InputStream, first_char::String, token_l
           )
      end
 
-     return Token(token_location, LiteralNumberToken(value))
+
 end
 
 
@@ -740,7 +735,7 @@ See also: [`InputStream`](@ref), [`KeywordEnum`](@ref), [`Token`](@ref)
 """
 function expect_keywords(input_file::InputStream, keywords::Vector{KeywordEnum})
      token = read_token(input_file)
-     if !isa(token, KeywordToken)
+     if typeof(token.value) ≠ KeywordToken
           throw(GrammarError(token.location, "expected a keyword instead of '$(token)' "))
      end
 
@@ -765,10 +760,10 @@ See also: [`InputStream`](@ref), [`Scene`](@ref), [`Token`](@ref)
 """
 function expect_number(input_file::InputStream, scene::Scene)
      token = read_token(input_file)
-     if !isa(token, LiteralNumberToken)
-          return token.value
-     elseif !isa(token, IdentifierToken)
-          variable_name = token.identifier
+     if typeof(token.value) == LiteralNumberToken
+          return token.value.number
+     elseif typeof(token.value) == IdentifierToken
+          variable_name = token.value.identifier
           if variable_name ∉ scene.float_variables
                throw(GrammarError(token.location, "unknown variable '$(token)'"))
           end
@@ -784,16 +779,21 @@ end
 
 Read a token from `input_file` and check that it is a literal string.
 Return the value of the string (a ``str``).
+
+See also: [`InputStream`](@ref), [`Scene`](@ref), [`Token`](@ref)
 """
 function expect_string(input_file::InputStream)
     token = read_token(input_file)
     if (typeof(token.value) ≠ StringToken)
           throw(GrammarError(token.location, "got $(token) instead of a string"))
     end
+
     return token.value.string
 end
 
 """
+     expect_identifier(input_file::InputStream)
+
 Read a token from `input_file` and check that it is an identifier.
 Return the name of the identifier.
 """
@@ -801,7 +801,9 @@ function expect_identifier(input_file::InputStream)
      token = read_token(input_file)
      if (typeof(token.value) ≠ IdentifierToken)
           throw(GrammarError(token.location, "got $(token) instead of an identifier"))
-    end
+     end
+
+     return token.value.identifier
 end
 
 
@@ -865,20 +867,20 @@ Call internally the following functions and structs of the program
 See also: [`InputStream`](@ref), [`Scene`](@ref), [`Token`](@ref), [`Pigment`](@ref)
 """
 function parse_pigment(input_file::InputStream, scene::Scene)
-     keyword = expect_keywords(input_file, [KeywordEnum[UNIFORM], KeywordEnum[CHECKERED], KeywordEnum[IMAGE]])
+     keyword = expect_keywords(input_file, [ UNIFORM,  CHECKERED,  IMAGE])
 
      expect_symbol(input_file, "(")
-     if keyword == KeywordEnum[UNIFORM]
+     if keyword ==  UNIFORM
           color = parse_color(input_file, scene)
           result = UniformPigment(color)
-     elseif keyword == KeywordEnum[CHECKERED]
+     elseif keyword ==  CHECKERED
           color1 = parse_color(input_file, scene)
           expect_symbol(input_file, ",")
           color2 = parse_color(input_file, scene)
           expect_symbol(input_file, ",")
           num_of_steps = Int(expect_number(input_file, scene))
           result = CheckeredPigment(color1, color2, num_of_steps)
-     elseif keyword == KeywordEnum[IMAGE]
+     elseif keyword ==  IMAGE
           file_name = expect_string(input_file)
           image = open(file_name, "r") do image_file; load_image(image_file); end
           result = ImagePigment(image)
@@ -905,14 +907,14 @@ Call internally the following functions and structs of the program
 See also: [`InputStream`](@ref), [`Scene`](@ref), [`Token`](@ref), [`BRDF`](@ref)
 """
 function parse_brdf(input_file::InputStream, scene::Scene)
-     brdf_keyword = expect_keywords(input_file, [KeywordEnum[DIFFUSE], KeywordEnum[SPECULAR]])
+     brdf_keyword = expect_keywords(input_file, [ DIFFUSE,  SPECULAR])
      expect_symbol(input_file, "(")
      pigment = parse_pigment(input_file, scene)
      expect_symbol(input_file, ")")
 
-     if (brdf_keyword == KeywordEnum[DIFFUSE])
+     if (brdf_keyword ==  DIFFUSE)
           return DiffuseBRDF(pigment)
-     elseif (brdf_keyword == KeywordEnum[SPECULAR])
+     elseif (brdf_keyword ==  SPECULAR)
           return SpecularBRDF(pigment)
      else
           @assert false "This line should be unreachable"
@@ -971,33 +973,33 @@ function parse_transformation(input_file::InputStream, scene::Scene)
 
      while true
           transformation_kw = expect_keywords(input_file, [
-               KeywordEnum[IDENTITY],
-               KeywordEnum[TRANSLATION],
-               KeywordEnum[ROTATION_X],
-               KeywordEnum[ROTATION_Y],
-               KeywordEnum[ROTATION_Z],
-               KeywordEnum[SCALING],
+                IDENTITY,
+                TRANSLATION,
+                ROTATION_X,
+                ROTATION_Y,
+                ROTATION_Z,
+                SCALING,
           ])
 
-          if transformation_kw == KeywordEnum[IDENTITY]
+          if transformation_kw ==  IDENTITY
                nothing # Do nothing (this is a primitive form of optimization!)
-          elseif transformation_kw == KeywordEnum[TRANSLATION]
+          elseif transformation_kw ==  TRANSLATION
                expect_symbol(input_file, "(")
                result *= translation(parse_vector(input_file, scene))
                expect_symbol(input_file, ")")
-          elseif transformation_kw == KeywordEnum[ROTATION_X]
+          elseif transformation_kw ==  ROTATION_X
                expect_symbol(input_file, "(")
                result *= rotation_x(expect_number(input_file, scene))
                expect_symbol(input_file, ")")
-          elseif transformation_kw == KeywordEnum[ROTATION_Y]
+          elseif transformation_kw ==  ROTATION_Y
                expect_symbol(input_file, "(")
                result *= rotation_y(expect_number(input_file, scene))
                expect_symbol(input_file, ")")
-          elseif transformation_kw == KeywordEnum[ROTATION_Z]
+          elseif transformation_kw ==  ROTATION_Z
                expect_symbol(input_file, "(")
                result *= rotation_z(expect_number(input_file, scene))
                expect_symbol(input_file, ")")
-          elseif transformation_kw == KeywordEnum[SCALING]
+          elseif transformation_kw ==  SCALING
                expect_symbol(input_file, "(")
                result *= scaling(parse_vector(input_file, scene))
                expect_symbol(input_file, ")")
@@ -1088,7 +1090,7 @@ See also: [`InputStream`](@ref), [`Scene`](@ref), [`Token`](@ref), [`Camera`](@r
 """
 function parse_camera(input_file::InputStream, scene::Scene)
      expect_symbol(input_file, "(")
-     type_kw = expect_keywords(input_file, [KeywordEnum[PERSPECTIVE], KeywordEnum[ORTHOGONAL]])
+     type_kw = expect_keywords(input_file, [ PERSPECTIVE,  ORTHOGONAL])
      expect_symbol(input_file, ",")
      transformation = parse_transformation(input_file, scene)
      expect_symbol(input_file, ",")
@@ -1097,9 +1099,9 @@ function parse_camera(input_file::InputStream, scene::Scene)
      distance = expect_number(input_file, scene)
      expect_symbol(input_file, ")")
 
-     if type_kw == KeywordEnum[PERSPECTIVE]
+     if type_kw ==  PERSPECTIVE
           result = PerspectiveCamera(distance, aspect_ratio, transformation)
-     elseif type_kw == KeywordEnum[ORTHOGONAL]
+     elseif type_kw ==  ORTHOGONAL
           result = OrthogonalCamera(aspect_ratio, transformation)
      end
 
@@ -1142,9 +1144,8 @@ function parse_scene(input_file::InputStream, variables::Dict{String, Float64} =
           if !isa(what.value, KeywordToken)
                throw(GrammarError(what.location, "expected a keyword instead of '$(what)'"))
           end
-          
 
-          if what.value.keyword == KeywordEnum[FLOAT]
+          if what.value.keyword ==  FLOAT
                variable_name = expect_identifier(input_file)
 
                # Save this for the error message
@@ -1154,26 +1155,27 @@ function parse_scene(input_file::InputStream, variables::Dict{String, Float64} =
                variable_value = expect_number(input_file, scene)
                expect_symbol(input_file, ")")
 
-               if (variable_name ∈ scene.float_variables) && !(variable_name ∈ scene.overridden_variables)
+               if (variable_name ∈ keys(scene.float_variables)) && !(variable_name ∈ scene.overridden_variables)
                     throw(GrammarError(variable_loc, "variable «$(variable_name)» cannot be redefined"))
                end
 
                if variable_name ∉ scene.overridden_variables
                     # Only define the variable if it was not defined by the user *outside* the scene file
                     # (e.g., from the command line)
+                    println(variable_name)
                     scene.float_variables[variable_name] = variable_value
                end
 
-          elseif what.value.keyword == KeywordEnum[SPHERE]
+          elseif what.value.keyword ==  SPHERE
                add_shape!(scene.world, parse_sphere(input_file, scene))
-          elseif what.value.keyword == KeywordEnum[PLANE]
+          elseif what.value.keyword ==  PLANE
                add_shape!(scene.world, parse_plane(input_file, scene))
-          elseif what.value.keyword == KeywordEnum[CAMERA]
+          elseif what.value.keyword ==  CAMERA
                if !isnothing(scene.camera)
                     throw(GrammarError(what.location, "You cannot define more than one camera"))
                end
                scene.camera = parse_camera(input_file, scene)
-          elseif what.value.keyword == KeywordEnum[MATERIAL]
+          elseif what.value.keyword ==  MATERIAL
                name, material = parse_material(input_file, scene)
                scene.materials[name] = material
           end
