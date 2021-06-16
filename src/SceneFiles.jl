@@ -783,7 +783,7 @@ end
     parse_vector(input_file::InputStream, scene::Scene) :: Vec
 
 Parse a vector from the given input `inputstream`.
-Calls internally [`expect_number`](@ref) and [`expect_symbol`](@ref)
+Call internally [`expect_number`](@ref) and [`expect_symbol`](@ref).
     
 See also: [`InputStream`](@ref), [`Scene`](@ref), [`Token`](@ref)
 """
@@ -797,4 +797,40 @@ function parse_vector(input_file::InputStream, scene::Scene)
      expect_symbol(input_file, "]")
 
      return Vec(x, y, z)
+end
+
+
+
+"""
+     parse_pigment(input_file::InputStream, scene::Scene) :: Pigment
+
+Parse a vector from the given input `inputstream`.
+Call internally [`expect_number`](@ref) and [`expect_symbol`](@ref).
+    
+See also: [`InputStream`](@ref), [`Scene`](@ref), [`Token`](@ref)
+"""
+function parse_pigment(input_file::InputStream, scene::Scene)
+     keyword = expect_keywords(input_file, [KeywordEnum.UNIFORM, KeywordEnum.CHECKERED, KeywordEnum.IMAGE])
+
+     expect_symbol(input_file, "(")
+     if keyword == KeywordEnum.UNIFORM
+          color = parse_color(input_file, scene)
+          result = UniformPigment(color)
+     elseif keyword == KeywordEnum.CHECKERED
+          color1 = parse_color(input_file, scene)
+          expect_symbol(input_file, ",")
+          color2 = parse_color(input_file, scene)
+          expect_symbol(input_file, ",")
+          num_of_steps = Int(expect_number(input_file, scene))
+          result = CheckeredPigment(color1, color2, num_of_steps)
+     elseif keyword == KeywordEnum.IMAGE
+          file_name = expect_string(input_file)
+          image = open(file_name, "r") do image_file; load_image(image_file); end
+          result = ImagePigment(image)
+     else
+          @assert false "This line should be unreachable"
+     end
+
+     expect_symbol(input_file, ")")
+     return result
 end
