@@ -1015,3 +1015,57 @@ function parse_transformation(input_file::InputStream, scene::Scene)
 
      return result
 end
+
+
+"""
+     parse_sphere(input_file::InputStream, scene::Scene) :: Sphere
+
+Parse a sphere from the given input `inputstream`.
+Call internally the following parsing functions:
+- [`expect_symbol`](@ref)
+- [`expect_identifier`](@ref)
+- [`parse_transformation`](@ref)
+
+See also: [`InputStream`](@ref), [`Scene`](@ref), [`Token`](@ref), [`Sphere`](@ref)
+"""
+function parse_sphere(input_file::InputStream, scene::Scene)
+     expect_symbol(input_file, "(")
+
+     material_name = expect_identifier(input_file)
+     if material_name ∉ keys(scene.materials)
+          # We raise the exception here because input_file is pointing to the end of the wrong identifier
+          throw(GrammarError(input_file.location, "unknown material $(material_name)"))
+     end
+
+     expect_symbol(input_file, ",")
+     transformation = parse_transformation(input_file, scene)
+     expect_symbol(input_file, ")")
+
+     return Sphere(transformation, scene.materials[material_name])
+end
+
+"""
+     parse_plane(input_file::InputStream, scene::Scene) :: Plane
+
+Parse a plane from the given input `inputstream`.
+Call internally the following parsing functions:
+- [`expect_symbol`](@ref)
+- [`expect_identifier`](@ref)
+- [`parse_transformation`](@ref)
+
+See also: [`InputStream`](@ref), [`Scene`](@ref), [`Token`](@ref), [`Plane`](@ref)
+"""
+function parse_plane(input_file::InputStream, scene::Scene)
+     expect_symbol(input_file, "(")
+
+     material_name = expect_identifier(input_file)
+     if material_name ∉ keys(scene.materials)
+          # We raise the exception here because input_file is pointing to the end of the wrong identifier
+          throw(GrammarError(input_file.location, "unknown material $(material_name)"))
+     end
+     expect_symbol(input_file, ",")
+     transformation = parse_transformation(input_file, scene)
+     expect_symbol(input_file, ")")
+
+     return Plane(transformation, scene.materials[material_name])
+end
