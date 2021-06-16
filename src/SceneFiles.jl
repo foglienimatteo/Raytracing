@@ -680,3 +680,15 @@ function unread_token(inputstream::InputStream, token::Token)
     @assert isnothing(inputstream.saved_token) "$(inputstream.saved_token) ≠ nothing "
     inputstream.saved_token = token
 end
+
+"""
+     expect_symbol(inputstream::InputStream, symbol::String) :: Bool
+
+Read a token from `input_file` and check that it matches `symbol`.
+"""
+function expect_symbol(inputstream::InputStream, symbol::String)
+     token = read_token(inputstream)
+     if (typeof(token.value) == SymbolToken) || (token.value.symbol ≠ symbol)
+          throw(GrammarError(token.location, "got $(token) insted of $(symbol)"))
+     end
+end
