@@ -41,27 +41,27 @@ end
 end
 
 
-function @test_is_keyword(token::Token, keyword::KeywordEnum) 
+function assert_is_keyword(token::Token, keyword::KeywordEnum) 
      @assert isa(token.value, KeywordToken) "Token '$(token.value)' is not a KeywordToken"
      @assert token.value.keyword == keyword "Token '$(token.value)' is not equal to keyword '$(keyword)'"
 end
 
-function @test_is_identifier(token::Token, identifier::String) 
+function assert_is_identifier(token::Token, identifier::String) 
      @assert isa(token.value, IdentifierToken) "Token '$(token.value)' is not a IdentifierToken"
      @assert token.value.identifier == identifier "expecting identifier '$(identifier)' instead of '$(token.value)'"
 end
 
-function @test_is_symbol(token::Token, symbol::String) 
+function assert_is_symbol(token::Token, symbol::String) 
      @assert isa(token.value, SymbolToken) "Token '$(token.value)' is not a SymbolToken"
      @assert token.value.symbol == symbol "expecting symbol '$(symbol)' instead of '$(token.value)'"
 end
 
-function @test_is_number(token::Token, number::Float64) 
+function assert_is_number(token::Token, number::Float64) 
      @assert isa(token.value, LiteralNumberToken) "Token '$(token.value)' is not a LiteralNumberToken"
      @assert token.value.number == number "Token '$(token.value)' is not equal to number '$(number)'"
 end
 
-function @test_is_string(token::Token, string::String) 
+function assert_is_string(token::Token, string::String) 
      @assert isa(token.value, StringToken) "Token '$(token.value)' is not a StringToken"
      @assert token.value.string == string "Token '$(token.value)' is not equal to string '$(string)'"
 end
@@ -126,16 +126,16 @@ end
 
      input_file = InputStream(stream)
 
-     @test_is_keyword(read_token(input_file), Raytracing.NEW)
-     @test_is_keyword(read_token(input_file), Raytracing.MATERIAL)
-     @test_is_identifier(read_token(input_file), "sky_material")
-     @test_is_symbol(read_token(input_file), "(")
-     @test_is_keyword(read_token(input_file), Raytracing.DIFFUSE)
-     @test_is_symbol(read_token(input_file), "(")
-     @test_is_keyword(read_token(input_file), Raytracing.IMAGE)
-     @test_is_symbol(read_token(input_file), "(")
-     @test_is_string(read_token(input_file), "my file.pfm")
-     @test_is_symbol(read_token(input_file), ")")
+     assert_is_keyword(read_token(input_file), Raytracing.NEW)
+     assert_is_keyword(read_token(input_file), Raytracing.MATERIAL)
+     assert_is_identifier(read_token(input_file), "sky_material")
+     assert_is_symbol(read_token(input_file), "(")
+     assert_is_keyword(read_token(input_file), Raytracing.DIFFUSE)
+     assert_is_symbol(read_token(input_file), "(")
+     assert_is_keyword(read_token(input_file), Raytracing.IMAGE)
+     assert_is_symbol(read_token(input_file), "(")
+     assert_is_string(read_token(input_file), "my file.pfm")
+     assert_is_symbol(read_token(input_file), ")")
 end
 
 @testset "test_parser" begin

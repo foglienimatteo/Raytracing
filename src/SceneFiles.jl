@@ -1129,7 +1129,7 @@ Call internally the following functions and structs of the program
 
 See also: [`InputStream`](@ref), [`Scene`](@ref), [`Token`](@ref)
 """    
-function parse_scene(input_file::InputStream, variables::Dict{String, Float64} = Dict())
+function parse_scene(input_file::InputStream, variables::Dict{T1,Τ2} = Dict{T1,Τ2}() ) where {T1,T2}
      scene = Scene()
      scene.float_variables = copy(variables)
      scene.overridden_variables = keys(variables)
@@ -1176,6 +1176,6 @@ function parse_scene(input_file::InputStream, variables::Dict{String, Float64} =
                scene.materials[name] = material
           end
      end
-     
+
      return scene
 end
