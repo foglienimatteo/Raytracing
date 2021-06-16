@@ -109,36 +109,48 @@ copy(location::SourceLocation) = SourceLocation(location.file_name, location.lin
 Enumeration for all the possible keywords recognized by the lexer:
 ```ditaa
 |:-----------------:|:-----------------:|:-----------------:|
-| NEW = 1           | CHECKERED = 8     | SCALING = 15      |
-| MATERIAL = 2      | IMAGE = 9         | ORTHOGONAL = 17   |
-| PLANE = 3         | IDENTITY = 10     | ORTHOGONAL = 17   |
-| SPHERE = 4        | TRANSLATION = 11  | PERSPECTIVE = 18  |
-| DIFFUSE = 5       | ROTATION_X = 12   | FLOAT = 19        |
-| SPECULAR = 6      | ROTATION_Y = 13   |
-| UNIFORM = 7       | ROTATION_Z = 14   |
+| NEW = 1           | UNIFORM = 21      | IDENTITY = 40     |
+| MATERIAL = 2      | CHECKERED = 22    | TRANSLATION = 41  |
+| FLOAT = 3         | IMAGE = 23        | ROTATION_X = 42   |
+|                   |                   | ROTATION_Y = 43   |
+|                   |                   | ROTATION_Z = 44   |
+|                   |                   | SCALING = 45      |
+|                   |                   |                   |
+|:-----------------:|:-----------------:|:-----------------:|
+| DIFFUSE = 5       | CAMERA = 30       | PLANE = 50        |
+| SPECULAR = 6      | ORTHOGONAL = 31   | SPHERE = 51       |
+|                   | PERSPECTIVE = 32  |                   |
+|                   |                   |                   |
+|                   |                   |                   |
 |:-----------------:|:-----------------:|:-----------------:|
 ```
 """
 @enum KeywordEnum begin
     NEW = 1
     MATERIAL = 2
-    PLANE = 3
-    SPHERE = 4
-    DIFFUSE = 5
-    SPECULAR = 6
-    UNIFORM = 7
-    CHECKERED = 8
-    IMAGE = 9
-    IDENTITY = 10
-    TRANSLATION = 11
-    ROTATION_X = 12
-    ROTATION_Y = 13
-    ROTATION_Z = 14
-    SCALING = 15
-    CAMERA = 16
-    ORTHOGONAL = 17
-    PERSPECTIVE = 18
-    FLOAT = 19
+    FLOAT = 3
+
+    DIFFUSE = 10
+    SPECULAR = 11
+
+    UNIFORM = 21
+    CHECKERED = 22
+    IMAGE = 23
+
+    CAMERA = 30
+    ORTHOGONAL = 31
+    PERSPECTIVE = 32
+
+    IDENTITY = 40
+    TRANSLATION = 41
+    ROTATION_X = 42
+    ROTATION_Y = 43
+    ROTATION_Z = 44
+    SCALING = 45
+
+    PLANE = 50
+    SPHERE = 51
+
 end
 
 KEYWORDS = Dict{String, KeywordEnum}(
