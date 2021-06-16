@@ -232,12 +232,7 @@ end
      plane(this_material_does_not_exist, identity)
      """)
 
-     try
-          _ = parse_scene(InputStream(stream))
-          @assert false "the code did not throw an exception"
-     catch except
-          @test isa(except, GrammarError)
-     end
+     @test_throws GrammarError parse_scene(InputStream(stream))
 end
 
 @testset "test_parser_double_camera" begin
@@ -247,10 +242,5 @@ end
      camera(orthogonal, identity, 1.0, 1.0)
      """)
 
-     try
-          _ = parse_scene(input_file=InputStream(stream))
-          @assert false "the code did not throw an exception"
-     catch except
-          @test isa(except, GrammarError)
-     end
+    @test_throws GrammarError parse_scene(InputStream(stream))
 end

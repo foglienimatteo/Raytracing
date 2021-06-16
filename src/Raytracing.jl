@@ -28,8 +28,6 @@ export Vec2d, HitRecord, PointLight, World
 export Renderer, OnOffRenderer, FlatRenderer, PathTracer, PointLightRenderer
 # from Operations.jl
 export are_close, squared_norm, norm, normalize #, normalized_dot
-# from PrintFunctions.jl
-export print_not_black
 # from ReadingWriting.jl
 export parse_command_line, parse_demo_settings
 export parse_tonemapping_settings, parse_demoanimation_settings
@@ -61,11 +59,12 @@ export LiteralNumberToken, SymbolToken, StopToken
 export read_token, skip_whitespaces_and_comments
 export parse_camera, parse_plane, parse_sphere
 export parse_scene
+# from PrintFunctions.jl
+export print_not_black
 
 include("PCG.jl")
 include("Structs.jl")
 include("Operations.jl")
-include("PrintFunctions.jl")
 include("ReadingWriting.jl")
 include("ToneMapping.jl")
 include("Transformations.jl")
@@ -77,6 +76,7 @@ include("Renderers.jl")
 include("OrthoNormalBasis.jl")
 include("ScatterRay.jl")
 include("SceneFiles.jl")
+include("PrintFunctions.jl")
 
 
 end  # module
