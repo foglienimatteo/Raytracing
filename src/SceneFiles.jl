@@ -804,8 +804,18 @@ end
 """
      parse_pigment(input_file::InputStream, scene::Scene) :: Pigment
 
-Parse a vector from the given input `inputstream`.
-Call internally [`expect_number`](@ref) and [`expect_symbol`](@ref).
+Parse a pigment from the given input `inputstream`.
+Call internally the following parsing functions:
+- [`expect_keywords`](@ref)
+- [`expect_symbol`](@ref)
+- [`parse_color`](@ref)
+- [`expect_number`](@ref)
+- [`expect_string`](@ref)
+Call internally the following functions and structs of the program
+- [`UniformPigment`](@ref)
+- [`CheckeredPigment`](@ref)
+- [`ImagePigment`](@ref)
+- [`load_image`](@ref)
     
 See also: [`InputStream`](@ref), [`Scene`](@ref), [`Token`](@ref)
 """
@@ -832,5 +842,77 @@ function parse_pigment(input_file::InputStream, scene::Scene)
      end
 
      expect_symbol(input_file, ")")
+     return result
+end
+
+
+"""
+     parse_transformation(input_file::InputStream, scene::Scene) :: Transformation
+
+Parse a transformation from the given input `inputstream`.
+Call internally the following parsing functions:
+- [`expect_keywords`](@ref)
+- [`expect_symbol`](@ref)
+- [`expect_number`](@ref)
+- [`parse_vector`](@ref)
+- [`read_token`](@ref)
+- [`unread_token`](@ref)
+Call internally the following functions and structs of the program
+- [`Transformation`](@ref)
+- [`translation`](@ref)
+- [`rotation_x`](@ref)
+- [`rotation_y`](@ref)
+- [`rotation_z`](@ref)
+- [`scaling`](@ref)
+
+See also: [`InputStream`](@ref), [`Scene`](@ref), [`Token`](@ref)
+"""
+function parse_transformation(input_file::InputStream, scene::Scene)
+     result = Transformation()
+
+     while true
+          transformation_kw = expect_keywords(input_file, [
+               KeywordEnum.IDENTITY,
+               KeywordEnum.TRANSLATION,
+               KeywordEnum.ROTATION_X,
+               KeywordEnum.ROTATION_Y,
+               KeywordEnum.ROTATION_Z,
+               KeywordEnum.SCALING,
+          ])
+
+          if transformation_kw == KeywordEnum.IDENTITY
+               nothing # Do nothing (this is a primitive form of optimization!)
+          elseif transformation_kw == KeywordEnum.TRANSLATION
+               expect_symbol(input_file, "(")
+               result *= translation(parse_vector(input_file, scene))
+               expect_symbol(input_file, ")")
+          elseif transformation_kw == KeywordEnum.ROTATION_X
+               expect_symbol(input_file, "(")
+               result *= rotation_x(expect_number(input_file, scene))
+               expect_symbol(input_file, ")")
+          elseif transformation_kw == KeywordEnum.ROTATION_Y
+               expect_symbol(input_file, "(")
+               result *= rotation_y(expect_number(input_file, scene))
+               expect_symbol(input_file, ")")
+          elseif transformation_kw == KeywordEnum.ROTATION_Z
+               expect_symbol(input_file, "(")
+               result *= rotation_z(expect_number(input_file, scene))
+               expect_symbol(input_file, ")")
+          elseif transformation_kw == KeywordEnum.SCALING
+               expect_symbol(input_file, "(")
+               result *= scaling(parse_vector(input_file, scene))
+               expect_symbol(input_file, ")")
+          end
+
+          # We must peek the next token to check if there is another transformation that is being
+          # chained or if the sequence ends. Thus, this is a LL(1) parser.
+          next_kw = read_token(input_file)
+          if !isa(next_kw, SymbolToken) || (next_kw.symbol != "*")
+               # Pretend you never read this token and put it back!
+               unread_token(input_file, next_kw)
+               break
+          end
+     end
+
      return result
 end
