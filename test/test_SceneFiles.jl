@@ -42,28 +42,28 @@ end
 
 
 function @test_is_keyword(token::Token, keyword::KeywordEnum) 
-     @@test isa(token.value, KeywordToken) "Token '$(token.value)' is not a KeywordToken"
-     @@test token.value.keyword == keyword "Token '$(token.value)' is not equal to keyword '$(keyword)'"
+     @assert isa(token.value, KeywordToken) "Token '$(token.value)' is not a KeywordToken"
+     @assert token.value.keyword == keyword "Token '$(token.value)' is not equal to keyword '$(keyword)'"
 end
 
 function @test_is_identifier(token::Token, identifier::String) 
-     @@test isa(token.value, IdentifierToken) "Token '$(token.value)' is not a IdentifierToken"
-     @@test token.value.identifier == identifier "expecting identifier '$(identifier)' instead of '$(token.value)'"
+     @assert isa(token.value, IdentifierToken) "Token '$(token.value)' is not a IdentifierToken"
+     @assert token.value.identifier == identifier "expecting identifier '$(identifier)' instead of '$(token.value)'"
 end
 
 function @test_is_symbol(token::Token, symbol::String) 
-     @@test isa(token.value, SymbolToken) "Token '$(token.value)' is not a SymbolToken"
-     @@test token.value.symbol == symbol "expecting symbol '$(symbol)' instead of '$(token.value)'"
+     @assert isa(token.value, SymbolToken) "Token '$(token.value)' is not a SymbolToken"
+     @assert token.value.symbol == symbol "expecting symbol '$(symbol)' instead of '$(token.value)'"
 end
 
 function @test_is_number(token::Token, number::Float64) 
-     @@test isa(token.value, LiteralNumberToken) "Token '$(token.value)' is not a LiteralNumberToken"
-     @@test token.value.number == number "Token '$(token.value)' is not equal to number '$(number)'"
+     @assert isa(token.value, LiteralNumberToken) "Token '$(token.value)' is not a LiteralNumberToken"
+     @assert token.value.number == number "Token '$(token.value)' is not equal to number '$(number)'"
 end
 
 function @test_is_string(token::Token, string::String) 
-     @@test isa(token.value, StringToken) "Token '$(token.value)' is not a StringToken"
-     @@test token.value.string == string "Token '$(token.value)' is not equal to string '$(string)'"
+     @assert isa(token.value, StringToken) "Token '$(token.value)' is not a StringToken"
+     @assert token.value.string == string "Token '$(token.value)' is not equal to string '$(string)'"
 end
 
 @testset "test_input_file" begin

@@ -1175,6 +1175,7 @@ function parse_scene(input_file::InputStream, variables::Dict{String, Float64} =
                name, material = parse_material(input_file, scene)
                scene.materials[name] = material
           end
-
+     end
+     
      return scene
 end
