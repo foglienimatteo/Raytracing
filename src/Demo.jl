@@ -225,10 +225,23 @@ function demo(
 	aspect_ratio = width / height
 
 	if camera_type == "per"
-		(bool_print==true) && (println("Using perspective camera"))
+		if bool_print==true
+			printstyled("Using", color=:magenta)
+			printstyled(" perspective camera", color=:light_magenta)
+			print("\n")
+		end
+#		(bool_print==true) && (printstyled("Using", color=:magenta)
+#							   printstyled(" perspective camera", color=:light_magenta)
+#							   )
 		camera = PerspectiveCamera(1., aspect_ratio, camera_tr)
 	elseif camera_type == "ort"
-		(bool_print==true) && (println("Using orthogonal camera"))
+		if bool_print==true
+			printstyled("Using", color=:magenta)
+			printstyled(" orthogonal camera", color=:light_magenta)
+			print("\n")
+		end
+#		(bool_print==true) && (printstyled("Using", color=:magenta)
+#							   printstyled(" orthogonal camera", color=:light_magenta))
 		camera = OrthogonalCamera(aspect_ratio, camera_tr) 
 	else
 		throw(ArgumentError("Unknown camera: $camera_type"))
@@ -239,13 +252,31 @@ function demo(
 	tracer = ImageTracer(image, camera, samples_per_side)
 
 	if algorithm == "onoff"
-		(bool_print==true) && (println("Using on/off renderer"))
+		if bool_print==true
+			printstyled("Using", color=:magenta)
+			printstyled(" on/off renderer", color=:light_magenta)
+			print("\n")
+		end
+#		(bool_print==true) && (printstyled("Using", color=:magenta)
+#							   printstyled(" on/off renderer", color=:light_magenta))
 		renderer = OnOffRenderer(world, BLACK)
 	elseif algorithm == "flat"
-		(bool_print==true) && (println("Using flat renderer"))
+		if bool_print==true
+			printstyled("Using", color=:magenta)
+			printstyled(" flat renderer", color=:light_magenta)
+			print("\n")
+		end
+#		(bool_print==true) && (printstyled("Using", color=:magenta)
+#							   printstyled(" flat renderer", color=:light_magenta))
 		renderer = FlatRenderer(world, BLACK)
 	elseif algorithm == "pathtracing"
-		(bool_print==true) && (println("Using path tracing renderer"))
+		if bool_print==true
+			printstyled("Using", color=:magenta)
+			printstyled(" path tracing renderer", color=:light_magenta)
+			print("\n")
+		end
+#		(bool_print==true) && (printstyled("Using", color=:magenta)
+#		  					   printstyled(" path tracing renderer", color=:light_magenta))
 		renderer = PathTracer(
 					world, 
 					BLACK, 
@@ -262,8 +293,8 @@ function demo(
 	end
 
 	function print_progress(row::Int64, col::Int64)
-     	printstyled("Rendered ", color=:light_cyan)
-		print("row\t $(image.height - row)/$(image.height) = ")
+     	printstyled("Rendered row\t ", color=:light_cyan)
+		print("$(image.height - row)/$(image.height) = ")
 		@printf "%.2f" 100*((image.height - row)/image.height)
 		print("%\r")
 	end
