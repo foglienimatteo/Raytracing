@@ -754,69 +754,6 @@ function expect_keywords(input_file::InputStream, keywords::Vector{KeywordEnum})
      return token.keyword
 end
 
-"""
-     expect_string(input_file::InputStream) :: String
-
-Read a token from `input_file` and check that it is a literal string.
-Return the value of the string (a ``str``).
-"""
-function expect_string(input_file::InputStream)
-    token = read_token(input_file)
-    if (typeof(token.value) ≠ StringToken)
-          throw(GrammarError(token.location, "got $(token) instead of a string"))
-    end
-    return token.value.string
-end
-
-"""
-Read a token from `input_file` and check that it is an identifier.
-Return the name of the identifier.
-"""
-function expect_identifier(input_file::InputStream)
-     token = read_token(input_file)
-     if (typeof(token.value) ≠ IdentifierToken)
-          throw(GrammarError(token.location, "got $(token) instead of an identifier"))
-    end
-end
-
-"""
-     parse_color(input_file::InputStream, scene::Scene) :: RGB{Float32}
-
-Read the color `input_file` and return it
-Call internally ['expect_symbol'](@ref), ['expect_number'](@ref)
-
-See also: ['InputStream'](@ref), ['Scene'](@ref), ['Token'](@ref)
-"""
-function parse_color(input_file::InputStream, scene::Scene)
-    expect_symbol(input_file, "<")
-    red = expect_number(input_file, scene)
-    expect_symbol(input_file, ",")
-    green = expect_number(input_file, scene)
-    expect_symbol(input_file, ",")
-    blue = expect_number(input_file, scene)
-    expect_symbol(input_file, ">")
-
-    return RGB{Float32}(red, green, blue)
-end
-
-"""
-     parse_brdf(input_file::InputStream, scene::Scene) :: BRDF
-
-
-"""
-function parse_brdf(input_file::InputStream, scene::Scene)
-    brdf_keyword = expect_keywords(input_file, [KeywordEnum.DIFFUSE, KeywordEnum.SPECULAR])
-    expect_symbol(input_file, "(")
-    pigment = parse_pigment(input_file, scene)
-    expect_symbol(input_file, ")")
-
-     if (brdf_keyword == KeywordEnum.DIFFUSE)
-          return DiffuseBRDF(pigment)
-     elseif (brdf_keyword == KeywordEnum.SPECULAR)
-          return SpecularBRDF(pigment)
-     end
-     @assert false "This line should be unreachable"
-end
 
 """
      expect_number(input_file::InputStream, scene::Scene) :: Float64
@@ -843,6 +780,32 @@ end
 
 
 """
+     expect_string(input_file::InputStream) :: String
+
+Read a token from `input_file` and check that it is a literal string.
+Return the value of the string (a ``str``).
+"""
+function expect_string(input_file::InputStream)
+    token = read_token(input_file)
+    if (typeof(token.value) ≠ StringToken)
+          throw(GrammarError(token.location, "got $(token) instead of a string"))
+    end
+    return token.value.string
+end
+
+"""
+Read a token from `input_file` and check that it is an identifier.
+Return the name of the identifier.
+"""
+function expect_identifier(input_file::InputStream)
+     token = read_token(input_file)
+     if (typeof(token.value) ≠ IdentifierToken)
+          throw(GrammarError(token.location, "got $(token) instead of an identifier"))
+    end
+end
+
+
+"""
     parse_vector(input_file::InputStream, scene::Scene) :: Vec
 
 Parse a vector from the given input `inputstream`.
@@ -863,6 +826,27 @@ function parse_vector(input_file::InputStream, scene::Scene)
 end
 
 """
+     parse_color(input_file::InputStream, scene::Scene) :: RGB{Float32}
+
+Read the color `input_file` and return it
+Call internally ['expect_symbol'](@ref), ['expect_number'](@ref)
+
+See also: ['InputStream'](@ref), ['Scene'](@ref), ['Token'](@ref)
+"""
+function parse_color(input_file::InputStream, scene::Scene)
+    expect_symbol(input_file, "<")
+    red = expect_number(input_file, scene)
+    expect_symbol(input_file, ",")
+    green = expect_number(input_file, scene)
+    expect_symbol(input_file, ",")
+    blue = expect_number(input_file, scene)
+    expect_symbol(input_file, ">")
+
+    return RGB{Float32}(red, green, blue)
+end
+
+
+"""
      parse_pigment(input_file::InputStream, scene::Scene) :: Pigment
 
 Parse a pigment from the given input `inputstream`.
@@ -878,7 +862,7 @@ Call internally the following functions and structs of the program
 - [`ImagePigment`](@ref)
 - [`load_image`](@ref)
     
-See also: [`InputStream`](@ref), [`Scene`](@ref), [`Token`](@ref)
+See also: [`InputStream`](@ref), [`Scene`](@ref), [`Token`](@ref), [`Pigment`](@ref)
 """
 function parse_pigment(input_file::InputStream, scene::Scene)
      keyword = expect_keywords(input_file, [KeywordEnum.UNIFORM, KeywordEnum.CHECKERED, KeywordEnum.IMAGE])
@@ -906,6 +890,60 @@ function parse_pigment(input_file::InputStream, scene::Scene)
      return result
 end
 
+"""
+     parse_brdf(input_file::InputStream, scene::Scene) :: BRDF
+
+Parse a BRDF from the given input `inputstream`.
+Call internally the following parsing functions:
+- [`expect_keywords`](@ref)
+- [`expect_symbol`](@ref)
+- [`parse_pigment`](@ref)
+Call internally the following functions and structs of the program
+- [`DiffuseBRDF`](@ref)
+- [`SpecularBRDF`](@ref)
+    
+See also: [`InputStream`](@ref), [`Scene`](@ref), [`Token`](@ref), [`BRDF`](@ref)
+"""
+function parse_brdf(input_file::InputStream, scene::Scene)
+     brdf_keyword = expect_keywords(input_file, [KeywordEnum.DIFFUSE, KeywordEnum.SPECULAR])
+     expect_symbol(input_file, "(")
+     pigment = parse_pigment(input_file, scene)
+     expect_symbol(input_file, ")")
+
+     if (brdf_keyword == KeywordEnum.DIFFUSE)
+          return DiffuseBRDF(pigment)
+     elseif (brdf_keyword == KeywordEnum.SPECULAR)
+          return SpecularBRDF(pigment)
+     else
+          @assert false "This line should be unreachable"
+     end
+end
+
+"""
+     parse_material(input_file::InputStream, scene::Scene) :: (String, Material)
+
+Parse a Material from the given input `inputstream`.
+Call internally the following parsing functions:
+- [`expect_identifier`](@ref)
+- [`expect_symbol`](@ref)
+- [`parse_brdf`](@ref)
+- [`parse_pigment`](@ref)
+Call internally the following functions and structs of the program
+- [`Material`](@ref)
+    
+See also: [`InputStream`](@ref), [`Scene`](@ref), [`Token`](@ref), [`Material`](@ref)
+"""
+function parse_material(input_file::InputStream, scene::Scene)
+     name = expect_identifier(input_file)
+
+     expect_symbol(input_file, "(")
+     brdf = parse_brdf(input_file, scene)
+     expect_symbol(input_file, ",")
+     emitted_radiance = parse_pigment(input_file, scene)
+     expect_symbol(input_file, ")")
+
+     return name, Material(brdf, emitted_radiance)
+end
 
 """
      parse_transformation(input_file::InputStream, scene::Scene) :: Transformation
