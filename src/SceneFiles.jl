@@ -688,8 +688,8 @@ function unread_token(inputstream::InputStream, token::Token)
     inputstream.saved_token = token
 end
 
-
 ##########################################################################################92
+
 
 """
      Scene(
@@ -719,6 +719,17 @@ struct Scene
      ) = new(m,w,c,fv,ov)
 end
 
+"""
+     expect_symbol(inputstream::InputStream, symbol::String)
+
+Read a token from `input_file` and check that it matches `symbol`.
+"""
+function expect_symbol(inputstream::InputStream, symbol::String)
+     token = read_token(inputstream)
+     if (typeof(token.value) ≠ SymbolToken) || (token.value.symbol ≠ symbol)
+          throw(GrammarError(token.location, "got $(token) insted of $(symbol)"))
+     end
+end
 
 """
      expect_keywords(input_file::InputStream, keywords::Vector{KeywordEnum}) :: KeywordEnum
@@ -765,4 +776,25 @@ function expect_number(input_file::InputStream, scene::Scene)
      end
 
      throw(GrammarError(token.location, "got \"$(token)\" instead of a number"))
+end
+
+
+"""
+    parse_vector(input_file::InputStream, scene::Scene) :: Vec
+
+Parse a vector from the given input `inputstream`.
+Calls internally [`expect_number`](@ref) and [`expect_symbol`](@ref)
+    
+See also: [`InputStream`](@ref), [`Scene`](@ref), [`Token`](@ref)
+"""
+function parse_vector(input_file::InputStream, scene::Scene)
+     expect_symbol(input_file, "[")
+     x = expect_number(input_file, scene)
+     expect_symbol(input_file, ",")
+     y = expect_number(input_file, scene)
+     expect_symbol(input_file, ",")
+     z = expect_number(input_file, scene)
+     expect_symbol(input_file, "]")
+
+     return Vec(x, y, z)
 end
