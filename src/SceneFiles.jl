@@ -393,6 +393,7 @@ end
 
 ##########################################################################################92
 
+
 """
     update_pos(inputstream::InputStream, ch::String)
 
@@ -438,6 +439,7 @@ function read_char(inputstream::InputStream)
      return ch
 end
 
+
 """
      unread_char(inputstream::InputStream, ch::String)
 
@@ -450,6 +452,7 @@ function unread_char(inputstream::InputStream, ch::String)
      inputstream.saved_char = ch
      inputstream.location = copy(inputstream.saved_location) # shallow copy ?
 end
+
 
 """
      skip_whitespaces_and_comments(inputstream::InputStream)
@@ -478,6 +481,7 @@ function skip_whitespaces_and_comments(inputstream::InputStream)
      unread_char(inputstream, ch)
      nothing
 end
+
 
 """
      parse_string_token(
@@ -558,6 +562,7 @@ function parse_float_token(inputstream::InputStream, first_char::String, token_l
      return Token(token_location, LiteralNumberToken(value))
 end
 
+
 """
      parse_keyword_or_identifier_token(
           inputstream::InputStream,
@@ -607,6 +612,7 @@ function parse_keyword_or_identifier_token(
           return Token(token_location, IdentifierToken(token))
      end
 end
+
 
 """
      read_token(inputstream::InputStream) :: Token
@@ -669,6 +675,7 @@ function read_token(inputstream::InputStream)
      end
 end
 
+
 """
     unread_token(inputstream::InputStream, token::Token)
 
@@ -679,4 +686,59 @@ See also: [`InputStream`](@ref), [`Token`](@ref), [`read_token`](@ref)
 function unread_token(inputstream::InputStream, token::Token)
     @assert isnothing(inputstream.saved_token) "$(inputstream.saved_token) ≠ nothing "
     inputstream.saved_token = token
+end
+
+
+##########################################################################################92
+
+"""
+     Scene(
+          materials::Dict{String, Material} = Dict{String, Material}(),
+          world::World = World(),
+          camera::Union{Camera, Nothing} = nothing,
+          float_variables::Dict{String, Float64} = Dict{String, Float64}(),
+          overridden_variables::Set{String} = Set{String}() 
+     )
+
+A scene read from a scene file.
+
+See also: [`Material`](@ref), [`World`](@ref), [`Camera`](@ref)
+"""
+struct Scene
+     materials::Dict{String, Material}
+     world::World
+     camera::Union{Camera, Nothing}
+     float_variables::Dict{String, Float64}
+     overridden_variables::Set{String}
+     Scene(
+          m::Dict{String, Material} = Dict{String, Material}(),
+          w::World = World(),
+          c::Union{Camera, Nothing} = nothing,
+          fv::Dict{String, Float64} = Dict{String, Float64}(),
+          ov::Set{String} = Set{String}() 
+     ) = new(m,w,c,fv,ov)
+end
+
+
+"""
+     expect_keywords(input_file::InputStream, keywords::Vector{KeywordEnum}) :: KeywordEnum
+
+Read a token from `input_file` and check that it is one of the keywords in `keywords`.
+
+See also: [`InputStream`](@ref), [`KeywordEnum`](@ref), [`Token`](@ref)
+"""
+function expect_keywords(input_file::InputStream, keywords::Vector{KeywordEnum})
+     token = read_token(input_file)
+     if !isa(token, KeywordToken)
+          throw(GrammarError(token.location, "expected a keyword instead of \"$(token)\" "))
+     end
+
+     if token.keyword ∉ keywords
+          throw(GrammarError(
+               token.location,
+               "expected one of the keywords $([String(x)*"," for x in keywords]...)) instead of \"$(token)\""
+          ))
+     end
+
+     return token.keyword
 end
