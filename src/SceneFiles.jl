@@ -1242,9 +1242,9 @@ end
 
 function render(
           scenefile::String,
+          renderer::Renderer = FlatRenderer(),
      	camera_type::Union{String, Nothing} = nothing,
 		camera_position::Union{Point, Nothing} = nothing, 
-		renderer::Renderer = FlatRenderer(),
      	α::Float64 = 0., 
      	width::Int64 = 640, 
      	height::Int64 = 480, 
@@ -1252,8 +1252,6 @@ function render(
         	png_output::String = "scene.png",
 		bool_print::Bool = true,
 		bool_savepfm::Bool = true,
-		init_state::Int64 = 45,
-		init_seq::Int64 = 54,
 		samples_per_pixel::Int64 = 0
      )
 
@@ -1336,15 +1334,19 @@ function render(
 	(bool_print==true) && (println("\nHDR demo image written to $(pfm_output)\n"))
 
 	# Apply tone-mapping to the image
-	if algorithm == "onoff"
+
+     if typeof(renderer) == OnOffRenderer
 		normalize_image!(img, 0.18, nothing)
-	elseif algorithm == "flat"
+	elseif typeof(renderer) == FlatRenderer
 		normalize_image!(img, 0.18, 0.5)
-	elseif algorithm == "pathtracing"
+	elseif typeof(renderer) == PathTracer
 		normalize_image!(img, 0.18, 0.1)
-	elseif algorithm == "pointlight"
-		normalize_image!(img, 0.18, 0.1)
+	elseif typeof(renderer) == PointLightRenderer
+          normalize_image!(img, 0.18, 0.1)
+	else
+		throw(ArgumentError("Unknown renderer: $(typeof(renderer))"))
 	end
+
 	clamp_image!(img)
 	γ_correction!(img, 1.27)
 

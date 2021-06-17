@@ -718,6 +718,59 @@ end
 ##########################################################################################92
 
 
+function parse_pathtracer_settings(dict::Dict{String, T}) where {T}
+
+    keys = [
+        "init_state", "init_seq", 
+        "background_color", "num_of_rays", "max_depth",
+        "russian_roulette_limit"
+    ]
+
+    for pair in dict
+        if (pair[1] in keys) ==false
+            throw(ArgumentError(
+                "invalid key : $(pair[1])\n"*
+                "valid keys for path-renderer function are:\n "*
+                "$(["$(key)" for key in keys])"
+            ))
+        end
+    end
+
+    haskey(dict, "init_state") ? 
+        init_state::Int64 = dict["init_state"] : 
+        init_state = 45
+
+    haskey(dict, "init_seq") ? 
+        init_seq::Int64 = dict["init_seq"] : 
+        init_seq = 54
+
+    haskey(dict, "background_color") ? begin
+            col::String = dict["background_color"]
+            (x,y,z) = Tuple(parse.(Float64, split(col, ","))) 
+            background_color::Int64 = RGB{Float32}(x, y, z)
+        end : 
+        background_color = RGB{Float32}(0.0, 0.0, 0.0)
+
+    haskey(dict, "num_of_rays") ? 
+        num_of_rays::Int64 = dict["num_of_rays"] : 
+        num_of_rays= 10
+
+    haskey(dict, "max_depth") ? 
+        max_depth::Int64 = dict["max_depth"] : 
+        max_depth = 2
+
+     haskey(dict, "russian_roulette_limit") ? 
+        russian_roulette_limit::Int64 = dict["russian_roulette_limit"] : 
+        russian_roulette_limit = 3
+
+    return (init_state, init_seq, 
+            background_color, 
+            num_of_rays, max_depth, 
+            russian_roulette_limit
+            )
+end
+
+
 """
     parse_render_settings(dict::Dict{String, Any}) 
         :: (
@@ -782,15 +835,18 @@ See also:  [`render`](@ref), [`Point`](@ref), [`PCG`](@ref)
 function parse_render_settings(dict::Dict{String, T}) where {T}
 
     keys = [
-        "scenefile", "camera_type", "camera_position",
-        "algorithm", "alpha", "width", "height",
+        "scenefile", 
+        "%COMMAND%",
+        "onoff", "flat", "pathtracer", "pointlight",
+        "camera_type", "camera_position", 
+        "alpha", "width", "height",
         "set_pfm_name", "set_png_name", 
         "bool_print", "bool_savepfm", 
         "init_state", "init_seq", "samples_per_pixel"
     ]
 
     for pair in dict
-        if (pair[1] in keys) ==false
+        if (pair[1] in keys)==false
             throw(ArgumentError(
                 "invalid key : $(pair[1])\n"*
                 "valid keys for demo function are:\n "*
@@ -814,10 +870,6 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
             camera_position = Point(x,y,z)
         end : 
         camera_position = nothing
-
-    haskey(dict, "algorithm") ? 
-        algorithm::String = dict["algorithm"] : 
-        algorithm = "flat"
 
     haskey(dict, "alpha") ? 
         α::Float64 = dict["alpha"] : 
@@ -847,51 +899,34 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
         bool_savepfm::Bool = dict["bool_savepfm"] : 
         bool_savepfm = true
 
-    haskey(dict, "init_state") ? 
-        init_state::Int64 = dict["init_state"] : 
-        init_state = 54
-
-    haskey(dict, "init_seq") ? 
-        init_seq::Int64 = dict["init_seq"] : 
-        init_seq = 45
-
     haskey(dict, "samples_per_pixel") ? 
         samples_per_pixel::Int64 = dict["samples_per_pixel"] : 
         samples_per_pixel = 0
 
 
-    if algorithm == "onoff"
-		(bool_print==true) && (println("Using on/off renderer"))
-		renderer = OnOffRenderer(world, BLACK)
-	elseif algorithm == "flat"
-		(bool_print==true) && (println("Using flat renderer"))
-		renderer = FlatRenderer(world, BLACK)
-	elseif algorithm == "pathtracing"
-		(bool_print==true) && (println("Using path tracing renderer"))
-		renderer = PathTracer(
-					world, 
-					BLACK, 
-					PCG(UInt64(init_state), UInt64(init_seq)), 
-					N, 
-					max_depth, 
-					russian_roulette_limit
-				)
-	elseif algorithm == "pointlight"
-         print("Using a point-light tracer")
-         renderer = PointLightRenderer(world, BLACK)
+    if haskey(dict, "%COMMAND%")
+        if dict["%COMMAND%"] == "onoff"
+            renderer = OnOffRenderer()
+        elseif dict["%COMMAND%"] == "flat"
+            renderer = FlatRenderer()
+        elseif dict["%COMMAND%"] == "pathtracer"
+            renderer = PathTracer(parse_pathtracer_settings(dict["pathtracer"]))
+        elseif dict["%COMMAND%"] == "pointlight"
+            renderer = PointLightRenderer()
+        end
 	else
-		throw(ArgumentError("Unknown renderer: $algorithm"))
+		renderer = FlatRenderer()
 	end
+
     return (
             scenefile,
+            renderer,
             camera_type,
-            camera_position, 
-            algorithm, 
+            camera_position,
             α, 
             width, height, 
             pfm, png, 
             bool_print, bool_savepfm, 
-            init_state, init_seq,
             samples_per_pixel
         )
 end

@@ -246,12 +246,29 @@ function ArgParse_command_line(arguments)
 	#### RENDER #####################################
 
 
-	add_arg_group!(s["render"], "scenefile to be renderer");
+	add_arg_group!(s["render"], "scenefile to be rendered and renderer to be used");
 	@add_arg_table! s["render"] begin
 		"scenefile"
 			help = "path to the file describing the scene to be rendered."
+			arg_type = String
 			#range_tester = input -> (typeof(query(input))<:File{format"PFM"})
 			required = true
+		"onoff"
+			action = :command
+			help = "onoff renderer"
+			dest_name = "onoff"
+		"flat"
+			action = :command
+			help = "flat-renderer"
+			dest_name = "flat"
+		"pathtracer"
+			action = :command
+			help = "path tracing renderer"
+			dest_name = "pathtracer"
+		"pointlight"
+			action = :command
+			help = "point-light tracing renderer"
+			dest_name = "pointlight"
 	end
 
 	add_arg_group!(s["render"], "render options");
@@ -262,22 +279,6 @@ function ArgParse_command_line(arguments)
           	arg_type = String
 			default = "per"
 			range_tester = input -> (input ∈ CAMERAS)
-    		"--algorithm"
-			help = "option for the renderer algorithm"
-          	arg_type = String
-			default = "flat"
-			range_tester = input -> (input ∈ RENDERERS)
-    		"--init_state"
-    			arg_type = Int64
-    			help = "Initial seed for the random number generator (positive integer number)."
-    			default = 45
-			range_tester = input -> (input>0)
-    		"--init_seq"
-    			arg_type = Int64
-    			help = "Identifier of the sequence produced by the "*
-			    "random number generator (positive integer number)."
-    			default = 54
-			range_tester = input -> (input>0)
 		"--camera_position"
           	help = "camera position in the scene as 'X,Y,Z'"
           	arg_type = String
@@ -298,12 +299,48 @@ function ArgParse_command_line(arguments)
 			default = 480
 			range_tester =  input -> (iseven(input) && input>0)
      	"--samples_per_pixel"
-			help = "Number of samples per pixel (must be a perfect square, e.g., 16)."
+			help = "Number of samples per pixel for the antialiasing algorithm\n"*
+					"It must be an integer perfect square, i.e. 0,1,4,9,16,...\n"*
+					"If =0 (default value), antialiasing does not occurs."
      		arg_type = Int64
      		default = 0
 			range_tester =  input -> ((input>=0) && (√input - floor(√input) ≈ 0.))
 	end
 
+	add_arg_group!(s["render"]["pathtracer"], "pathtracing renderer options");
+	@add_arg_table! s["render"]["pathtracer"] begin
+		"--init_state"
+    			arg_type = Int64
+    			help = "Initial seed for the random number generator (positive integer number)."
+    			default = 45
+			range_tester = input -> (input>0)
+    		"--init_seq"
+    			arg_type = Int64
+    			help = "Identifier of the sequence produced by the "*
+			    "random number generator (positive integer number)."
+    			default = 54
+			range_tester = input -> (input>0)
+		"--background_color"
+			help = "background color specified as 'R,G,B' components between 0 and 255"
+          	arg_type = String
+          	default = "0,0,0"
+          	range_tester = input -> (length(split(input, ",")) == 3)
+		"--num_of_rays" 
+			help = "number of `Ray`s generated for each integral evaluation"
+			arg_type = Int64
+			default = 10
+			range_tester = input -> (input>0)
+		"--max_depth"
+			help = "maximal number recursive integrations"
+			arg_type = Int64
+			default = 3
+			range_tester = input -> (input>0)
+		"--russian_roulette_limit"
+			help = "depth at whitch the Russian Roulette algorithm begins"
+			arg_type = Int64
+			default = 2
+			range_tester = input -> (input>0)
+	end
 
 
 	#### parse_args ###################################
@@ -328,7 +365,7 @@ main(x::Union{String, Float64, Int64}...) = main([string(var) for var in [x...]]
 function main(args)
 	parsed_arguments = ArgParse_command_line(args) # the result is a Dict{String,Any}
 	(isnothing(parsed_arguments)) && (return nothing)
-	#print_ArgParseSettings(parsed_arguments)
+	print_ArgParseSettings(parsed_arguments)
 
 	parsed_command = parsed_arguments["%COMMAND%"]
 	parsed_settings = parsed_arguments[parsed_command]
@@ -343,7 +380,8 @@ function main(args)
 		#println(parse_tonemapping_settings(parsed_settings))
 		demo_animation(parse_demoanimation_settings(parsed_settings)...)
 	elseif parsed_command=="render"
-		render_scene(parse_render_settings(parsed_settings)...)
+		println(parse_render_settings(parsed_settings))
+		render(parse_render_settings(parsed_settings)...)
 	else
 		throw(ArgumentError("unknown command $(parsed_command)"))
 	end

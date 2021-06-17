@@ -792,7 +792,7 @@ as it is really fast, but it produces boring images.
 
 See also: [`Renderer`](@ref), [`World`](@ref)
 """
-struct OnOffRenderer <: Renderer
+mutable struct OnOffRenderer <: Renderer
     world::World
     background_color::RGB{Float32}
     color::RGB{Float32}
@@ -812,7 +812,7 @@ determine how to compute the final radiance.
 
 See also: [`Renderer`](@ref), [`World`](@ref)
 """
-struct FlatRenderer <: Renderer
+mutable struct FlatRenderer <: Renderer
     world::World
     background_color::RGB{Float32}
     FlatRenderer(w = World(), bc = BLACK) = new(w, bc)
@@ -823,7 +823,7 @@ end
             world::World, 
             background_color::RGB{Float32} = RGB{Float32}(0.0, 0.0, 0.0),
             pcg::PCG = PCG(),
-            N::Int64 = 10,
+            num_of_rays::Int64 = 10,
             max_depth::Int64 = 2,
             russian_roulette_limit::Int64 = 3
         )
@@ -847,14 +847,15 @@ max_depth to `Inf`.
 
 - `num_of_rays::Int64` : number of `Ray`s generated for each integral evaluation
 
-- `max_depth::Int64` : maximal number recursive integrations
+- `max_depth::Int64` : maximal number recursive integrations; if a ray intersecting
+  a surface has `depth>max_depth`, the returned color is `RGB{Float32}(0,0,0)`
 
 - `russian_roulette_limit::Int64`: depth at whitch the Russian 
   Roulette algorithm begins
 
 See also: [`Renderer`](@ref), [`Ray`](@ref), [`World`](@ref), [`PCG`](@ref)
 """
-struct PathTracer <: Renderer
+mutable struct PathTracer <: Renderer
     world::World
     background_color::RGB{Float32}
     pcg::PCG
@@ -885,7 +886,7 @@ A simple point-light tracing renderer.
 
 See also: [`Renderer`](@ref), [`World`](@ref)
 """
-struct PointLightRenderer <: Renderer
+mutable struct PointLightRenderer <: Renderer
     world::World
     background_color::RGB{Float32}
     ambient_color::RGB{Float32}
