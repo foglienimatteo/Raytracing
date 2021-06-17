@@ -32,6 +32,7 @@ export are_close, squared_norm, norm, normalize #, normalized_dot
 export parse_command_line, parse_demo_settings
 export parse_tonemapping_settings, parse_demoanimation_settings
 export load_image, ldr2pfm
+export parse_render_settings 
 # from ToneMapping.jl
 export normalize_image!,  clamp_image!, γ_correction!, tone_mapping
 # from Transformations.jl
@@ -57,7 +58,7 @@ export KeywordEnum, GrammarError, InputStream
 export Token, KeywordToken, IdentifierToken, StringToken
 export LiteralNumberToken, SymbolToken, StopToken
 export read_token, skip_whitespaces_and_comments
-export Scene, parse_scene
+export Scene, parse_scene, render
 # from PrintFunctions.jl
 export print_not_black
 
@@ -77,5 +78,4 @@ include("ScatterRay.jl")
 include("SceneFiles.jl")
 include("PrintFunctions.jl")
 
-
-end  # module
+end

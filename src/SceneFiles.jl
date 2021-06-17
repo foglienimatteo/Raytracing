@@ -1234,3 +1234,125 @@ function parse_scene(inputstream::InputStream, variables::Dict{String, Float64} 
 
      return scene
 end
+
+
+function render(x::(Pair{T1,T2} where {T1,T2})...)
+	render( parse_render_settings(  Dict( pair for pair in [x...]) )... )
+end
+
+function render(
+          scenefile::String,
+     	camera_type::String = "per",
+		camera_position::Point = Point(-1.,0.,0.), 
+		algorithm::String = "flat",
+     	α::Float64 = 0., 
+     	width::Int64 = 640, 
+     	height::Int64 = 480, 
+     	pfm_output::String = "scene.pfm", 
+        	png_output::String = "scene.png",
+		bool_print::Bool = true,
+		bool_savepfm::Bool = true,
+		init_state::Int64 = 45,
+		init_seq::Int64 = 54,
+		samples_per_pixel::Int64 = 0
+     )
+
+     scene = open(scenefile, "r") do stream
+               inputstream = InputStream(stream)
+               parse_scene(inputstream)
+     end
+
+     samples_per_side = Int64(floor(√samples_per_pixel))
+    (samples_per_side^2 ≈ samples_per_pixel) ||
+		throw(ArgumentError(
+				"the number of samples per pixel "*
+				"$(samples_per_pixel) must be a perfect square")
+	)
+
+	world = scene.world
+
+	observer_vec = camera_position - Point(0., 0., 0.)
+
+	camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec)
+	aspect_ratio = width / height
+
+	if camera_type == "per"
+		(bool_print==true) && (println("Using perspective camera"))
+		camera = PerspectiveCamera(1., aspect_ratio, camera_tr)
+	elseif camera_type == "ort"
+		(bool_print==true) && (println("Using orthogonal camera"))
+		camera = OrthogonalCamera(aspect_ratio, camera_tr) 
+	else
+		throw(ArgumentError("Unknown camera: $camera_type"))
+	end
+	
+	# Run the ray-tracer
+	image = HDRimage(width, height)
+	tracer = ImageTracer(image, camera, samples_per_side)
+
+	if algorithm == "onoff"
+		(bool_print==true) && (println("Using on/off renderer"))
+		renderer = OnOffRenderer(world, BLACK)
+	elseif algorithm == "flat"
+		(bool_print==true) && (println("Using flat renderer"))
+		renderer = FlatRenderer(world, BLACK)
+	elseif algorithm == "pathtracing"
+		(bool_print==true) && (println("Using path tracing renderer"))
+		renderer = PathTracer(
+					world, 
+					BLACK, 
+					PCG(UInt64(init_state), UInt64(init_seq)), 
+					10, 
+					2, 
+					3
+				)
+	elseif algorithm == "pointlight"
+         print("Using a point-light tracer")
+         renderer = PointLightRenderer(world, BLACK)
+	else
+		throw(ArgumentError("Unknown renderer: $algorithm"))
+	end
+
+	function print_progress(row::Int64, col::Int64)
+     	print("Rendered row $(image.height - row)/$(image.height) \t= ")
+		@printf "%.2f" 100*((image.height - row)/image.height)
+		print("%\n")
+	end
+
+	fire_all_rays!(tracer, renderer, print_progress)
+	img = tracer.img
+
+	# Save the HDR image
+	(bool_savepfm==true) && (open(pfm_output, "w") do outf; write(outf, img); end)
+	(bool_print==true) && (println("\nHDR demo image written to $(pfm_output)\n"))
+
+	# Apply tone-mapping to the image
+	if algorithm == "onoff"
+		normalize_image!(img, 0.18, nothing)
+	elseif algorithm == "flat"
+		normalize_image!(img, 0.18, 0.5)
+	elseif algorithm == "pathtracing"
+		normalize_image!(img, 0.18, 0.1)
+	elseif algorithm == "pointlight"
+		normalize_image!(img, 0.18, 0.1)
+	end
+	clamp_image!(img)
+	γ_correction!(img, 1.27)
+
+	# Save the LDR image
+	if (typeof(query(png_output)) == File{DataFormat{:UNKNOWN}, String})
+		(bool_print==true) && (
+			println(
+				"File{DataFormat{:UNKNOWN}, String} for $(png_output)\n"*
+				"Written as a .png file.\n"
+			)
+		)
+     	Images.save(File{format"PNG"}(png_output), get_matrix(img))
+	else
+		Images.save(png_output, get_matrix(img))
+	end
+
+	(bool_print==true) && (println("\nHDR demo image written to $(png_output)\n"))
+	nothing
+
+end

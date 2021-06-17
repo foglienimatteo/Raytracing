@@ -14,7 +14,8 @@
 # LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
 # SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
 # CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-# IN THE SOFTWARE.
+# IN THE SOFTWARE
+#
 
 
 using Pkg
@@ -26,6 +27,7 @@ import FileIO: @format_str, query
 using Raytracing
 
 FILE_NAME = split(PROGRAM_FILE, "/")[end]
+CAMERAS = ["ort", "per"]
 RENDERERS = ["onoff", "flat", "pathtracing", "pointlight"]
 
 function parse_commandline_error_handler(settings::ArgParseSettings, err, err_code::Int = 1)
@@ -56,6 +58,8 @@ function parse_commandline_error_handler(settings::ArgParseSettings, err, err_co
 	#return err_code
 end
 
+
+
 function ArgParse_command_line(arguments)
 	s = ArgParseSettings()
 
@@ -73,9 +77,18 @@ function ArgParse_command_line(arguments)
 		"tonemapping"
 			action = :command
 			help = "apply tone mapping to a pfm image and save it as a ldr file"
+		"render"
+			action = :command
+			help = "render an image from a file"
+
 	end
 
+
+	#### TONE MAPPING ###################################################################92
+
+
 	s["tonemapping"].description = "Apply tone mapping to a pfm image and save it as a ldr file"
+	
 	add_arg_group!(s["tonemapping"], "tonemapping filenames");
 	@add_arg_table! s["tonemapping"] begin
 		"infile"
@@ -86,6 +99,7 @@ function ArgParse_command_line(arguments)
 			help = "output file name"
 			required = true
 	end
+
 	add_arg_group!(s["tonemapping"], "tonemapping settings");
 	@add_arg_table! s["tonemapping"] begin
 		"--alpha", "-a"
@@ -97,6 +111,10 @@ function ArgParse_command_line(arguments)
 			arg_type = Float64
 			default = 1.27
 	end
+
+
+	#### DEMO #########################################
+
 
 	s["demo"].description = 
 		"""Creates a demo image with the specified options.\n"""*
@@ -118,7 +136,7 @@ function ArgParse_command_line(arguments)
 	    				"ort -> Orthogonal camera, per -> Perspective camera"
           	arg_type = String
 			default = "per"
-			range_tester = input -> (input ∈ ["ort", "per"])
+			range_tester = input -> (input ∈ CAMERAS)
     		"--algorithm"
 			help = "option for the renderer algorithm"
           	arg_type = String
@@ -131,13 +149,13 @@ function ArgParse_command_line(arguments)
 			range_tester = input -> (input ∈ ["A", "B", "C"])
     		"--init_state"
     			arg_type = Int64
-    			help = "Initial seed for the random number generator (positive number)."
+    			help = "Initial seed for the random number generator (positive integer number)."
     			default = 45
 			range_tester = input -> (input>0)
     		"--init_seq"
     			arg_type = Int64
     			help = "Identifier of the sequence produced by the "*
-			    "random number generator (positive number)."
+			    "random number generator (positive integer number)."
     			default = 54
 			range_tester = input -> (input>0)
 		"--camera_position"
@@ -165,6 +183,7 @@ function ArgParse_command_line(arguments)
      		default = 0
 			range_tester =  input -> ((input>=0) && (√input - floor(√input) ≈ 0.))
 	end
+
 	add_arg_group!(s["demo"], "demo optional filenames");
 	@add_arg_table! s["demo"] begin
 		"--set_pfm_name"
@@ -181,16 +200,21 @@ function ArgParse_command_line(arguments)
 			constant = "demo.png"
 	end
 
+
+	#### DEMO_ANIMATION ###################################
+
+
 	s["demo_animation"].description = "creates an animation of a 360 degree rotation around"*
 								"vertical axis of the demo image."
-	add_arg_group!(s["demo_animation"], "demo-animation settings");
+
+	add_arg_group!(s["demo_animation"], "demo_animation settings");
 	@add_arg_table! s["demo_animation"] begin
 		"--camera_type"
 			help = "flag for the camera type:\n"*
 	    				"ort -> Orthogonal camera, per -> Perspective camera"
           	arg_type = String
 			default = "per"
-			range_tester = input -> (input ∈ ["ort", "per"])
+			range_tester = input -> (input ∈ CAMERAS)
     		"--algorithm"
 			help = "flag for the renderer algorithm"
           	arg_type = String
@@ -207,15 +231,83 @@ function ArgParse_command_line(arguments)
 			default = 150
 			range_tester = iseven
 	end
-	add_arg_group!(s["demo_animation"], "demo-animation optional filename");
+
+	add_arg_group!(s["demo_animation"], "demo_animation optional filename");
 	@add_arg_table! s["demo_animation"] begin
 		"--set_anim_name"
 			help = "name of the animation file to be saved"
 			nargs = '?'
 			arg_type = String
-			default = "demo-animation.mp4"
-			constant = "demo-animation.mp4"
+			default = "demo_animation.mp4"
+			constant = "demo_animation.mp4"
 	end
+
+
+	#### RENDER #####################################
+
+
+	add_arg_group!(s["render"], "scenefile to be renderer");
+	@add_arg_table! s["render"] begin
+		"scenefile"
+			help = "path to the file describing the scene to be rendered."
+			#range_tester = input -> (typeof(query(input))<:File{format"PFM"})
+			required = true
+	end
+
+	add_arg_group!(s["render"], "render options");
+	@add_arg_table! s["render"] begin
+		"--camera_type"
+			help = "option for the camera type:\n"*
+	    				"ort -> Orthogonal camera, per -> Perspective camera"
+          	arg_type = String
+			default = "per"
+			range_tester = input -> (input ∈ CAMERAS)
+    		"--algorithm"
+			help = "option for the renderer algorithm"
+          	arg_type = String
+			default = "flat"
+			range_tester = input -> (input ∈ RENDERERS)
+    		"--init_state"
+    			arg_type = Int64
+    			help = "Initial seed for the random number generator (positive integer number)."
+    			default = 45
+			range_tester = input -> (input>0)
+    		"--init_seq"
+    			arg_type = Int64
+    			help = "Identifier of the sequence produced by the "*
+			    "random number generator (positive integer number)."
+    			default = 54
+			range_tester = input -> (input>0)
+		"--camera_position"
+          	help = "camera position in the scene as 'X,Y,Z'"
+          	arg_type = String
+          	default = "-1,0,0"
+          	range_tester = input -> (length(split(input, ",")) == 3)
+		"--alpha"
+			help = "angle of view, in degrees"
+			arg_type = Float64
+			default = 0.
+		"--width"
+			help = "pixel number on the width of the resulting demo image."
+			arg_type = Int64
+			default = 640
+			range_tester = input -> (iseven(input) && input>0)
+		"--height"
+			help = "pixel number on the height of the resulting demo image."
+			arg_type = Int64
+			default = 480
+			range_tester =  input -> (iseven(input) && input>0)
+     	"--samples_per_pixel"
+			help = "Number of samples per pixel (must be a perfect square, e.g., 16)."
+     		arg_type = Int64
+     		default = 0
+			range_tester =  input -> ((input>=0) && (√input - floor(√input) ≈ 0.))
+	end
+
+
+
+	#### parse_args ###################################
+
 
 	parse_args(arguments, s)
 end
@@ -244,16 +336,16 @@ function main(args)
 	if parsed_command=="demo"
 		#println(parse_demo_settings(parsed_settings))
 		demo(parse_demo_settings(parsed_settings)...)
-	end
-
-	if parsed_command=="tonemapping"
+	elseif parsed_command=="tonemapping"
 		#println(parse_tonemapping_settings(parsed_settings))
 		tone_mapping(parse_tonemapping_settings(parsed_settings)...)
-	end
-
-	if parsed_command=="demo-animation"
+	elseif parsed_command=="demo_animation"
 		#println(parse_tonemapping_settings(parsed_settings))
 		demo_animation(parse_demoanimation_settings(parsed_settings)...)
+	elseif parsed_command=="render"
+		render_scene(parse_render_settings(parsed_settings)...)
+	else
+		throw(ArgumentError("unknown command $(parsed_command)"))
 	end
 
 	return nothing

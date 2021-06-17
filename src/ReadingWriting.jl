@@ -713,3 +713,161 @@ function ldr2pfm(path::String, outfile::String)
     end
     nothing
 end
+
+
+##########################################################################################92
+
+
+"""
+    parse_render_settings(dict::Dict{String, Any}) 
+        :: (
+            String, String, Point, String, Float64, Int64, Int64, String,
+            String, Bool, Bool, Int64, Int64, Int64
+            )
+
+Parse a `Dict{String, T} where {T}` for the [`render`](@ref) function.
+
+## Input
+
+A `dict::Dict{String, T} where {T}
+
+## Returns
+
+A tuple `(sf, ct, cp, al, α, w, h, pfm, png, bp, bs,  ist, ise, spp)`
+containing the following variables; the corresponding keys are also showed:
+
+- `sf::String = dict["scenefile"]` : input scene file name (required)
+
+- `ct::String = dict["camera_type"]` : set the perspective projection view:
+  - `ct=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
+  - `ct=="ort"`  -> set [`OrthogonalCamera`](@ref)
+
+- `cp::String = dict["camera_position"]` : "X,Y,Z" coordinates of the 
+  choosen observation point of view 
+
+- `al::String = dict["algorithm"]` : algorithm to be used in the rendered:
+  - `al=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
+  - `al=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
+  - `al=="pathtracing"` -> [`PathTracer`](@ref) algorithm 
+  - `algorithm=="pointlight"` -> [`PointLightRenderer`](@ref) algorithm
+
+- `α::String = dict["alpha"]` : choosen angle of rotation respect to vertical 
+  (i.e. z) axis
+
+- `w::Int64 = dict["width"]` : number of pixels on the horizontal axis to be rendered
+
+- `h::Int64 = dict["height"]` : number of pixels on the vertical axis to be rendered 
+
+- `pfm::String = dict["set_pfm_name"]` : output pfm filename
+
+- `png::String` = dict["set_png_name"]` : output LDR filename
+
+- `bp::Bool = dict["bool_print"]` : if `true`, WIP message of `render` 
+  function are printed (otherwise no)
+
+- `bs::Bool = dict["bool_savepfm"]` : if `true`, `render` function saves the 
+  pfm file to disk
+
+- `ist::Int64 = dict["init_state"]` : initial state of the PCG generator
+
+- `ise::Int64 = dict["init_seq"]` : initial sequence of the PCG generator
+
+- `spp::Int64  = dict["samples_per_pixel"]` : number of ray to be 
+  generated for each pixel
+
+See also:  [`render`](@ref), [`Point`](@ref), [`PCG`](@ref)
+"""
+function parse_render_settings(dict::Dict{String, T}) where {T}
+
+    keys = [
+        "scenefile", "camera_type", "camera_position",
+        "algorithm", "alpha", "width", "height",
+        "set_pfm_name", "set_png_name", 
+        "bool_print", "bool_savepfm", 
+        "init_state", "init_seq", "samples_per_pixel"
+    ]
+
+    for pair in dict
+        if (pair[1] in keys) ==false
+            throw(ArgumentError(
+                "invalid key : $(pair[1])\n"*
+                "valid keys for demo function are:\n "*
+                "$(["$(key)" for key in keys])"
+            ))
+        end
+    end
+
+    haskey(dict, "scenefile") ? 
+        scenefile::String = dict["scenefile"] : 
+        throw(ArgumentError("need to specify the input scenefile to be rendered"))
+
+    haskey(dict, "camera_type") ? 
+        camera_type::String = dict["camera_type"] : 
+        camera_type = "per"
+
+    haskey(dict, "camera_position") ?
+        begin
+            obs::String = dict["camera_position"]
+            (x,y,z) = Tuple(parse.(Float64, split(obs, ","))) 
+            camera_position = Point(x,y,z)
+        end : 
+        camera_position =  Point(-1.0 , 0. , 0.)
+
+    haskey(dict, "algorithm") ? 
+        algorithm::String = dict["algorithm"] : 
+        algorithm = "flat"
+
+    haskey(dict, "alpha") ? 
+        α::Float64 = dict["alpha"] : 
+        α = 0.
+
+    haskey(dict, "width") ? 
+        width::Int64 = dict["width"] : 
+        width = 640
+
+    haskey(dict, "height") ? 
+        height::Int64 = dict["height"] : 
+        height= 480
+
+    haskey(dict, "set_pfm_name") ? 
+        pfm::String = dict["set_pfm_name"] : 
+        pfm = "scene.pfm"
+
+    haskey(dict, "set_png_name") ? 
+        png::String = dict["set_png_name"] : 
+        png = "scene.png"
+
+    haskey(dict, "bool_print") ? 
+        bool_print::Bool = dict["bool_print"] : 
+        bool_print = true
+    
+    haskey(dict, "bool_savepfm") ? 
+        bool_savepfm::Bool = dict["bool_savepfm"] : 
+        bool_savepfm = true
+
+    haskey(dict, "init_state") ? 
+        init_state::Int64 = dict["init_state"] : 
+        init_state = 54
+
+    haskey(dict, "init_seq") ? 
+        init_seq::Int64 = dict["init_seq"] : 
+        init_seq = 45
+
+    haskey(dict, "samples_per_pixel") ? 
+        samples_per_pixel::Int64 = dict["samples_per_pixel"] : 
+        samples_per_pixel = 0
+
+
+    return (
+            scenefile,
+            camera_type,
+            camera_position, 
+            algorithm, 
+            α, 
+            width, height, 
+            pfm, png, 
+            bool_print, bool_savepfm, 
+            init_state, init_seq,
+            samples_per_pixel
+        )
+end
