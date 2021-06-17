@@ -721,8 +721,9 @@ end
 """
     parse_render_settings(dict::Dict{String, Any}) 
         :: (
-            String, String, Point, String, Float64, Int64, Int64, String,
-            String, Bool, Bool, Int64, Int64, Int64
+            String, Union{String, Nothing}, Union{Point, Nothing}, String,
+            Float64, Int64, Int64, String, String, Bool, Bool, Int64, 
+            Int64, Int64
             )
 
 Parse a `Dict{String, T} where {T}` for the [`render`](@ref) function.
@@ -738,12 +739,13 @@ containing the following variables; the corresponding keys are also showed:
 
 - `sf::String = dict["scenefile"]` : input scene file name (required)
 
-- `ct::String = dict["camera_type"]` : set the perspective projection view:
-  - `ct=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
+- `ct::Union{String, Nothing} = dict["camera_type"]` : set the perspective projection view:
+  - `ct=="per"` -> set [`PerspectiveCamera`](@ref) 
   - `ct=="ort"`  -> set [`OrthogonalCamera`](@ref)
+  - `nothing` : default return value if not specified
 
-- `cp::String = dict["camera_position"]` : "X,Y,Z" coordinates of the 
-  choosen observation point of view 
+- `cp::Union{String, Nothing} = dict["camera_position"]` : "X,Y,Z" coordinates of the 
+  choosen observation point of view (`nothing` default return value, else `Point(X,Y,Z)`)
 
 - `al::String = dict["algorithm"]` : algorithm to be used in the rendered:
   - `al=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
@@ -803,7 +805,7 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
 
     haskey(dict, "camera_type") ? 
         camera_type::String = dict["camera_type"] : 
-        camera_type = "per"
+        camera_type = nothing
 
     haskey(dict, "camera_position") ?
         begin
@@ -811,7 +813,7 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
             (x,y,z) = Tuple(parse.(Float64, split(obs, ","))) 
             camera_position = Point(x,y,z)
         end : 
-        camera_position =  Point(-1.0 , 0. , 0.)
+        camera_position = nothing
 
     haskey(dict, "algorithm") ? 
         algorithm::String = dict["algorithm"] : 
@@ -858,6 +860,28 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
         samples_per_pixel = 0
 
 
+    if algorithm == "onoff"
+		(bool_print==true) && (println("Using on/off renderer"))
+		renderer = OnOffRenderer(world, BLACK)
+	elseif algorithm == "flat"
+		(bool_print==true) && (println("Using flat renderer"))
+		renderer = FlatRenderer(world, BLACK)
+	elseif algorithm == "pathtracing"
+		(bool_print==true) && (println("Using path tracing renderer"))
+		renderer = PathTracer(
+					world, 
+					BLACK, 
+					PCG(UInt64(init_state), UInt64(init_seq)), 
+					N, 
+					max_depth, 
+					russian_roulette_limit
+				)
+	elseif algorithm == "pointlight"
+         print("Using a point-light tracer")
+         renderer = PointLightRenderer(world, BLACK)
+	else
+		throw(ArgumentError("Unknown renderer: $algorithm"))
+	end
     return (
             scenefile,
             camera_type,

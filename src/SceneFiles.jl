@@ -1197,7 +1197,7 @@ function parse_scene(inputstream::InputStream, variables::Dict{String, Float64} 
                throw(GrammarError(what.location, "expected a keyword instead of '$(what)'"))
           end
 
-          if what.value.keyword ==  FLOAT
+          if what.value.keyword == FLOAT
                variable_name = expect_identifier(inputstream)
 
                # Save this for the error message
@@ -1217,11 +1217,11 @@ function parse_scene(inputstream::InputStream, variables::Dict{String, Float64} 
                     scene.float_variables[variable_name] = variable_value
                end
 
-          elseif what.value.keyword ==  SPHERE
+          elseif what.value.keyword == SPHERE
                add_shape!(scene.world, parse_sphere(inputstream, scene))
-          elseif what.value.keyword ==  PLANE
+          elseif what.value.keyword == PLANE
                add_shape!(scene.world, parse_plane(inputstream, scene))
-          elseif what.value.keyword ==  CAMERA
+          elseif what.value.keyword == CAMERA
                if !isnothing(scene.camera)
                     throw(GrammarError(what.location, "You cannot define more than one camera"))
                end
@@ -1242,9 +1242,9 @@ end
 
 function render(
           scenefile::String,
-     	camera_type::String = "per",
-		camera_position::Point = Point(-1.,0.,0.), 
-		algorithm::String = "flat",
+     	camera_type::Union{String, Nothing} = nothing,
+		camera_position::Union{Point, Nothing} = nothing, 
+		renderer::Renderer = FlatRenderer(),
      	α::Float64 = 0., 
      	width::Int64 = 640, 
      	height::Int64 = 480, 
@@ -1269,49 +1269,58 @@ function render(
 				"$(samples_per_pixel) must be a perfect square")
 	)
 
-	world = scene.world
+	renderer.world = scene.world
 
-	observer_vec = camera_position - Point(0., 0., 0.)
+     if isnothing(camera_position)
+          camera_tr = scene.camera.T
+     else
+          observer_vec = camera_position - Point(0., 0., 0.)
+          camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec) * scene.camera.T
+     end
 
-	camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec)
-	aspect_ratio = width / height
+     aspect_ratio = scene.camera.a
 
-	if camera_type == "per"
+     if isnothing(camera_type)
+          if typeof(scene.camera) == OrthogonalCamera
+               (bool_print==true) && (println("Using perspective camera"))
+               camera = OrthogonalCamera(aspect_ratio, camera_tr)
+
+          elseif typeof(scene.camera) == PerspectiveCamera
+               (bool_print==true) && (println("Using orthogonal camera"))
+               camera = PerspectiveCamera(scene.camera.d, aspect_ratio, camera_tr)
+
+          else
+		     throw(ArgumentError("Unknown camera: $camera_type"))
+	     end
+     
+     elseif camera_type == "per"
 		(bool_print==true) && (println("Using perspective camera"))
 		camera = PerspectiveCamera(1., aspect_ratio, camera_tr)
+
 	elseif camera_type == "ort"
 		(bool_print==true) && (println("Using orthogonal camera"))
 		camera = OrthogonalCamera(aspect_ratio, camera_tr) 
+
 	else
 		throw(ArgumentError("Unknown camera: $camera_type"))
+	end
+
+
+     if typeof(renderer) == OnOffRenderer
+		(bool_print==true) && (println("Using on/off renderer"))
+	elseif typeof(renderer) == FlatRenderer
+		(bool_print==true) && (println("Using flat renderer"))
+	elseif typeof(renderer) == PathTracer
+		(bool_print==true) && (println("Using path tracing renderer"))
+	elseif typeof(renderer) == PointLightRenderer
+          (bool_print==true) && (println("Using point-light renderer"))
+	else
+		throw(ArgumentError("Unknown renderer: $(typeof(renderer))"))
 	end
 	
 	# Run the ray-tracer
 	image = HDRimage(width, height)
 	tracer = ImageTracer(image, camera, samples_per_side)
-
-	if algorithm == "onoff"
-		(bool_print==true) && (println("Using on/off renderer"))
-		renderer = OnOffRenderer(world, BLACK)
-	elseif algorithm == "flat"
-		(bool_print==true) && (println("Using flat renderer"))
-		renderer = FlatRenderer(world, BLACK)
-	elseif algorithm == "pathtracing"
-		(bool_print==true) && (println("Using path tracing renderer"))
-		renderer = PathTracer(
-					world, 
-					BLACK, 
-					PCG(UInt64(init_state), UInt64(init_seq)), 
-					10, 
-					2, 
-					3
-				)
-	elseif algorithm == "pointlight"
-         print("Using a point-light tracer")
-         renderer = PointLightRenderer(world, BLACK)
-	else
-		throw(ArgumentError("Unknown renderer: $algorithm"))
-	end
 
 	function print_progress(row::Int64, col::Int64)
      	print("Rendered row $(image.height - row)/$(image.height) \t= ")
