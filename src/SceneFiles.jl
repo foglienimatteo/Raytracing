@@ -119,7 +119,7 @@ Enumeration for all the possible keywords recognized by the lexer:
 |                   |                   |                        |
 |                   |                   |                        |
 |:-----------------:|:-----------------:|:----------------------:|
-| BRDF = 10         | CAMERA = 30       | PLANE = 51             |
+| BRDFS = 10         | CAMERA = 30       | PLANE = 51             |
 | DIFFUSE = 11      | ORTHOGONAL = 31   | SPHERE = 52            |
 | SPECULAR = 12     | PERSPECTIVE = 32  |                        |
 |                   |                   |                        |
@@ -134,7 +134,7 @@ Enumeration for all the possible keywords recognized by the lexer:
     VECTOR = 4
     COLOR = 5
 
-    BRDF = 10
+    BRDFS = 10
     DIFFUSE = 11
     SPECULAR = 12
 
@@ -166,7 +166,7 @@ KEYWORDS = Dict{String, KeywordEnum}(
     "vector" => VECTOR,
     "color" => COLOR,
 
-    "brdf" => BRDF,
+    "brdf" => BRDFS,
     "diffuse" => DIFFUSE,
     "specular" => SPECULAR,
 
@@ -738,6 +738,9 @@ mutable struct Scene
      float_variables::Dict{String, Float64}
      vector_variables::Dict{String,Vec}
      color_variables::Dict{String,RGB{Float32}}
+     pigment_variables::Dict{String,Pigment}
+     brdf_variables::Dict{String,BRDF}
+     transformation_variables::Dict{String,Transformation}
 
      variable_names::Set{String}
      overridden_variables::Set{String}
@@ -749,10 +752,13 @@ mutable struct Scene
           fv::Dict{String, Float64} = Dict{String, Float64}(),
           vv::Dict{String,Vec} = Dict{String,Vec}(),
           cv::Dict{String,RGB{Float32}} = Dict{String,RGB{Float32}}(),
+          pv::Dict{String,Pigment} = Dict{String,Pigment}(),
+          bv::Dict{String,BRDF} = Dict{String,BRDF}(),
+          tv::Dict{String,Transformation} = Dict{String,Transformation}(),
           vn::Set{String} = Set{String}(),
           ov::Set{String} = Set{String}(),
 
-     ) = new(m,w,c,fv,vv,cv,vn,ov)
+     ) = new(m,w,c,fv,vv,cv,pv,bv,tv,vn,ov)
 end
 
 
@@ -962,6 +968,18 @@ Call internally the following functions and structs of the program:
 See also: [`InputStream`](@ref), [`Scene`](@ref), [`Pigment`](@ref)
 """
 function parse_pigment(inputstream::InputStream, scene::Scene)
+     token = read_token(inputstream)
+     if typeof(token.value) == IdentifierToken
+          variable_name = token.value.identifier
+          if variable_name ∉ keys(scene.pigment_variables)
+               throw(GrammarError(token.location, "unknown pigment '$(token)'"))
+          end
+
+          return scene.pigment_variables[variable_name]
+     else
+          unread_token(inputstream, token)
+     end
+
      keyword = expect_keywords(inputstream, [ UNIFORM,  CHECKERED,  IMAGE])
 
      expect_symbol(inputstream, "(")
@@ -984,6 +1002,7 @@ function parse_pigment(inputstream::InputStream, scene::Scene)
      end
 
      expect_symbol(inputstream, ")")
+     
      return result
 end
 
@@ -1004,6 +1023,18 @@ Call internally the following functions and structs of the program:
 See also: [`InputStream`](@ref), [`Scene`](@ref), [`BRDF`](@ref)
 """
 function parse_brdf(inputstream::InputStream, scene::Scene)
+     token = read_token(inputstream)
+     if typeof(token.value) == IdentifierToken
+          variable_name = token.value.identifier
+          if variable_name ∉ keys(scene.brdf_variables)
+               throw(GrammarError(token.location, "unknown BRDF '$(token)'"))
+          end
+
+          return scene.brdf_variables[variable_name]
+     else
+          unread_token(inputstream, token)
+     end
+
      brdf_keyword = expect_keywords(inputstream, [ DIFFUSE,  SPECULAR])
      expect_symbol(inputstream, "(")
      pigment = parse_pigment(inputstream, scene)
@@ -1072,6 +1103,18 @@ Call internally the following functions and structs of the program:
 See also: [`InputStream`](@ref), [`Scene`](@ref), [`Transformation`](@ref)
 """
 function parse_transformation(inputstream::InputStream, scene::Scene)
+     token = read_token(inputstream)
+     if typeof(token.value) == IdentifierToken
+          variable_name = token.value.identifier
+          if variable_name ∉ keys(scene.transformation_variables)
+               throw(GrammarError(token.location, "unknown pigment '$(token)'"))
+          end
+
+          return scene.transformation_variables[variable_name]
+     else
+          unread_token(inputstream, token)
+     end
+
      result = Transformation()
 
      while true
@@ -1310,6 +1353,54 @@ function parse_scene(inputstream::InputStream, variables::Dict{String, Float64} 
 
                if variable_name ∉ scene.overridden_variables
                     scene.color_variables[variable_name] = variable_value
+                    push!(scene.variable_names, variable_name)
+               end
+               
+          elseif what.value.keyword == BRDFS
+               variable_name = expect_identifier(inputstream)
+               variable_loc = inputstream.location
+               expect_symbol(inputstream, "(")
+               variable_value = parse_brdf(inputstream, scene)
+               expect_symbol(inputstream, ")")
+
+               if (variable_name ∈ scene.variable_names) && !(variable_name ∈ scene.overridden_variables)
+                    throw(GrammarError(variable_loc, "variable «$(variable_name)» cannot be redefined"))
+               end
+
+               if variable_name ∉ scene.overridden_variables
+                    scene.brdf_variables[variable_name] = variable_value
+                    push!(scene.variable_names, variable_name)
+               end
+
+          elseif what.value.keyword == PIGMENT
+               variable_name = expect_identifier(inputstream)
+               variable_loc = inputstream.location
+               expect_symbol(inputstream, "(")
+               variable_value = parse_pigment(inputstream, scene)
+               expect_symbol(inputstream, ")")
+
+               if (variable_name ∈ scene.variable_names) && !(variable_name ∈ scene.overridden_variables)
+                    throw(GrammarError(variable_loc, "variable «$(variable_name)» cannot be redefined"))
+               end
+
+               if variable_name ∉ scene.overridden_variables
+                    scene.pigment_variables[variable_name] = variable_value
+                    push!(scene.variable_names, variable_name)
+               end
+
+          elseif what.value.keyword == TRANSFORMATION
+               variable_name = expect_identifier(inputstream)
+               variable_loc = inputstream.location
+               expect_symbol(inputstream, "(")
+               variable_value = parse_transformation(inputstream, scene)
+               expect_symbol(inputstream, ")")
+
+               if (variable_name ∈ scene.variable_names) && !(variable_name ∈ scene.overridden_variables)
+                    throw(GrammarError(variable_loc, "variable «$(variable_name)» cannot be redefined"))
+               end
+
+               if variable_name ∉ scene.overridden_variables
+                    scene.transformation_variables[variable_name] = variable_value
                     push!(scene.variable_names, variable_name)
                end
 
