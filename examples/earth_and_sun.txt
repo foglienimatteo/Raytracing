@@ -68,6 +68,6 @@ sphere(
      milky_way_trans
      )
 
-# sun_pointlight_lum = <sun_lum, sun_lum, sun_lum>
-# pointlight(sun_pos, sun_pointlight_lum)
+color sun_pointlight_lum(<sun_lum, sun_lum, sun_lum>)
+pointlight sun_pointlight(sun_pos, sun_pointlight_lum, 1.0)
 

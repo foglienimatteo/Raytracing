@@ -30,6 +30,16 @@ FILE_NAME = split(PROGRAM_FILE, "/")[end]
 CAMERAS = ["ort", "per"]
 RENDERERS = ["onoff", "flat", "pathtracing", "pointlight"]
 
+function range_tester_declare_float(string::String="")
+	(string == "") && (return true)
+
+	println(string)
+	str=split(string, ":")
+	println(str)
+	length(str)==2 && !isnothing(tryparse(Float64, str[2]))
+end
+
+
 function parse_commandline_error_handler(settings::ArgParseSettings, err, err_code::Int = 1)
 	help_string = 
 		"execute one of the following to get the help instructions:\n"*
@@ -308,6 +318,19 @@ function ArgParse_command_line(arguments)
      		default = 0
 			range_tester =  input -> ((input>=0) && (√input - floor(√input) ≈ 0.))
 	end
+
+	add_arg_group!(s["render"], 
+		"render declare options for a scene; this options"*
+		"allows to modify values of the scene without changing"*
+		"the scenefile directly."
+	);
+	@add_arg_table! s["render"] begin
+		"--declare_float"
+			help = "Declare a variable. The syntax is «--declare-float=VAR:VALUE». Example: --declare_float=clock:150"
+          	arg_type = String
+			default = ""
+			range_tester = range_tester_declare_float
+		end
 
 	add_arg_group!(s["render"]["pathtracer"], "pathtracing renderer options");
 	@add_arg_table! s["render"]["pathtracer"] begin

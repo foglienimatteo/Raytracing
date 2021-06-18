@@ -110,16 +110,15 @@ Enumeration for all the possible keywords recognized by the lexer:
 ```ditaa
 |:-----------------:|:-----------------:|:----------------------:|
 | NEW = 1           | PIGMENT = 20      | TRANSFORMATION = 40    |
-| MATERIAL = 2      | UNIFORM = 21      | IDENTITY = 41          |
-| FLOAT = 3         | CHECKERED = 22    | TRANSLATION = 42       |
-| VECTOR = 4        | IMAGE = 23        | ROTATION_X = 43        |
-| COLOR = 5         |                   | ROTATION_Y = 44        |
-|                   |                   | ROTATION_Z = 45        |
+| FLOAT = 2         | UNIFORM = 21      | IDENTITY = 41          |
+| VECTOR = 3        | CHECKERED = 22    | TRANSLATION = 42       |
+| COLOR = 4         | IMAGE = 23        | ROTATION_X = 43        |
+| MATERIAL = 5      |                   | ROTATION_Y = 44        |
+| POINTLIGHT = 6    |                   | ROTATION_Z = 45        |
 |                   |                   | SCALING = 46           |
 |                   |                   |                        |
-|                   |                   |                        |
 |:-----------------:|:-----------------:|:----------------------:|
-| BRDFS = 10         | CAMERA = 30       | PLANE = 51             |
+| BRDFS = 10        | CAMERA = 30       | PLANE = 51             |
 | DIFFUSE = 11      | ORTHOGONAL = 31   | SPHERE = 52            |
 | SPECULAR = 12     | PERSPECTIVE = 32  |                        |
 |                   |                   |                        |
@@ -128,43 +127,45 @@ Enumeration for all the possible keywords recognized by the lexer:
 ```
 """
 @enum KeywordEnum begin
-    NEW = 1
-    MATERIAL = 2
-    FLOAT = 3
-    VECTOR = 4
-    COLOR = 5
+     NEW = 1
+     FLOAT = 2
+     VECTOR = 3
+     COLOR = 4
+     MATERIAL = 5
+     POINTLIGHT = 6
 
-    BRDFS = 10
-    DIFFUSE = 11
-    SPECULAR = 12
+     BRDFS = 10
+     DIFFUSE = 11
+     SPECULAR = 12
 
-    PIGMENT = 20
-    UNIFORM = 21
-    CHECKERED = 22
-    IMAGE = 23
+     PIGMENT = 20
+     UNIFORM = 21
+     CHECKERED = 22
+     IMAGE = 23
 
-    CAMERA = 30
-    ORTHOGONAL = 31
-    PERSPECTIVE = 32
+     CAMERA = 30
+     ORTHOGONAL = 31
+     PERSPECTIVE = 32
 
-    TRANSFORMATION = 40
-    IDENTITY = 41
-    TRANSLATION = 42
-    ROTATION_X = 43
-    ROTATION_Y = 44
-    ROTATION_Z = 45
-    SCALING = 46
+     TRANSFORMATION = 40
+     IDENTITY = 41
+     TRANSLATION = 42
+     ROTATION_X = 43
+     ROTATION_Y = 44
+     ROTATION_Z = 45
+     SCALING = 46
 
-    PLANE = 51
-    SPHERE = 52
+     PLANE = 51
+     SPHERE = 52
 end
 
 KEYWORDS = Dict{String, KeywordEnum}(
     "new" => NEW,
-    "material" => MATERIAL,
     "float" => FLOAT,
     "vector" => VECTOR,
     "color" => COLOR,
+    "material" => MATERIAL,
+    "pointlight" => POINTLIGHT,
 
     "brdf" => BRDFS,
     "diffuse" => DIFFUSE,
@@ -741,6 +742,7 @@ mutable struct Scene
      pigment_variables::Dict{String,Pigment}
      brdf_variables::Dict{String,BRDF}
      transformation_variables::Dict{String,Transformation}
+     pointlight_variables::Dict{String,PointLight}
 
      variable_names::Set{String}
      overridden_variables::Set{String}
@@ -749,16 +751,19 @@ mutable struct Scene
           m::Dict{String, Material} = Dict{String, Material}(),
           w::World = World(),
           c::Union{Camera, Nothing} = nothing,
+
           fv::Dict{String, Float64} = Dict{String, Float64}(),
           vv::Dict{String,Vec} = Dict{String,Vec}(),
           cv::Dict{String,RGB{Float32}} = Dict{String,RGB{Float32}}(),
           pv::Dict{String,Pigment} = Dict{String,Pigment}(),
           bv::Dict{String,BRDF} = Dict{String,BRDF}(),
           tv::Dict{String,Transformation} = Dict{String,Transformation}(),
+          plv::Dict{String,PointLight} = Dict{String,PointLight}(),
+
           vn::Set{String} = Set{String}(),
           ov::Set{String} = Set{String}(),
 
-     ) = new(m,w,c,fv,vv,cv,pv,bv,tv,vn,ov)
+     ) = new(m,w,c,fv,vv,cv,pv,bv,tv,plv,vn,ov)
 end
 
 
@@ -1166,6 +1171,44 @@ end
 
 
 """
+     parse_pointlight(inputstream::InputStream, scene::Scene) :: PointLight
+
+Parse a PointLight from the given `inputstream` and return it.
+
+Call internally the following parsing functions:
+- [`read_token`](@ref)
+- [`unread_token`](@ref)
+- [`expect_number`](@ref)
+- [`expect_symbol`](@ref)
+- [`parse_vector`](@ref)
+- [`parse_color`](@ref)
+    
+See also: [`InputStream`](@ref), [`Scene`](@ref), [`PointLight`](@ref)
+"""
+function parse_pointlight(inputstream::InputStream, scene::Scene)
+     token = read_token(inputstream)
+     if typeof(token.value) == IdentifierToken && 
+          (token.value.identifier ∈ keys(scene.pointlight_variables))
+          return scene.pointlight_variables[variable_name]
+     else
+          unread_token(inputstream, token)
+     end
+
+     point = parse_vector(inputstream, scene)
+     expect_symbol(inputstream, ",")
+     color = parse_color(inputstream, scene)
+     expect_symbol(inputstream, ",")
+     linear_radius = expect_number(inputstream, scene)
+
+     return PointLight(
+               Point(point.x, point.y, point.z),
+               color,
+               linear_radius,
+               )
+end
+
+
+"""
      parse_sphere(inputstream::InputStream, scene::Scene) :: Sphere
 
 Parse a Sphere from the given `inputstream` and return it.
@@ -1401,6 +1444,22 @@ function parse_scene(inputstream::InputStream, variables::Dict{String, Float64} 
 
                if variable_name ∉ scene.overridden_variables
                     scene.transformation_variables[variable_name] = variable_value
+                    push!(scene.variable_names, variable_name)
+               end
+
+          elseif what.value.keyword == POINTLIGHT
+               variable_name = expect_identifier(inputstream)
+               variable_loc = inputstream.location
+               expect_symbol(inputstream, "(")
+               variable_value = parse_pointlight(inputstream, scene)
+               expect_symbol(inputstream, ")")
+
+               if (variable_name ∈ scene.variable_names) && !(variable_name ∈ scene.overridden_variables)
+                    throw(GrammarError(variable_loc, "variable «$(variable_name)» cannot be redefined"))
+               end
+
+               if variable_name ∉ scene.overridden_variables
+                    scene.pointlight_variables[variable_name] = variable_value
                     push!(scene.variable_names, variable_name)
                end
 

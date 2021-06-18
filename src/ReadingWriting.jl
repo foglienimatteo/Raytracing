@@ -836,13 +836,14 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
 
     keys = [
         "scenefile", 
-        "%COMMAND%",
-        "onoff", "flat", "pathtracer", "pointlight",
         "camera_type", "camera_position", 
         "alpha", "width", "height",
         "set_pfm_name", "set_png_name", 
         "bool_print", "bool_savepfm", 
-        "init_state", "init_seq", "samples_per_pixel"
+        "init_state", "init_seq", "samples_per_pixel",
+        "declare_float",
+        "%COMMAND%",
+        "onoff", "flat", "pathtracer", "pointlight",
     ]
 
     for pair in dict
@@ -903,6 +904,15 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
         samples_per_pixel::Int64 = dict["samples_per_pixel"] : 
         samples_per_pixel = 0
 
+    haskey(dict, "declare_float") ? begin
+        dict["declare_float"] == "" ? declare_float = nothing :
+	    str = split(dict["declare_float"], ":")
+	    if !(length(str)==2 && !isnothing(tryparse(Float64, str[2])))
+            throw(ArgumentError("invalid declare_float usage"))
+        end
+        declare_float::Dict{String, Float64} = Dict(str[1]=>parse(Float64, str[2]))
+        end : 
+        declare_float = nothing
 
     if haskey(dict, "%COMMAND%")
         if dict["%COMMAND%"] == "onoff"
@@ -927,6 +937,7 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
             width, height, 
             pfm, png, 
             bool_print, bool_savepfm, 
-            samples_per_pixel
+            samples_per_pixel, 
+            declare_float,
         )
 end

@@ -21,12 +21,18 @@ function render(
         	png_output::String = "scene.png",
 		bool_print::Bool = true,
 		bool_savepfm::Bool = true,
-		samples_per_pixel::Int64 = 0
+		samples_per_pixel::Int64 = 0,
+          declare_float::Union{Dict{String,Float64}, Nothing} = nothing,
      )
 
      scene = open(scenefile, "r") do stream
+          if isnothing(declare_float)
                inputstream = InputStream(stream)
                parse_scene(inputstream)
+          else
+               inputstream = InputStream(stream)
+               parse_scene(inputstream, declare_float)
+          end
      end
 
      samples_per_side = Int64(floor(√samples_per_pixel))

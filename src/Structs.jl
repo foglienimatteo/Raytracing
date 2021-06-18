@@ -862,7 +862,7 @@ mutable struct PathTracer <: Renderer
     num_of_rays::Int64
     max_depth::Int64
     russian_roulette_limit::Int64
-    PathTracer(w::World, bc=BLACK, pcg=PCG(), n=10, md=2, RRlim=3) = 
+    PathTracer(w::World = World(), bc=BLACK, pcg=PCG(), n=10, md=2, RRlim=3) = 
         new(w, bc, pcg, n, md, RRlim)
 end
 
@@ -891,7 +891,7 @@ mutable struct PointLightRenderer <: Renderer
     background_color::RGB{Float32}
     ambient_color::RGB{Float32}
     PointLightRenderer(
-            w::World, 
+            w::World = World(), 
             bc=RGB{Float32}(0., 0., 0.), 
             ac=RGB{Float32}(0.1, 0.1, 0.1)
         ) = new(w, bc, ac)
