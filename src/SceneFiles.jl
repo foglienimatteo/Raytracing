@@ -118,9 +118,15 @@ Enumeration for all the possible keywords recognized by the lexer:
 |                   |                   | SCALING = 46           |
 |                   |                   |                        |
 |:-----------------:|:-----------------:|:----------------------:|
-| BRDFS = 10        | CAMERA = 30       | PLANE = 51             |
-| DIFFUSE = 11      | ORTHOGONAL = 31   | SPHERE = 52            |
-| SPECULAR = 12     | PERSPECTIVE = 32  |                        |
+| BRDFS = 10        | CAMERA = 30       | BOOL = 50              |
+| DIFFUSE = 11      | ORTHOGONAL = 31   | TRUE = 51              |
+| SPECULAR = 12     | PERSPECTIVE = 32  | FALSE = 52             |
+|                   |                   |                        |
+|                   |                   |                        |
+|:-----------------:|:-----------------:|:----------------------:|
+| PLANE = 61        |                   |                        |
+| SPHERE = 62       |                   |                        |
+|                   |                   |                        |
 |                   |                   |                        |
 |                   |                   |                        |
 |:-----------------:|:-----------------:|:----------------------:|
@@ -155,8 +161,12 @@ Enumeration for all the possible keywords recognized by the lexer:
      ROTATION_Z = 45
      SCALING = 46
 
-     PLANE = 51
-     SPHERE = 52
+     BOOL = 50
+     TRUE = 51
+     FALSE = 52
+
+     PLANE = 61
+     SPHERE = 62
 end
 
 KEYWORDS = Dict{String, KeywordEnum}(
@@ -187,6 +197,10 @@ KEYWORDS = Dict{String, KeywordEnum}(
     "rotation_y" => ROTATION_Y,
     "rotation_z" => ROTATION_Z,
     "scaling" => SCALING,
+
+     "bool" => BOOL,
+     "true" => TRUE,
+     "false" => FALSE,
 
     "plane" => PLANE,
     "sphere" => SPHERE,
@@ -737,6 +751,7 @@ mutable struct Scene
      camera::Union{Camera, Nothing}
 
      float_variables::Dict{String, Float64}
+     bool_variables::Dict{String,Bool}
      vector_variables::Dict{String,Vec}
      color_variables::Dict{String,RGB{Float32}}
      pigment_variables::Dict{String,Pigment}
@@ -748,22 +763,39 @@ mutable struct Scene
      overridden_variables::Set{String}
 
      Scene(
-          m::Dict{String, Material} = Dict{String, Material}(),
-          w::World = World(),
-          c::Union{Camera, Nothing} = nothing,
+          materials::Dict{String, Material} = Dict{String, Material}(),
+          world::World = World(),
+          camera::Union{Camera, Nothing} = nothing,
 
-          fv::Dict{String, Float64} = Dict{String, Float64}(),
-          vv::Dict{String,Vec} = Dict{String,Vec}(),
-          cv::Dict{String,RGB{Float32}} = Dict{String,RGB{Float32}}(),
-          pv::Dict{String,Pigment} = Dict{String,Pigment}(),
-          bv::Dict{String,BRDF} = Dict{String,BRDF}(),
-          tv::Dict{String,Transformation} = Dict{String,Transformation}(),
-          plv::Dict{String,PointLight} = Dict{String,PointLight}(),
+          float_variables::Dict{String, Float64} = Dict{String, Float64}(),
+          bool_variables::Dict{String, Bool} = Dict{String, Bool}(),
+          vector_variables::Dict{String,Vec} = Dict{String,Vec}(),
+          color_variables::Dict{String,RGB{Float32}} = Dict{String,RGB{Float32}}(),
+          pigment_variables::Dict{String,Pigment} = Dict{String,Pigment}(),
+          brdf_variables::Dict{String,BRDF} = Dict{String,BRDF}(),
+          transformation_variables::Dict{String,Transformation} = Dict{String,Transformation}(),
+          pointlight_variables::Dict{String,PointLight} = Dict{String,PointLight}(),
 
-          vn::Set{String} = Set{String}(),
-          ov::Set{String} = Set{String}(),
+          variable_names::Set{String} = Set{String}(),
+          overridden_variables::Set{String} = Set{String}(),
 
-     ) = new(m,w,c,fv,vv,cv,pv,bv,tv,plv,vn,ov)
+     ) = new(
+          materials,
+          world,
+          camera,
+
+          float_variables,
+          bool_variables,
+          vector_variables,
+          color_variables,
+          pigment_variables,
+          brdf_variables,
+          transformation_variables,
+          pointlight_variables,
+
+          variable_names,
+          overridden_variables,
+     )
 end
 
 
@@ -833,6 +865,45 @@ function expect_number(inputstream::InputStream, scene::Scene)
                throw(GrammarError(token.location, "unknown variable '$(token)'"))
           end
           return scene.float_variables[variable_name]
+     end
+
+     throw(GrammarError(token.location, "got '$(token)' instead of a number"))
+end
+
+
+"""
+     expect_bool(inputstream::InputStream, scene::Scene) :: Bool
+
+Read a token from `inputstream` and check that its type is `KeywordToken` 
+or `IdentifierToken` (i.e. a variable defined in `scene`), 
+throwing  `GrammarError` otherwise.
+Return the parsed bool or the identifier associated parsed bool, respectively.
+Call internally [`read_token`](@ref).
+
+See also: [`InputStream`](@ref), [`Scene`](@ref), [`KeywordToken`](@ref), 
+[`IdentifierToken`](@ref)
+"""
+function expect_bool(inputstream::InputStream, scene::Scene)
+     token = read_token(inputstream)
+     if typeof(token.value) == KeywordToken
+          unread_token(inputstream, token)
+          
+          keyword = expect_keywords(inputstream, [ TRUE,  FALSE])
+
+          if keyword == TRUE
+               return true
+          elseif keyword == FALSE
+               return false
+          end
+
+          throw(ArgumentError("how did you come here?"))
+
+     elseif typeof(token.value) == IdentifierToken
+          variable_name = token.value.identifier
+          if variable_name ∉ keys(scene.bool_variables)
+               throw(GrammarError(token.location, "unknown bool variable '$(token)'"))
+          end
+          return scene.bool_variables[variable_name]
      end
 
      throw(GrammarError(token.location, "got '$(token)' instead of a number"))
@@ -1197,9 +1268,21 @@ function parse_pointlight(inputstream::InputStream, scene::Scene)
      point = parse_vector(inputstream, scene)
      expect_symbol(inputstream, ",")
      color = parse_color(inputstream, scene)
-     expect_symbol(inputstream, ",")
-     linear_radius = expect_number(inputstream, scene)
 
+     token = read_token(inputstream)
+     if typeof(token.value) == SymbolToken && token.value.symbol == ","
+          unread_token(inputstream, token)
+
+          expect_symbol(inputstream, ",")
+          linear_radius = expect_number(inputstream, scene)
+     else
+          unread_token(inputstream, token)
+          linear_radius = 0.0
+     end
+
+     println(point)
+     println(color)
+     println(linear_radius)
      return PointLight(
                Point(point.x, point.y, point.z),
                color,
@@ -1232,9 +1315,21 @@ function parse_sphere(inputstream::InputStream, scene::Scene)
      end
      expect_symbol(inputstream, ",")
      transformation = parse_transformation(inputstream, scene)
-     expect_symbol(inputstream, ")")
 
-     return Sphere(transformation, scene.materials[material_name])
+     token = read_token(inputstream)
+     if typeof(token.value) == SymbolToken && token.value.symbol == ","
+          unread_token(inputstream, token)
+
+          expect_symbol(inputstream, ",")
+          bool = expect_bool(inputstream, scene)
+          expect_symbol(inputstream, ")")
+     else
+          unread_token(inputstream, token)
+          expect_symbol(inputstream, ")")
+          bool = false
+     end
+
+     return Sphere(transformation, scene.materials[material_name], bool)
 end
 
 
@@ -1364,6 +1459,22 @@ function parse_scene(inputstream::InputStream, variables::Dict{String, Float64} 
                     # Only define the variable if it was not defined by the user *outside* the scene file
                     # (e.g., from the command line)
                     scene.float_variables[variable_name] = variable_value
+                    push!(scene.variable_names, variable_name)
+               end
+
+          elseif what.value.keyword == BOOL
+               variable_name = expect_identifier(inputstream)
+               variable_loc = inputstream.location
+               expect_symbol(inputstream, "(")
+               variable_value = expect_bool(inputstream, scene)
+               expect_symbol(inputstream, ")")
+
+               if (variable_name ∈ scene.variable_names) && !(variable_name ∈ scene.overridden_variables)
+                    throw(GrammarError(variable_loc, "variable «$(variable_name)» cannot be redefined"))
+               end
+
+               if variable_name ∉ scene.overridden_variables
+                    scene.bool_variables[variable_name] = variable_value
                     push!(scene.variable_names, variable_name)
                end
 

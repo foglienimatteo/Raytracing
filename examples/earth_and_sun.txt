@@ -16,6 +16,7 @@ float sun_radius(1.0)
 float sun_lum(0.0)
 brdf sun_brdf (diffuse(image("images/earth.jpg")))
 pigment sun_emitted_pigment ( uniform(<sun_lum, sun_lum, sun_lum>) )
+bool sun(true)
 
 vector milky_way_pos([0.0, 0.0, 0.0])
 float milky_way_radius(20.0)
@@ -54,7 +55,8 @@ transformation sun_trans(
 
 sphere(
      sun_material,
-     sun_trans
+     sun_trans,
+     sun
      )
 
 
@@ -69,5 +71,7 @@ sphere(
      )
 
 color sun_pointlight_lum(<sun_lum, sun_lum, sun_lum>)
-pointlight sun_pointlight(sun_pos, sun_pointlight_lum, 1.0)
+#pointlight sun_pointlight(sun_pos, sun_pointlight_lum, 1.0)
+
+pointlight sun_pointlight([-1, 0, 0], <10, 10, 10>)
 

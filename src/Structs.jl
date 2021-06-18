@@ -567,12 +567,13 @@ See also: [`Shape`](@ref), [`Transformation`](@ref), [`Material`](@ref)
 struct Sphere <: Shape
     T::Transformation
     Material::Material
+    flag_pointlight::Bool
     
-    Sphere(T::Transformation, M::Material) = new(T,M)
-    Sphere(M::Material, T::Transformation) = new(T,M)
-    Sphere(T::Transformation) = new(T, Material())
-    Sphere(M::Material) = new(Transformation(), M)
-    Sphere() = new(Transformation(), Material())
+    Sphere(T::Transformation, M::Material, b::Bool=false) = new(T,M,b)
+    Sphere(M::Material, T::Transformation, b::Bool=false) = new(T,M,b)
+    Sphere(T::Transformation, b::Bool=false) = new(T, Material(), b)
+    Sphere(M::Material, b::Bool=false) = new(Transformation(), M, b)
+    Sphere() = new(Transformation(), Material(), false)
 end
 
 """
@@ -594,13 +595,13 @@ See also: [`Shape`](@ref), [`Transformation`](@ref), [`Material`](@ref)
 struct Plane <: Shape
     T::Transformation
     Material::Material
+    flag_pointlight::Bool
     
-    Plane(T::Transformation, M::Material) = new(T,M)
-    Plane(M::Material, T::Transformation) = new(T,M)
-    Plane(T::Transformation) = new(T, Material())
-    Plane(M::Material) = new(Transformation(), M)
-    Plane() = new(Transformation(), Material())
-    #Plane(T=Transformation(), M=Material()) = new(T,M)
+    Plane(T::Transformation, M::Material, b::Bool=false) = new(T,M,b)
+    Plane(M::Material, T::Transformation, b::Bool=false) = new(T,M,b)
+    Plane(T::Transformation, b::Bool=false) = new(T, Material(), b)
+    Plane(M::Material, b::Bool=false) = new(Transformation(), M, b)
+    Plane() = new(Transformation(), Material(), false)
 end
 
 """
