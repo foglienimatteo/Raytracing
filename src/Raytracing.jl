@@ -58,7 +58,9 @@ export KeywordEnum, GrammarError, InputStream
 export Token, KeywordToken, IdentifierToken, StringToken
 export LiteralNumberToken, SymbolToken, StopToken
 export read_token, skip_whitespaces_and_comments
-export Scene, parse_scene, render
+export Scene, parse_scene
+#from Render.jl
+export render
 # from PrintFunctions.jl
 export print_not_black
 
@@ -76,6 +78,7 @@ include("Renderers.jl")
 include("OrthoNormalBasis.jl")
 include("ScatterRay.jl")
 include("SceneFiles.jl")
+include("Render.jl")
 include("PrintFunctions.jl")
 
 end

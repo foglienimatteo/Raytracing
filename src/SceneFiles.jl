@@ -108,21 +108,23 @@ copy(location::SourceLocation) = SourceLocation(location.file_name, location.lin
 
 Enumeration for all the possible keywords recognized by the lexer:
 ```ditaa
-|:-----------------:|:-----------------:|:-----------------:|
-| NEW = 1           | UNIFORM = 21      | IDENTITY = 40     |
-| MATERIAL = 2      | CHECKERED = 22    | TRANSLATION = 41  |
-| FLOAT = 3         | IMAGE = 23        | ROTATION_X = 42   |
-| VECTOR = 4        |                   | ROTATION_Y = 43   |
-| COLOR = 5         |                   | ROTATION_Z = 44   |
-|                   |                   | SCALING = 45      |
-|                   |                   |                   |
-|:-----------------:|:-----------------:|:-----------------:|
-| DIFFUSE = 10      | CAMERA = 30       | PLANE = 50        |
-| SPECULAR = 11     | ORTHOGONAL = 31   | SPHERE = 51       |
-|                   | PERSPECTIVE = 32  |                   |
-|                   |                   |                   |
-|                   |                   |                   |
-|:-----------------:|:-----------------:|:-----------------:|
+|:-----------------:|:-----------------:|:----------------------:|
+| NEW = 1           | PIGMENT = 20      | TRANSFORMATION = 40    |
+| MATERIAL = 2      | UNIFORM = 21      | IDENTITY = 41          |
+| FLOAT = 3         | CHECKERED = 22    | TRANSLATION = 42       |
+| VECTOR = 4        | IMAGE = 23        | ROTATION_X = 43        |
+| COLOR = 5         |                   | ROTATION_Y = 44        |
+|                   |                   | ROTATION_Z = 45        |
+|                   |                   | SCALING = 46           |
+|                   |                   |                        |
+|                   |                   |                        |
+|:-----------------:|:-----------------:|:----------------------:|
+| BRDF = 10         | CAMERA = 30       | PLANE = 51             |
+| DIFFUSE = 11      | ORTHOGONAL = 31   | SPHERE = 52            |
+| SPECULAR = 12     | PERSPECTIVE = 32  |                        |
+|                   |                   |                        |
+|                   |                   |                        |
+|:-----------------:|:-----------------:|:----------------------:|
 ```
 """
 @enum KeywordEnum begin
@@ -132,9 +134,11 @@ Enumeration for all the possible keywords recognized by the lexer:
     VECTOR = 4
     COLOR = 5
 
-    DIFFUSE = 10
-    SPECULAR = 11
+    BRDF = 10
+    DIFFUSE = 11
+    SPECULAR = 12
 
+    PIGMENT = 20
     UNIFORM = 21
     CHECKERED = 22
     IMAGE = 23
@@ -143,16 +147,16 @@ Enumeration for all the possible keywords recognized by the lexer:
     ORTHOGONAL = 31
     PERSPECTIVE = 32
 
-    IDENTITY = 40
-    TRANSLATION = 41
-    ROTATION_X = 42
-    ROTATION_Y = 43
-    ROTATION_Z = 44
-    SCALING = 45
+    TRANSFORMATION = 40
+    IDENTITY = 41
+    TRANSLATION = 42
+    ROTATION_X = 43
+    ROTATION_Y = 44
+    ROTATION_Z = 45
+    SCALING = 46
 
-    PLANE = 50
-    SPHERE = 51
-
+    PLANE = 51
+    SPHERE = 52
 end
 
 KEYWORDS = Dict{String, KeywordEnum}(
@@ -162,9 +166,11 @@ KEYWORDS = Dict{String, KeywordEnum}(
     "vector" => VECTOR,
     "color" => COLOR,
 
+    "brdf" => BRDF,
     "diffuse" => DIFFUSE,
     "specular" => SPECULAR,
 
+    "pigment" => PIGMENT,
     "uniform" => UNIFORM,
     "checkered" => CHECKERED,
     "image" => IMAGE,
@@ -173,6 +179,7 @@ KEYWORDS = Dict{String, KeywordEnum}(
     "orthogonal" => ORTHOGONAL,
     "perspective" => PERSPECTIVE,
 
+    "transformation" => TRANSFORMATION,
     "identity" => IDENTITY,
     "translation" => TRANSLATION,
     "rotation_x" => ROTATION_X,
@@ -1325,174 +1332,4 @@ function parse_scene(inputstream::InputStream, variables::Dict{String, Float64} 
      end
 
      return scene
-end
-
-
-function render(x::(Pair{T1,T2} where {T1,T2})...)
-	render( parse_render_settings(  Dict( pair for pair in [x...]) )... )
-end
-
-function render(
-          scenefile::String,
-          renderer::Renderer = FlatRenderer(),
-     	camera_type::Union{String, Nothing} = nothing,
-		camera_position::Union{Point, Nothing} = nothing, 
-     	α::Float64 = 0., 
-     	width::Int64 = 640, 
-     	height::Int64 = 480, 
-     	pfm_output::String = "scene.pfm", 
-        	png_output::String = "scene.png",
-		bool_print::Bool = true,
-		bool_savepfm::Bool = true,
-		samples_per_pixel::Int64 = 0
-     )
-
-     scene = open(scenefile, "r") do stream
-               inputstream = InputStream(stream)
-               parse_scene(inputstream)
-     end
-
-     samples_per_side = Int64(floor(√samples_per_pixel))
-    (samples_per_side^2 ≈ samples_per_pixel) ||
-		throw(ArgumentError(
-				"the number of samples per pixel "*
-				"$(samples_per_pixel) must be a perfect square")
-	)
-
-	renderer.world = scene.world
-
-     if isnothing(camera_type) && isnothing(camera_position) && isnothing(scene.camera) 
-          camera = PerspectiveCamera(-1.0, 1.0, rotation_z(deg2rad(α)))
-
-     elseif isnothing(camera_type) && isnothing(camera_position)
-          camera = scene.camera 
-
-     elseif isnothing(camera_type) && isnothing(scene.camera) 
-          observer_vec = camera_position - Point(0., 0., 0.)
-          camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec)
-          camera = PerspectiveCamera(-1.0, 1.0, camera_tr)
-
-     elseif isnothing(camera_position) && isnothing(scene.camera) 
-          if camera_type == "per"
-		     (bool_print==true) && (println("Using perspective camera"))
-		     camera = PerspectiveCamera(1., 1.0, rotation_z(deg2rad(α)))
-	     elseif camera_type == "ort"
-		     (bool_print==true) && (println("Using orthogonal camera"))
-		     camera = OrthogonalCamera(1.0, rotation_z(deg2rad(α))) 
-	     else
-		     throw(ArgumentError("Unknown camera: $camera_type"))
-	     end
-
-     elseif isnothing(camera_type)
-          observer_vec = camera_position - Point(0., 0., 0.)
-          camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec) * scene.camera.T
-          if typeof(scene.camera) == OrthogonalCamera
-               (bool_print==true) && (println("Using perspective camera"))
-               camera = OrthogonalCamera(scene.camera.a, camera_tr)
-          elseif typeof(scene.camera) == PerspectiveCamera
-               (bool_print==true) && (println("Using orthogonal camera"))
-               camera = PerspectiveCamera(scene.camera.d, scene.camera.a, camera_tr)
-          else
-		     throw(ArgumentError("Unknown camera: $camera_type"))
-	     end
-
-     elseif isnothing(camera_position)
-          if camera_type == "per"
-		     (bool_print==true) && (println("Using perspective camera"))
-		     camera = PerspectiveCamera(scene.camera.d, scene.camera.a, rotation_z(deg2rad(α)) * scene.camera.T)
-	     elseif camera_type == "ort"
-		     (bool_print==true) && (println("Using orthogonal camera"))
-		     camera = OrthogonalCamera(scene.camera.a, rotation_z(deg2rad(α)) * scene.camera.T) 
-	     else
-		     throw(ArgumentError("Unknown camera: $camera_type"))
-	     end
-
-     elseif isnothing(scene.camera)
-          observer_vec = camera_position - Point(0., 0., 0.)
-          camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec)
-          if camera_type == "per"
-		     (bool_print==true) && (println("Using perspective camera"))
-		     camera = PerspectiveCamera(1.0, 1.0, camera_tr)
-	     elseif camera_type == "ort"
-		     (bool_print==true) && (println("Using orthogonal camera"))
-		     camera = OrthogonalCamera(1.0, camera_tr) 
-	     else
-		     throw(ArgumentError("Unknown camera: $camera_type"))
-	     end
-
-
-
-     else
-          observer_vec = camera_position - Point(0., 0., 0.)
-          camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec) * scene.camera.T
-          if camera_type == "per"
-		     (bool_print==true) && (println("Using perspective camera"))
-		     camera = PerspectiveCamera(scene.camera.d, scene.camera.a, camera_tr)
-	     elseif camera_type == "ort"
-		     (bool_print==true) && (println("Using orthogonal camera"))
-		     camera = OrthogonalCamera(scene.camera.a, camera_tr) 
-	     else
-		     throw(ArgumentError("Unknown camera: $camera_type"))
-	     end
-
-     end
-    
-   
-     if typeof(renderer) == OnOffRenderer
-		(bool_print==true) && (println("Using on/off renderer"))
-	elseif typeof(renderer) == FlatRenderer
-		(bool_print==true) && (println("Using flat renderer"))
-	elseif typeof(renderer) == PathTracer
-		(bool_print==true) && (println("Using path tracing renderer"))
-	elseif typeof(renderer) == PointLightRenderer
-          (bool_print==true) && (println("Using point-light renderer"))
-	else
-		throw(ArgumentError("Unknown renderer: $(typeof(renderer))"))
-	end
-	
-	image = HDRimage(width, height)
-	tracer = ImageTracer(image, camera, samples_per_side)
-
-	function print_progress(row::Int64, col::Int64)
-     	print("Rendered row $(image.height - row)/$(image.height) \t= ")
-		@printf "%.2f" 100*((image.height - row)/image.height)
-		print("%\n")
-	end
-
-	fire_all_rays!(tracer, renderer, print_progress)
-	img = tracer.img
-
-	(bool_savepfm==true) && (open(pfm_output, "w") do outf; write(outf, img); end)
-	(bool_print==true) && (println("\nHDR demo image written to $(pfm_output)\n"))
-
-     if typeof(renderer) == OnOffRenderer
-		normalize_image!(img, 0.18, nothing)
-	elseif typeof(renderer) == FlatRenderer
-		normalize_image!(img, 0.18, 0.5)
-	elseif typeof(renderer) == PathTracer
-		normalize_image!(img, 0.18, 0.1)
-	elseif typeof(renderer) == PointLightRenderer
-          normalize_image!(img, 0.18, 0.1)
-	else
-		throw(ArgumentError("Unknown renderer: $(typeof(renderer))"))
-	end
-
-	clamp_image!(img)
-	γ_correction!(img, 1.27)
-
-	if (typeof(query(png_output)) == File{DataFormat{:UNKNOWN}, String})
-		(bool_print==true) && (
-			println(
-				"File{DataFormat{:UNKNOWN}, String} for $(png_output)\n"*
-				"Written as a .png file.\n"
-			)
-		)
-     	Images.save(File{format"PNG"}(png_output), get_matrix(img))
-	else
-		Images.save(png_output, get_matrix(img))
-	end
-
-	(bool_print==true) && (println("\nHDR demo image written to $(png_output)\n"))
-	nothing
-
 end
