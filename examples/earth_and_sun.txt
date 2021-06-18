@@ -71,7 +71,11 @@ sphere(
      )
 
 color sun_pointlight_lum(<sun_lum, sun_lum, sun_lum>)
-#pointlight sun_pointlight(sun_pos, sun_pointlight_lum, 1.0)
+pointlight(
+     sun_pos, 
+     sun_pointlight_lum, 
+     1.0
+     )
 
-pointlight sun_pointlight([-1, 0, 0], <10, 10, 10>)
+#pointlight sun_pointlight([-1, 0, 0], <10, 10, 10>)
 

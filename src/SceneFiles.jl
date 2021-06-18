@@ -1257,14 +1257,7 @@ Call internally the following parsing functions:
 See also: [`InputStream`](@ref), [`Scene`](@ref), [`PointLight`](@ref)
 """
 function parse_pointlight(inputstream::InputStream, scene::Scene)
-     token = read_token(inputstream)
-     if typeof(token.value) == IdentifierToken && 
-          (token.value.identifier ∈ keys(scene.pointlight_variables))
-          return scene.pointlight_variables[variable_name]
-     else
-          unread_token(inputstream, token)
-     end
-
+     expect_symbol(inputstream, "(")
      point = parse_vector(inputstream, scene)
      expect_symbol(inputstream, ",")
      color = parse_color(inputstream, scene)
@@ -1279,6 +1272,7 @@ function parse_pointlight(inputstream::InputStream, scene::Scene)
           unread_token(inputstream, token)
           linear_radius = 0.0
      end
+     expect_symbol(inputstream, ")")
 
      println(point)
      println(color)
@@ -1424,6 +1418,7 @@ Call internally the following parsing functions:
 
 Call internally the following functions and structs of the program:
 - [`add_shape!`](@ref)
+- [`add_pointlight!`](@ref)
 
 See also: [`InputStream`](@ref), [`Scene`](@ref)
 """
@@ -1559,20 +1554,7 @@ function parse_scene(inputstream::InputStream, variables::Dict{String, Float64} 
                end
 
           elseif what.value.keyword == POINTLIGHT
-               variable_name = expect_identifier(inputstream)
-               variable_loc = inputstream.location
-               expect_symbol(inputstream, "(")
-               variable_value = parse_pointlight(inputstream, scene)
-               expect_symbol(inputstream, ")")
-
-               if (variable_name ∈ scene.variable_names) && !(variable_name ∈ scene.overridden_variables)
-                    throw(GrammarError(variable_loc, "variable «$(variable_name)» cannot be redefined"))
-               end
-
-               if variable_name ∉ scene.overridden_variables
-                    scene.pointlight_variables[variable_name] = variable_value
-                    push!(scene.variable_names, variable_name)
-               end
+               add_light!(scene.world, parse_pointlight(inputstream, scene))
 
           elseif what.value.keyword == CAMERA
                if !isnothing(scene.camera)
