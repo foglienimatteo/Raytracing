@@ -6,7 +6,7 @@
 #
 
 WHITESPACE = [" ", "\t", "\n", "\r"]
-SYMBOLS = ["(", ")", "<", ">", "[", "]", ",", "*"]
+SYMBOLS = ["(", ")", "<", ">", "[", "]", ",", "*", "@"]
 LETTERS = [
      'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 
      'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 
@@ -112,13 +112,13 @@ Enumeration for all the possible keywords recognized by the lexer:
 | NEW = 1           | UNIFORM = 21      | IDENTITY = 40     |
 | MATERIAL = 2      | CHECKERED = 22    | TRANSLATION = 41  |
 | FLOAT = 3         | IMAGE = 23        | ROTATION_X = 42   |
-|                   |                   | ROTATION_Y = 43   |
-|                   |                   | ROTATION_Z = 44   |
+| VECTOR = 4        |                   | ROTATION_Y = 43   |
+| COLOR = 5         |                   | ROTATION_Z = 44   |
 |                   |                   | SCALING = 45      |
 |                   |                   |                   |
 |:-----------------:|:-----------------:|:-----------------:|
-| DIFFUSE = 5       | CAMERA = 30       | PLANE = 50        |
-| SPECULAR = 6      | ORTHOGONAL = 31   | SPHERE = 51       |
+| DIFFUSE = 10      | CAMERA = 30       | PLANE = 50        |
+| SPECULAR = 11     | ORTHOGONAL = 31   | SPHERE = 51       |
 |                   | PERSPECTIVE = 32  |                   |
 |                   |                   |                   |
 |                   |                   |                   |
@@ -129,6 +129,8 @@ Enumeration for all the possible keywords recognized by the lexer:
     NEW = 1
     MATERIAL = 2
     FLOAT = 3
+    VECTOR = 4
+    COLOR = 5
 
     DIFFUSE = 10
     SPECULAR = 11
@@ -156,23 +158,30 @@ end
 KEYWORDS = Dict{String, KeywordEnum}(
     "new" => NEW,
     "material" => MATERIAL,
-    "plane" => PLANE,
-    "sphere" => SPHERE,
+    "float" => FLOAT,
+    "vector" => VECTOR,
+    "color" => COLOR,
+
     "diffuse" => DIFFUSE,
     "specular" => SPECULAR,
+
     "uniform" => UNIFORM,
     "checkered" => CHECKERED,
     "image" => IMAGE,
+
+    "camera" => CAMERA,
+    "orthogonal" => ORTHOGONAL,
+    "perspective" => PERSPECTIVE,
+
     "identity" => IDENTITY,
     "translation" => TRANSLATION,
     "rotation_x" => ROTATION_X,
     "rotation_y" => ROTATION_Y,
     "rotation_z" => ROTATION_Z,
     "scaling" => SCALING,
-    "camera" => CAMERA,
-    "orthogonal" => ORTHOGONAL,
-    "perspective" => PERSPECTIVE,
-    "float" => FLOAT,
+
+    "plane" => PLANE,
+    "sphere" => SPHERE,
 )
 
 
@@ -465,7 +474,7 @@ See also: [`InputStream`](@ref)
 """        
 function skip_whitespaces_and_comments(inputstream::InputStream)
      ch = read_char(inputstream)
-     while ( (ch in WHITESPACE) || (ch == "#") )
+     while ( (ch in WHITESPACE) || (ch == "#") || (ch == "@"))
           if ch == "#"
                # It's a comment! Keep reading until the end of the line 
                #(include the case "", the end-of-file)
@@ -473,6 +482,15 @@ function skip_whitespaces_and_comments(inputstream::InputStream)
                     nothing
                end
           end
+
+          if ch == "@"
+               # It's a comment! Keep reading until another @ is found
+               #(include the case "", the end-of-file)
+               while read_char(inputstream) ∉ ["@", ""]
+                    nothing
+               end
+          end
+
           ch = read_char(inputstream)
           !(ch == "") || (return nothing)
      end
@@ -709,15 +727,25 @@ mutable struct Scene
      materials::Dict{String, Material}
      world::World
      camera::Union{Camera, Nothing}
+
      float_variables::Dict{String, Float64}
+     vector_variables::Dict{String,Vec}
+     color_variables::Dict{String,RGB{Float32}}
+
+     variable_names::Set{String}
      overridden_variables::Set{String}
+
      Scene(
           m::Dict{String, Material} = Dict{String, Material}(),
           w::World = World(),
           c::Union{Camera, Nothing} = nothing,
           fv::Dict{String, Float64} = Dict{String, Float64}(),
-          ov::Set{String} = Set{String}() 
-     ) = new(m,w,c,fv,ov)
+          vv::Dict{String,Vec} = Dict{String,Vec}(),
+          cv::Dict{String,RGB{Float32}} = Dict{String,RGB{Float32}}(),
+          vn::Set{String} = Set{String}(),
+          ov::Set{String} = Set{String}(),
+
+     ) = new(m,w,c,fv,vv,cv,vn,ov)
 end
 
 
@@ -845,15 +873,28 @@ Call internally [`expect_number`](@ref) and [`expect_symbol`](@ref).
 See also: [`InputStream`](@ref), [`Scene`](@ref), [`Vec`](@ref)
 """
 function parse_vector(inputstream::InputStream, scene::Scene)
-     expect_symbol(inputstream, "[")
-     x = expect_number(inputstream, scene)
-     expect_symbol(inputstream, ",")
-     y = expect_number(inputstream, scene)
-     expect_symbol(inputstream, ",")
-     z = expect_number(inputstream, scene)
-     expect_symbol(inputstream, "]")
+     token = read_token(inputstream)
 
-     return Vec(x, y, z)
+     if typeof(token.value) == SymbolToken
+          unread_token(inputstream, token)
+
+          expect_symbol(inputstream, "[")
+          x = expect_number(inputstream, scene)
+          expect_symbol(inputstream, ",")
+          y = expect_number(inputstream, scene)
+          expect_symbol(inputstream, ",")
+          z = expect_number(inputstream, scene)
+          expect_symbol(inputstream, "]")
+          return Vec(x, y, z)
+
+     elseif typeof(token.value) == IdentifierToken
+          variable_name = token.value.identifier
+          if variable_name ∉ keys(scene.vector_variables)
+               throw(GrammarError(token.location, "unknown variable '$(token)'"))
+          end
+          return scene.vector_variables[variable_name]
+     end
+
 end
 
 
@@ -866,15 +907,30 @@ Call internally ['expect_symbol'](@ref) and ['expect_number'](@ref).
 See also: ['InputStream'](@ref), ['Scene'](@ref)
 """
 function parse_color(inputstream::InputStream, scene::Scene)
-    expect_symbol(inputstream, "<")
-    red = expect_number(inputstream, scene)
-    expect_symbol(inputstream, ",")
-    green = expect_number(inputstream, scene)
-    expect_symbol(inputstream, ",")
-    blue = expect_number(inputstream, scene)
-    expect_symbol(inputstream, ">")
+     token = read_token(inputstream)
 
-    return RGB{Float32}(red, green, blue)
+     if typeof(token.value) == SymbolToken
+          unread_token(inputstream, token)
+
+          expect_symbol(inputstream, "<")
+          red = expect_number(inputstream, scene)
+          expect_symbol(inputstream, ",")
+          green = expect_number(inputstream, scene)
+          expect_symbol(inputstream, ",")
+          blue = expect_number(inputstream, scene)
+          expect_symbol(inputstream, ">")
+
+          return RGB{Float32}(red, green, blue)
+
+     elseif typeof(token.value) == IdentifierToken
+          variable_name = token.value.identifier
+          if variable_name ∉ keys(scene.color_variables)
+               throw(GrammarError(token.location, "unknown variable '$(token)'"))
+          end
+
+          return scene.color_variables[variable_name]
+     end
+
 end
 
 
@@ -1207,7 +1263,7 @@ function parse_scene(inputstream::InputStream, variables::Dict{String, Float64} 
                variable_value = expect_number(inputstream, scene)
                expect_symbol(inputstream, ")")
 
-               if (variable_name ∈ keys(scene.float_variables)) && !(variable_name ∈ scene.overridden_variables)
+               if (variable_name ∈ scene.variable_names) && !(variable_name ∈ scene.overridden_variables)
                     throw(GrammarError(variable_loc, "variable «$(variable_name)» cannot be redefined"))
                end
 
@@ -1215,20 +1271,56 @@ function parse_scene(inputstream::InputStream, variables::Dict{String, Float64} 
                     # Only define the variable if it was not defined by the user *outside* the scene file
                     # (e.g., from the command line)
                     scene.float_variables[variable_name] = variable_value
+                    push!(scene.variable_names, variable_name)
                end
 
-          elseif what.value.keyword == SPHERE
-               add_shape!(scene.world, parse_sphere(inputstream, scene))
-          elseif what.value.keyword == PLANE
-               add_shape!(scene.world, parse_plane(inputstream, scene))
+          elseif what.value.keyword == VECTOR
+               variable_name = expect_identifier(inputstream)
+               variable_loc = inputstream.location
+               expect_symbol(inputstream, "(")
+               variable_value = parse_vector(inputstream, scene)
+               expect_symbol(inputstream, ")")
+
+               if (variable_name ∈ scene.variable_names) && !(variable_name ∈ scene.overridden_variables)
+                    throw(GrammarError(variable_loc, "variable «$(variable_name)» cannot be redefined"))
+               end
+
+               if variable_name ∉ scene.overridden_variables
+                    scene.vector_variables[variable_name] = variable_value
+                    push!(scene.variable_names, variable_name)
+               end
+
+          elseif what.value.keyword == COLOR
+               variable_name = expect_identifier(inputstream)
+               variable_loc = inputstream.location
+               expect_symbol(inputstream, "(")
+               variable_value = parse_color(inputstream, scene)
+               expect_symbol(inputstream, ")")
+
+               if (variable_name ∈ scene.variable_names) && !(variable_name ∈ scene.overridden_variables)
+                    throw(GrammarError(variable_loc, "variable «$(variable_name)» cannot be redefined"))
+               end
+
+               if variable_name ∉ scene.overridden_variables
+                    scene.color_variables[variable_name] = variable_value
+                    push!(scene.variable_names, variable_name)
+               end
+
           elseif what.value.keyword == CAMERA
                if !isnothing(scene.camera)
                     throw(GrammarError(what.location, "You cannot define more than one camera"))
                end
                scene.camera = parse_camera(inputstream, scene)
+
           elseif what.value.keyword ==  MATERIAL
                name, material = parse_material(inputstream, scene)
                scene.materials[name] = material
+
+          elseif what.value.keyword == SPHERE
+               add_shape!(scene.world, parse_sphere(inputstream, scene))
+
+          elseif what.value.keyword == PLANE
+               add_shape!(scene.world, parse_plane(inputstream, scene))
           end
      end
 
@@ -1269,41 +1361,83 @@ function render(
 
 	renderer.world = scene.world
 
-     if isnothing(camera_position)
-          camera_tr = scene.camera.T
-     else
+     if isnothing(camera_type) && isnothing(camera_position) && isnothing(scene.camera) 
+          camera = PerspectiveCamera(-1.0, 1.0, rotation_z(deg2rad(α)))
+
+     elseif isnothing(camera_type) && isnothing(camera_position)
+          camera = scene.camera 
+
+     elseif isnothing(camera_type) && isnothing(scene.camera) 
+          observer_vec = camera_position - Point(0., 0., 0.)
+          camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec)
+          camera = PerspectiveCamera(-1.0, 1.0, camera_tr)
+
+     elseif isnothing(camera_position) && isnothing(scene.camera) 
+          if camera_type == "per"
+		     (bool_print==true) && (println("Using perspective camera"))
+		     camera = PerspectiveCamera(1., 1.0, rotation_z(deg2rad(α)))
+	     elseif camera_type == "ort"
+		     (bool_print==true) && (println("Using orthogonal camera"))
+		     camera = OrthogonalCamera(1.0, rotation_z(deg2rad(α))) 
+	     else
+		     throw(ArgumentError("Unknown camera: $camera_type"))
+	     end
+
+     elseif isnothing(camera_type)
           observer_vec = camera_position - Point(0., 0., 0.)
           camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec) * scene.camera.T
-     end
-
-     aspect_ratio = scene.camera.a
-
-     if isnothing(camera_type)
           if typeof(scene.camera) == OrthogonalCamera
                (bool_print==true) && (println("Using perspective camera"))
-               camera = OrthogonalCamera(aspect_ratio, camera_tr)
-
+               camera = OrthogonalCamera(scene.camera.a, camera_tr)
           elseif typeof(scene.camera) == PerspectiveCamera
                (bool_print==true) && (println("Using orthogonal camera"))
-               camera = PerspectiveCamera(scene.camera.d, aspect_ratio, camera_tr)
-
+               camera = PerspectiveCamera(scene.camera.d, scene.camera.a, camera_tr)
           else
 		     throw(ArgumentError("Unknown camera: $camera_type"))
 	     end
-     
-     elseif camera_type == "per"
-		(bool_print==true) && (println("Using perspective camera"))
-		camera = PerspectiveCamera(1., aspect_ratio, camera_tr)
 
-	elseif camera_type == "ort"
-		(bool_print==true) && (println("Using orthogonal camera"))
-		camera = OrthogonalCamera(aspect_ratio, camera_tr) 
+     elseif isnothing(camera_position)
+          if camera_type == "per"
+		     (bool_print==true) && (println("Using perspective camera"))
+		     camera = PerspectiveCamera(scene.camera.d, scene.camera.a, rotation_z(deg2rad(α)) * scene.camera.T)
+	     elseif camera_type == "ort"
+		     (bool_print==true) && (println("Using orthogonal camera"))
+		     camera = OrthogonalCamera(scene.camera.a, rotation_z(deg2rad(α)) * scene.camera.T) 
+	     else
+		     throw(ArgumentError("Unknown camera: $camera_type"))
+	     end
 
-	else
-		throw(ArgumentError("Unknown camera: $camera_type"))
-	end
+     elseif isnothing(scene.camera)
+          observer_vec = camera_position - Point(0., 0., 0.)
+          camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec)
+          if camera_type == "per"
+		     (bool_print==true) && (println("Using perspective camera"))
+		     camera = PerspectiveCamera(1.0, 1.0, camera_tr)
+	     elseif camera_type == "ort"
+		     (bool_print==true) && (println("Using orthogonal camera"))
+		     camera = OrthogonalCamera(1.0, camera_tr) 
+	     else
+		     throw(ArgumentError("Unknown camera: $camera_type"))
+	     end
 
 
+
+     else
+          observer_vec = camera_position - Point(0., 0., 0.)
+          camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec) * scene.camera.T
+          if camera_type == "per"
+		     (bool_print==true) && (println("Using perspective camera"))
+		     camera = PerspectiveCamera(scene.camera.d, scene.camera.a, camera_tr)
+	     elseif camera_type == "ort"
+		     (bool_print==true) && (println("Using orthogonal camera"))
+		     camera = OrthogonalCamera(scene.camera.a, camera_tr) 
+	     else
+		     throw(ArgumentError("Unknown camera: $camera_type"))
+	     end
+
+     end
+    
+   
      if typeof(renderer) == OnOffRenderer
 		(bool_print==true) && (println("Using on/off renderer"))
 	elseif typeof(renderer) == FlatRenderer
@@ -1316,7 +1450,6 @@ function render(
 		throw(ArgumentError("Unknown renderer: $(typeof(renderer))"))
 	end
 	
-	# Run the ray-tracer
 	image = HDRimage(width, height)
 	tracer = ImageTracer(image, camera, samples_per_side)
 
@@ -1329,11 +1462,8 @@ function render(
 	fire_all_rays!(tracer, renderer, print_progress)
 	img = tracer.img
 
-	# Save the HDR image
 	(bool_savepfm==true) && (open(pfm_output, "w") do outf; write(outf, img); end)
 	(bool_print==true) && (println("\nHDR demo image written to $(pfm_output)\n"))
-
-	# Apply tone-mapping to the image
 
      if typeof(renderer) == OnOffRenderer
 		normalize_image!(img, 0.18, nothing)
@@ -1350,7 +1480,6 @@ function render(
 	clamp_image!(img)
 	γ_correction!(img, 1.27)
 
-	# Save the LDR image
 	if (typeof(query(png_output)) == File{DataFormat{:UNKNOWN}, String})
 		(bool_print==true) && (
 			println(

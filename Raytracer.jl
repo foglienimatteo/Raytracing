@@ -245,14 +245,16 @@ function ArgParse_command_line(arguments)
 
 	#### RENDER #####################################
 
-
-	add_arg_group!(s["render"], "scenefile to be rendered and renderer to be used");
 	@add_arg_table! s["render"] begin
 		"scenefile"
 			help = "path to the file describing the scene to be rendered."
 			arg_type = String
 			#range_tester = input -> (typeof(query(input))<:File{format"PFM"})
 			required = true
+	end
+
+	add_arg_group!(s["render"], "renderer to be used");
+	@add_arg_table! s["render"] begin
 		"onoff"
 			action = :command
 			help = "onoff renderer"

@@ -680,13 +680,13 @@ end
 
 
 """
-    load_image(path::String) :: HDRimage
+    load_image(path::Union{String, IO}) :: HDRimage
 
 Load an image from the specified `path` in an HDR image format.
 
 See also: [`HDRimage`](@ref)
 """
-function load_image(path::String)
+function load_image(path::Union{String, IO})
     img = load(path)
     img_float32 = float32.(img)
     width, height = size(img_float32)

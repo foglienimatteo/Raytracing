@@ -1,0 +1,57 @@
+#
+# 
+#
+
+camera(perspective, translation([-2, 0, 1]), 1.0, 1.0)
+
+vector earth_pos([0.5, -1.0, 0.0])
+float earth_radius(1.0)
+float earth_lum(0.0)
+
+material earth_material( 
+     diffuse(image("images/earth.jpg")), 
+     uniform(<earth_lum, earth_lum, earth_lum>)
+)
+
+vector sun_pos([4.0, 3.0, 0.0])
+float sun_radius(1.0)
+float sun_lum(0.0)
+
+# sun_pointlight_lum = <sun_lum, sun_lum, sun_lum>
+material sun_material(
+     diffuse(image("images/sun.jpg")), 
+     uniform(<sun_lum, sun_lum, sun_lum>)
+)
+
+vector milky_way_pos([0.0, 0.0, 0.0])
+float milky_way_radius(50.0)
+float milky_way_lum(0.00)
+
+material milky_way_material(
+     diffuse(image("images/milky_way.jpg")), 
+     uniform(<milky_way_lum, milky_way_lum, milky_way_lum>)
+)
+
+
+sphere(
+     earth_material,
+     translation(earth_pos)
+     * scaling([earth_radius, earth_radius, earth_radius])
+     )
+
+sphere(
+     sun_material,
+     translation(sun_pos)
+     * scaling([sun_radius, sun_radius, sun_radius])
+     )
+
+
+sphere(
+     milky_way_material,
+     translation(milky_way_pos)
+     * scaling([milky_way_radius, milky_way_radius, milky_way_radius])
+     )
+
+
+# pointlight(sun_pos, sun_pointlight_lum)
+
