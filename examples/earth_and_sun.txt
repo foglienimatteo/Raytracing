@@ -6,6 +6,10 @@ This is a multi-line comment: everything between two "at" symbols
 will be ignored by lexer and parser.
 @
 
+float var1(1.0)
+float var2(2.0)
+float var3(var1 * var2)
+
 camera(perspective, translation([-2, 0, 1]), 1.0, 1.0)
 
 vector earth_pos([0.5, -1.0, 0.0])
@@ -13,7 +17,7 @@ float earth_radius(1.0)
 float earth_lum(0.001)
 string earth_path ("images/earth.jpg")
 brdf earth_brdf (diffuse(image(earth_path)))
-pigment earth_emitted_pigment (earth_lum*diffuse(image(earth_path)) )
+pigment earth_emitted_pigment ( uniform(<earth_lum,earth_lum,earth_lum>) )
 
 
 vector sun_pos([4.0, 3.0, 0.0])
@@ -21,7 +25,7 @@ float sun_radius(1.0)
 float sun_lum(0.0)
 string sun_path ("images/sun.jpg")
 brdf sun_brdf (diffuse(image(sun_path)))
-pigment sun_emitted_pigment ( sum_lum*diffuse(image(sun_path)) )
+pigment sun_emitted_pigment ( uniform(<sun_lum, sun_lum, sun_lum>) )
 bool sun(true)
 
 vector milky_way_pos([0.0, 0.0, 0.0])
@@ -29,7 +33,7 @@ float milky_way_radius(20.0)
 float milky_way_lum(0.00)
 string milky_way_path ("images/milky_way_HD.jpg")
 brdf milky_way_brdf (diffuse(image(milky_way_path)))
-pigment milky_way_emitted_pigment ( milky_way_lum*diffuse(image(milky_way_path)) )
+pigment milky_way_emitted_pigment ( uniform(<milky_way_lum,milky_way_lum,milky_way_lum>) )
 
 
 material earth_material( 

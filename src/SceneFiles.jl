@@ -6,7 +6,8 @@
 #
 
 WHITESPACE = [" ", "\t", "\n", "\r"]
-SYMBOLS = ["(", ")", "<", ">", "[", "]", ",", "*", "@"]
+OPERATIONS = ["*", "/", "+", "-"]
+SYMBOLS = union(["(", ")", "<", ">", "[", "]", ",", "@"], OPERATIONS)
 LETTERS = [
      'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 
      'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 
@@ -705,7 +706,7 @@ function read_token(inputstream::InputStream)
      elseif ch == "\"" 
           # A literal string (used for file names)
           return parse_string_token(inputstream, token_location)
-     elseif ( isdecimal(ch) || (ch ∈ ["+", "-", "."]) )
+     elseif ( isdecimal(ch) || (ch ∈ ["."]) )
           # A floating-point number
           return parse_float_token(inputstream, ch, token_location)
      elseif isalpha(ch)
@@ -866,10 +867,69 @@ function expect_number(inputstream::InputStream, scene::Scene)
           if variable_name ∉ keys(scene.float_variables)
                throw(GrammarError(token.location, "unknown variable '$(token)'"))
           end
-          return scene.float_variables[variable_name]
-     end
 
-     throw(GrammarError(token.location, "got '$(token)' instead of a number"))
+          token = read_token(inputstream)
+          if (typeof(token.value) == SymbolToken) && (token.value.symbol ∈ OPERATIONS)
+               unread_token(inputstream, token)
+               return parse_operation_numbers(inputstream, scene)
+          else
+               unread_token(inputstream, token)
+               return scene.float_variables[variable_name]
+          end
+     else
+          throw(GrammarError(token.location, "got '$(token)' instead of a number"))
+     end
+end
+
+
+function parse_muldiv_numbers(inputstream::InputStream, scene::Scene)
+     token = read_token(inputstream)
+
+     while true
+          transformation_kw = expect_symbol(inputstream, [
+               IDENTITY,
+               TRANSLATION,
+               ROTATION_X,
+               ROTATION_Y,
+               ROTATION_Z,
+               SCALING,
+          ])
+
+          if transformation_kw == IDENTITY
+               nothing # Do nothing (this is a primitive form of optimization!)
+          elseif transformation_kw == TRANSLATION
+               expect_symbol(inputstream, "(")
+               result *= translation(parse_vector(inputstream, scene))
+               expect_symbol(inputstream, ")")
+          elseif transformation_kw == ROTATION_X
+               expect_symbol(inputstream, "(")
+               result *= rotation_x(expect_number(inputstream, scene))
+               expect_symbol(inputstream, ")")
+          elseif transformation_kw == ROTATION_Y
+               expect_symbol(inputstream, "(")
+               result *= rotation_y(expect_number(inputstream, scene))
+               expect_symbol(inputstream, ")")
+          elseif transformation_kw == ROTATION_Z
+               expect_symbol(inputstream, "(")
+               result *= rotation_z(expect_number(inputstream, scene))
+               expect_symbol(inputstream, ")")
+          elseif transformation_kw == SCALING
+               expect_symbol(inputstream, "(")
+               result *= scaling(parse_vector(inputstream, scene))
+               expect_symbol(inputstream, ")")
+          end
+
+          # We must peek the next token to check if there is another transformation that is being
+          # chained or if the sequence ends. Thus, this is a LL(1) parser.
+          next_kw = read_token(inputstream)
+          if (typeof(next_kw.value) ≠ SymbolToken) || (next_kw.value.symbol ≠ "*")
+               # Pretend you never read this token and put it back!
+               unread_token(inputstream, next_kw)
+               break
+          end
+     end
+     
+
 end
 
 
