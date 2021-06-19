@@ -32,11 +32,16 @@ RENDERERS = ["onoff", "flat", "pathtracing", "pointlight"]
 
 function range_tester_declare_float(string::String="")
 	(string == "") && (return true)
+	string_without_spaces = filter(x -> !isspace(x), string)
 
-	println(string)
-	str=split(string, ":")
-	println(str)
-	length(str)==2 && !isnothing(tryparse(Float64, str[2]))
+	vec_nameval = split.(split(string_without_spaces, ","), ":" )
+	for declare_float ∈ vec_nameval
+		if !(length(declare_float)==2 && !isnothing(tryparse(Float64, declare_float[2])))
+			return false
+		end
+	end
+
+	return true
 end
 
 

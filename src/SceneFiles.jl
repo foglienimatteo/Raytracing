@@ -111,11 +111,11 @@ Enumeration for all the possible keywords recognized by the lexer:
 |:-----------------:|:-----------------:|:----------------------:|
 | NEW = 1           | PIGMENT = 20      | TRANSFORMATION = 40    |
 | FLOAT = 2         | UNIFORM = 21      | IDENTITY = 41          |
-| VECTOR = 3        | CHECKERED = 22    | TRANSLATION = 42       |
-| COLOR = 4         | IMAGE = 23        | ROTATION_X = 43        |
-| MATERIAL = 5      |                   | ROTATION_Y = 44        |
-| POINTLIGHT = 6    |                   | ROTATION_Z = 45        |
-|                   |                   | SCALING = 46           |
+| STRING = 3        | CHECKERED = 22    | TRANSLATION = 42       |
+| VECTOR = 4        | IMAGE = 23        | ROTATION_X = 43        |
+| COLOR = 5         |                   | ROTATION_Y = 44        |
+| MATERIAL = 6      |                   | ROTATION_Z = 45        |
+| POINTLIGHT = 7    |                   | SCALING = 46           |
 |                   |                   |                        |
 |:-----------------:|:-----------------:|:----------------------:|
 | BRDFS = 10        | CAMERA = 30       | BOOL = 50              |
@@ -135,10 +135,11 @@ Enumeration for all the possible keywords recognized by the lexer:
 @enum KeywordEnum begin
      NEW = 1
      FLOAT = 2
-     VECTOR = 3
-     COLOR = 4
-     MATERIAL = 5
-     POINTLIGHT = 6
+     STRING = 3
+     VECTOR = 4
+     COLOR = 5
+     MATERIAL = 6
+     POINTLIGHT = 7
 
      BRDFS = 10
      DIFFUSE = 11
@@ -170,40 +171,41 @@ Enumeration for all the possible keywords recognized by the lexer:
 end
 
 KEYWORDS = Dict{String, KeywordEnum}(
-    "new" => NEW,
-    "float" => FLOAT,
-    "vector" => VECTOR,
-    "color" => COLOR,
-    "material" => MATERIAL,
-    "pointlight" => POINTLIGHT,
+     "new" => NEW,
+     "float" => FLOAT,
+     "string" => STRING,
+     "vector" => VECTOR,
+     "color" => COLOR,
+     "material" => MATERIAL,
+     "pointlight" => POINTLIGHT,
 
-    "brdf" => BRDFS,
-    "diffuse" => DIFFUSE,
-    "specular" => SPECULAR,
+     "brdf" => BRDFS,
+     "diffuse" => DIFFUSE,
+     "specular" => SPECULAR,
 
-    "pigment" => PIGMENT,
-    "uniform" => UNIFORM,
-    "checkered" => CHECKERED,
-    "image" => IMAGE,
+     "pigment" => PIGMENT,
+     "uniform" => UNIFORM,
+     "checkered" => CHECKERED,
+     "image" => IMAGE,
 
-    "camera" => CAMERA,
-    "orthogonal" => ORTHOGONAL,
-    "perspective" => PERSPECTIVE,
+     "camera" => CAMERA,
+     "orthogonal" => ORTHOGONAL,
+     "perspective" => PERSPECTIVE,
 
-    "transformation" => TRANSFORMATION,
-    "identity" => IDENTITY,
-    "translation" => TRANSLATION,
-    "rotation_x" => ROTATION_X,
-    "rotation_y" => ROTATION_Y,
-    "rotation_z" => ROTATION_Z,
-    "scaling" => SCALING,
+     "transformation" => TRANSFORMATION,
+     "identity" => IDENTITY,
+     "translation" => TRANSLATION,
+     "rotation_x" => ROTATION_X,
+     "rotation_y" => ROTATION_Y,
+     "rotation_z" => ROTATION_Z,
+     "scaling" => SCALING,
 
      "bool" => BOOL,
      "true" => TRUE,
      "false" => FALSE,
 
-    "plane" => PLANE,
-    "sphere" => SPHERE,
+     "plane" => PLANE,
+     "sphere" => SPHERE,
 )
 
 
@@ -751,13 +753,13 @@ mutable struct Scene
      camera::Union{Camera, Nothing}
 
      float_variables::Dict{String, Float64}
+     string_variables::Dict{String, String}
      bool_variables::Dict{String,Bool}
      vector_variables::Dict{String,Vec}
      color_variables::Dict{String,RGB{Float32}}
      pigment_variables::Dict{String,Pigment}
      brdf_variables::Dict{String,BRDF}
      transformation_variables::Dict{String,Transformation}
-     pointlight_variables::Dict{String,PointLight}
 
      variable_names::Set{String}
      overridden_variables::Set{String}
@@ -768,13 +770,13 @@ mutable struct Scene
           camera::Union{Camera, Nothing} = nothing,
 
           float_variables::Dict{String, Float64} = Dict{String, Float64}(),
+          string_variables::Dict{String, String} = Dict{String, String}(),
           bool_variables::Dict{String, Bool} = Dict{String, Bool}(),
           vector_variables::Dict{String,Vec} = Dict{String,Vec}(),
           color_variables::Dict{String,RGB{Float32}} = Dict{String,RGB{Float32}}(),
           pigment_variables::Dict{String,Pigment} = Dict{String,Pigment}(),
           brdf_variables::Dict{String,BRDF} = Dict{String,BRDF}(),
           transformation_variables::Dict{String,Transformation} = Dict{String,Transformation}(),
-          pointlight_variables::Dict{String,PointLight} = Dict{String,PointLight}(),
 
           variable_names::Set{String} = Set{String}(),
           overridden_variables::Set{String} = Set{String}(),
@@ -785,13 +787,13 @@ mutable struct Scene
           camera,
 
           float_variables,
+          string_variables,
           bool_variables,
           vector_variables,
           color_variables,
           pigment_variables,
           brdf_variables,
           transformation_variables,
-          pointlight_variables,
 
           variable_names,
           overridden_variables,
@@ -911,7 +913,7 @@ end
 
 
 """
-     expect_string(inputstream::InputStream) :: String
+     expect_string(inputstream::InputStream, scene::Scene) :: String
 
 Read a token from `inputstream` and check that its type is `StringToken`,
 throwing  `GrammarError` otherwise.
@@ -920,13 +922,19 @@ Call internally [`read_token`](@ref).
 
 See also: [`InputStream`](@ref), [`Scene`](@ref), [`StringToken`](@ref), 
 """
-function expect_string(inputstream::InputStream)
-    token = read_token(inputstream)
-    if (typeof(token.value) ≠ StringToken)
+function expect_string(inputstream::InputStream, scene::Scene)
+     token = read_token(inputstream)
+     if typeof(token.value) == StringToken
+          return token.value.string
+     elseif typeof(token.value) == IdentifierToken
+          variable_name = token.value.identifier
+          if variable_name ∉ keys(scene.string_variables)
+               throw(GrammarError(token.location, "unknown string variable '$(token)'"))
+          end
+          return scene.string_variables[variable_name]
+     else
           throw(GrammarError(token.location, "got $(token) instead of a string"))
-    end
-
-    return token.value.string
+     end
 end
 
 
@@ -1070,7 +1078,7 @@ function parse_pigment(inputstream::InputStream, scene::Scene)
           num_of_steps = Int(expect_number(inputstream, scene))
           result = CheckeredPigment(color1, color2, num_of_steps)
      elseif keyword ==  IMAGE
-          file_name = expect_string(inputstream)
+          file_name = expect_string(inputstream, scene)
           image = open(file_name, "r") do image_file; load_image(image_file); end
           result = ImagePigment(image)
      else
@@ -1274,9 +1282,6 @@ function parse_pointlight(inputstream::InputStream, scene::Scene)
      end
      expect_symbol(inputstream, ")")
 
-     println(point)
-     println(color)
-     println(linear_radius)
      return PointLight(
                Point(point.x, point.y, point.z),
                color,
@@ -1454,6 +1459,22 @@ function parse_scene(inputstream::InputStream, variables::Dict{String, Float64} 
                     # Only define the variable if it was not defined by the user *outside* the scene file
                     # (e.g., from the command line)
                     scene.float_variables[variable_name] = variable_value
+                    push!(scene.variable_names, variable_name)
+               end
+
+          elseif what.value.keyword == STRING
+               variable_name = expect_identifier(inputstream)
+               variable_loc = inputstream.location
+               expect_symbol(inputstream, "(")
+               variable_value = expect_string(inputstream, scene)
+               expect_symbol(inputstream, ")")
+
+               if (variable_name ∈ scene.variable_names) && !(variable_name ∈ scene.overridden_variables)
+                    throw(GrammarError(variable_loc, "variable «$(variable_name)» cannot be redefined"))
+               end
+
+               if variable_name ∉ scene.overridden_variables
+                    scene.string_variables[variable_name] = variable_value
                     push!(scene.variable_names, variable_name)
                end
 

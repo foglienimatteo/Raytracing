@@ -905,14 +905,23 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
         samples_per_pixel = 0
 
     haskey(dict, "declare_float") ? begin
-        dict["declare_float"] == "" ? declare_float = nothing :
-	    str = split(dict["declare_float"], ":")
-	    if !(length(str)==2 && !isnothing(tryparse(Float64, str[2])))
-            throw(ArgumentError("invalid declare_float usage"))
+        if dict["declare_float"] == "" 
+            declare_float = nothing
+        else
+            string_without_spaces = filter(x -> !isspace(x), dict["declare_float"])
+	        vec_nameval = split.(split(string_without_spaces, ","), ":" )
+	        for nameval ∈ vec_nameval
+		        if !(length(nameval)==2 && !isnothing(tryparse(Float64, nameval[2])))
+			        throw(ArgumentError(
+                        "invalid declare_float usage.\n"*
+                        "correct usage:  --declare_float= var1:1.0 , var2:2"
+                    ))
+		        end
+	        end
+            declare_float = Dict{String, Float64}([v[1]=>parse(Float64, v[2]) for v in vec_nameval]...)
         end
-        declare_float::Dict{String, Float64} = Dict(str[1]=>parse(Float64, str[2]))
-        end : 
-        declare_float = nothing
+
+        end : declare_float = nothing
 
     if haskey(dict, "%COMMAND%")
         if dict["%COMMAND%"] == "onoff"
