@@ -11,7 +11,7 @@ using Colors, Images, ImageIO, FileIO, Polynomials
 using ColorTypes:RGB
 using LinearAlgebra, StaticArrays
 using Printf, ProgressBars
-using Documenter, DocStringExtensions
+using Documenter, DocStringExtensions, JSON
 
 import Base.:+; import Base.:-; import Base.:≈; import Base.:/; import Base.:*
 import Base: write, read, print, println, copy;

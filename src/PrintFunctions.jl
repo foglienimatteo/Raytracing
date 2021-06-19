@@ -83,8 +83,8 @@ end
 
 # Token print functions
 function println(io::IO, token::Token)
-     println(io, "Token with the following values:")
-     println(io, "token.location = ", token.location.file_name, "\t (", token.location.line_num, ", ", token.location.col_num, ")")
+     print(io, "Token: \t")
+     print(io, "token.location = [", token.location.file_name, "(", token.location.line_num, ", ", token.location.col_num, ") ]")
      println(io, "token.value = ", token.value)
 end
 print(io::IO, token::Token) = println(io, token)

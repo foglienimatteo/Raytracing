@@ -395,7 +395,7 @@ main(x::Union{String, Float64, Int64}...) = main([string(var) for var in [x...]]
 function main(args)
 	parsed_arguments = ArgParse_command_line(args) # the result is a Dict{String,Any}
 	(isnothing(parsed_arguments)) && (return nothing)
-	print_ArgParseSettings(parsed_arguments)
+	#print_ArgParseSettings(parsed_arguments)
 
 	parsed_command = parsed_arguments["%COMMAND%"]
 	parsed_settings = parsed_arguments[parsed_command]
@@ -410,7 +410,7 @@ function main(args)
 		#println(parse_tonemapping_settings(parsed_settings))
 		demo_animation(parse_demoanimation_settings(parsed_settings)...)
 	elseif parsed_command=="render"
-		println(parse_render_settings(parsed_settings))
+		#println(parse_render_settings(parsed_settings))
 		render(parse_render_settings(parsed_settings)...)
 	else
 		throw(ArgumentError("unknown command $(parsed_command)"))

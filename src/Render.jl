@@ -5,6 +5,82 @@
 # Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni.
 #
 
+function print_JSON(
+     png_output::String,
+     pfm_output::Union{String, Nothing},
+     scenefile::String,
+     algorithm::Renderer,
+     camera::Camera,
+     samples_per_side::Int64,
+     rendering_time_s::Float64,
+     )
+
+     dict_camera = if typeof(camera) == OrthogonalCamera
+               Dict(
+                    "projection" => "orthogonal",
+                    "aspect_ratio" => camera.a,
+                    "transformation" => camera.T.M,
+               )
+
+          elseif typeof(camera) == PerspectiveCamera
+               Dict(
+                    "projection" => "orthogonal",
+                    "distance" => camera.d,
+                    "aspect ratio" => camera.a,
+                    "transformation" => camera.T.M,
+               )
+          end
+
+     dict_renderer = if typeof(algorithm) == OnOffRenderer
+              Dict(
+                    "algorithm" => "On-Off Renderer",
+                    "background color" => algorithm.background_color,
+                    "color" => algorithm.color,
+               )
+
+          elseif typeof(algorithm) == FlatRenderer
+              Dict(
+                    "algorithm" => "Flat Renderer",
+                    "background color" => algorithm.background_color,
+               )
+          elseif typeof(algorithm) == PathTracer
+              Dict(
+                    "algorithm" => "Path-Tracing Renderer",
+                    "background color" => algorithm.background_color,
+                    "PCG" => Dict(
+                         "initial state" => Int64(algorithm.PCG.state),
+                         "initial sequence" => Int64(algorithm.PCG.inc),
+                         ),
+                    "number of rays" => algorithm.num_of_rays,
+                    "max depth" => algorithm.max_depth,
+                    "russian roulette limit" => algorithm.russian_roulette_limit,
+               )
+          elseif typeof(algorithm) == PointLightRenderer
+               Dict(
+                    "algorithm" => "Point-Light Renderer",
+                    "background color" => algorithm.background_color,
+                    "color" => algorithm.ambient_color,
+               )
+          end
+
+
+     data = Dict(
+          "scene file" => scenefile,
+          "png output" => png_output,
+          "pfm output" => pfm_output,
+          "camera" => dict_camera, 
+          "renderer" => dict_renderer,
+          "samples per pixel (0 means no antialiasing)" => samples_per_side^2,
+          "rendering time (in s)"=>rendering_time_s,
+     )
+
+     open( png_output * ".json","w") do f
+          JSON.print(f, data)
+     end
+
+
+end
+
 function render(x::(Pair{T1,T2} where {T1,T2})...)
 	render( parse_render_settings(  Dict( pair for pair in [x...]) )... )
 end
@@ -24,6 +100,8 @@ function render(
 		samples_per_pixel::Int64 = 0,
           declare_float::Union{Dict{String,Float64}, Nothing} = nothing,
      )
+
+     time_1 = time()
 
      scene = open(scenefile, "r") do stream
           if isnothing(declare_float)
@@ -132,6 +210,8 @@ function render(
 	else
 		throw(ArgumentError("Unknown renderer: $(typeof(renderer))"))
 	end
+
+
 	
 	image = HDRimage(width, height)
 	tracer = ImageTracer(image, camera, samples_per_side)
@@ -141,6 +221,8 @@ function render(
 		@printf "%.2f" 100*((image.height - row)/image.height)
 		print("%\n")
 	end
+
+     algorithm = renderer
 
 	fire_all_rays!(tracer, renderer, print_progress)
 	img = tracer.img
@@ -178,4 +260,18 @@ function render(
 	(bool_print==true) && (println("\nHDR demo image written to $(png_output)\n"))
 	nothing
 
+     time_2 = time()
+     rendering_time_s = time_2 - time_1
+
+     pfm = bool_savepfm ? pfm_output : nothing
+
+     print_JSON(
+          png_output,
+          pfm,
+          scenefile,
+          algorithm,
+          camera,
+          samples_per_side,
+          rendering_time_s,
+     )
 end
