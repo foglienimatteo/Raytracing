@@ -244,3 +244,92 @@ end
 
     @test_throws GrammarError parse_scene(InputStream(stream))
 end
+
+
+@testset "test_math_operations_1" begin
+     stream = IOBuffer(""" 
+          float var1(1.0)
+          float var2(2.0)
+          float var3(0.5)
+          float var4(0.5)
+          float var5(-var1 * var2 - 0.5/(var3 + var4))
+
+          assert(var5, -2.5)
+     """)
+
+     scene = parse_scene(InputStream(stream))
+     @test 1==1
+end
+
+@testset "test_math_operations_2" begin
+     stream = IOBuffer(""" 
+          float var1(1.0)
+          float var2(2.0)
+          float var3(0.5)
+          float var4(0.5)
+          float var5(-var1 * var2 - 0.5/(var3 + var4))
+
+          assert(var5, 2.5)
+     """)
+
+     @test_throws AssertionError parse_scene(InputStream(stream))
+end
+
+@testset "test_return_token_value_1" begin
+     stream = IOBuffer(""" 
+          vector try( ([1,2,3] + [3,2,1])*2.0 - [1,1,1] )
+          assert (try*1.0, -1.0*[-7,-7,-7])
+     """)
+
+     @test 1==1
+end
+
+@testset "test_return_token_value_2" begin
+     stream = IOBuffer(""" 
+          vector try( ([1,2,3] + [3,2,1])*2.0 - [1,1,1] )
+          assert (try, -1.0*[7,-7,-7])
+     """)
+
+     @test_throws AssertionError parse_scene(InputStream(stream))
+end
+
+
+@testset "test_parse_vector_1" begin
+     stream = IOBuffer(""" 
+          vector v1([1,2,3])
+          vector v2([4,5,6] * 1.0 - v1)
+          assert(v2-v1*0, 3*[1,1,1] )
+     """)
+
+     @test 1==1
+end
+
+@testset "test_parse_vector_2" begin
+     stream = IOBuffer(""" 
+          vector v1([1,2,3])
+          vector v2([4,5,6] * 1.0 - v1)
+          assert(v2-v1*0, 1*[1,1,1] )
+     """)
+
+     @test_throws AssertionError parse_scene(InputStream(stream))
+end
+
+@testset "test_parse_color_1" begin
+     stream = IOBuffer(""" 
+          color c1(<1,2,3>)
+          color c2(<4,5,6> * 1.0 - c1)
+          assert(c2-c1*0, 3*<1,1,1> )
+     """)
+
+     @test 1==1
+end
+
+@testset "test_parse_color_2" begin
+     stream = IOBuffer(""" 
+          color c1(<1,2,3>)
+          color c2(<4,5,6> * 1.0 - c1)
+          assert(c2-c1*0, 0*<1,1,1> )
+     """)
+
+     @test_throws AssertionError parse_scene(InputStream(stream))
+end

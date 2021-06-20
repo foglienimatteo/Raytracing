@@ -13,9 +13,17 @@ float var4(0.5)
 float var5(-var1 * var2 - 0.5/(var3 + var4))
 print(var5)
 
-test(var5, -2.5)
 
-vector try( ([1,2,3] + [4,5,6])*2.0 - [1,1,1] )
+assert(var5, -2.5)
+
+vector try( ([1,2,3] + [3,2,1])*2.0 - [1,1,1] )
+assert (try, -1.0*[-7,-7,-7])
+
+color c1(<1,2,3>)
+
+vector c1([1,2,3])
+vector c2([4,5,6] * 1.0 - c1)
+assert(c2-c1*0, 3*[1,1,1] )
 
 
 camera(perspective, translation([-2, 0, 1]), 1.0, 1.0)

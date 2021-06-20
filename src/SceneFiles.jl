@@ -126,7 +126,7 @@ Enumeration for all the possible keywords recognized by the lexer:
 |                   |                   |                        |
 |:-----------------:|:-----------------:|:----------------------:|
 | PLANE = 61        | PRINT = 71        |                        |
-| SPHERE = 62       | TEST = 72         |                        |
+| SPHERE = 62       | ASSERT = 72         |                        |
 |                   |                   |                        |
 |                   |                   |                        |
 |                   |                   |                        |
@@ -171,7 +171,7 @@ Enumeration for all the possible keywords recognized by the lexer:
      SPHERE = 62
 
      PRINT = 71
-     TEST = 72
+     ASSERT = 72
 end
 
 KEYWORDS = Dict{String, KeywordEnum}(
@@ -212,7 +212,7 @@ KEYWORDS = Dict{String, KeywordEnum}(
      "sphere" => SPHERE,
 
      "print" => PRINT,
-     "test" => TEST,
+     "assert" => ASSERT,
 )
 
 
@@ -746,13 +746,24 @@ end
           materials::Dict{String, Material} = Dict{String, Material}(),
           world::World = World(),
           camera::Union{Camera, Nothing} = nothing,
+
           float_variables::Dict{String, Float64} = Dict{String, Float64}(),
-          overridden_variables::Set{String} = Set{String}() 
+          string_variables::Dict{String, String} = Dict{String, String}(),
+          bool_variables::Dict{String, Bool} = Dict{String, Bool}(),
+          vector_variables::Dict{String,Vec} = Dict{String,Vec}(),
+          color_variables::Dict{String,RGB{Float32}} = Dict{String,RGB{Float32}}(),
+          pigment_variables::Dict{String,Pigment} = Dict{String,Pigment}(),
+          brdf_variables::Dict{String,BRDF} = Dict{String,BRDF}(),
+          transformation_variables::Dict{String,Transformation} = Dict{String,Transformation}(),
+
+          variable_names::Set{String} = Set{String}(),
+          overridden_variables::Set{String} = Set{String}(),
      )
 
 A scene read from a scene file.
 
-See also: [`Material`](@ref), [`World`](@ref), [`Camera`](@ref)
+See also: [`Material`](@ref), [`World`](@ref), [`Camera`](@ref), [`Vec`](@ref),
+[`Pigment`](@ref), [`BRDF`](@ref), [`Transformation`](@ref)
 """
 mutable struct Scene
      materials::Dict{String, Material}
@@ -1096,7 +1107,6 @@ function parse_vector(inputstream::InputStream, scene::Scene, open::Bool=false)
      if open == true
           return result
      else
-          println(result)
           return eval(Meta.parse(result))
      end
 end
@@ -1139,6 +1149,78 @@ Call internally ['expect_symbol'](@ref) and ['expect_number'](@ref).
 
 See also: ['InputStream'](@ref), ['Scene'](@ref)
 """
+function parse_color(inputstream::InputStream, scene::Scene, open::Bool=false)
+     token = read_token(inputstream)
+     result = ""
+
+     if typeof(token.value) == SymbolToken && token.value.symbol == "("
+          result *= "("*parse_vector(inputstream, scene, true)
+          expect_symbol(inputstream, ")")
+          result *= ")"
+          token = read_token(inputstream)
+     end
+     
+     if typeof(token.value) == SymbolToken && token.value.symbol == "-"
+          result *= "-"
+          token = read_token(inputstream)
+     end
+          
+     while true
+          if (typeof(token.value) == SymbolToken) && (token.value.symbol ∈ OPERATIONS)
+               result *= token.value.symbol
+          elseif typeof(token.value) == IdentifierToken
+               variable_name = token.value.identifier
+               if variable_name ∉ union(keys(scene.color_variables), keys(scene.float_variables))
+                    throw(GrammarError(token.location, "unknown vector/float variable '$(token)'"))
+               end
+               next_value = variable_name ∈ keys(scene.color_variables) ?
+                    scene.color_variables[variable_name] :
+                    scene.float_variables[variable_name]
+               result *= repr(next_value)
+          elseif typeof(token.value) == SymbolToken && token.value.symbol =="<"
+               unread_token(inputstream, token)
+
+               expect_symbol(inputstream, "<")
+               x = expect_number(inputstream, scene)
+               expect_symbol(inputstream, ",")
+               y = expect_number(inputstream, scene)
+               expect_symbol(inputstream, ",")
+               z = expect_number(inputstream, scene)
+               expect_symbol(inputstream, ">")
+               result*= repr(RGB{Float32}(x, y, z))
+
+          elseif (typeof(token.value) == SymbolToken) && (token.value.symbol=="(")
+               result *= "("*parse_color(inputstream, scene, true)
+               expect_symbol(inputstream, ")")
+               result *= ")"
+
+          elseif typeof(token.value) == LiteralNumberToken
+               result *= repr(token.value.number)
+          else
+               unread_token(inputstream, token)
+               break
+          end
+
+          #=
+          elseif (typeof(token.value) == SymbolToken) && (token.value.symbol==")")
+               unread_token(inputstream, token)
+               break
+          else
+               throw(GrammarError(token.location, "unknown variable '$(token)'"))
+          end
+          =#
+
+          token = read_token(inputstream)
+     end
+
+     if open == true
+          return result
+     else
+          return eval(Meta.parse(result))
+     end
+end
+
+#=
 function parse_color(inputstream::InputStream, scene::Scene)
      token = read_token(inputstream)
 
@@ -1165,7 +1247,7 @@ function parse_color(inputstream::InputStream, scene::Scene)
      end
 
 end
-
+=#
 
 """
      parse_pigment(inputstream::InputStream, scene::Scene) :: Pigment
@@ -1593,79 +1675,92 @@ Call internally the following parsing functions:
 See also: [`Vec`](@ref), [`Pigment`](@ref), [`BRDF`](@ref), 
 [`InputStream`](@ref), [`Scene`](@ref), [`GrammarError`](@ref)
 """
-function return_token_value(inputstream::InputStream, scene::Scene)
+function return_token_value(inputstream::InputStream, scene::Scene, bool::Bool = false)
      token = read_token(inputstream)
-     sign = 1.0
-     result =
-     if typeof(token.value) == LiteralNumberToken
-          token.value.number
+     result = ""
 
-     elseif typeof(token.value) == StringToken
-          token.value.string
+     while true
 
-     elseif typeof(token.value) == SymbolToken
-          symbol = token.value.symbol
-          if symbol=="["
+          if typeof(token.value) == LiteralNumberToken
+               result *= repr(token.value.number)
+
+          elseif typeof(token.value) == StringToken
+               result *= repr(token.value.string)
+
+          elseif typeof(token.value) == SymbolToken && token.value.symbol ∈ OPERATIONS
+               result *= token.value.symbol
+
+          elseif typeof(token.value) == SymbolToken && token.value.symbol=="["
                unread_token(inputstream, token)
-               parse_vector(inputstream, scene)
-          elseif symbol=="<"
+               result *= repr(parse_vector(inputstream, scene))
+
+          elseif typeof(token.value) == SymbolToken && token.value.symbol=="<"
                unread_token(inputstream, token)
-               parse_color(inputstream, scene)
-          elseif symbol=="-"
-               sign*=-1.0
-               return_token_value(inputstream, scene)
+               result *= repr(parse_color(inputstream, scene))
+
+          elseif typeof(token.value) == SymbolToken && token.value.symbol=="("
+               result *= "("*return_token_value(inputstream, scene, true)
+               expect_symbol(inputstream, ")")
+               result *= ")"
+
+          elseif typeof(token.value) == KeywordToken
+               keyword = token.value.keyword
+               if keyword ∈ [DIFFUSE,  SPECULAR]
+                    unread_token(inputstream, token)
+                    result *= repr(parse_brdf(inputstream, scene))
+               elseif keyword ∈ [UNIFORM,  CHECKERED,  IMAGE]
+                    unread_token(inputstream, token)
+                    result *= repr(parse_pigment(inputstream, scene))
+               else
+                    throw(GrammarError(token.location, 
+                    "keyword '$(keyword)' do not define anything that can be compared"))
+               end
+
+
+          elseif typeof(token.value) == IdentifierToken
+               variable_name = token.value.identifier
+               if variable_name ∈ keys(scene.float_variables)
+                    result *= repr(scene.float_variables[variable_name])
+               elseif variable_name ∈ keys(scene.string_variables)
+                    result *= repr(scene.string_variables[variable_name])
+               elseif variable_name ∈ keys(scene.bool_variables)
+                    result *= repr(scene.bool_variables[variable_name])
+               elseif variable_name ∈ keys(scene.vector_variables)
+                    result *= repr(scene.vector_variables[variable_name])
+               elseif variable_name ∈ keys(scene.color_variables)
+                    result *= repr(scene.color_variables[variable_name])
+               elseif variable_name ∈ keys(scene.pigment_variables)
+                    result *= repr(scene.pigment_variables[variable_name])
+               elseif variable_name ∈ keys(scene.brdf_variables)
+                    result *= repr(scene.brdf_variables[variable_name])
+               elseif variable_name ∈ keys(scene.transformation_variables)
+                    result *= repr(scene.transformation_variables[variable_name])
+               else
+                    throw(GrammarError(token.location, 
+                    "identifier '$(variable_name)' do not define anything that can be compared"))
+               end
           else
-               throw(GrammarError(token.location, "symbol '$(symbol)' do not define anything"))
+               unread_token(inputstream, token)
+               break
           end
 
-     elseif typeof(token.value) == KeywordToken
-          keyword = token.value.keyword
-          if keyword ∈ [DIFFUSE,  SPECULAR]
-               unread_token(inputstream, token)
-               parse_brdf(inputstream, scene)
-          elseif keyword ∈ [UNIFORM,  CHECKERED,  IMAGE]
-               unread_token(inputstream, token)
-               parse_pigment(inputstream, scene)
-          else
-               throw(GrammarError(token.location, 
-               "keyword '$(keyword)' do not define anything that can be compared"))
-          end
-
-
-     elseif typeof(token.value) == IdentifierToken
-          variable_name = token.value.identifier
-          if variable_name ∈ keys(scene.float_variables)
-               scene.float_variables[variable_name]
-          elseif variable_name ∈ keys(scene.string_variables)
-               scene.string_variables[variable_name]
-          elseif variable_name ∈ keys(scene.bool_variables)
-               scene.bool_variables[variable_name]
-          elseif variable_name ∈ keys(scene.vector_variables)
-               scene.vector_variables[variable_name]
-          elseif variable_name ∈ keys(scene.color_variables)
-               scene.color_variables[variable_name]
-          elseif variable_name ∈ keys(scene.pigment_variables)
-               scene.pigment_variables[variable_name]
-          elseif variable_name ∈ keys(scene.brdf_variables)
-               scene.brdf_variables[variable_name]
-          elseif variable_name ∈ keys(scene.transformation_variables)
-               scene.transformation_variables[variable_name]
-          else
-               throw(GrammarError(token.location, 
-               "identifier '$(variable_name)' do not define anything that can be compared"))
-          end
+          token = read_token(inputstream)
      end
 
-     return sign*result
+     if open==true
+          return result
+     else
+          return eval(Meta.parse(result))
+     end
 end     
 
-function test_are_equal(inputstream::InputStream, scene::Scene)
+function assert_are_equal(inputstream::InputStream, scene::Scene)
      expect_symbol(inputstream, "(")
      value1 =  return_token_value(inputstream, scene)
      expect_symbol(inputstream, ",")
      value2 =  return_token_value(inputstream, scene)
      expect_symbol(inputstream, ")")
-     @test value1 == value2
+     @assert value1 == value2 "$(value1) and $(value2) are not equal!"
 end
 
 """
@@ -1863,8 +1958,8 @@ function parse_scene(inputstream::InputStream, variables::Dict{String, Float64} 
 
           elseif what.value.keyword == PRINT
                println(inputstream, scene)
-          elseif what.value.keyword == TEST
-               test_are_equal(inputstream, scene)
+          elseif what.value.keyword == ASSERT
+               assert_are_equal(inputstream, scene)
           end
      end
 
