@@ -273,19 +273,19 @@ function ArgParse_command_line(arguments)
 		"onoff"
 			action = :command
 			help = "onoff renderer"
-			dest_name = "onoff"
+			#dest_name = "onoff"
 		"flat"
 			action = :command
 			help = "flat-renderer"
-			dest_name = "flat"
+			#dest_name = "flat"
 		"pathtracer"
 			action = :command
 			help = "path tracing renderer"
-			dest_name = "pathtracer"
+			#dest_name = "pathtracer"
 		"pointlight"
 			action = :command
 			help = "point-light tracing renderer"
-			dest_name = "pointlight"
+			#dest_name = "pointlight"
 	end
 
 	add_arg_group!(s["render"], "render options");

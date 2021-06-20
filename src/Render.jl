@@ -5,6 +5,7 @@
 # Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni.
 #
 
+
 function print_JSON(
      png_output::String,
      pfm_output::Union{String, Nothing},
@@ -12,6 +13,7 @@ function print_JSON(
      algorithm::Renderer,
      camera::Camera,
      samples_per_side::Int64,
+     declare_float::Union{Dict, Nothing},
      rendering_time_s::Float64,
      )
 
@@ -71,15 +73,17 @@ function print_JSON(
           "camera" => dict_camera, 
           "renderer" => dict_renderer,
           "samples per pixel (0 means no antialiasing)" => samples_per_side^2,
-          "rendering time (in s)"=>rendering_time_s,
+          "declared float from Command Line" => declare_float,
+          "rendering time (in s)"=> @sprintf("%.3f", rendering_time_s),
      )
 
-     open( png_output * ".json","w") do f
-          JSON.print(f, data)
+     open( join(map(x->x*".", split(png_output,".")[1:end-1])) * "json","w") do f
+          JSON.print(f, data, 4)
      end
 
 
 end
+
 
 function render(x::(Pair{T1,T2} where {T1,T2})...)
 	render( parse_render_settings(  Dict( pair for pair in [x...]) )... )
@@ -272,6 +276,7 @@ function render(
           algorithm,
           camera,
           samples_per_side,
+          declare_float,
           rendering_time_s,
      )
 end

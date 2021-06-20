@@ -874,79 +874,59 @@ Call internally [`read_token`](@ref).
 See also: [`InputStream`](@ref), [`Scene`](@ref), [`LiteralNumberToken`](@ref), 
 [`IdentifierToken`](@ref)
 """
-function expect_number(inputstream::InputStream, scene::Scene)
+function expect_number(inputstream::InputStream, scene::Scene, open::Bool=false)
      token = read_token(inputstream)
+     result = ""
+
+     if typeof(token.value) == SymbolToken && token.value.symbol == "("
+          result *= "("*expect_number(inputstream, scene, true)
+          expect_symbol(inputstream, ")")
+          result *= ")"
+     end
      
      if typeof(token.value) == SymbolToken && token.value.symbol == "-"
-          sign = "-1.0*"
+          result *= "-"
           token = read_token(inputstream)
-     else
-          sign = "1.0*"
      end
           
-
-     if typeof(token.value) == LiteralNumberToken
-          result = sign * repr(token.value.number)
-     elseif typeof(token.value) == IdentifierToken
-          variable_name = token.value.identifier
-          if variable_name ∉ keys(scene.float_variables)
-               throw(GrammarError(token.location, "unknown variable '$(token)'"))
-          end
-          result = sign * repr(scene.float_variables[variable_name])
-     else
-          throw(GrammarError(token.location, "'$(token)' is not a number"))
-     end
-
-     count = 0
      while true
-          token = read_token(inputstream)
           if (typeof(token.value) == SymbolToken) && (token.value.symbol ∈ OPERATIONS)
-               loc_operation = token.location
-               operation = token.value.symbol
-
-               token = read_token(inputstream)
-               if typeof(token.value) == LiteralNumberToken
-                    next_number = token.value.number
-               elseif typeof(token.value) == IdentifierToken
-                    variable_name = token.value.identifier
-                    if variable_name ∉ keys(scene.float_variables)
-                         throw(GrammarError(token.location, "unknown variable '$(token)'"))
-                    end
-                    next_number = scene.float_variables[variable_name]
-               else
-                    throw(GrammarError(token.location, "'$(token)' is not a number"))
+               result *= token.value.symbol
+          elseif typeof(token.value) == IdentifierToken
+               variable_name = token.value.identifier
+               if variable_name ∉ keys(scene.float_variables)
+                    throw(GrammarError(token.location, "unknown variable '$(token)'"))
                end
-              
-               if operation=="+"
-                    result = result * "+" * repr(next_number)
-               elseif operation=="-"
-                    result = result * "-" * repr(next_number)
-               elseif operation=="*"
-                    result = result * "*" * repr(next_number)
-               elseif operation=="/"
-                    result = result * "/" * repr(next_number)
-               else
-                    throw(GrammarError(loc_operation, "unknown operation $(operation)"))
-               end
-
+               next_number = scene.float_variables[variable_name]
+               result *= repr(next_number)
+          elseif typeof(token.value) == LiteralNumberToken
+               result *= repr(token.value.number)
           elseif (typeof(token.value) == SymbolToken) && (token.value.symbol=="(")
-               result = result * "("
-               count += 1
-
-          elseif (typeof(token.value) == SymbolToken) && (token.value.symbol==")") && (count>0) 
-               result = result * ")"
-               count -= 1
+               result *= "("*expect_number(inputstream, scene, true)
+               expect_symbol(inputstream, ")")
+               result *= ")"
           else
                unread_token(inputstream, token)
                break
           end
+
+          #=
+          elseif (typeof(token.value) == SymbolToken) && (token.value.symbol==")")
+               unread_token(inputstream, token)
+               break
+          else
+               throw(GrammarError(token.location, "unknown variable '$(token)'"))
+          end
+          =#
+
+          token = read_token(inputstream)
      end
 
-     if !(count==0)
-          throw(GrammarError(token.location, "before this token parentesis are not closed!"))
+     if open == true
+          return result
+     else
+          return eval(Meta.parse(result))
      end
-
-     return eval(Meta.parse(result))
 end
 
 
@@ -1522,10 +1502,28 @@ function parse_camera(inputstream::InputStream, scene::Scene)
 end
 
 
+function println(location::SourceLocation)
+     print("location = [")
+     if location.filename == ""
+          print("nothing, ")
+     else
+          print("$(location.filename), ")
+     end
+     print("(", location.line_num,",", location.col_num,")")
+end
+
 function println(inputstream::InputStream)
      expect_symbol(inputstream, "(")
-     println(read_token(inputstream))
-     expect_symbol(inputstream, ")")
+     token = read_token(inputstream)
+     if typeof(token.value) == SymbolToken
+          println("SymbolToken: ", token.location, ", value = ", token.value.symbol)
+     elseif typeof(token.value) == LiteralNumberToken
+          println("LiteralNumberToken: ", token.location, ", value = ", token.value.number)
+     elseif typeof(token.value) == StringToken
+          println("StringToken: ", token.location, ", value = ", token.value.string)
+     elseif typeof(token.value) == StringToken
+          println("KeywordToken: ", token.location, ", value = ", token.value.keyword)
+     end
 end
 
 """

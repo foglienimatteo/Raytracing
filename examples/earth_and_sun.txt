@@ -8,8 +8,10 @@ will be ignored by lexer and parser.
 
 float var1(1.0)
 float var2(2.0)
-float var3(var1 * var2)
-print(var3)
+float var3(0.5)
+float var4(0.5)
+float var5(-var1 * var2 - 0.5/(var3 + var4))
+
 
 camera(perspective, translation([-2, 0, 1]), 1.0, 1.0)
 
@@ -89,5 +91,5 @@ pointlight(
      sun_pointlight_lum
      )
 
-#pointlight sun_pointlight([-1, 0, 0], <10, 10, 10>)
+
 
