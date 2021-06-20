@@ -30,19 +30,6 @@ FILE_NAME = split(PROGRAM_FILE, "/")[end]
 CAMERAS = ["ort", "per"]
 RENDERERS = ["onoff", "flat", "pathtracing", "pointlight"]
 
-function range_tester_declare_float(string::String="")
-	(string == "") && (return true)
-	string_without_spaces = filter(x -> !isspace(x), string)
-
-	vec_nameval = split.(split(string_without_spaces, ","), ":" )
-	for declare_float ∈ vec_nameval
-		if !(length(declare_float)==2 && !isnothing(tryparse(Float64, declare_float[2])))
-			return false
-		end
-	end
-
-	return true
-end
 
 
 function parse_commandline_error_handler(settings::ArgParseSettings, err, err_code::Int = 1)
@@ -334,8 +321,31 @@ function ArgParse_command_line(arguments)
 			help = "Declare a variable. The syntax is «--declare-float=VAR:VALUE». Example: --declare_float=clock:150"
           	arg_type = String
 			default = ""
-			range_tester = range_tester_declare_float
+			range_tester = check_is_declare_float
 		end
+
+	add_arg_group!(s["render"]["onoff"], "onoff renderer options");
+	@add_arg_table! s["render"]["onoff"] begin
+		"--background_color"
+			help = "background color specified as '<R,G,B>' components. Example: --background_color=<1,2,3>"
+          	arg_type = String
+          	default = "<0,0,0>"
+          	range_tester = check_is_color
+		"--color"
+			help = "hit color specified as '<R,G,B>' components. Example: --ambient_color=<1,2,3>"
+          	arg_type = String
+          	default = "<0,0,0>"
+          	range_tester = check_is_color
+	end
+
+	add_arg_group!(s["render"]["flat"], "flat renderer options");
+	@add_arg_table! s["render"]["flat"] begin
+		"--background_color"
+			help = "background color specified as '<R,G,B>' components. Example: --background_color=<1,2,3>"
+          	arg_type = String
+          	default = "<0,0,0>"
+          	range_tester = check_is_color
+	end
 
 	add_arg_group!(s["render"]["pathtracer"], "pathtracing renderer options");
 	@add_arg_table! s["render"]["pathtracer"] begin
@@ -351,10 +361,10 @@ function ArgParse_command_line(arguments)
     			default = 54
 			range_tester = input -> (input>0)
 		"--background_color"
-			help = "background color specified as 'R,G,B' components between 0 and 255"
+			help = "background color specified as '<R,G,B>' components. Example: --background_color=<1,2,3>"
           	arg_type = String
           	default = "0,0,0"
-          	range_tester = input -> (length(split(input, ",")) == 3)
+          	range_tester = check_is_color
 		"--num_of_rays" 
 			help = "number of `Ray`s generated for each integral evaluation"
 			arg_type = Int64
@@ -370,6 +380,20 @@ function ArgParse_command_line(arguments)
 			arg_type = Int64
 			default = 2
 			range_tester = input -> (input>0)
+	end
+
+	add_arg_group!(s["render"]["pointlight"], "pointlight renderer options");
+	@add_arg_table! s["render"]["pointlight"] begin
+		"--background_color"
+			help = "background color specified as '<R,G,B>' components. Example: --background_color=<1,2,3>"
+          	arg_type = String
+          	default = "<0,0,0>"
+          	range_tester = check_is_color
+		"--ambient_color"
+			help = "ambient color specified as '<R,G,B>' components. Example: --ambient_color=<1,2,3>"
+          	arg_type = String
+          	default = "<0,0,0>"
+          	range_tester = check_is_color
 	end
 
 

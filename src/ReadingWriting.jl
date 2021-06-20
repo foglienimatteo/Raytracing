@@ -718,6 +718,162 @@ end
 ##########################################################################################92
 
 
+"""
+    check_is_color(string::String="") :: Bool
+
+Checks if the input `string` is a color written in RGB components
+as "<R, G, B>".
+"""
+function check_is_color(string::String="")
+	(string == "") && (return true)
+	color = filter(x -> !isspace(x), string)
+
+	(color[begin] == "<" && color[end] == ">") || (return false)
+
+	color = color[begin+1:end-1]
+	color = split(color, ",")
+	(length(color)==3) || (return false)
+
+	for c in color
+		!isnothing(tryparse(Float64, c)) || (return false)
+	end
+
+	return true
+end
+
+"""
+    string2color(string::String="") :: RGB{Float32}
+
+Checks if the input `string` is a color written in RGB components
+as "<R, G, B>" with [`check_is_color`](@ref), and return it.
+"""
+function string2color(string::String)
+    if check_is_color(string)==false
+        throw(ArgumentError(
+            "invalid color sintax; must be: <R, G, B>\n"*
+            "Example: --background_color=<1,2,3>"
+        ))
+    end
+
+    if string==""
+        return RGB{Float32}(0,0,0)
+    end
+
+	color = filter(x -> !isspace(x), string)[begin+1:end-1]
+	RGB = split(color, ",")
+    R, G, B = parse.(Float64, RGB)
+
+	return RGB{Float32}(R,G,B)
+end
+
+
+"""
+    check_is_declare_float(string::String="") 
+
+Checks if the input `string` is a declaration of one (or more) floats
+in the form "NAME:VALUE" with [`check_is_declare_float`](@ref).
+Examples:
+```bash
+    --declare_float=name:1.0
+    --declare_float=name1:1.0,name2:2.0
+```
+"""
+function check_is_declare_float(string::String="")
+	(string == "") && (return true)
+	string_without_spaces = filter(x -> !isspace(x), string)
+
+	vec_nameval = split.(split(string_without_spaces, ","), ":" )
+	for declare_float ∈ vec_nameval
+		if !(length(declare_float)==2 && !isnothing(tryparse(Float64, declare_float[2])))
+			return false
+		end
+	end
+
+	return true
+end
+
+"""
+    declare_float2dict(string::String) :: Union{Dict{String, Float64}, Nothing}
+
+Checks if the input `string` is a declaration of one (or more) floats
+in the form "NAME:VALUE" with [`check_is_declare_float`](@ref).
+Return a `Dict{String, Float64}` that associates each NAME (as keys) with
+its `Float64` value, or nothing if `string==""`.
+"""
+function declare_float2dict(string::String)
+    if check_is_declare_float(string)==false
+        throw(ArgumentError(
+            "invalid declare_float usage.\n"*
+            "correct usage:  --declare_float=var1:1.0,var2:2"
+        ))
+    end
+
+    if string==""
+        return nothing
+    end
+
+	string_without_spaces = filter(x -> !isspace(x), dict["declare_float"])
+    vec_nameval = split.(split(string_without_spaces, ","), ":" )
+    declare_float = Dict{String, Float64}([v[1]=>parse(Float64, v[2]) for v in vec_nameval]...)
+    return declare_float
+end
+
+
+##########################################################################################92
+
+
+function parse_onoff_settings(dict::Dict{String, T}) where {T}
+
+    keys = [
+        "background_color", "color",
+    ]
+
+    for pair in dict
+        if (pair[1] in keys)==false
+            throw(ArgumentError(
+                "invalid key : $(pair[1])\n"*
+                "valid keys for onoff-renderer function are:\n "*
+                "$(["$(key)" for key in keys])"
+            ))
+        end
+    end
+
+    haskey(dict, "background_color") ? 
+        background_color = string2color(dict["background_color"]) : 
+        background_color = RGB{Float32}(0.0, 0.0, 0.0)
+
+    haskey(dict, "color") ? 
+        color = string2color(dict["color"]) : 
+        color = RGB{Float32}(0.0, 0.0, 0.0)
+
+  
+    return (background_color, color)
+end
+
+function parse_flat_settings(dict::Dict{String, T}) where {T}
+
+    keys = [
+        "background_color",
+    ]
+
+    for pair in dict
+        if (pair[1] in keys)==false
+            throw(ArgumentError(
+                "invalid key : $(pair[1])\n"*
+                "valid keys for onoff-renderer function are:\n "*
+                "$(["$(key)" for key in keys])"
+            ))
+        end
+    end
+
+    haskey(dict, "background_color") ? 
+        background_color = string2color(dict["background_color"]) : 
+        background_color = RGB{Float32}(0.0, 0.0, 0.0)
+
+  
+    return (background_color,)
+end
+
 function parse_pathtracer_settings(dict::Dict{String, T}) where {T}
 
     keys = [
@@ -744,11 +900,8 @@ function parse_pathtracer_settings(dict::Dict{String, T}) where {T}
         init_seq::Int64 = dict["init_seq"] : 
         init_seq = 54
 
-    haskey(dict, "background_color") ? begin
-            col::String = dict["background_color"]
-            (x,y,z) = Tuple(parse.(Float64, split(col, ","))) 
-            background_color::Int64 = RGB{Float32}(x, y, z)
-        end : 
+    haskey(dict, "background_color") ?
+        background_color = string2color(dict["background_color"]) : 
         background_color = RGB{Float32}(0.0, 0.0, 0.0)
 
     haskey(dict, "num_of_rays") ? 
@@ -768,6 +921,34 @@ function parse_pathtracer_settings(dict::Dict{String, T}) where {T}
             num_of_rays, max_depth, 
             russian_roulette_limit
             )
+end
+
+function parse_pointlight_settings(dict::Dict{String, T}) where {T}
+
+    keys = [
+        "background_color", "ambient_color",
+    ]
+
+    for pair in dict
+        if (pair[1] in keys)==false
+            throw(ArgumentError(
+                "invalid key : $(pair[1])\n"*
+                "valid keys for onoff-renderer function are:\n "*
+                "$(["$(key)" for key in keys])"
+            ))
+        end
+    end
+
+    haskey(dict, "background_color") ? 
+        background_color = string2color(dict["background_color"]) : 
+        background_color = RGB{Float32}(0.0, 0.0, 0.0)
+
+    haskey(dict, "ambient_color") ? 
+        ambient_color = string2color(dict["ambient_color"]) : 
+        ambient_color = RGB{Float32}(0.0, 0.0, 0.0)
+
+  
+    return (background_color, ambient_color)
 end
 
 
@@ -904,34 +1085,19 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
         samples_per_pixel::Int64 = dict["samples_per_pixel"] : 
         samples_per_pixel = 0
 
-    haskey(dict, "declare_float") ? begin
-        if dict["declare_float"] == "" 
-            declare_float = nothing
-        else
-            string_without_spaces = filter(x -> !isspace(x), dict["declare_float"])
-	        vec_nameval = split.(split(string_without_spaces, ","), ":" )
-	        for nameval ∈ vec_nameval
-		        if !(length(nameval)==2 && !isnothing(tryparse(Float64, nameval[2])))
-			        throw(ArgumentError(
-                        "invalid declare_float usage.\n"*
-                        "correct usage:  --declare_float= var1:1.0 , var2:2"
-                    ))
-		        end
-	        end
-            declare_float = Dict{String, Float64}([v[1]=>parse(Float64, v[2]) for v in vec_nameval]...)
-        end
-
-        end : declare_float = nothing
+    haskey(dict, "declare_float") ?
+        declare_float = declare_float2dict(dict["declare_float"]) 
+        : declare_float = nothing
 
     if haskey(dict, "%COMMAND%")
         if dict["%COMMAND%"] == "onoff"
-            renderer = OnOffRenderer()
+            renderer = OnOffRenderer(parse_onoff_settings(dict["onoff"]))
         elseif dict["%COMMAND%"] == "flat"
-            renderer = FlatRenderer()
+            renderer = FlatRenderer(parse_flat_settings(dict["flat"]))
         elseif dict["%COMMAND%"] == "pathtracer"
             renderer = PathTracer(parse_pathtracer_settings(dict["pathtracer"]))
         elseif dict["%COMMAND%"] == "pointlight"
-            renderer = PointLightRenderer()
+            renderer = PointLightRenderer(parse_pointlight_settings(dict["pointlight"]))
         end
 	else
 		renderer = FlatRenderer()
