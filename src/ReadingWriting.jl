@@ -725,10 +725,11 @@ Checks if the input `string` is a color written in RGB components
 as "<R, G, B>".
 """
 function check_is_color(string::String="")
+    println(string)
 	(string == "") && (return true)
-	color = filter(x -> !isspace(x), string)
+	color = filter(x -> !isspace(x) && x≠"\"", string)
 
-	(color[begin] == "<" && color[end] == ">") || (return false)
+	(color[begin] == '<' && color[end] == '>') || (return false)
 
 	color = color[begin+1:end-1]
 	color = split(color, ",")
@@ -759,13 +760,64 @@ function string2color(string::String)
         return RGB{Float32}(0,0,0)
     end
 
-	color = filter(x -> !isspace(x), string)[begin+1:end-1]
-	RGB = split(color, ",")
-    R, G, B = parse.(Float64, RGB)
+	color = filter(x -> !isspace(x)&& x≠"\"", string)[begin+1:end-1]
+	rgb = Vector{String}(split(color, ","))
+    R, G, B = tuple(parse.(Float64, rgb)...)
 
+    println(R,G,B)
 	return RGB{Float32}(R,G,B)
 end
 
+
+"""
+    check_is_vector(string::String="") :: Bool
+
+Checks if the input `string` is a vector written in X,Y,Z components
+as "[X, Y, Z]".
+"""
+function check_is_vector(string::String="")
+	(string == "") && (return true)
+	color = filter(x -> !isspace(x), string)
+
+	(color[begin] == '[' && color[end] == ']') || (return false)
+
+	color = color[begin+1:end-1]
+	color = split(color, ",")
+	(length(color)==3) || (return false)
+
+	for c in color
+		!isnothing(tryparse(Float64, c)) || (return false)
+	end
+
+	return true
+end
+
+"""
+    string2vector(string::String="") :: Union{Vec, Nothing}
+
+Checks if the input `string` is  a vector written in X,Y,Z components
+as "[X, Y, Z]" with [`check_is_vector`](@ref), and return `Vec(X,Y,Z)`.
+
+See also: [`Vec`](@ref)
+"""
+function string2vector(string::String)
+    if check_is_vector(string)==false
+        throw(ArgumentError(
+            "invalid vector sintax; must be: [1,2,3]\n"*
+            "Example: --camera_position=[1,2,3]"
+        ))
+    end
+
+    if string==""
+        return Vec(0,0,0)
+    end
+
+	color = filter(x -> !isspace(x) && x≠"\"", string)[begin+1:end-1]
+	Vec = split(color, ",")
+    x, y, z = parse.(Float64, RGB)
+
+	return Vec(x, y, z)
+end
 
 """
     check_is_declare_float(string::String="") 
@@ -776,6 +828,7 @@ Examples:
 ```bash
     --declare_float=name:1.0
     --declare_float=name1:1.0,name2:2.0
+    --declare_float=" name1 : 1.0 , name2: 2.0"
 ```
 """
 function check_is_declare_float(string::String="")
@@ -803,8 +856,10 @@ its `Float64` value, or nothing if `string==""`.
 function declare_float2dict(string::String)
     if check_is_declare_float(string)==false
         throw(ArgumentError(
-            "invalid declare_float usage.\n"*
-            "correct usage:  --declare_float=var1:1.0,var2:2"
+            "invalid declare_float usage. Correct usage: \n"*
+            "\t--declare_float=name:1.0\n"*
+            "\t--declare_float=name1:1.0,name2:2.0\n"*
+            """\t--declare_float=" name1 : 1.0 , name2: 2.0\n"""
         ))
     end
 
@@ -812,7 +867,7 @@ function declare_float2dict(string::String)
         return nothing
     end
 
-	string_without_spaces = filter(x -> !isspace(x), dict["declare_float"])
+	string_without_spaces = filter(x -> !isspace(x), string)
     vec_nameval = split.(split(string_without_spaces, ","), ":" )
     declare_float = Dict{String, Float64}([v[1]=>parse(Float64, v[2]) for v in vec_nameval]...)
     return declare_float
@@ -847,7 +902,7 @@ function parse_onoff_settings(dict::Dict{String, T}) where {T}
         color = RGB{Float32}(0.0, 0.0, 0.0)
 
   
-    return (background_color, color)
+    return (World(), background_color, color)
 end
 
 function parse_flat_settings(dict::Dict{String, T}) where {T}
@@ -871,7 +926,7 @@ function parse_flat_settings(dict::Dict{String, T}) where {T}
         background_color = RGB{Float32}(0.0, 0.0, 0.0)
 
   
-    return (background_color,)
+    return (World(), background_color)
 end
 
 function parse_pathtracer_settings(dict::Dict{String, T}) where {T}
@@ -892,13 +947,9 @@ function parse_pathtracer_settings(dict::Dict{String, T}) where {T}
         end
     end
 
-    haskey(dict, "init_state") ? 
-        init_state::Int64 = dict["init_state"] : 
-        init_state = 45
+    init_state = UInt64(haskey(dict, "init_state") ? dict["init_state"] : 45)
 
-    haskey(dict, "init_seq") ? 
-        init_seq::Int64 = dict["init_seq"] : 
-        init_seq = 54
+    init_seq = UInt64(haskey(dict, "init_seq") ? dict["init_seq"] : 54)
 
     haskey(dict, "background_color") ?
         background_color = string2color(dict["background_color"]) : 
@@ -916,8 +967,9 @@ function parse_pathtracer_settings(dict::Dict{String, T}) where {T}
         russian_roulette_limit::Int64 = dict["russian_roulette_limit"] : 
         russian_roulette_limit = 3
 
-    return (init_state, init_seq, 
-            background_color, 
+    return (World(),
+            background_color,
+            PCG(init_state, init_seq), 
             num_of_rays, max_depth, 
             russian_roulette_limit
             )
@@ -948,7 +1000,7 @@ function parse_pointlight_settings(dict::Dict{String, T}) where {T}
         ambient_color = RGB{Float32}(0.0, 0.0, 0.0)
 
   
-    return (background_color, ambient_color)
+    return (World(), background_color, ambient_color)
 end
 
 
@@ -1086,18 +1138,18 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
         samples_per_pixel = 0
 
     haskey(dict, "declare_float") ?
-        declare_float = declare_float2dict(dict["declare_float"]) 
-        : declare_float = nothing
+        declare_float = declare_float2dict(dict["declare_float"]) : 
+        declare_float = nothing
 
     if haskey(dict, "%COMMAND%")
         if dict["%COMMAND%"] == "onoff"
-            renderer = OnOffRenderer(parse_onoff_settings(dict["onoff"]))
+            renderer = OnOffRenderer(parse_onoff_settings(dict["onoff"])...)
         elseif dict["%COMMAND%"] == "flat"
-            renderer = FlatRenderer(parse_flat_settings(dict["flat"]))
+            renderer = FlatRenderer(parse_flat_settings(dict["flat"])...)
         elseif dict["%COMMAND%"] == "pathtracer"
-            renderer = PathTracer(parse_pathtracer_settings(dict["pathtracer"]))
+            renderer = PathTracer(parse_pathtracer_settings(dict["pathtracer"])...)
         elseif dict["%COMMAND%"] == "pointlight"
-            renderer = PointLightRenderer(parse_pointlight_settings(dict["pointlight"]))
+            renderer = PointLightRenderer(parse_pointlight_settings(dict["pointlight"])...)
         end
 	else
 		renderer = FlatRenderer()

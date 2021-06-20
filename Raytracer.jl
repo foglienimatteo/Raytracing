@@ -363,7 +363,7 @@ function ArgParse_command_line(arguments)
 		"--background_color"
 			help = "background color specified as '<R,G,B>' components. Example: --background_color=<1,2,3>"
           	arg_type = String
-          	default = "0,0,0"
+          	default = "<0,0,0>"
           	range_tester = check_is_color
 		"--num_of_rays" 
 			help = "number of `Ray`s generated for each integral evaluation"
