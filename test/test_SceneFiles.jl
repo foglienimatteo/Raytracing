@@ -136,6 +136,8 @@ end
      assert_is_symbol(read_token(input_file), "(")
      assert_is_string(read_token(input_file), "my file.pfm")
      assert_is_symbol(read_token(input_file), ")")
+
+     @test 1==1
 end
 
 @testset "test_parser" begin
@@ -281,6 +283,7 @@ end
           assert (try*1.0, -1.0*[-7,-7,-7])
      """)
 
+     scene = parse_scene(InputStream(stream))
      @test 1==1
 end
 
@@ -301,6 +304,7 @@ end
           assert(v2-v1*0, 3*[1,1,1] )
      """)
 
+     scene = parse_scene(InputStream(stream))
      @test 1==1
 end
 
@@ -321,6 +325,7 @@ end
           assert(c2-c1*0, 3*<1,1,1> )
      """)
 
+     scene = parse_scene(InputStream(stream))
      @test 1==1
 end
 
@@ -332,4 +337,27 @@ end
      """)
 
      @test_throws AssertionError parse_scene(InputStream(stream))
+end
+
+@testset "test_assert_1" begin
+     stream = IOBuffer(""" 
+          assert(1.0, 1, "=")
+          assert(1.0, 1, "==")
+          assert(1.0, 2.0, "<")
+          assert(1.0, 2.0, "<=")
+          assert(3, 2.0, ">")
+          assert(3, 2.0, ">=")
+     """)
+
+     scene = parse_scene(InputStream(stream))
+     @test 1==1
+end
+
+@testset "test_assert_2" begin
+     @test_throws AssertionError parse_scene(InputStream(IOBuffer("""assert(0.0, 1, "=")""")))
+     @test_throws AssertionError parse_scene(InputStream(IOBuffer("""assert(0.0, 1, "==")""")))
+     @test_throws AssertionError parse_scene(InputStream(IOBuffer("""assert(1.0, 1, ">")""")))
+     @test_throws AssertionError parse_scene(InputStream(IOBuffer("""assert(1.0, 2, ">=")""")))
+     @test_throws AssertionError parse_scene(InputStream(IOBuffer("""assert(1.0, 1, "<")""")))
+     @test_throws AssertionError parse_scene(InputStream(IOBuffer("""assert(1.0, 0, "<=")""")))
 end

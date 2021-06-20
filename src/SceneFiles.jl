@@ -1754,13 +1754,37 @@ function return_token_value(inputstream::InputStream, scene::Scene, bool::Bool =
      end
 end     
 
-function assert_are_equal(inputstream::InputStream, scene::Scene)
+function assert(inputstream::InputStream, scene::Scene)
      expect_symbol(inputstream, "(")
      value1 =  return_token_value(inputstream, scene)
      expect_symbol(inputstream, ",")
      value2 =  return_token_value(inputstream, scene)
-     expect_symbol(inputstream, ")")
-     @assert value1 == value2 "$(value1) and $(value2) are not equal!"
+
+     token = read_token(inputstream)
+     if typeof(token.value) == SymbolToken && token.value.symbol == ","
+          unread_token(inputstream, token)
+          expect_symbol(inputstream,",")
+          operator = expect_string(inputstream, scene)
+          expect_symbol(inputstream, ")")
+
+          if operator ∈ ["=", "=="]
+               @assert value1 == value2 "$(value1) and $(value2) are not equal!"
+          elseif operator == "<"
+               @assert value1 < value2 "$(value1) is not < $(value2)!"
+          elseif operator == "<="
+               @assert value1 <= value2 "$(value1) is not <= $(value2)!"
+          elseif operator == ">"
+               @assert value1 > value2 "$(value1) is not > $(value2)!"
+          elseif operator == ">="
+               @assert value1 >= value2 "$(value1) is not >= $(value2)!"
+          else
+               throw(GrammarError(token.location, "operator $(operator)  is not valid"))
+          end
+     else
+          unread_token(inputstream, token)
+          expect_symbol(inputstream, ")")
+          @assert value1 == value2 "$(value1) and $(value2) are not equal!"
+     end
 end
 
 """
@@ -1958,8 +1982,9 @@ function parse_scene(inputstream::InputStream, variables::Dict{String, Float64} 
 
           elseif what.value.keyword == PRINT
                println(inputstream, scene)
+
           elseif what.value.keyword == ASSERT
-               assert_are_equal(inputstream, scene)
+               assert(inputstream, scene)
           end
      end
 
