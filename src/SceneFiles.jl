@@ -126,7 +126,7 @@ Enumeration for all the possible keywords recognized by the lexer:
 |                   |                   |                        |
 |:-----------------:|:-----------------:|:----------------------:|
 | PLANE = 61        | PRINT = 71        |                        |
-| SPHERE = 62       |                   |                        |
+| SPHERE = 62       | TEST = 72         |                        |
 |                   |                   |                        |
 |                   |                   |                        |
 |                   |                   |                        |
@@ -171,6 +171,7 @@ Enumeration for all the possible keywords recognized by the lexer:
      SPHERE = 62
 
      PRINT = 71
+     TEST = 72
 end
 
 KEYWORDS = Dict{String, KeywordEnum}(
@@ -211,6 +212,7 @@ KEYWORDS = Dict{String, KeywordEnum}(
      "sphere" => SPHERE,
 
      "print" => PRINT,
+     "test" => TEST,
 )
 
 
@@ -882,6 +884,7 @@ function expect_number(inputstream::InputStream, scene::Scene, open::Bool=false)
           result *= "("*expect_number(inputstream, scene, true)
           expect_symbol(inputstream, ")")
           result *= ")"
+          token = read_token(inputstream)
      end
      
      if typeof(token.value) == SymbolToken && token.value.symbol == "-"
@@ -927,51 +930,6 @@ function expect_number(inputstream::InputStream, scene::Scene, open::Bool=false)
      else
           return eval(Meta.parse(result))
      end
-end
-
-
-function parse_operation_numbers(inputstream::InputStream, scene::Scene)
-     token = read_token(inputstream)
-
-
-     while true
-          operation = expect_symbol(inputstream, OPERATIONS)
-
-          if transformation_kw == IDENTITY
-               nothing # Do nothing (this is a primitive form of optimization!)
-          elseif transformation_kw == TRANSLATION
-               expect_symbol(inputstream, "(")
-               result *= translation(parse_vector(inputstream, scene))
-               expect_symbol(inputstream, ")")
-          elseif transformation_kw == ROTATION_X
-               expect_symbol(inputstream, "(")
-               result *= rotation_x(expect_number(inputstream, scene))
-               expect_symbol(inputstream, ")")
-          elseif transformation_kw == ROTATION_Y
-               expect_symbol(inputstream, "(")
-               result *= rotation_y(expect_number(inputstream, scene))
-               expect_symbol(inputstream, ")")
-          elseif transformation_kw == ROTATION_Z
-               expect_symbol(inputstream, "(")
-               result *= rotation_z(expect_number(inputstream, scene))
-               expect_symbol(inputstream, ")")
-          elseif transformation_kw == SCALING
-               expect_symbol(inputstream, "(")
-               result *= scaling(parse_vector(inputstream, scene))
-               expect_symbol(inputstream, ")")
-          end
-
-          # We must peek the next token to check if there is another transformation that is being
-          # chained or if the sequence ends. Thus, this is a LL(1) parser.
-          next_kw = read_token(inputstream)
-          if (typeof(next_kw.value) ≠ SymbolToken) || (next_kw.value.symbol ≠ "*")
-               # Pretend you never read this token and put it back!
-               unread_token(inputstream, next_kw)
-               break
-          end
-     end
-     
-
 end
 
 
@@ -1071,6 +1029,80 @@ Call internally [`expect_number`](@ref) and [`expect_symbol`](@ref).
     
 See also: [`InputStream`](@ref), [`Scene`](@ref), [`Vec`](@ref)
 """
+function parse_vector(inputstream::InputStream, scene::Scene, open::Bool=false)
+     token = read_token(inputstream)
+     result = ""
+
+     if typeof(token.value) == SymbolToken && token.value.symbol == "("
+          result *= "("*parse_vector(inputstream, scene, true)
+          expect_symbol(inputstream, ")")
+          result *= ")"
+          token = read_token(inputstream)
+     end
+     
+     if typeof(token.value) == SymbolToken && token.value.symbol == "-"
+          result *= "-"
+          token = read_token(inputstream)
+     end
+          
+     while true
+          if (typeof(token.value) == SymbolToken) && (token.value.symbol ∈ OPERATIONS)
+               result *= token.value.symbol
+          elseif typeof(token.value) == IdentifierToken
+               variable_name = token.value.identifier
+               if variable_name ∉ union(keys(scene.vector_variables), keys(scene.float_variables))
+                    throw(GrammarError(token.location, "unknown vector/float variable '$(token)'"))
+               end
+               next_value = variable_name ∈ keys(scene.vector_variables) ?
+                    scene.vector_variables[variable_name] :
+                    scene.float_variables[variable_name]
+               result *= repr(next_value)
+          elseif typeof(token.value) == SymbolToken && token.value.symbol =="["
+               unread_token(inputstream, token)
+
+               expect_symbol(inputstream, "[")
+               x = expect_number(inputstream, scene)
+               expect_symbol(inputstream, ",")
+               y = expect_number(inputstream, scene)
+               expect_symbol(inputstream, ",")
+               z = expect_number(inputstream, scene)
+               expect_symbol(inputstream, "]")
+               result*= repr(Vec(x, y, z))
+
+          elseif (typeof(token.value) == SymbolToken) && (token.value.symbol=="(")
+               result *= "("*parse_vector(inputstream, scene, true)
+               expect_symbol(inputstream, ")")
+               result *= ")"
+
+          elseif typeof(token.value) == LiteralNumberToken
+               result *= repr(token.value.number)
+          else
+               unread_token(inputstream, token)
+               break
+          end
+
+          #=
+          elseif (typeof(token.value) == SymbolToken) && (token.value.symbol==")")
+               unread_token(inputstream, token)
+               break
+          else
+               throw(GrammarError(token.location, "unknown variable '$(token)'"))
+          end
+          =#
+
+          token = read_token(inputstream)
+     end
+
+     if open == true
+          return result
+     else
+          println(result)
+          return eval(Meta.parse(result))
+     end
+end
+
+
+#=
 function parse_vector(inputstream::InputStream, scene::Scene)
      token = read_token(inputstream)
 
@@ -1095,6 +1127,8 @@ function parse_vector(inputstream::InputStream, scene::Scene)
      end
 
 end
+=#
+
 
 
 """
@@ -1512,18 +1546,126 @@ function println(location::SourceLocation)
      print("(", location.line_num,",", location.col_num,")")
 end
 
-function println(inputstream::InputStream)
+function println(inputstream::InputStream, scene::Scene)
      expect_symbol(inputstream, "(")
      token = read_token(inputstream)
      if typeof(token.value) == SymbolToken
-          println("SymbolToken: ", token.location, ", value = ", token.value.symbol)
+          println("SymbolToken: ", token.location, ", ", token.value.symbol)
      elseif typeof(token.value) == LiteralNumberToken
-          println("LiteralNumberToken: ", token.location, ", value = ", token.value.number)
+          println("LiteralNumberToken: ", token.location, ",  ", token.value.number)
      elseif typeof(token.value) == StringToken
-          println("StringToken: ", token.location, ", value = ", token.value.string)
-     elseif typeof(token.value) == StringToken
-          println("KeywordToken: ", token.location, ", value = ", token.value.keyword)
+          println("StringToken: ", token.location, ",  ", token.value.string)
+     elseif typeof(token.value) == KeywordToken
+          println("KeywordToken: ", token.location, ",  ", token.value.keyword)
+     elseif typeof(token.value) == IdentifierToken
+          print("IdentifierToken: ", token.location, ", identifier = ", token.value.identifier, ", value =")
+          if token.value.identifier ∈ keys(scene.float_variables)
+               println(scene.float_variables[token.value.identifier])
+          elseif token.value.identifier ∈ keys(scene.vector_variables)
+               println(scene.vector_variables[token.value.identifier])
+          elseif token.value.identifier ∈ keys(scene.color_variables)
+               println(scene.color_variables[token.value.identifier])
+          else
+               println(typeof(token.value.identifier))
+          end
      end
+     expect_symbol(inputstream, ")")
+end
+
+"""
+     return_token_value(
+          inputstream::InputStream, 
+          scene::Scene
+          ) :: Union{Float64, Bool, String, Vec, RGB{Float32}, Pigment, BRDF}
+
+Return the value of the token readed from `inputstream`.
+If the token is an IdentifierToken, return the value associated with that 
+identifier insdie the given `scene`.
+Throws `GrammarError` if an error occurs.
+Call internally the following parsing functions:
+- [`read_token`](@ref)
+- [`unread_token`](@ref)
+- [`parse_vector`](@ref)
+- [`parse_color`](@ref)
+- [`parse_pigment`](@ref)
+- [`parse_brdf`](@ref)
+
+See also: [`Vec`](@ref), [`Pigment`](@ref), [`BRDF`](@ref), 
+[`InputStream`](@ref), [`Scene`](@ref), [`GrammarError`](@ref)
+"""
+function return_token_value(inputstream::InputStream, scene::Scene)
+     token = read_token(inputstream)
+     sign = 1.0
+     result =
+     if typeof(token.value) == LiteralNumberToken
+          token.value.number
+
+     elseif typeof(token.value) == StringToken
+          token.value.string
+
+     elseif typeof(token.value) == SymbolToken
+          symbol = token.value.symbol
+          if symbol=="["
+               unread_token(inputstream, token)
+               parse_vector(inputstream, scene)
+          elseif symbol=="<"
+               unread_token(inputstream, token)
+               parse_color(inputstream, scene)
+          elseif symbol=="-"
+               sign*=-1.0
+               return_token_value(inputstream, scene)
+          else
+               throw(GrammarError(token.location, "symbol '$(symbol)' do not define anything"))
+          end
+
+     elseif typeof(token.value) == KeywordToken
+          keyword = token.value.keyword
+          if keyword ∈ [DIFFUSE,  SPECULAR]
+               unread_token(inputstream, token)
+               parse_brdf(inputstream, scene)
+          elseif keyword ∈ [UNIFORM,  CHECKERED,  IMAGE]
+               unread_token(inputstream, token)
+               parse_pigment(inputstream, scene)
+          else
+               throw(GrammarError(token.location, 
+               "keyword '$(keyword)' do not define anything that can be compared"))
+          end
+
+
+     elseif typeof(token.value) == IdentifierToken
+          variable_name = token.value.identifier
+          if variable_name ∈ keys(scene.float_variables)
+               scene.float_variables[variable_name]
+          elseif variable_name ∈ keys(scene.string_variables)
+               scene.string_variables[variable_name]
+          elseif variable_name ∈ keys(scene.bool_variables)
+               scene.bool_variables[variable_name]
+          elseif variable_name ∈ keys(scene.vector_variables)
+               scene.vector_variables[variable_name]
+          elseif variable_name ∈ keys(scene.color_variables)
+               scene.color_variables[variable_name]
+          elseif variable_name ∈ keys(scene.pigment_variables)
+               scene.pigment_variables[variable_name]
+          elseif variable_name ∈ keys(scene.brdf_variables)
+               scene.brdf_variables[variable_name]
+          elseif variable_name ∈ keys(scene.transformation_variables)
+               scene.transformation_variables[variable_name]
+          else
+               throw(GrammarError(token.location, 
+               "identifier '$(variable_name)' do not define anything that can be compared"))
+          end
+     end
+
+     return sign*result
+end     
+
+function test_are_equal(inputstream::InputStream, scene::Scene)
+     expect_symbol(inputstream, "(")
+     value1 =  return_token_value(inputstream, scene)
+     expect_symbol(inputstream, ",")
+     value2 =  return_token_value(inputstream, scene)
+     expect_symbol(inputstream, ")")
+     @test value1 == value2
 end
 
 """
@@ -1720,7 +1862,9 @@ function parse_scene(inputstream::InputStream, variables::Dict{String, Float64} 
                add_shape!(scene.world, parse_plane(inputstream, scene))
 
           elseif what.value.keyword == PRINT
-               println(inputstream)
+               println(inputstream, scene)
+          elseif what.value.keyword == TEST
+               test_are_equal(inputstream, scene)
           end
      end
 
