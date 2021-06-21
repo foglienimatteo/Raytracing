@@ -118,8 +118,8 @@ end
      stream = IOBuffer("""
      # This is a comment
      # This is another comment
-     new material sky_material(
-          diffuse(image("my file.pfm")),
+     NEW MATERIAL sky_material(
+          DIFFUSE(IMAGE("my file.pfm")),
           <5.0, 500.0, 300.0>
      ) # Comment at the end of the line
 """)
@@ -142,37 +142,37 @@ end
 
 @testset "test_parser" begin
      stream = IOBuffer("""
-     float clock(150)
+     FLOAT clock(150)
 
-     material sky_material(
-          diffuse(uniform(<0, 0, 0>)),
-          uniform(<0.7, 0.5, 1>)
+     MATERIAL sky_material(
+          DIFFUSE(UNIFORM(<0, 0, 0>)),
+          UNIFORM(<0.7, 0.5, 1>)
      )
 
      # Here is a comment
 
-     material ground_material(
-          diffuse(checkered(<0.3, 0.5, 0.1>,
+     MATERIAL ground_material(
+          DIFFUSE(CHECKERED(<0.3, 0.5, 0.1>,
                               <0.1, 0.2, 0.5>, 4)),
-          uniform(<0, 0, 0>)
+          UNIFORM(<0, 0, 0>)
      )
 
-     material sphere_material(
-          specular(uniform(<0.5, 0.5, 0.5>)),
-          uniform(<0, 0, 0>)
+     MATERIAL sphere_material(
+          SPECULAR(UNIFORM(<0.5, 0.5, 0.5>)),
+          UNIFORM(<0, 0, 0>)
      )
 
-     plane (sky_material, translation([0, 0, 100]) * rotation_y(clock))
-     plane (ground_material, identity)
+     PLANE (sky_material, TRANSLATION([0, 0, 100]) * ROTATION_Y(clock))
+     PLANE (ground_material, IDENTITY)
 
-     sphere(sphere_material, translation([0, 0, 1]))
+     SPHERE(sphere_material, TRANSLATION([0, 0, 1]))
 
-     camera(perspective, rotation_z(30) * translation([-4, 0, 1]), 1.0, 2.0)
+     CAMERA(PERSPECTIVE, ROTATION_Z(30) * TRANSLATION([-4, 0, 1]), 1.0, 2.0)
      """)
 
      scene = parse_scene(InputStream(stream))
 
-     # Check that the float variables are ok
+     # Check that the FLOAT variables are ok
 
      @test length(scene.float_variables) == 1
      @test "clock" ∈ keys(scene.float_variables)
@@ -250,13 +250,13 @@ end
 
 @testset "test_math_operations_1" begin
      stream = IOBuffer(""" 
-          float var1(1.0)
-          float var2(2.0)
-          float var3(0.5)
-          float var4(0.5)
-          float var5(-var1 * var2 - 0.5/(var3 + var4))
+          FLOAT var1(1.0)
+          FLOAT var2(2.0)
+          FLOAT var3(0.5)
+          FLOAT var4(0.5)
+          FLOAT var5(-var1 * var2 - 0.5/(var3 + var4))
 
-          assert(var5, -2.5)
+          ASSERT(var5, -2.5)
      """)
 
      scene = parse_scene(InputStream(stream))
@@ -265,13 +265,13 @@ end
 
 @testset "test_math_operations_2" begin
      stream = IOBuffer(""" 
-          float var1(1.0)
-          float var2(2.0)
-          float var3(0.5)
-          float var4(0.5)
-          float var5(-var1 * var2 - 0.5/(var3 + var4))
+          FLOAT var1(1.0)
+          FLOAT var2(2.0)
+          FLOAT var3(0.5)
+          FLOAT var4(0.5)
+          FLOAT var5(-var1 * var2 - 0.5/(var3 + var4))
 
-          assert(var5, 2.5)
+          ASSERT(var5, 2.5)
      """)
 
      @test_throws AssertionError parse_scene(InputStream(stream))
@@ -279,8 +279,8 @@ end
 
 @testset "test_return_token_value_1" begin
      stream = IOBuffer(""" 
-          vector try( ([1,2,3] + [3,2,1])*2.0 - [1,1,1] )
-          assert (try*1.0, -1.0*[-7,-7,-7])
+          VECTOR try( ([1,2,3] + [3,2,1])*2.0 - [1,1,1] )
+          ASSERT (try*1.0, -1.0*[-7,-7,-7])
      """)
 
      scene = parse_scene(InputStream(stream))
@@ -289,75 +289,75 @@ end
 
 @testset "test_return_token_value_2" begin
      stream = IOBuffer(""" 
-          vector try( ([1,2,3] + [3,2,1])*2.0 - [1,1,1] )
-          assert (try, -1.0*[7,-7,-7])
+          VECTOR try( ([1,2,3] + [3,2,1])*2.0 - [1,1,1] )
+          ASSERT (try, -1.0*[7,-7,-7])
      """)
 
      @test_throws AssertionError parse_scene(InputStream(stream))
 end
 
 
-@testset "test_parse_vector_1" begin
+@testset "test_parse_VECTOR_1" begin
      stream = IOBuffer(""" 
-          vector v1([1,2,3])
-          vector v2([4,5,6] * 1.0 - v1)
-          assert(v2-v1*0, 3*[1,1,1] )
+          VECTOR v1([1,2,3])
+          VECTOR v2([4,5,6] * 1.0 - v1)
+          ASSERT(v2-v1*0, 3*[1,1,1] )
      """)
 
      scene = parse_scene(InputStream(stream))
      @test 1==1
 end
 
-@testset "test_parse_vector_2" begin
+@testset "test_parse_VECTOR_2" begin
      stream = IOBuffer(""" 
-          vector v1([1,2,3])
-          vector v2([4,5,6] * 1.0 - v1)
-          assert(v2-v1*0, 1*[1,1,1] )
+          VECTOR v1([1,2,3])
+          VECTOR v2([4,5,6] * 1.0 - v1)
+          ASSERT(v2-v1*0, 1*[1,1,1] )
      """)
 
      @test_throws AssertionError parse_scene(InputStream(stream))
 end
 
-@testset "test_parse_color_1" begin
+@testset "test_parse_COLOR_1" begin
      stream = IOBuffer(""" 
-          color c1(<1,2,3>)
-          color c2(<4,5,6> * 1.0 - c1)
-          assert(c2-c1*0, 3*<1,1,1> )
+          COLOR c1(<1,2,3>)
+          COLOR c2(<4,5,6> * 1.0 - c1)
+          ASSERT(c2-c1*0, 3*<1,1,1> )
      """)
 
      scene = parse_scene(InputStream(stream))
      @test 1==1
 end
 
-@testset "test_parse_color_2" begin
+@testset "test_parse_COLOR_2" begin
      stream = IOBuffer(""" 
-          color c1(<1,2,3>)
-          color c2(<4,5,6> * 1.0 - c1)
-          assert(c2-c1*0, 0*<1,1,1> )
+          COLOR c1(<1,2,3>)
+          COLOR c2(<4,5,6> * 1.0 - c1)
+          ASSERT(c2-c1*0, 0*<1,1,1> )
      """)
 
      @test_throws AssertionError parse_scene(InputStream(stream))
 end
 
-@testset "test_assert_1" begin
+@testset "test_ASSERT_1" begin
      stream = IOBuffer(""" 
-          assert(1.0, 1, "=")
-          assert(1.0, 1, "==")
-          assert(1.0, 2.0, "<")
-          assert(1.0, 2.0, "<=")
-          assert(3, 2.0, ">")
-          assert(3, 2.0, ">=")
+          ASSERT(1.0, 1, "=")
+          ASSERT(1.0, 1, "==")
+          ASSERT(1.0, 2.0, "<")
+          ASSERT(1.0, 2.0, "<=")
+          ASSERT(3, 2.0, ">")
+          ASSERT(3, 2.0, ">=")
      """)
 
      scene = parse_scene(InputStream(stream))
      @test 1==1
 end
 
-@testset "test_assert_2" begin
-     @test_throws AssertionError parse_scene(InputStream(IOBuffer("""assert(0.0, 1, "=")""")))
-     @test_throws AssertionError parse_scene(InputStream(IOBuffer("""assert(0.0, 1, "==")""")))
-     @test_throws AssertionError parse_scene(InputStream(IOBuffer("""assert(1.0, 1, ">")""")))
-     @test_throws AssertionError parse_scene(InputStream(IOBuffer("""assert(1.0, 2, ">=")""")))
-     @test_throws AssertionError parse_scene(InputStream(IOBuffer("""assert(1.0, 1, "<")""")))
-     @test_throws AssertionError parse_scene(InputStream(IOBuffer("""assert(1.0, 0, "<=")""")))
+@testset "test_ASSERT_2" begin
+     @test_throws AssertionError parse_scene(InputStream(IOBuffer("""ASSERT(0.0, 1, "=")""")))
+     @test_throws AssertionError parse_scene(InputStream(IOBuffer("""ASSERT(0.0, 1, "==")""")))
+     @test_throws AssertionError parse_scene(InputStream(IOBuffer("""ASSERT(1.0, 1, ">")""")))
+     @test_throws AssertionError parse_scene(InputStream(IOBuffer("""ASSERT(1.0, 2, ">=")""")))
+     @test_throws AssertionError parse_scene(InputStream(IOBuffer("""ASSERT(1.0, 1, "<")""")))
+     @test_throws AssertionError parse_scene(InputStream(IOBuffer("""ASSERT(1.0, 0, "<=")""")))
 end

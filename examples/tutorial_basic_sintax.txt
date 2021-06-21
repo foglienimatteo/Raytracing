@@ -1,6 +1,16 @@
 # DEMO : WORLD TYPE B
+# This is a simple tutorial scene-file that explains the basic syntax
+# of how scene can be defined for this program
+# 
+# In order to check the correct behaviour of this file (i.e. that is correctòy parsed,
+# without throwing exceptions) run the followinf command in the CLI (or another equivalent):
+#
+#    ./Raytracer.jl render examples/tutorial_basic_sintax.txt onoff 
+#
+# And now let's start explaining how the scene-file must be written!
 
-# everything that follows an hashtag symbol ("#") it's a comment
+
+# Everything that follows an hashtag symbol ("#") it's a comment
 # and will be ignored by lexer and parser.
 
 @
@@ -11,7 +21,7 @@ PAY ATTENTION: This grammar is a LL(1) one, so you cannot put another "at"
 symbol inside this section!
 @
 
-# Let's define a variable!
+# Let's now define a variable!
 FLOAT my_float(1.0)
 # now "my_float" it's an identifier associated with the floating number "1.0"!
 
@@ -41,6 +51,7 @@ MATERIAL my_material ( DIFFUSE(UNIFORM(<1,1,1>)) , UNIFORM(<0,0,0>) )
 MATERIAL my_second_material(my_diffuse, my_uniform)
 
 
+
 # Math operations are enabled between floats...
 FLOAT float(pi + 3.5*e)     # pi and e are reserved words!
 FLOAT another_float( float + 1.0 - float/(pi + 3.5*e))                   
@@ -67,9 +78,13 @@ ASSERT(another_float, pi + 3.5*e)
 ASSERT(another_color, (pi + 3.5*e)*<1,1,1>)
 ASSERT(another_vector, (pi + 3.5*e)*[1,1,1])
 
-# Last but not least, youi can print to stdout the value of a variable or identifier
+
+# Last but not least, you can print to stdout the value of a variable or identifier
 PRINT(1.0)
 PRINT(another_float)
 PRINT(another_color)
 PRINT(another_vector)
 
+
+# Now move to read the "examples/demo_world_B.txt" file to understand
+# how create a scene!
