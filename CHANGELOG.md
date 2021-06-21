@@ -1,6 +1,7 @@
 # HEAD
 
-Implementing the lexer.
+- added the `render` function and implemented lexer and parser; now it's possible to read a scene from a fiel and render it; see PR[#18](https://github.com/cosmofico97/Raytracing/pull/18)
+
 
 # VERSION 0.5.0
 

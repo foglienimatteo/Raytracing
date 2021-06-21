@@ -1,0 +1,74 @@
+# DEMO : WORLD TYPE B
+
+# everything that follows an hashtag symbol ("#") it's a comment
+# and will be ignored by lexer and parser.
+
+@
+It's also possible to comment large parts of scene-code thanks to the
+"at" symbol; this will comment everything between two of them.
+
+PAY ATTENTION: This grammar is a LL(1) one, so you cannot put another "at"
+symbol inside this section!
+@
+
+# Let's define a variable!
+FLOAT my_float(1.0)
+# now "my_float" it's an identifier associated with the floating number "1.0"!
+
+# You can define with a similar syntax also:
+VECTOR my_vec([1, 2, 3])                   # Vectors, BUT SQUARE BRACKETS [] AND COMMAS , ARE REQUIRED!
+COLOR my_col(<1, 2, 3>)                    # Vectors, BUT ANGLE BRACKETS <> AND COMMAS , ARE REQUIRED!
+STRING my_str("let's create a string")     # Strings, BUT DOUBLE QUOTES "" ARE REQUIRED!
+
+
+
+# You can also define with a slightly more complicated syntax also:
+# - Pigments, that can be of three types:
+PIGMENT my_uniform( UNIFORM(<1,1,1>) )                      # Uniform Pigment, created from an input color
+PIGMENT my_checkered( CHECKERED( <1,1,1> , <2,2,2>, 4 ) )   # Checkered Pigment, created from two input color and an integer fo the number of steps
+PIGMENT my_image( IMAGE("images/milky_way.jpg"))          # Image Pigment, created from an image loaded from the specified input path
+
+# - BRDF, created from an input pigment, that can be of two types:
+BRDF my_diffuse( DIFFUSE(IMAGE("images/milky_way.jpg")) )   # Diffuse BRDF, as a opaque object
+BRDF my_specular( specular(<1,1,1>) )                       # Specular BRDF, as a mirror object          
+
+# - Material, created from a BRDF (first argument) that describes the object surface,
+# and a Pigment (second argument) that describes the self-emitted radiance of the object
+MATERIAL my_material ( DIFFUSE(UNIFORM(<1,1,1>)) , UNIFORM(<0,0,0>) )
+
+# You can also define objects from pre-defined variables!
+MATERIAL my_second_material(my_diffuse, my_uniform)
+
+
+# Math operations are enabled between floats...
+FLOAT float(pi + 3.5*e)     # pi and e are reserved words!
+FLOAT another_float( float + 1.0 - float/(pi + 3.5*e))                   
+# ...between float and color and between colors...
+COLOR color(<1,1,1> * float)
+COLOR another_color( color + <1, 1, 1.0> - color*1.0/(pi + 3.5*e) )     # use *1.0/... to divide a color for a number
+# ...between float and vector and between vectors...
+VECTOR vector([1,1,1] * float)
+VECTOR another_vector( vector + [1.0, 1, 1] - color*1.0/(pi + 3.5*e) ) 
+
+
+# It's also possible to check if a variable has a specific value
+# or is greater that/less than another with the ASSERT keyword
+ASSERT(1, 1)        # Checking that 1==1, throws AssertionError otherwise
+ASSERT(1, 1, "=")   # Checking that 1==1 again
+ASSERT(1, 1, "==")  # Checking that 1==1 again
+ASSERT(1, 2, "<")   # Checking that 1<2
+ASSERT(1, 2, "<=")  # Checking that 1<=2
+ASSERT(3, 2, ">")   # Checking that 3>2
+ASSERT(3, 2, ">=")  # Checking that 3>=2
+
+# in a more complicated manner:
+ASSERT(another_float, pi + 3.5*e)
+ASSERT(another_color, (pi + 3.5*e)*<1,1,1>)
+ASSERT(another_vector, (pi + 3.5*e)*[1,1,1])
+
+# Last but not least, youi can print to stdout the value of a variable or identifier
+PRINT(1.0)
+PRINT(another_float)
+PRINT(another_color)
+PRINT(another_vector)
+
