@@ -9,6 +9,46 @@ SYM_NUM = Dict("e"=>ℯ, "pi"=>π)
 
 
 """
+    check_is_positive(string::String="") :: Bool
+
+Checks if the input `string` is a number that can be parsed as 
+a positive Float64.
+"""
+function check_is_positive(string::String="")
+	var = filter(x -> !isspace(x) && x≠"\"", string)
+     (var == "") && (return true)
+
+	!isnothing(tryparse(Float64, var)) || (return false)
+
+     return parse(Float64, var)>0 ? true : false
+end
+
+
+"""
+    string2positive(string::String) :: Float64
+
+Checks if the input `string` is a number that can be parsed as 
+a positive Float64 with [`check_is_positive`](@ref), and return it as
+a `Float64`.
+"""
+function string2positive(string::String, uint::Bool=false)
+     if check_is_positive(string)==false
+          throw(ArgumentError(
+               "invalid number; it must be parsed as a positive Int64"
+          ))
+     end
+     var = filter(x -> !isspace(x) && x≠"\"", string)
+
+     !(var=="") || (return 0)
+
+	return parse(Float64, var)
+end
+
+
+##########################################################################################92
+
+
+"""
     check_is_uint64(string::String="") :: Bool
 
 Checks if the input `string` is a number that can be parsed as 
@@ -37,6 +77,51 @@ function string2int64(string::String, uint::Bool=false)
      if check_is_uint64(string)==false
           throw(ArgumentError(
                "invalid number; it must be parsed as a positive Int64"
+          ))
+     end
+     var = filter(x -> !isspace(x) && x≠"\"", string)
+
+     !(var=="") || (return uint==false ? Int64(0) : UInt64(0) )
+
+	return uint==false ? 
+          convert(Int64,parse(Float64, var)) : 
+          convert(UInt64,parse(Float64, var))
+end
+
+
+##########################################################################################92
+
+
+"""
+    check_is_even_uint64(string::String="") :: Bool
+
+Checks if the input `string` is a number that can be parsed as 
+an even positive Int64.
+"""
+function check_is_even_uint64(string::String="")
+	var = filter(x -> !isspace(x) && x≠"\"", string)
+     (var == "") && (return true)
+
+	!isnothing(tryparse(Float64, var)) || (return false)
+     number = parse(Float64, var)
+     (number - floor(number) ≈ 0.0 ) || (return false)
+     even = convert(Int64, number)
+
+     return (even>0 && iseven(even)) ? true : false
+end
+
+
+"""
+    string2evenint64(string::String, uint::Bool=false) :: Union{Int64, UInt64}
+
+Checks if the input `string` is a number that can be parsed as 
+an even positive Int64 with [`check_is_even_uint64`](@ref), and return it as
+a `Int64` if `uint==false`or as a `UInt64` if `uint==true`.
+"""
+function string2evenint64(string::String, uint::Bool=false)
+     if check_is_even_uint64(string)==false
+          throw(ArgumentError(
+               "invalid number; it must be parsed as an even positive Int64"
           ))
      end
      var = filter(x -> !isspace(x) && x≠"\"", string)

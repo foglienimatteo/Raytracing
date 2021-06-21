@@ -107,10 +107,12 @@ function ArgParse_command_line(arguments)
 		"--alpha", "-a"
 			help = "scaling factor for the normalization process"
 			arg_type = Float64
+			range_tester == check_is_positive
 			default = 0.18
 		"--gamma", "-g"
 			help = "gamma value for the tone mapping process"
 			arg_type = Float64
+			range_tester == check_is_positive
 			default = 1.27
 	end
 
@@ -291,15 +293,16 @@ function ArgParse_command_line(arguments)
 		"--alpha"
 			help = "angle of view around z-axis, in degrees"
 			arg_type = Float64
+			range_tester == check_is_positive
 			default = 0.
 		"--width"
 			help = "pixel number on the width of the resulting demo image."
 			default = 640
-			range_tester = input -> (check_is_uint64(input) && iseven(input))
+			range_tester = check_is_even_uint64
 		"--height"
 			help = "pixel number on the height of the resulting demo image."
 			default = 480
-			range_tester =  input -> (check_is_uint64(input) && iseven(input))
+			range_tester = check_is_even_uint64
      	"--samples_per_pixel"
 			help = "Number of samples per pixel for the antialiasing algorithm\n"*
 					"It must be an integer perfect square, i.e. 0,1,4,9,16,...\n"*

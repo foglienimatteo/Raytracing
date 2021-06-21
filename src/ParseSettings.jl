@@ -142,27 +142,17 @@ function parse_demo_settings(dict::Dict{String, T}) where {T}
         end
     end
 
-    haskey(dict, "camera_type") ? 
-        camera_type::String = dict["camera_type"] : 
-        camera_type = "per"
+    camera_type::String = haskey(dict, "camera_type") ? dict["camera_type"] : "per"
 
-    haskey(dict, "camera_position") ?
-        begin
-            obs::String = dict["camera_position"]
-            (x,y,z) = Tuple(parse.(Float64, split(obs, ","))) 
-            camera_position = Point(x,y,z)
-        end : 
-        camera_position =  Point(-1.0 , 0. , 0.)
+    camera_position::Vec = haskey(dict, "camera_position") ?
+        string2vector(dict["camera_position"]) : 
+        Vec(-1.0 , 0. , 0.)
 
-    haskey(dict, "algorithm") ? 
-        algorithm::String = dict["algorithm"] : 
-        algorithm = "flat"
+    algorithm::String = haskey(dict, "algorithm") ? dict["algorithm"] : "flat"
 
-    haskey(dict, "alpha") ? 
-        α::Float64 = dict["alpha"] : 
-        α = 0.
+    α::Float64 = haskey(dict, "alpha") ? dict["alpha"] : 0.
 
-    haskey(dict, "width") ? 
+    width::Int64 = haskey(dict, "width") ? 
         width::Int64 = dict["width"] : 
         width = 640
 
