@@ -185,3 +185,27 @@ end
      @test_throws ArgumentError Raytracing.string2vector("<0,0,0>")
      @test_throws ArgumentError Raytracing.string2vector("[0 0 0]")
 end
+
+
+##########################################################################################92
+
+
+@testset "test_check_is_one_of" begin
+     @test Raytracing.check_is_one_of("per", CAMERAS)
+     @test Raytracing.check_is_one_of("ort", CAMERAS)
+     @test Raytracing.check_is_one_of("  per    ", CAMERAS)
+     @test Raytracing.check_is_one_of("ort   ", CAMERAS)
+     @test !Raytracing.check_is_one_of("", CAMERAS)
+     @test !Raytracing.check_is_one_of("  ", CAMERAS)
+     @test !Raytracing.check_is_one_of("prova", CAMERAS)
+end
+
+@testset "test_string2stringoneof" begin
+     @test Raytracing.string2stringoneof("per", CAMERAS) == "per"
+     @test Raytracing.string2stringoneof("ort", CAMERAS) == "ort"
+     @test Raytracing.string2stringoneof("per   ", CAMERAS) == "per"
+     @test Raytracing.string2stringoneof("  ort ", CAMERAS) == "ort"
+     @test_throws ArgumentError Raytracing.string2stringoneof("", CAMERAS)
+     @test_throws ArgumentError Raytracing.string2stringoneof("   ", CAMERAS)
+     @test_throws ArgumentError Raytracing.string2stringoneof("prova ", CAMERAS)
+end
