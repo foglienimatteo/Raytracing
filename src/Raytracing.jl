@@ -70,10 +70,10 @@ export render
 export print_not_black
 
 CAMERAS = ["ort", "per"]
-RENDERERS = ["onoff", "flat", "pathtracing", "pointlight"]
+RENDERERS = ["onoff", "flat", "pathtracer", "pointlight"]
 DEMO_WORLD_TYPES = ["A", "B"]
 
-export CAMERAS, RENDERERS
+export CAMERAS, RENDERERS, DEMO_WORLD_TYPES
 
 include("PCG.jl")
 include("Structs.jl")

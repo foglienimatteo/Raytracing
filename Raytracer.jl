@@ -161,7 +161,11 @@ function ArgParse_command_line(arguments)
 					"If =0 (default value), antialiasing does not occurs."
      		default = 0
 			range_tester = check_is_square
-
+		"--world_type"
+          	help = "world type to be rendered; valid values: $(DEMO_WORLD_TYPES)"
+          	arg_type = String
+          	default = "A"
+          	range_tester = input -> check_is_one_of(input, DEMO_WORLD_TYPES)
 		"--set_pfm_name"
 			help = "name of the pfm file to be saved"
 			nargs = '?'
@@ -298,6 +302,11 @@ function ArgParse_command_line(arguments)
 					"If =0 (default value), antialiasing does not occurs."
      		default = 0
 			range_tester = check_is_square
+		"--world_type"
+          	help = "world type to be rendered; valid values: $(DEMO_WORLD_TYPES)"
+          	arg_type = String
+          	default = "A"
+          	range_tester = input -> check_is_one_of(input, DEMO_WORLD_TYPES)
 		"--set_anim_name"
 			help = "name of the animation file to be saved"
 			nargs = '?'
