@@ -31,7 +31,7 @@ PIGMENT my_image( IMAGE("images/milky_way.jpg"))          # Image Pigment, creat
 
 # - BRDF, created from an input pigment, that can be of two types:
 BRDF my_diffuse( DIFFUSE(IMAGE("images/milky_way.jpg")) )   # Diffuse BRDF, as a opaque object
-BRDF my_specular( specular(<1,1,1>) )                       # Specular BRDF, as a mirror object          
+BRDF my_specular( SPECULAR(UNIFORM(<1,1,1>)) )              # Specular BRDF, as a mirror object          
 
 # - Material, created from a BRDF (first argument) that describes the object surface,
 # and a Pigment (second argument) that describes the self-emitted radiance of the object
@@ -49,7 +49,7 @@ COLOR color(<1,1,1> * float)
 COLOR another_color( color + <1, 1, 1.0> - color*1.0/(pi + 3.5*e) )     # use *1.0/... to divide a color for a number
 # ...between float and vector and between vectors...
 VECTOR vector([1,1,1] * float)
-VECTOR another_vector( vector + [1.0, 1, 1] - color*1.0/(pi + 3.5*e) ) 
+VECTOR another_vector( vector + [1.0, 1, 1] - vector*1.0/(pi + 3.5*e) ) 
 
 
 # It's also possible to check if a variable has a specific value

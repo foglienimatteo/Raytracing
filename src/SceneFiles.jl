@@ -866,7 +866,7 @@ function expect_keywords(inputstream::InputStream, keywords::Vector{KeywordEnum}
      if token.value.keyword ∉ keywords
           throw(GrammarError(
                token.location,
-               "expected one of the keywords $([String(x)*"," for x in keywords]...)) instead of '$(token)'"
+               "expected one of the keywords $([x for x in keywords]) instead of '$(token)'"
           ))
      end
 
@@ -906,6 +906,8 @@ function expect_number(inputstream::InputStream, scene::Scene, open::Bool=false)
      while true
           if (typeof(token.value) == SymbolToken) && (token.value.symbol ∈ OPERATIONS)
                result *= token.value.symbol
+          elseif (typeof(token.value) == IdentifierToken) && (token.value.identifier ∈ keys(SYM_NUM))
+               result *=  string(SYM_NUM[token.value.identifier])
           elseif typeof(token.value) == IdentifierToken
                variable_name = token.value.identifier
                if variable_name ∉ keys(scene.float_variables)
@@ -1059,6 +1061,8 @@ function parse_vector(inputstream::InputStream, scene::Scene, open::Bool=false)
      while true
           if (typeof(token.value) == SymbolToken) && (token.value.symbol ∈ OPERATIONS)
                result *= token.value.symbol
+          elseif (typeof(token.value) == IdentifierToken) && (token.value.identifier ∈ keys(SYM_NUM))
+               result *=  string(SYM_NUM[token.value.identifier])
           elseif typeof(token.value) == IdentifierToken
                variable_name = token.value.identifier
                if variable_name ∉ union(keys(scene.vector_variables), keys(scene.float_variables))
@@ -1168,6 +1172,8 @@ function parse_color(inputstream::InputStream, scene::Scene, open::Bool=false)
      while true
           if (typeof(token.value) == SymbolToken) && (token.value.symbol ∈ OPERATIONS)
                result *= token.value.symbol
+          elseif (typeof(token.value) == IdentifierToken) && (token.value.identifier ∈ keys(SYM_NUM))
+               result *=  string(SYM_NUM[token.value.identifier])
           elseif typeof(token.value) == IdentifierToken
                variable_name = token.value.identifier
                if variable_name ∉ union(keys(scene.color_variables), keys(scene.float_variables))
@@ -1675,7 +1681,7 @@ Call internally the following parsing functions:
 See also: [`Vec`](@ref), [`Pigment`](@ref), [`BRDF`](@ref), 
 [`InputStream`](@ref), [`Scene`](@ref), [`GrammarError`](@ref)
 """
-function return_token_value(inputstream::InputStream, scene::Scene, bool::Bool = false)
+function return_token_value(inputstream::InputStream, scene::Scene, open::Bool = false)
      token = read_token(inputstream)
      result = ""
 
@@ -1719,7 +1725,9 @@ function return_token_value(inputstream::InputStream, scene::Scene, bool::Bool =
 
           elseif typeof(token.value) == IdentifierToken
                variable_name = token.value.identifier
-               if variable_name ∈ keys(scene.float_variables)
+               if (variable_name ∈ keys(SYM_NUM))
+                    result *=  string(SYM_NUM[token.value.identifier])
+               elseif variable_name ∈ keys(scene.float_variables)
                     result *= repr(scene.float_variables[variable_name])
                elseif variable_name ∈ keys(scene.string_variables)
                     result *= repr(scene.string_variables[variable_name])
