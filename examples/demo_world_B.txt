@@ -1,0 +1,79 @@
+# -*- encoding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
+#
+# DEMO WORLD B
+# This is a simple tutorial scene-file that explains the basic syntax
+# of how scene can be defined for this program
+# 
+# In order to check the correct behaviour of this file (i.e. that is correctly parsed,
+# without throwing exceptions, and render the demo image of the world type "B) run the 
+# following command in the CLI (or another equivalent):
+#
+#    ./Raytracer.jl render examples/demo_world_B.txt onoff 
+#
+# And now let's start explaining how to define a scene!
+
+# First of all, let's define the materials of the objects
+MATERIAL sky_material (
+        DIFFUSE( UNIFORM(<0, 0, 0>) ),
+        UNIFORM( <1.0, 0.9, 0.5> )      # This will be our light source for this scene!
+)
+
+MATERIAL ground_material (
+        DIFFUSE( CHECKERED( <0.3, 0.5, 0.1> ,  <0.1, 0.2, 0.5> , 2 ) ),
+        UNIFORM( <0, 0, 0> )
+)
+
+MATERIAL sphere_material (
+        DIFFUSE( UNIFORM( to_RGB(0, 128, 240) ,  <0, 0, 0> , 2 ) ),
+        UNIFORM( <0, 0, 0> )
+)
+
+MATERIAL mirror_material (
+        DIFFUSE( UNIFORM( to_RGB(232, 10, 10) ) ),
+        UNIFORM( <0, 0, 0> )
+)
+
+MATERIAL mirror_material_2 (
+        DIFFUSE( UNIFORM( to_RGB(178, 255, 102) ) ),
+        UNIFORM( <0, 0, 0> )
+)
+
+
+
+SPHERE(
+    sky_material,
+    SCALING([50, 50, 50]) * TRANSLATION([0, 0, 0])
+)
+
+PLANE(
+    ground_material,
+    IDENTITY 
+)
+
+PLANE(
+    mirror_material_2,
+    TRANSLATION([0., -2., 0]) * ROTATION_Z(π/6.) * ROTATION_X(pi/2.) 
+)
+
+FLOAT s1(0.6)
+FLOAT s2(1.0)
+
+
+SPHERE(
+    sphere_material,
+    TRANSLATION([0, 0, 0.3]) * SCALING([s1, s1, s1])
+)
+
+SPHERE(
+    mirror_material,
+    TRANSLATION([0.4, 1.5, 0]) * SCALING([s2, s2, s2])
+)
+
+POINTLIGHT(
+    [-1.0, 4.0, 2.0], 
+    <1.0, 1.0, 1.0>
+)

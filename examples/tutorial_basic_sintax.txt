@@ -1,4 +1,10 @@
-# DEMO : WORLD TYPE B
+# -*- encoding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
+#
+# TUTORIAL BASIC SYNTAX
 # This is a simple tutorial scene-file that explains the basic syntax
 # of how scene can be defined for this program
 # 
