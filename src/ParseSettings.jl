@@ -487,7 +487,7 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
         throw(ArgumentError("need to specify the input scenefile to be rendered"))
 
     camera_type::Union{String, Nothing} = haskey(dict, "camera_type") ? 
-        string2stringoneof(dict["camera_type"], CAMERAS): 
+        string2stringoneof(dict["camera_type"], CAMERAS) : 
         nothing
 
     camera_position::Vec = haskey(dict, "camera_position") ?
