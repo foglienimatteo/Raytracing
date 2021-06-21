@@ -16,9 +16,10 @@ FLOAT my_float(1.0)
 # now "my_float" it's an identifier associated with the floating number "1.0"!
 
 # You can define with a similar syntax also:
-VECTOR my_vec([1, 2, 3])                   # Vectors, BUT SQUARE BRACKETS [] AND COMMAS , ARE REQUIRED!
-COLOR my_col(<1, 2, 3>)                    # Vectors, BUT ANGLE BRACKETS <> AND COMMAS , ARE REQUIRED!
-STRING my_str("let's create a string")     # Strings, BUT DOUBLE QUOTES "" ARE REQUIRED!
+BOOL my_bool(TRUE)                      # Bools           
+VECTOR my_vec([1, 2, 3])                # Vectors, BUT SQUARE BRACKETS [] AND COMMAS , ARE REQUIRED!
+COLOR my_col(<1, 2, 3>)                 # Vectors, BUT ANGLE BRACKETS <> AND COMMAS , ARE REQUIRED!
+STRING my_str("let's create a string")  # Strings, BUT DOUBLE QUOTES "" ARE REQUIRED!
 
 
 
