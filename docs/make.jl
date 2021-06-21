@@ -11,6 +11,7 @@ Documenter.makedocs(
 			"Introduction" => "index.md",
 			"Demo" => "demo.md",
 			"Demo animation" => "demo_animation.md",
+			"The Render Function" => "render.md",
 			"Scene Files" => "scene_files.md",
 			"Base Structs" => "base_structs.md",
 			"Reading and Writing PFM files" => "readingwritingpfm.md",
@@ -20,6 +21,7 @@ Documenter.makedocs(
 			"Renderers" => "renderers.md",
 			"Transformations" => "transformations.md",
 			"Avaiable Shapes" => "shapes.md",
+			"Range Tester Functions" => "range_testers.md",
 			],
 )
 

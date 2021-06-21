@@ -363,7 +363,7 @@ end
 
 
 """
-    string2color(string::String, vec::Vector{String}) :: String
+    string2stringoneof(string::String, vec::Vector{String}) :: String
 
 Checks if the input `string` is inside one of the strings
 contained in `vec` with [`check_is_one_of`](@ref), and return it.

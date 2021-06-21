@@ -1754,6 +1754,30 @@ function return_token_value(inputstream::InputStream, scene::Scene, bool::Bool =
      end
 end     
 
+"""
+     assert(inputstream::InputStream, scene::Scene)
+
+Parse an assertion from the given `inputstream` and return it.
+Throws `AssertionError` if the assertion is false, nothing otherwise.
+
+Call internally the following parsing functions:
+- [`expect_symbol`](@ref)
+- [`expect_keywords`](@ref)
+- [`expect_number`](@ref)
+- [`expect_string`](@ref)
+- [`return_token_value`](@ref)
+
+## Examples
+
+```text
+assert(1, 1)             # Checks that 1==1
+assert(1, 2, "<")        # Checks that 1<2
+float var(1.0)           # Define var as a variable with value 1.0
+assert(var, 2, "<=")     # Checks that var<=2
+```
+
+See also: [`InputStream`](@ref), [`Scene`](@ref)
+"""
 function assert(inputstream::InputStream, scene::Scene)
      expect_symbol(inputstream, "(")
      value1 =  return_token_value(inputstream, scene)
@@ -1802,7 +1826,7 @@ Call internally the following parsing functions:
 - [`StopToken`](@ref)
 - [`expect_identifier`](@ref)
 - [`expect_symbol`](@ref)
-- [`parse_number`](@ref)
+- [`expect_number`](@ref)
 - [`parse_sphere`](@ref)
 - [`parse_plane`](@ref)
 - [`parse_camera`](@ref)
@@ -1810,7 +1834,7 @@ Call internally the following parsing functions:
 
 Call internally the following functions and structs of the program:
 - [`add_shape!`](@ref)
-- [`add_pointlight!`](@ref)
+- [`add_light!`](@ref)
 
 See also: [`InputStream`](@ref), [`Scene`](@ref)
 """

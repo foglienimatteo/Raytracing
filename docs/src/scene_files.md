@@ -53,6 +53,7 @@ Raytracing.Scene
 Raytracing.expect_symbol
 Raytracing.expect_keywords
 Raytracing.expect_number
+Raytracing.expect_bool
 Raytracing.expect_string
 Raytracing.expect_identifier
 Raytracing.parse_vector
@@ -61,7 +62,10 @@ Raytracing.parse_pigment
 Raytracing.parse_brdf
 Raytracing.parse_material
 Raytracing.parse_transformation
+Raytracing.parse_pointlight
 Raytracing.parse_camera
+Raytracing.return_token_value
+Raytracing.assert
 Raytracing.parse_scene
 ```
 
