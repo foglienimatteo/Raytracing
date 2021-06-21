@@ -295,11 +295,17 @@ function parse_demo_settings(dict::Dict{String, T}) where {T}
 
     camera_type::String = haskey(dict, "camera_type") ? string2stringoneof(dict["camera_type"], CAMERAS) : "per"
 
-    camera_position::Vec = haskey(dict, "camera_position") ?
-        string2vector(dict["camera_position"]) : 
-        Vec(-1.0 , 0. , 0.)
+    camera_position::Vec = haskey(dict, "camera_position") ? begin
+            typeof(dict["camera_position"]) ∈ [Vec, Point] ?
+            dict["camera_position"] :
+            string2vector(dict["camera_position"]) 
+        end : Vec(-1.0 , 0. , 0.)
 
-    α::Float64 = haskey(dict, "alpha") ? string2positive(dict["alpha"]) : 0.
+    α::Float64 = haskey(dict, "alpha") ? begin 
+        typeof(dict["alpha"]) <: Number ?
+            dict["alpha"] : 
+            parse(Float64, dict["alpha"])
+        end : 0.
 
     width::Int64 = haskey(dict, "width") ? string2evenint64(dict["width"]) : 640
 
@@ -322,7 +328,6 @@ function parse_demo_settings(dict::Dict{String, T}) where {T}
             renderer,
             camera_type,
             camera_position, 
-            algorithm, 
             α, 
             width, height, 
             pfm, png,
@@ -375,7 +380,7 @@ function parse_demoanimation_settings(dict::Dict{String, T}) where {T}
 
     keys = union([
         "%COMMAND%", "renderer",
-        "camera_type", 
+        "camera_type", "camera_position",
         "width", "height",  "world_type",
         "set_anim_name", "samples_per_pixel",
     ], RENDERERS)
@@ -407,6 +412,12 @@ function parse_demoanimation_settings(dict::Dict{String, T}) where {T}
 	end
 
     camera_type::String = haskey(dict, "camera_type") ? string2stringoneof(dict["camera_type"], CAMERAS) : "per"
+     
+    camera_position::Vec = haskey(dict, "camera_position") ? begin
+            typeof(dict["camera_position"]) ∈ [Vec, Point] ?
+            dict["camera_position"] :
+            string2vector(dict["camera_position"]) 
+        end : Vec(-1.0 , 0. , 0.)
 
     width::Int64 = haskey(dict, "width") ? string2evenint64(dict["width"]) : 640
 
@@ -420,7 +431,8 @@ function parse_demoanimation_settings(dict::Dict{String, T}) where {T}
         string2stringoneof(dict["world_type"], DEMO_WORLD_TYPES) : "A"
 
 
-    return (renderer, camera_type, 
+    return (renderer, 
+            camera_type, camera_position,
             width, height, anim, 
             samples_per_pixel, world_type)
 end
@@ -522,11 +534,17 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
         string2stringoneof(dict["camera_type"], CAMERAS) : 
         nothing
 
-    camera_position::Vec = haskey(dict, "camera_position") ?
-        string2vector(dict["camera_position"]) : 
-        Vec(-1.0 , 0. , 0.)
+    camera_position::Vec = haskey(dict, "camera_position") ? begin
+            typeof(dict["camera_position"]) ∈ [Vec, Point] ?
+            dict["camera_position"] :
+            string2vector(dict["camera_position"]) 
+        end : Vec(-1.0 , 0. , 0.)
 
-    α::Float64 = haskey(dict, "alpha") ? string2positive(dict["alpha"]) : 0.
+    α::Float64 = haskey(dict, "alpha") ? begin 
+        typeof(dict["alpha"]) <: Number ?
+            dict["alpha"] : 
+            parse(Float64, dict["alpha"])
+        end : 0.
 
     width::Int64 = haskey(dict, "width") ? string2evenint64(dict["width"]) : 640
 

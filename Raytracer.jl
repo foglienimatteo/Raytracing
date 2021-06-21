@@ -279,6 +279,11 @@ function ArgParse_command_line(arguments)
           	arg_type = String
 			default = "per"
 			range_tester = input -> check_is_one_of(input, CAMERAS)
+		"--camera_position"
+          	help = "camera position in the scene as '[X,Y,Z]'"
+          	arg_type = String
+          	default = "[-1,0,0]"
+          	range_tester = check_is_vector
 		"--width"
 			help = "pixel number on the width of the resulting demo image."
 			default = 640
@@ -399,26 +404,6 @@ function ArgParse_command_line(arguments)
 			required = true
 	end
 
-	add_arg_group!(s["render"], "renderer to be used");
-	@add_arg_table! s["render"] begin
-		"onoff"
-			action = :command
-			help = "onoff renderer"
-			#dest_name = "onoff"
-		"flat"
-			action = :command
-			help = "flat-renderer"
-			#dest_name = "flat"
-		"pathtracer"
-			action = :command
-			help = "path tracing renderer"
-			#dest_name = "pathtracer"
-		"pointlight"
-			action = :command
-			help = "point-light tracing renderer"
-			#dest_name = "pointlight"
-	end
-
 	add_arg_group!(s["render"], "render options");
 	@add_arg_table! s["render"] begin
 		"--camera_type"
@@ -465,6 +450,26 @@ function ArgParse_command_line(arguments)
 			default = ""
 			range_tester = check_is_declare_float
 		end
+
+	add_arg_group!(s["render"], "renderer to be used");
+	@add_arg_table! s["render"] begin
+		"onoff"
+			action = :command
+			help = "onoff renderer"
+			#dest_name = "onoff"
+		"flat"
+			action = :command
+			help = "flat-renderer"
+			#dest_name = "flat"
+		"pathtracer"
+			action = :command
+			help = "path tracing renderer"
+			#dest_name = "pathtracer"
+		"pointlight"
+			action = :command
+			help = "point-light tracing renderer"
+			#dest_name = "pointlight"
+	end
 
 	add_arg_group!(s["render"]["onoff"], "onoff renderer options");
 	@add_arg_table! s["render"]["onoff"] begin
