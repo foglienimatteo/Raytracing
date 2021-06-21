@@ -284,31 +284,28 @@ function ArgParse_command_line(arguments)
 			default = "per"
 			range_tester = input -> (input ∈ CAMERAS)
 		"--camera_position"
-          	help = "camera position in the scene as 'X,Y,Z'"
+          	help = "camera position in the scene as '[X,Y,Z]'"
           	arg_type = String
-          	default = "-1,0,0"
-          	range_tester = input -> (length(split(input, ",")) == 3)
+          	default = "[-1,0,0]"
+          	range_tester = check_is_vector
 		"--alpha"
-			help = "angle of view, in degrees"
+			help = "angle of view around z-axis, in degrees"
 			arg_type = Float64
 			default = 0.
 		"--width"
 			help = "pixel number on the width of the resulting demo image."
-			arg_type = Int64
 			default = 640
-			range_tester = input -> (iseven(input) && input>0)
+			range_tester = input -> (check_is_uint64(input) && iseven(input))
 		"--height"
 			help = "pixel number on the height of the resulting demo image."
-			arg_type = Int64
 			default = 480
-			range_tester =  input -> (iseven(input) && input>0)
+			range_tester =  input -> (check_is_uint64(input) && iseven(input))
      	"--samples_per_pixel"
 			help = "Number of samples per pixel for the antialiasing algorithm\n"*
 					"It must be an integer perfect square, i.e. 0,1,4,9,16,...\n"*
 					"If =0 (default value), antialiasing does not occurs."
-     		arg_type = Int64
      		default = 0
-			range_tester =  input -> ((input>=0) && (√input - floor(√input) ≈ 0.))
+			range_tester = check_is_square
 	end
 
 	add_arg_group!(s["render"], 
@@ -350,16 +347,14 @@ function ArgParse_command_line(arguments)
 	add_arg_group!(s["render"]["pathtracer"], "pathtracing renderer options");
 	@add_arg_table! s["render"]["pathtracer"] begin
 		"--init_state"
-    			arg_type = Int64
     			help = "Initial seed for the random number generator (positive integer number)."
     			default = 45
-			range_tester = input -> (input>0)
+			range_tester = check_is_uint64
     		"--init_seq"
-    			arg_type = Int64
     			help = "Identifier of the sequence produced by the "*
 			    "random number generator (positive integer number)."
     			default = 54
-			range_tester = input -> (input>0)
+			range_tester = check_is_uint64
 		"--background_color"
 			help = "background color specified as '<R,G,B>' components. Example: --background_color=<1,2,3>"
           	arg_type = String
@@ -367,19 +362,16 @@ function ArgParse_command_line(arguments)
           	range_tester = check_is_color
 		"--num_of_rays" 
 			help = "number of `Ray`s generated for each integral evaluation"
-			arg_type = Int64
 			default = 10
-			range_tester = input -> (input>0)
+			range_tester = check_is_uint64
 		"--max_depth"
 			help = "maximal number recursive integrations"
-			arg_type = Int64
 			default = 3
-			range_tester = input -> (input>0)
+			range_tester = check_is_uint64
 		"--russian_roulette_limit"
 			help = "depth at whitch the Russian Roulette algorithm begins"
-			arg_type = Int64
 			default = 2
-			range_tester = input -> (input>0)
+			range_tester = check_is_uint64
 	end
 
 	add_arg_group!(s["render"]["pointlight"], "pointlight renderer options");

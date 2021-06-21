@@ -19,6 +19,7 @@
 using Raytracing, Test, LinearAlgebra, StaticArrays
 import ColorTypes:RGB
 
+
 ##########################################################################################92
 
 
@@ -39,7 +40,9 @@ end
 	include("test_ToneMapping.jl")
 end
 
+
 ##########################################################################################92
+
 
 @testset "test_Geometry" begin
 	include("test_Geometry.jl")
@@ -54,7 +57,9 @@ end
 
 end
 
+
 ##########################################################################################92
+
 
 @testset "test_Sphere" begin
 	include("test_Sphere.jl")
@@ -68,7 +73,9 @@ end
 	include("test_Shapes-World.jl")
 end
 
+
 ##########################################################################################92
+
 
 @testset "test_Pigment" begin
 	include("test_Pigment.jl")
@@ -84,6 +91,13 @@ end
 
 @testset "test_OrthoNormalBasis" begin
 	include("test_OrthoNormalBasis.jl")
+end
+
+
+##########################################################################################92
+
+@testset "test_RangeTesters" begin
+	include("test_RangeTesters.jl")
 end
 
 @testset "test_SceneFiles" begin
