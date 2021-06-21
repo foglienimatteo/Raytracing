@@ -32,7 +32,9 @@ export are_close, squared_norm, norm, normalize #, normalized_dot
 export parse_command_line, parse_demo_settings
 export parse_tonemapping_settings, parse_demoanimation_settings
 export load_image, ldr2pfm
+# from RangeTesters.jl
 export check_is_color, check_is_declare_float
+# from ParseSettings.jl
 export parse_render_settings 
 # from ToneMapping.jl
 export normalize_image!,  clamp_image!, γ_correction!, tone_mapping
@@ -69,6 +71,8 @@ include("PCG.jl")
 include("Structs.jl")
 include("Operations.jl")
 include("ReadingWriting.jl")
+include("RangeTesters.jl")
+include("ParseSettings.jl")
 include("ToneMapping.jl")
 include("Transformations.jl")
 include("ImageTracer.jl")
