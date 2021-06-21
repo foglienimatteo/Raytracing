@@ -350,3 +350,28 @@ end
 
 ##########################################################################################92
 
+"""
+    check_is_one_of(string::String, vec::Vector{String}) :: Bool
+
+Checks if the input `string` is inside one of the strings
+contained in `vec`.
+"""
+function check_is_one_of(string::String, vec::Vector{String})
+	var = filter(x -> !isspace(x) && x≠"\"", string)
+	return var ∈ vec ? true : false
+end
+
+
+"""
+    string2color(string::String, vec::Vector{String}) :: String
+
+Checks if the input `string` is inside one of the strings
+contained in `vec` with [`check_is_one_of`](@ref), and return it.
+"""
+function string2stringoneof(string::String, vec::Vector{String})
+     if check_is_one_of(string, vec)==false
+          throw(ArgumentError("$(string) is not in $(vec)"))
+     end
+
+     return filter(x -> !isspace(x) && x≠"\"", string)
+end

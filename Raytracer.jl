@@ -27,10 +27,6 @@ import FileIO: @format_str, query
 using Raytracing
 
 FILE_NAME = split(PROGRAM_FILE, "/")[end]
-CAMERAS = ["ort", "per"]
-RENDERERS = ["onoff", "flat", "pathtracing", "pointlight"]
-
-
 
 function parse_commandline_error_handler(settings::ArgParseSettings, err, err_code::Int = 1)
 	help_string = 
@@ -284,7 +280,7 @@ function ArgParse_command_line(arguments)
 	    				"ort -> Orthogonal camera, per -> Perspective camera"
           	arg_type = String
 			default = "per"
-			range_tester = input -> (input ∈ CAMERAS)
+			range_tester = input -> check_is_one_of(input, CAMERAS)
 		"--camera_position"
           	help = "camera position in the scene as '[X,Y,Z]'"
           	arg_type = String

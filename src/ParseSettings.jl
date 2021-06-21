@@ -150,29 +150,19 @@ function parse_demo_settings(dict::Dict{String, T}) where {T}
 
     algorithm::String = haskey(dict, "algorithm") ? dict["algorithm"] : "flat"
 
-    α::Float64 = haskey(dict, "alpha") ? dict["alpha"] : 0.
+    α::Float64 = haskey(dict, "alpha") ? string2positive(dict["alpha"]) : 0.
 
-    width::Int64 = haskey(dict, "width") ? dict["width"] : 640
+    width::Int64 = haskey(dict, "width") ? string2evenint64(dict["width"]) : 640
 
-    haskey(dict, "height") ? 
-        height::Int64 = dict["height"] : 
-        height= 480
+    height::Int64 = haskey(dict, "height") ? string2evenint64(dict["height"]) : 480
 
-    haskey(dict, "set_pfm_name") ? 
-        pfm::String = dict["set_pfm_name"] : 
-        pfm = "demo.pfm"
+    pfm::String = haskey(dict, "set_pfm_name") ? dict["set_pfm_name"] : "demo.pfm"
 
-    haskey(dict, "set_png_name") ? 
-        png::String = dict["set_png_name"] : 
-        png = "demo.png"
+    png::String = haskey(dict, "set_png_name") ? dict["set_png_name"] : "demo.png"
 
-    haskey(dict, "bool_print") ? 
-        bool_print::Bool = dict["bool_print"] : 
-        bool_print = true
+    bool_print::Bool = haskey(dict, "bool_print") ?  dict["bool_print"] : true
     
-    haskey(dict, "bool_savepfm") ? 
-        bool_savepfm::Bool = dict["bool_savepfm"] : 
-        bool_savepfm = true
+    bool_savepfm::Bool = haskey(dict, "bool_savepfm") ? dict["bool_savepfm"] : true
 
     haskey(dict, "world_type") ? 
         world_type::String = dict["world_type"] : 
