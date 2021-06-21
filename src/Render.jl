@@ -93,7 +93,7 @@ function render(
           scenefile::String,
           renderer::Renderer = FlatRenderer(),
      	camera_type::Union{String, Nothing} = nothing,
-		camera_position::Union{Point, Nothing} = nothing, 
+		camera_position::Union{Point, Vec, Nothing} = nothing, 
      	α::Float64 = 0., 
      	width::Int64 = 640, 
      	height::Int64 = 480, 
@@ -117,27 +117,27 @@ function render(
           end
      end
 
-     samples_per_side = Int64(floor(√samples_per_pixel))
-    (samples_per_side^2 ≈ samples_per_pixel) ||
-		throw(ArgumentError(
-				"the number of samples per pixel "*
-				"$(samples_per_pixel) must be a perfect square")
-	)
+     renderer.world = scene.world
+     
+     samples_per_side = string2rootint64(string(samples_per_pixel))
 
-	renderer.world = scene.world
+     observer_vec = isnothing(camera_position) ?
+          nothing :
+          typeof(camera_position) == Point ?
+		camera_position - Point(0., 0., 0.) :
+		camera_position
 
-     if isnothing(camera_type) && isnothing(camera_position) && isnothing(scene.camera) 
+     if isnothing(camera_type) && isnothing(observer_vec) && isnothing(scene.camera) 
           camera = PerspectiveCamera(-1.0, 1.0, rotation_z(deg2rad(α)))
 
-     elseif isnothing(camera_type) && isnothing(camera_position)
+     elseif isnothing(camera_type) && isnothing(observer_vec)
           camera = scene.camera 
 
      elseif isnothing(camera_type) && isnothing(scene.camera) 
-          observer_vec = camera_position - Point(0., 0., 0.)
           camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec)
           camera = PerspectiveCamera(-1.0, 1.0, camera_tr)
 
-     elseif isnothing(camera_position) && isnothing(scene.camera) 
+     elseif isnothing(observer_vec) && isnothing(scene.camera) 
           if camera_type == "per"
 		     (bool_print==true) && (println("Using perspective camera"))
 		     camera = PerspectiveCamera(1., 1.0, rotation_z(deg2rad(α)))
@@ -149,7 +149,6 @@ function render(
 	     end
 
      elseif isnothing(camera_type)
-          observer_vec = camera_position - Point(0., 0., 0.)
           camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec) * scene.camera.T
           if typeof(scene.camera) == OrthogonalCamera
                (bool_print==true) && (println("Using perspective camera"))
@@ -161,7 +160,7 @@ function render(
 		     throw(ArgumentError("Unknown camera: $camera_type"))
 	     end
 
-     elseif isnothing(camera_position)
+     elseif isnothing(observer_vec)
           if camera_type == "per"
 		     (bool_print==true) && (println("Using perspective camera"))
 		     camera = PerspectiveCamera(scene.camera.d, scene.camera.a, rotation_z(deg2rad(α)) * scene.camera.T)
@@ -173,7 +172,6 @@ function render(
 	     end
 
      elseif isnothing(scene.camera)
-          observer_vec = camera_position - Point(0., 0., 0.)
           camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec)
           if camera_type == "per"
 		     (bool_print==true) && (println("Using perspective camera"))
@@ -188,7 +186,6 @@ function render(
 
 
      else
-          observer_vec = camera_position - Point(0., 0., 0.)
           camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec) * scene.camera.T
           if camera_type == "per"
 		     (bool_print==true) && (println("Using perspective camera"))
@@ -215,20 +212,13 @@ function render(
 		throw(ArgumentError("Unknown renderer: $(typeof(renderer))"))
 	end
 
-
 	
 	image = HDRimage(width, height)
 	tracer = ImageTracer(image, camera, samples_per_side)
 
-	function print_progress(row::Int64, col::Int64)
-     	print("Rendered row $(image.height - row)/$(image.height) \t= ")
-		@printf "%.2f" 100*((image.height - row)/image.height)
-		print("%\n")
-	end
-
      algorithm = renderer
 
-	fire_all_rays!(tracer, renderer, print_progress)
+	fire_all_rays!(tracer, renderer, (r,c) -> print_progress(r,c,image.height, image.width))
 	img = tracer.img
 
 	(bool_savepfm==true) && (open(pfm_output, "w") do outf; write(outf, img); end)
