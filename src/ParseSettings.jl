@@ -152,9 +152,7 @@ function parse_demo_settings(dict::Dict{String, T}) where {T}
 
     α::Float64 = haskey(dict, "alpha") ? dict["alpha"] : 0.
 
-    width::Int64 = haskey(dict, "width") ? 
-        width::Int64 = dict["width"] : 
-        width = 640
+    width::Int64 = haskey(dict, "width") ? dict["width"] : 640
 
     haskey(dict, "height") ? 
         height::Int64 = dict["height"] : 

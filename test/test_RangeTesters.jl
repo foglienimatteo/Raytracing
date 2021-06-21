@@ -6,6 +6,28 @@
 #
 
 
+@testset "test_check_is_positive" begin
+     @test Raytracing.check_is_positive("")
+     @test Raytracing.check_is_positive("    ")
+     @test Raytracing.check_is_positive(" 3 ")
+     @test Raytracing.check_is_positive("3.0 ")
+     @test !Raytracing.check_is_positive("-3.4")
+     @test !Raytracing.check_is_positive(" -3")
+end
+
+@testset "test_string2positive" begin
+     @test Raytracing.string2positive("") == 0.0
+     @test Raytracing.string2positive("    ") == 0.0
+     @test Raytracing.string2positive(" 3 ") == 3.0
+     @test Raytracing.string2positive("3.0 ") == 3.0
+     @test_throws ArgumentError Raytracing.string2positive("-3.4")
+     @test_throws ArgumentError Raytracing.string2positive("-3")
+end
+
+
+##########################################################################################92
+
+
 @testset "test_check_is_uint64" begin
      @test Raytracing.check_is_uint64("")
      @test Raytracing.check_is_uint64("    ")
@@ -34,6 +56,47 @@ end
      @test_throws ArgumentError Raytracing.string2int64("-3", true)
      @test_throws ArgumentError Raytracing.string2int64("3.4", false)
      @test_throws ArgumentError Raytracing.string2int64("-3", false)
+end
+
+
+##########################################################################################92
+
+
+@testset "test_check_is_even_uint64" begin
+     @test Raytracing.check_is_even_uint64("")
+     @test Raytracing.check_is_even_uint64("    ")
+     @test Raytracing.check_is_even_uint64(" 0 ")
+     @test Raytracing.check_is_even_uint64("0.0 ")
+     @test Raytracing.check_is_even_uint64(" 2 ")
+     @test Raytracing.check_is_even_uint64("2.0 ")
+     @test Raytracing.check_is_even_uint64(" 4 ")
+     @test Raytracing.check_is_even_uint64("4.0 ")
+     @test !Raytracing.check_is_even_uint64("2.5")
+     @test !Raytracing.check_is_even_uint64("1")
+     @test !Raytracing.check_is_even_uint64("3")
+     @test !Raytracing.check_is_even_uint64("-4")
+end
+
+@testset "test_string2evenint64" begin
+     @test Raytracing.string2evenint64("") == 0
+     @test Raytracing.string2evenint64("", true) == UInt64(0)
+     @test Raytracing.string2evenint64("", false) == 0
+     @test Raytracing.string2evenint64("    ") == 0
+     @test Raytracing.string2evenint64("    ", true) == UInt64(0)
+     @test Raytracing.string2evenint64("    ", false) == 0
+     @test Raytracing.string2evenint64(" 2 ") == 2
+     @test Raytracing.string2evenint64(" 2 ", true) == UInt64(2)
+     @test Raytracing.string2evenint64(" 2 ", false) == 2
+     @test Raytracing.string2evenint64("2.0 ") == 2
+     @test Raytracing.string2evenint64("  2.0 ", true) == UInt64(2)
+     @test Raytracing.string2evenint64("2.0 ", false) == 2
+     @test_throws ArgumentError Raytracing.string2evenint64("3.4")
+     @test_throws ArgumentError Raytracing.string2evenint64("-3")
+     @test_throws ArgumentError Raytracing.string2evenint64("3", true)
+     @test_throws ArgumentError Raytracing.string2evenint64("3.4", true)
+     @test_throws ArgumentError Raytracing.string2evenint64("-3", true)
+     @test_throws ArgumentError Raytracing.string2evenint64("3.4", false)
+     @test_throws ArgumentError Raytracing.string2evenint64("-3", false)
 end
 
 

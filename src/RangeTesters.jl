@@ -107,7 +107,7 @@ function check_is_even_uint64(string::String="")
      (number - floor(number) ≈ 0.0 ) || (return false)
      even = convert(Int64, number)
 
-     return (even>0 && iseven(even)) ? true : false
+     return (even>=0 && iseven(even)) ? true : false
 end
 
 
@@ -126,9 +126,7 @@ function string2evenint64(string::String, uint::Bool=false)
      end
      var = filter(x -> !isspace(x) && x≠"\"", string)
 
-     if var==""
-          return uint==false ? Int64(0) : UInt64(0)
-     end
+     !(var=="") || (return uint==false ? Int64(0) : UInt64(0))
 
 	return uint==false ? 
           convert(Int64,parse(Float64, var)) : 
