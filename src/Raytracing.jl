@@ -71,6 +71,7 @@ export print_not_black
 
 CAMERAS = ["ort", "per"]
 RENDERERS = ["onoff", "flat", "pathtracing", "pointlight"]
+DEMO_WORLD_TYPES = ["A", "B"]
 
 export CAMERAS, RENDERERS
 

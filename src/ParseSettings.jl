@@ -142,13 +142,13 @@ function parse_demo_settings(dict::Dict{String, T}) where {T}
         end
     end
 
-    camera_type::String = haskey(dict, "camera_type") ? dict["camera_type"] : "per"
+    camera_type::String = haskey(dict, "camera_type") ? string2stringoneof(dict["camera_type"], CAMERAS) : "per"
 
     camera_position::Vec = haskey(dict, "camera_position") ?
         string2vector(dict["camera_position"]) : 
         Vec(-1.0 , 0. , 0.)
 
-    algorithm::String = haskey(dict, "algorithm") ? dict["algorithm"] : "flat"
+    algorithm::String = haskey(dict, "algorithm") ? string2stringoneof(dict["algorithm"], RENDERERS) : "flat"
 
     α::Float64 = haskey(dict, "alpha") ? string2positive(dict["alpha"]) : 0.
 
@@ -164,22 +164,14 @@ function parse_demo_settings(dict::Dict{String, T}) where {T}
     
     bool_savepfm::Bool = haskey(dict, "bool_savepfm") ? dict["bool_savepfm"] : true
 
-    haskey(dict, "world_type") ? 
-        world_type::String = dict["world_type"] : 
-        world_type = "A"
+    world_type::String = haskey(dict, "world_type") ? 
+        string2stringoneof(dict["world_type"], DEMO_WORLD_TYPES) : "A"
 
-    haskey(dict, "init_state") ? 
-        init_state::Int64 = dict["init_state"] : 
-        init_state = 54
+    init_state::UInt64 = haskey(dict, "init_state") ? string2int64(dict["init_state"], true) : UInt64(54)
 
-    haskey(dict, "init_seq") ? 
-        init_seq::Int64 = dict["init_seq"] : 
-        init_seq = 45
+    init_seq::UInt64 = haskey(dict, "init_seq") ? string2int64(dict["init_seq"], true) : UInt64(45)
 
-    haskey(dict, "samples_per_pixel") ? 
-        samples_per_pixel::Int64 = dict["samples_per_pixel"] : 
-        samples_per_pixel = 0
-
+    samples_per_pixel::Int64 = haskey(dict, "samples_per_pixel") ? string2evenint64(dict["samples_per_pixel"]) : 0
 
     return (
             camera_type,
@@ -252,33 +244,22 @@ function parse_demoanimation_settings(dict::Dict{String, T}) where {T}
         end
     end
 
-    haskey(dict, "camera_type") ? 
-        camera_type::String = dict["camera_type"] : 
-        camera_type = "per"
+    camera_type::String = haskey(dict, "camera_type") ? string2stringoneof(dict["camera_type"], CAMERAS) : "per"
 
-    haskey(dict, "algorithm") ? 
-        algorithm::String = dict["algorithm"] : 
-        algorithm = "flat"
+    algorithm::String = haskey(dict, "algorithm") ? string2stringoneof(dict["algorithm"], RENDERERS) : "flat"
 
-    haskey(dict, "width") ? 
-        width::Int64 = dict["width"] : 
-        width = 200
+    width::Int64 = haskey(dict, "width") ? string2evenint64(dict["width"]) : 640
 
-    haskey(dict, "height") ? 
-        height::Int64 = dict["height"] : 
-        height= 150
+    height::Int64 = haskey(dict, "height") ? string2evenint64(dict["height"]) : 480
 
-    haskey(dict, "world_type") ? 
-        world_type::String = dict["world_type"] : 
-        world_type = "A"
+    world_type::String = haskey(dict, "world_type") ? 
+        string2stringoneof(dict["world_type"], DEMO_WORLD_TYPES) : "A"
 
-    haskey(dict, "set_anim_name") ? 
-        anim::String = dict["set_anim_name"] : 
-        anim = "demo_animation.mp4"
 
-    haskey(dict, "samples_per_pixel") ? 
-        samples_per_pixel::Int64 = dict["samples_per_pixel"] : 
-        samples_per_pixel = 0
+    anim::String = haskey(dict, "set_anim_name") ? dict["set_anim_name"] : "demo_animation.mp4"
+
+    samples_per_pixel::Int64 = haskey(dict, "samples_per_pixel") ? string2evenint64(dict["samples_per_pixel"]) : 0
+
 
     return (camera_type, algorithm, 
             width, height, world_type, 
@@ -306,17 +287,18 @@ function parse_onoff_settings(dict::Dict{String, T}) where {T}
         end
     end
 
-    haskey(dict, "background_color") ? 
-        background_color = string2color(dict["background_color"]) : 
-        background_color = RGB{Float32}(0.0, 0.0, 0.0)
+    background_color::RGB{Float32} = haskey(dict, "background_color") ? 
+        string2color(dict["background_color"]) : 
+        RGB{Float32}(0.0, 0.0, 0.0)
 
-    haskey(dict, "color") ? 
-        color = string2color(dict["color"]) : 
-        color = RGB{Float32}(0.0, 0.0, 0.0)
+    color::RGB{Float32} = haskey(dict, "color") ? 
+        string2color(dict["color"]) : 
+        RGB{Float32}(0.0, 0.0, 0.0)
 
   
     return (World(), background_color, color)
 end
+
 
 function parse_flat_settings(dict::Dict{String, T}) where {T}
 
@@ -334,13 +316,14 @@ function parse_flat_settings(dict::Dict{String, T}) where {T}
         end
     end
 
-    haskey(dict, "background_color") ? 
-        background_color = string2color(dict["background_color"]) : 
-        background_color = RGB{Float32}(0.0, 0.0, 0.0)
+    background_color::RGB{Float32} =haskey(dict, "background_color") ? 
+        string2color(dict["background_color"]) : 
+        RGB{Float32}(0.0, 0.0, 0.0)
 
   
     return (World(), background_color)
 end
+
 
 function parse_pathtracer_settings(dict::Dict{String, T}) where {T}
 
@@ -360,25 +343,22 @@ function parse_pathtracer_settings(dict::Dict{String, T}) where {T}
         end
     end
 
-    init_state = UInt64(haskey(dict, "init_state") ? dict["init_state"] : 45)
+    init_state::UInt64 = haskey(dict, "init_state") ? string2int64(dict["init_state"], true) : UInt64(54)
 
-    init_seq = UInt64(haskey(dict, "init_seq") ? dict["init_seq"] : 54)
+    init_seq::UInt64 = haskey(dict, "init_seq") ? string2int64(dict["init_seq"], true) : UInt64(45)
 
-    haskey(dict, "background_color") ?
-        background_color = string2color(dict["background_color"]) : 
-        background_color = RGB{Float32}(0.0, 0.0, 0.0)
+    background_color::RGB{Float32} =haskey(dict, "background_color") ? 
+        string2color(dict["background_color"]) : 
+        RGB{Float32}(0.0, 0.0, 0.0)
 
-    haskey(dict, "num_of_rays") ? 
-        num_of_rays::Int64 = dict["num_of_rays"] : 
-        num_of_rays= 10
 
-    haskey(dict, "max_depth") ? 
-        max_depth::Int64 = dict["max_depth"] : 
-        max_depth = 2
+    num_of_rays::Int64 = haskey(dict, "num_of_rays") ? string2int64(dict["num_of_rays"]) : 10
 
-     haskey(dict, "russian_roulette_limit") ? 
-        russian_roulette_limit::Int64 = dict["russian_roulette_limit"] : 
-        russian_roulette_limit = 3
+    max_depth::Int64 = haskey(dict, "max_depth") ? string2int64(dict["max_depth"]) : 2
+
+    russian_roulette_limit::Int64 = haskey(dict, "russian_roulette_limit") ? 
+        string2int64(dict["russian_roulette_limit"]) : 2
+
 
     return (World(),
             background_color,
@@ -404,13 +384,13 @@ function parse_pointlight_settings(dict::Dict{String, T}) where {T}
         end
     end
 
-    haskey(dict, "background_color") ? 
-        background_color = string2color(dict["background_color"]) : 
-        background_color = RGB{Float32}(0.0, 0.0, 0.0)
+    background_color::RGB{Float32} =haskey(dict, "background_color") ? 
+        string2color(dict["background_color"]) : 
+        RGB{Float32}(0.0, 0.0, 0.0)
 
-    haskey(dict, "ambient_color") ? 
-        ambient_color = string2color(dict["ambient_color"]) : 
-        ambient_color = RGB{Float32}(0.0, 0.0, 0.0)
+    ambient_color::RGB{Float32} =haskey(dict, "ambient_color") ? 
+        string2color(dict["ambient_color"]) : 
+        RGB{Float32}(0.0, 0.0, 0.0)
 
   
     return (World(), background_color, ambient_color)
@@ -506,53 +486,33 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
         scenefile::String = dict["scenefile"] : 
         throw(ArgumentError("need to specify the input scenefile to be rendered"))
 
-    haskey(dict, "camera_type") ? 
-        camera_type::String = dict["camera_type"] : 
-        camera_type = nothing
+    camera_type::Union{String, Nothing} = haskey(dict, "camera_type") ? 
+        string2stringoneof(dict["camera_type"], CAMERAS): 
+        nothing
 
-    haskey(dict, "camera_position") ?
-        begin
-            obs::String = dict["camera_position"]
-            (x,y,z) = Tuple(parse.(Float64, split(obs, ","))) 
-            camera_position = Point(x,y,z)
-        end : 
-        camera_position = nothing
+    camera_position::Vec = haskey(dict, "camera_position") ?
+        string2vector(dict["camera_position"]) : 
+        Vec(-1.0 , 0. , 0.)
 
-    haskey(dict, "alpha") ? 
-        α::Float64 = dict["alpha"] : 
-        α = 0.
+    α::Float64 = haskey(dict, "alpha") ? string2positive(dict["alpha"]) : 0.
 
-    haskey(dict, "width") ? 
-        width::Int64 = dict["width"] : 
-        width = 640
+    width::Int64 = haskey(dict, "width") ? string2evenint64(dict["width"]) : 640
 
-    haskey(dict, "height") ? 
-        height::Int64 = dict["height"] : 
-        height= 480
+    height::Int64 = haskey(dict, "height") ? string2evenint64(dict["height"]) : 480
 
-    haskey(dict, "set_pfm_name") ? 
-        pfm::String = dict["set_pfm_name"] : 
-        pfm = "scene.pfm"
+    pfm::String = haskey(dict, "set_pfm_name") ? dict["set_pfm_name"] : "scene.pfm"
 
-    haskey(dict, "set_png_name") ? 
-        png::String = dict["set_png_name"] : 
-        png = "scene.png"
+    png::String = haskey(dict, "set_png_name") ? dict["set_png_name"] : "scene.png"
 
-    haskey(dict, "bool_print") ? 
-        bool_print::Bool = dict["bool_print"] : 
-        bool_print = true
+    bool_print::Bool = haskey(dict, "bool_print") ?  dict["bool_print"] : true
     
-    haskey(dict, "bool_savepfm") ? 
-        bool_savepfm::Bool = dict["bool_savepfm"] : 
-        bool_savepfm = true
+    bool_savepfm::Bool = haskey(dict, "bool_savepfm") ? dict["bool_savepfm"] : true
 
-    haskey(dict, "samples_per_pixel") ? 
-        samples_per_pixel::Int64 = dict["samples_per_pixel"] : 
-        samples_per_pixel = 0
+    samples_per_pixel::Int64 = haskey(dict, "samples_per_pixel") ? string2evenint64(dict["samples_per_pixel"]) : 0
 
-    haskey(dict, "declare_float") ?
-        declare_float = declare_float2dict(dict["declare_float"]) : 
-        declare_float = nothing
+    declare_float::Union{Dict{String, Float64}, Nothing} = haskey(dict, "declare_float") ?
+        declare_float2dict(dict["declare_float"]) : 
+        nothing
 
     if haskey(dict, "%COMMAND%")
         if dict["%COMMAND%"] == "onoff"
