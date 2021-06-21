@@ -5,6 +5,8 @@
 # Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
 #
 
+SYM_NUM = ["e", "pi"]
+
 
 """
     check_is_uint64(string::String="") :: Bool
@@ -13,12 +15,14 @@ Checks if the input `string` is a number that can be parsed as
 a positive Int64.
 """
 function check_is_uint64(string::String="")
-	(string == "") && (return true)
 	var = filter(x -> !isspace(x) && x≠"\"", string)
+     (var == "") && (return true)
 
-	!isnothing(tryparse(Int64, var)) || (return false)
+	!isnothing(tryparse(Float64, var)) || (return false)
+     number = parse(Float64, var)
+     (number - floor(number) ≈ 0.0 ) || (return false)
 
-     return parse(Int64,var)>0 ? true : false
+     return convert(Int64, number)>0 ? true : false
 end
 
 
@@ -56,11 +60,12 @@ Checks if the input `string` is a number that can be parsed as
 a squared positive Int64.
 """
 function check_is_square(string::String="")
-	(string == "") && (return true)
 	var = filter(x -> !isspace(x) && x≠"\"", string)
+     (var == "") && (return true)
 
-	!isnothing(tryparse(Int64, var)) || (return false)
-     square = parse(Int64,var)
+	!isnothing(tryparse(Float64, var)) || (return false)
+     square = parse(Float64,var)
+     (square >= 0) || (return false)
 
      return √square - floor(√square) ≈ 0. ? true : false
 end
@@ -83,7 +88,7 @@ function string2rootint64(string::String)
      if string==""
           return 0
      end
-     
+
      return √parse(Int64,var) 
 end
 
@@ -99,9 +104,8 @@ Checks if the input `string` is a color written in RGB components
 as "<R, G, B>".
 """
 function check_is_color(string::String="")
-     println(string)
-	(string == "") && (return true)
 	color = filter(x -> !isspace(x) && x≠"\"", string)
+     (color == "") && (return true)
 
 	(color[begin] == '<' && color[end] == '>') || (return false)
 
@@ -110,8 +114,10 @@ function check_is_color(string::String="")
 	(length(color)==3) || (return false)
 
 	for c in color
-		!isnothing(tryparse(Float64, c)) || (return false)
-	end
+		if isnothing(tryparse(Float64, c)) && c ∉ SYM_NUM
+               return false
+          end 
+     end
 
 	return true
 end
@@ -139,7 +145,6 @@ function string2color(string::String)
 	rgb = Vector{String}(split(color, ","))
      R, G, B = tuple(parse.(Float64, rgb)...)
 
-     println(R,G,B)
 	return RGB{Float32}(R,G,B)
 end
 
@@ -154,17 +159,19 @@ Checks if the input `string` is a vector written in X,Y,Z components
 as "[X, Y, Z]".
 """
 function check_is_vector(string::String="")
-	(string == "") && (return true)
-	color = filter(x -> !isspace(x), string)
+	vector = filter(x -> !isspace(x), string)
+     (vector == "") && (return true)
 
-	(color[begin] == '[' && color[end] == ']') || (return false)
+	(vector[begin] == '[' && vector[end] == ']') || (return false)
 
-	color = color[begin+1:end-1]
-	color = split(color, ",")
-	(length(color)==3) || (return false)
+	vector = vector[begin+1:end-1]
+	vector = split(vector, ",")
+	(length(vector)==3) || (return false)
 
-	for c in color
-		!isnothing(tryparse(Float64, c)) || (return false)
+	for c in vector
+		if isnothing(tryparse(Float64, c)) && c ∉ SYM_NUM
+               return false
+          end 
 	end
 
 	return true
@@ -189,9 +196,9 @@ function string2vector(string::String)
      if string==""
           return Vec(0,0,0)
      end
-
-	color = filter(x -> !isspace(x) && x≠"\"", string)[begin+1:end-1]
-	Vec = split(color, ",")
+     
+     vector = filter(x -> !isspace(x) && x≠"\"", string)[begin+1:end-1]
+	Vec = split(vector, ",")
      x, y, z = parse.(Float64, RGB)
 
 	return Vec(x, y, z)
