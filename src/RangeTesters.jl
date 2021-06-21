@@ -5,7 +5,7 @@
 # Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
 #
 
-SYM_NUM = ["e", "pi"]
+SYM_NUM = Dict("e"=>ℯ, "pi"=>π)
 
 
 """
@@ -39,18 +39,19 @@ function string2int64(string::String, uint::Bool=false)
                "invalid number; it must be parsed as a positive Int64"
           ))
      end
+     var = filter(x -> !isspace(x) && x≠"\"", string)
 
-     if string==""
+     if var==""
           return uint==false ? Int64(0) : UInt64(0)
      end
 
-	return uint==false ? parse(Int64,string) : parse(UInt64,string)
+	return uint==false ? 
+          convert(Int64,parse(Float64, var)) : 
+          convert(UInt64,parse(Float64, var))
 end
 
 
 ##########################################################################################92
-
-
 
 
 """
@@ -85,11 +86,9 @@ function string2rootint64(string::String)
           ))
      end
 
-     if string==""
-          return 0
-     end
-
-     return √parse(Int64,var) 
+     var = filter(x -> !isspace(x) && x≠"\"", string)
+     !(var=="") || (return 0)
+     return convert(Int64, √parse(Float64,var))
 end
 
 
@@ -114,7 +113,7 @@ function check_is_color(string::String="")
 	(length(color)==3) || (return false)
 
 	for c in color
-		if isnothing(tryparse(Float64, c)) && c ∉ SYM_NUM
+		if isnothing(tryparse(Float64, c)) && c ∉ keys(SYM_NUM)
                return false
           end 
      end
@@ -137,15 +136,17 @@ function string2color(string::String)
           ))
      end
 
-     if string==""
-          return RGB{Float32}(0,0,0)
-     end
+     var = filter(x -> !isspace(x) && x≠"\"", string)
 
-	color = filter(x -> !isspace(x)&& x≠"\"", string)[begin+1:end-1]
-	rgb = Vector{String}(split(color, ","))
-     R, G, B = tuple(parse.(Float64, rgb)...)
+     !(var=="") || (return RGB{Float32}(0,0,0) )
 
-	return RGB{Float32}(R,G,B)
+	rgb = Vector{String}(split(var[begin+1:end-1], ","))
+
+     R = isnothing(tryparse(Float64, rgb[1])) ? SYM_NUM[rgb[1]] : parse(Float64, rgb[1])
+     G = isnothing(tryparse(Float64, rgb[2])) ? SYM_NUM[rgb[2]] : parse(Float64, rgb[2])
+     B = isnothing(tryparse(Float64, rgb[3])) ? SYM_NUM[rgb[3]] : parse(Float64, rgb[3])
+
+     return RGB{Float32}(R,G,B)
 end
 
 
@@ -169,7 +170,7 @@ function check_is_vector(string::String="")
 	(length(vector)==3) || (return false)
 
 	for c in vector
-		if isnothing(tryparse(Float64, c)) && c ∉ SYM_NUM
+		if isnothing(tryparse(Float64, c)) && c ∉ keys(SYM_NUM)
                return false
           end 
 	end
@@ -193,13 +194,15 @@ function string2vector(string::String)
           ))
      end
 
-     if string==""
-          return Vec(0,0,0)
-     end
+     var = filter(x -> !isspace(x) && x≠"\"", string)
+
+     !(var=="") || ( return Vec(0.0, 0, 0) )
      
-     vector = filter(x -> !isspace(x) && x≠"\"", string)[begin+1:end-1]
-	Vec = split(vector, ",")
-     x, y, z = parse.(Float64, RGB)
+     vector = filter(x -> !isspace(x) && x≠"\"", var)[begin+1:end-1]
+	vec = split(vector, ",")
+     x = isnothing(tryparse(Float64, vec[1])) ? SYM_NUM[vec[1]] : parse(Float64, vec[1])
+     y = isnothing(tryparse(Float64, vec[2])) ? SYM_NUM[vec[2]] : parse(Float64, vec[2])
+     z = isnothing(tryparse(Float64, vec[3])) ? SYM_NUM[vec[3]] : parse(Float64, vec[3])
 
 	return Vec(x, y, z)
 end
@@ -252,11 +255,10 @@ function declare_float2dict(string::String)
           ))
      end
 
-     if string==""
-          return nothing
-     end
-
      string_without_spaces = filter(x -> !isspace(x), string)
+
+     !(string_without_spaces=="") || (return nothing)
+
      vec_nameval = split.(split(string_without_spaces, ","), ":" )
      declare_float = Dict{String, Float64}([v[1]=>parse(Float64, v[2]) for v in vec_nameval]...)
      return declare_float

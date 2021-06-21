@@ -15,6 +15,31 @@
      @test !Raytracing.check_is_uint64("-3")
 end
 
+@testset "test_string2int64" begin
+     @test Raytracing.string2int64("") == 0
+     @test Raytracing.string2int64("", true) == UInt64(0)
+     @test Raytracing.string2int64("", false) == 0
+     @test Raytracing.string2int64("    ") == 0
+     @test Raytracing.string2int64("    ", true) == UInt64(0)
+     @test Raytracing.string2int64("    ", false) == 0
+     @test Raytracing.string2int64(" 3 ") == 3
+     @test Raytracing.string2int64(" 3 ", true) == UInt64(3)
+     @test Raytracing.string2int64(" 3 ", false) == 3
+     @test Raytracing.string2int64("3.0 ") == 3
+     @test Raytracing.string2int64("3.0 ", true) == UInt64(3)
+     @test Raytracing.string2int64("3.0 ", false) == 3
+     @test_throws ArgumentError Raytracing.string2int64("3.4")
+     @test_throws ArgumentError Raytracing.string2int64("-3")
+     @test_throws ArgumentError Raytracing.string2int64("3.4", true)
+     @test_throws ArgumentError Raytracing.string2int64("-3", true)
+     @test_throws ArgumentError Raytracing.string2int64("3.4", false)
+     @test_throws ArgumentError Raytracing.string2int64("-3", false)
+end
+
+
+##########################################################################################92
+
+
 @testset "test_check_is_square" begin
      @test Raytracing.check_is_square("")
      @test Raytracing.check_is_square("    ")
@@ -29,6 +54,24 @@ end
      @test !Raytracing.check_is_square("10.0")
 end
 
+@testset "test_string2rootint64" begin
+     @test Raytracing.string2rootint64("") == 0
+     @test Raytracing.string2rootint64("    ") == 0
+     @test Raytracing.string2rootint64(" 0 ") == 0
+     @test Raytracing.string2rootint64(" 1 ") == 1
+     @test Raytracing.string2rootint64(" 4 ") == 2
+     @test Raytracing.string2rootint64(" 4.0 ") == 2
+     @test Raytracing.string2rootint64(" 9 ") == 3
+     @test Raytracing.string2rootint64(" 9.0 ") == 3
+     @test_throws ArgumentError Raytracing.string2rootint64("3")
+     @test_throws ArgumentError Raytracing.string2rootint64("-4")
+     @test_throws ArgumentError Raytracing.string2rootint64("10.0")
+end
+
+
+
+##########################################################################################92
+
 
 
 @testset "test_check_is_color" begin
@@ -42,6 +85,21 @@ end
      @test !Raytracing.check_is_color("<0 0 0>")
 end
 
+@testset "test_string2color" begin
+     @test Raytracing.string2color("") == RGB{Float32}(0,0,0)
+     @test Raytracing.string2color("  ") == RGB{Float32}(0,0,0)
+     @test Raytracing.string2color("<0,0,0>") == RGB{Float32}(0,0,0)
+     @test Raytracing.string2color("<1.0,  2, pi >   ") == RGB{Float32}(1,2,π)
+     @test_throws ArgumentError Raytracing.string2color("3")
+     @test_throws ArgumentError Raytracing.string2color("0,0,0")
+     @test_throws ArgumentError Raytracing.string2color("[0,0,0]")
+     @test_throws ArgumentError Raytracing.string2color("<0 0 0>")
+end
+
+
+##########################################################################################92
+
+
 @testset "test_check_is_vector" begin
      @test Raytracing.check_is_vector("")
      @test Raytracing.check_is_vector("  ")
@@ -51,4 +109,16 @@ end
      @test !Raytracing.check_is_vector("0,0,0")
      @test !Raytracing.check_is_vector("<0,0,0>")
      @test !Raytracing.check_is_vector("[0 0 0]")
+end
+
+
+@testset "test_string2vector" begin
+     @test Raytracing.string2vector("") == Raytracing.Vec(0.,0.,0.)
+     @test Raytracing.string2vector("  ") == Raytracing.Vec(0.,0.,0.)
+     @test Raytracing.string2vector("[0,0,0]") == Raytracing.Vec(0.,0.,0.)
+     @test Raytracing.string2vector("[1.0,  2, pi ]   ") == Raytracing.Vec(1.,2.,π)
+     @test_throws ArgumentError Raytracing.string2vector("3")
+     @test_throws ArgumentError Raytracing.string2vector("0,0,0")
+     @test_throws ArgumentError Raytracing.string2vector("<0,0,0>")
+     @test_throws ArgumentError Raytracing.string2vector("[0 0 0]")
 end

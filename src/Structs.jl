@@ -149,10 +149,13 @@ struct Vec
     x::Float64
     y::Float64
     z::Float64
-    Vec(x, y, z) = new(x, y, z)
+    Vec(x::Float64, y::Float64, z::Float64) = new(x, y, z)
     Vec() = new(0.0, 0.0, 0.0)
     Vec(P::Point) = new(P.x, P.y, P.z)
     Vec(v::SVector{4, Float64}) = new(v[1], v[2], v[3])
+    function Vec(x::T1, y::T2, z::T3) where {T1<:Number,T2<:Number, T3<:Number}
+        Vec(convert(Float64, x), convert(Float64, y), convert(Float64, z))
+    end
 end
 
 const VEC_X = Vec(1.0, 0.0, 0.0)
