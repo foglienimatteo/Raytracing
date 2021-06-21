@@ -7,7 +7,7 @@
 
 WHITESPACE = [" ", "\t", "\n", "\r"]
 OPERATIONS = ["*", "/", "+", "-"]
-SYMBOLS = union(["(", ")", "<", ">", "[", "]", ",", "@"], OPERATIONS)
+SYMBOLS = union(["(", ")", "<", ">", "[", "]", "{", "}", ",", "@"], OPERATIONS)
 LETTERS = [
      'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 
      'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 
@@ -874,6 +874,101 @@ function expect_keywords(inputstream::InputStream, keywords::Vector{KeywordEnum}
 end
 
 
+function parse_function(inputstream::InputStream, scene::Scene)
+     token = read_token(inputstream)
+     result = ""
+     while true
+          token = read_token(inputstream)
+          
+          if typeof(token.value) == LiteralNumberToken
+               result *= repr(token.value.number)
+
+          elseif typeof(token.value) == StringToken
+               result *= repr(token.value.string)
+
+          elseif typeof(token.value) == SymbolToken && token.value.symbol ∈ union(OPERATIONS, [",", "."])
+               result *= token.value.symbol
+
+          elseif typeof(token.value) == SymbolToken && token.value.symbol=="["
+               unread_token(inputstream, token)
+               result *= repr(parse_vector(inputstream, scene))
+               expect_symbol(inputstream, "]")
+
+          elseif typeof(token.value) == SymbolToken && token.value.symbol=="<"
+               unread_token(inputstream, token)
+               result *= repr(parse_color(inputstream, scene))
+               expect_symbol(inputstream, ">")
+
+          elseif typeof(token.value) == SymbolToken && token.value.symbol=="("
+               result *= "("*parse_function(inputstream, scene)
+               expect_symbol(inputstream, ")")
+               result *= ")"
+
+          elseif typeof(token.value) == SymbolToken && token.value.symbol =="{"
+               result *= "("*parse_function(inputstream, scene)
+               expect_symbol(inputstream, "}")
+               result *= ")"
+
+          elseif typeof(token.value) == KeywordToken
+               keyword = token.value.keyword
+               if keyword ∈ [DIFFUSE,  SPECULAR]
+                    unread_token(inputstream, token)
+                    result *= repr(parse_brdf(inputstream, scene))
+               elseif keyword ∈ [UNIFORM,  CHECKERED,  IMAGE]
+                    unread_token(inputstream, token)
+                    result *= repr(parse_pigment(inputstream, scene))
+               else
+                    throw(GrammarError(token.location, 
+                    "keyword '$(keyword)' do not define anything that can be compared"))
+               end
+
+
+          elseif typeof(token.value) == IdentifierToken
+               variable_name = token.value.identifier
+               if (variable_name ∈ keys(SYM_NUM))
+                    result *=  string(SYM_NUM[token.value.identifier])
+               elseif isdefined(Raytracing, Symbol(variable_name))
+                    result *= "Raytracing."*variable_name
+                    expect_symbol(inputstream, "{")
+                    result *= "("*expect_number(inputstream, scene, true)
+                    expect_symbol(inputstream, "}")
+                    result *= ")"
+               elseif isdefined(Base, Symbol(variable_name))
+                    result *= "Base."*variable_name
+                    expect_symbol(inputstream, "{")
+                    result *= "("*expect_number(inputstream, scene, true)
+                    expect_symbol(inputstream, "}")
+                    result *= ")"
+               elseif variable_name ∈ keys(scene.float_variables)
+                    result *= repr(scene.float_variables[variable_name])
+               elseif variable_name ∈ keys(scene.string_variables)
+                    result *= repr(scene.string_variables[variable_name])
+               elseif variable_name ∈ keys(scene.bool_variables)
+                    result *= repr(scene.bool_variables[variable_name])
+               elseif variable_name ∈ keys(scene.vector_variables)
+                    result *= repr(scene.vector_variables[variable_name])
+               elseif variable_name ∈ keys(scene.color_variables)
+                    result *= repr(scene.color_variables[variable_name])
+               elseif variable_name ∈ keys(scene.pigment_variables)
+                    result *= repr(scene.pigment_variables[variable_name])
+               elseif variable_name ∈ keys(scene.brdf_variables)
+                    result *= repr(scene.brdf_variables[variable_name])
+               elseif variable_name ∈ keys(scene.transformation_variables)
+                    result *= repr(scene.transformation_variables[variable_name])
+               else
+                    throw(GrammarError(token.location, 
+                    "identifier '$(variable_name)' do not define anything that can be compared"))
+               end
+          else
+               unread_token(inputstream, token)
+               break
+          end
+
+     end
+     return result
+end
+
+
 """
      expect_number(inputstream::InputStream, scene::Scene) :: Float64
 
@@ -910,11 +1005,27 @@ function expect_number(inputstream::InputStream, scene::Scene, open::Bool=false)
                result *=  string(SYM_NUM[token.value.identifier])
           elseif typeof(token.value) == IdentifierToken
                variable_name = token.value.identifier
-               if variable_name ∉ keys(scene.float_variables)
-                    throw(GrammarError(token.location, "unknown variable '$(token)'"))
+
+               if isdefined(Raytracing, Symbol(variable_name))
+                    result *= "Raytracing."*variable_name
+                    expect_symbol(inputstream, "{")
+                    result *= "("*parse_function(inputstream, scene)
+                    expect_symbol(inputstream, "}")
+                    result *= ")"
+               elseif isdefined(Base, Symbol(variable_name))
+                    result *= "Base."*variable_name
+                    expect_symbol(inputstream, "{")
+                    result *= "("*parse_function(inputstream, scene)
+                    expect_symbol(inputstream, "}")
+                    result *= ")"
+
+               else 
+                    (variable_name ∈ keys(scene.float_variables) ) ||
+                         throw(GrammarError(token.location, "unknown variable '$(token)'"))
+                    next_number = scene.float_variables[variable_name]
+                    result *= repr(next_number)
                end
-               next_number = scene.float_variables[variable_name]
-               result *= repr(next_number)
+
           elseif typeof(token.value) == LiteralNumberToken
                result *= repr(token.value.number)
           elseif (typeof(token.value) == SymbolToken) && (token.value.symbol=="(")
@@ -975,10 +1086,11 @@ function expect_bool(inputstream::InputStream, scene::Scene)
 
      elseif typeof(token.value) == IdentifierToken
           variable_name = token.value.identifier
-          if variable_name ∉ keys(scene.bool_variables)
+  
+          (variable_name ∈ keys(scene.bool_variables) ) ||
                throw(GrammarError(token.location, "unknown bool variable '$(token)'"))
-          end
-          return scene.bool_variables[variable_name]
+          next_number = scene.bool_variables[variable_name]
+          result *= repr(next_number)
      end
 
      throw(GrammarError(token.location, "got '$(token)' instead of a number"))
@@ -1065,13 +1177,29 @@ function parse_vector(inputstream::InputStream, scene::Scene, open::Bool=false)
                result *=  string(SYM_NUM[token.value.identifier])
           elseif typeof(token.value) == IdentifierToken
                variable_name = token.value.identifier
-               if variable_name ∉ union(keys(scene.vector_variables), keys(scene.float_variables))
-                    throw(GrammarError(token.location, "unknown vector/float variable '$(token)'"))
+
+               if isdefined(Raytracing, Symbol(variable_name))
+                    result *= "Raytracing."*variable_name
+                    expect_symbol(inputstream, "{")
+                    result *= "("*parse_function(inputstream, scene)
+                    expect_symbol(inputstream, "}")
+                    result *= ")"
+               elseif isdefined(Base, Symbol(variable_name))
+                    result *= "Base."*variable_name
+                    expect_symbol(inputstream, "{")
+                    result *= "("*parse_function(inputstream, scene)
+                    expect_symbol(inputstream, "}")
+                    result *= ")"
+
+               else 
+                    (variable_name ∈ union(keys(scene.vector_variables), keys(scene.float_variables)) ) ||
+                         throw(GrammarError(token.location, "unknown float/vector variable '$(token)'"))
+                    next_value = variable_name ∈ keys(scene.vector_variables) ?
+                         scene.vector_variables[variable_name] :
+                         scene.float_variables[variable_name]
+                    result *= repr(next_value)
                end
-               next_value = variable_name ∈ keys(scene.vector_variables) ?
-                    scene.vector_variables[variable_name] :
-                    scene.float_variables[variable_name]
-               result *= repr(next_value)
+
           elseif typeof(token.value) == SymbolToken && token.value.symbol =="["
                unread_token(inputstream, token)
 
@@ -1170,19 +1298,39 @@ function parse_color(inputstream::InputStream, scene::Scene, open::Bool=false)
      end
           
      while true
+          println(token)
           if (typeof(token.value) == SymbolToken) && (token.value.symbol ∈ OPERATIONS)
                result *= token.value.symbol
           elseif (typeof(token.value) == IdentifierToken) && (token.value.identifier ∈ keys(SYM_NUM))
                result *=  string(SYM_NUM[token.value.identifier])
           elseif typeof(token.value) == IdentifierToken
                variable_name = token.value.identifier
-               if variable_name ∉ union(keys(scene.color_variables), keys(scene.float_variables))
-                    throw(GrammarError(token.location, "unknown vector/float variable '$(token)'"))
+               println(variable_name)
+               
+               if isdefined(Raytracing, Symbol(variable_name))
+                    result *= "Raytracing."*variable_name
+                    expect_symbol(inputstream, "{")
+                    println("wo", result)
+                    result *= "("*parse_function(inputstream, scene)
+                    expect_symbol(inputstream, "}")
+                    result *= ")"
+                    println(result)
+               elseif isdefined(Base, Symbol(variable_name))
+                    result *= "Base."*variable_name
+                    expect_symbol(inputstream, "{")
+                    result *= "("*parse_function(inputstream, scene)
+                    expect_symbol(inputstream, "}")
+                    result *= ")"
+
+               else 
+                    (variable_name ∈ union(keys(scene.color_variables), keys(scene.float_variables)) ) ||
+                         throw(GrammarError(token.location, "unknown float/color variable '$(token)'"))
+                    next_value = variable_name ∈ keys(scene.color_variables) ?
+                         scene.color_variables[variable_name] :
+                         scene.float_variables[variable_name]
+                    result *= repr(next_value)
                end
-               next_value = variable_name ∈ keys(scene.color_variables) ?
-                    scene.color_variables[variable_name] :
-                    scene.float_variables[variable_name]
-               result *= repr(next_value)
+               
           elseif typeof(token.value) == SymbolToken && token.value.symbol =="<"
                unread_token(inputstream, token)
 
@@ -1222,6 +1370,7 @@ function parse_color(inputstream::InputStream, scene::Scene, open::Bool=false)
      if open == true
           return result
      else
+          println(result)
           return eval(Meta.parse(result))
      end
 end
@@ -1727,6 +1876,18 @@ function return_token_value(inputstream::InputStream, scene::Scene, open::Bool =
                variable_name = token.value.identifier
                if (variable_name ∈ keys(SYM_NUM))
                     result *=  string(SYM_NUM[token.value.identifier])
+               elseif isdefined(Raytracing, Symbol(variable_name))
+                    result *= "Raytracing."*variable_name
+                    expect_symbol(inputstream, "{")
+                    result *= "("*parse_function(inputstream, scene)
+                    expect_symbol(inputstream, "}")
+                    result *= ")"
+               elseif isdefined(Base, Symbol(variable_name))
+                    result *= "Base."*variable_name
+                    expect_symbol(inputstream, "{")
+                    result *= "("*parse_function(inputstream, scene)
+                    expect_symbol(inputstream, "}")
+                    result *= ")"
                elseif variable_name ∈ keys(scene.float_variables)
                     result *= repr(scene.float_variables[variable_name])
                elseif variable_name ∈ keys(scene.string_variables)

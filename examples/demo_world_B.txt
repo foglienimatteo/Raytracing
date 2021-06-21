@@ -28,17 +28,17 @@ MATERIAL ground_material (
 )
 
 MATERIAL sphere_material (
-        DIFFUSE( UNIFORM( to_RGB(0, 128, 240) ,  <0, 0, 0> , 2 ) ),
+        DIFFUSE( UNIFORM( to_RGB{<0, 128, 240>} ,  <0, 0, 0> , 2 ) ),
         UNIFORM( <0, 0, 0> )
 )
 
 MATERIAL mirror_material (
-        DIFFUSE( UNIFORM( to_RGB(232, 10, 10) ) ),
+        DIFFUSE( UNIFORM( to_RGB{<232, 10, 10>} ) ),
         UNIFORM( <0, 0, 0> )
 )
 
 MATERIAL mirror_material_2 (
-        DIFFUSE( UNIFORM( to_RGB(178, 255, 102) ) ),
+        DIFFUSE( UNIFORM( to_RGB{<178, 255, 102>} ) ),
         UNIFORM( <0, 0, 0> )
 )
 
