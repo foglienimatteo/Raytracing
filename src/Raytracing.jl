@@ -34,8 +34,8 @@ export parse_tonemapping_settings, parse_demoanimation_settings
 export load_image, ldr2pfm
 # from RangeTesters.jl
 export check_is_positive, check_is_uint64, check_is_even_uint64
-export check_is_square, check_is_color, check_is_declare_float
-export check_is_one_of
+export check_is_square, check_is_color, check_is_vector
+export check_is_declare_float, check_is_one_of
 # from ParseSettings.jl
 export parse_render_settings 
 # from ToneMapping.jl

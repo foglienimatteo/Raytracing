@@ -23,6 +23,8 @@ function check_is_positive(string::String="")
      return parse(Float64, var)>0 ? true : false
 end
 
+check_is_positive(number::Number) = check_is_positive(string(number))
+
 
 """
     string2positive(string::String) :: Float64
@@ -44,6 +46,7 @@ function string2positive(string::String, uint::Bool=false)
 	return parse(Float64, var)
 end
 
+string2positive(number::Number, uint::Bool=false) = string2positive(string(number), uint)
 
 ##########################################################################################92
 
@@ -64,6 +67,8 @@ function check_is_uint64(string::String="")
 
      return convert(Int64, number)>0 ? true : false
 end
+
+check_is_uint64(number::Number) = check_is_uint64(string(number))
 
 
 """
@@ -88,6 +93,8 @@ function string2int64(string::String, uint::Bool=false)
           convert(UInt64,parse(Float64, var))
 end
 
+string2int64(number::Number, uint::Bool=false) = string2int64(string(number), uint)
+
 
 ##########################################################################################92
 
@@ -109,6 +116,8 @@ function check_is_even_uint64(string::String="")
 
      return (even>=0 && iseven(even)) ? true : false
 end
+
+check_is_even_uint64(number::Number) = check_is_even_uint64(string(number))
 
 
 """
@@ -134,6 +143,9 @@ function string2evenint64(string::String, uint::Bool=false)
 end
 
 
+string2evenint64(number::Number, uint::Bool=false) = string2evenint64(string(number), uint)
+
+
 ##########################################################################################92
 
 
@@ -154,6 +166,8 @@ function check_is_square(string::String="")
      return √square - floor(√square) ≈ 0. ? true : false
 end
 
+check_is_square(number::Number) = check_is_square(string(number))
+
 
 """
     string2rootint64(string::String) :: Int64
@@ -173,6 +187,9 @@ function string2rootint64(string::String)
      !(var=="") || (return 0)
      return convert(Int64, √parse(Float64,var))
 end
+
+
+string2rootint64(number::Number) = string2rootint64(string(number))
 
 
 ##########################################################################################92
