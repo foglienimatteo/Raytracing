@@ -24,30 +24,25 @@
                 0.0
             ],
             [
-                -1.0,
+                -3.0,
                 0.0,
-                0.0,
+                1.0,
                 1.0
             ]
         ],
         "projection": "orthogonal"
     },
     "declared float from Command Line": null,
-    "scene file": "examples/tutorial_basic_sintax.txt",
+    "scene file": "examples/earth_and_sun.txt",
     "renderer": {
-        "algorithm": "On-Off Renderer",
+        "algorithm": "Flat Renderer",
         "background color": {
-            "r": 0.0,
-            "g": 0.0,
-            "b": 0.0
-        },
-        "color": {
             "r": 0.0,
             "g": 0.0,
             "b": 0.0
         }
     },
-    "rendering time (in s)": "9.655",
-    "time of start": "2021-6-22 : 18:2:9",
+    "rendering time (in s)": "11.618",
+    "time of start": "2021-6-22 : 19:25:45",
     "pfm output": "scene.pfm"
 }

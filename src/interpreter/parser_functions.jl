@@ -234,27 +234,25 @@ function expect_bool(inputstream::InputStream, scene::Scene)
      token = read_token(inputstream)
      if typeof(token.value) == KeywordToken
           unread_token(inputstream, token)
-          
           keyword = expect_keywords(inputstream, [ TRUE,  FALSE])
 
           if keyword == TRUE
                return true
           elseif keyword == FALSE
                return false
+          else
+               throw(ArgumentError("how did you come here?"))
           end
-
-          throw(ArgumentError("how did you come here?"))
 
      elseif typeof(token.value) == IdentifierToken
           variable_name = token.value.identifier
   
           (variable_name ∈ keys(scene.bool_variables) ) ||
                throw(GrammarError(token.location, "unknown bool variable '$(token)'"))
-          next_number = scene.bool_variables[variable_name]
-          result *= repr(next_number)
+          return scene.bool_variables[variable_name]
+     else
+          throw(GrammarError(token.location, "got '$(token)' instead of a bool variable"))
      end
-
-     throw(GrammarError(token.location, "got '$(token)' instead of a number"))
 end
 
 

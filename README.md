@@ -65,14 +65,14 @@ In order to understand how to write such a file, take a look at the [examples](e
 
 Here we insert another example of usage, that renders the [earth_and_sun.txt](examples/earth_and_sun.txt) file:
 ```bash
-pathtracing 
-./Raytracer.jl tonemapping demo.pfm demo.png -a=0.18 -g=1.0
+./Raytracer.jl render examples/earth_and_sun.txt flat
+./Raytracer.jl tonemapping scene.pfm scene.png -a=0.18 -g=1.0
 ```
 (it's possible you have to adjust the `-g` value to your computer monitor gamma value)
 
 Earth with FlatRenderer            | 
 :---------------------------------:|
-![](demo/demo_C_Flat_640x480.png) 
+![](examples/earth_and_sun.png) 
 
 Refer to the latest [stable documentation](https://cosmofico97.github.io/Raytracing/stable) for more examples.
 

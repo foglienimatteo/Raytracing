@@ -26,7 +26,7 @@ VECTOR earth_pos([0.5, -1.0, 0.0])
 FLOAT earth_radius(1.0)
 FLOAT earth_lum(0.001)
 STRING earth_path ("images/earth.jpg")
-BRDF earth_BRDF (DIFFUSE(image(earth_path)))
+BRDF earth_brdf (DIFFUSE(IMAGE(earth_path)))
 PIGMENT earth_emitted_pigment ( UNIFORM(<earth_lum,earth_lum,earth_lum>) )
 
 
@@ -34,19 +34,19 @@ VECTOR sun_pos([4.0, 3.0, 0.0])
 FLOAT sun_radius(1.0)
 FLOAT sun_lum(0.0)
 STRING sun_path ("images/sun.jpg")
-BRDF sun_brdf (DIFFUSE(image(sun_path)))
+BRDF sun_brdf (DIFFUSE(IMAGE(sun_path)))
 PIGMENT sun_emitted_pigment ( UNIFORM(<sun_lum, sun_lum, sun_lum>) )
-BOOL sun(true) # This bool for the sun is fundamental for the pointlight algorithm!
+BOOL sun(TRUE) # This bool for the sun is fundamental for the pointlight algorithm!
 # It allows to the rays emitted from the pointlight (that is placed inside the sun
 # in this spatial configuration, see below) not to be stopped by the sun surface.
-# If you set this to "false" or do not pass it, the image will be dark, except for
+# If you set this to FALSE or do not pass it, the image will be dark, except for
 # the sun itself.
 
 VECTOR milky_way_pos([0.0, 0.0, 0.0])
 FLOAT milky_way_radius(20.0)
 FLOAT milky_way_lum(0.00)
 STRING milky_way_path ("images/milky_way_HD.jpg")
-BRDF milky_way_brdf (DIFFUSE(image(milky_way_path)))
+BRDF milky_way_brdf (DIFFUSE(IMAGE(milky_way_path)))
 PIGMENT milky_way_emitted_pigment ( UNIFORM(<milky_way_lum,milky_way_lum,milky_way_lum>) )
 
 
@@ -79,7 +79,7 @@ TRANSFORMATION sun_trans(
 )
 
 SPHERE(
-     sun_MATERIAL,
+     sun_material,
      sun_trans,
      sun
      )
