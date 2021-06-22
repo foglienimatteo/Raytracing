@@ -107,6 +107,8 @@ function render(
           declare_float::Union{Dict{String,Float64}, Nothing} = nothing,
      )
 
+     (bool_print==true) && println("\n\nStarting the image rendering of \"$(scenefile)\"...")
+
      time_of_start = Dates.format(now(), DateFormat("Y-m-d : H:M:S"))
      time_1 = time()
 
@@ -119,6 +121,8 @@ function render(
                parse_scene(inputstream, declare_float)
           end
      end
+
+     (bool_print==true) && println("\nReaded and parsed \"$(scenefile)\", now initialize camera and renderer...\n")
 
      renderer.world = scene.world
      
@@ -142,48 +146,48 @@ function render(
 
      elseif isnothing(observer_vec) && isnothing(scene.camera) 
           if camera_type == "per"
-		     (bool_print==true) && (println("Using perspective camera"))
+		     (bool_print==true) && (println("Choosen perspective camera..."))
 		     camera = PerspectiveCamera(1., 1.0, rotation_z(deg2rad(α)))
 	     elseif camera_type == "ort"
-		     (bool_print==true) && (println("Using orthogonal camera"))
+		     (bool_print==true) && (println("Choosen orthogonal camera..."))
 		     camera = OrthogonalCamera(1.0, rotation_z(deg2rad(α))) 
 	     else
-		     throw(ArgumentError("Unknown camera: $camera_type"))
+		     throw(ArgumentError("Unknown camera: \"$(camera_type)\""))
 	     end
 
      elseif isnothing(camera_type)
           camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec) * scene.camera.T
           if typeof(scene.camera) == OrthogonalCamera
-               (bool_print==true) && (println("Using perspective camera"))
+               (bool_print==true) && (println("Choosen perspective camera..."))
                camera = OrthogonalCamera(scene.camera.a, camera_tr)
           elseif typeof(scene.camera) == PerspectiveCamera
-               (bool_print==true) && (println("Using orthogonal camera"))
+               (bool_print==true) && (println("Choosen orthogonal camera..."))
                camera = PerspectiveCamera(scene.camera.d, scene.camera.a, camera_tr)
           else
-		     throw(ArgumentError("Unknown camera: $camera_type"))
+		     throw(ArgumentError("Unknown camera: \"$(camera_type)\""))
 	     end
 
      elseif isnothing(observer_vec)
           if camera_type == "per"
-		     (bool_print==true) && (println("Using perspective camera"))
+		     (bool_print==true) && (println("Choosen perspective camera..."))
 		     camera = PerspectiveCamera(scene.camera.d, scene.camera.a, rotation_z(deg2rad(α)) * scene.camera.T)
 	     elseif camera_type == "ort"
-		     (bool_print==true) && (println("Using orthogonal camera"))
+		     (bool_print==true) && (println("Choosen orthogonal camera..."))
 		     camera = OrthogonalCamera(scene.camera.a, rotation_z(deg2rad(α)) * scene.camera.T) 
 	     else
-		     throw(ArgumentError("Unknown camera: $camera_type"))
+		     throw(ArgumentError("Unknown camera: \"$(camera_type)\""))
 	     end
 
      elseif isnothing(scene.camera)
           camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec)
           if camera_type == "per"
-		     (bool_print==true) && (println("Using perspective camera"))
+		     (bool_print==true) && (println("Choosen perspective camera..."))
 		     camera = PerspectiveCamera(1.0, 1.0, camera_tr)
 	     elseif camera_type == "ort"
-		     (bool_print==true) && (println("Using orthogonal camera"))
+		     (bool_print==true) && (println("Choosen orthogonal camera..."))
 		     camera = OrthogonalCamera(1.0, camera_tr) 
 	     else
-		     throw(ArgumentError("Unknown camera: $camera_type"))
+		     throw(ArgumentError("Unknown camera: \"$(camera_type)\""))
 	     end
 
 
@@ -191,41 +195,45 @@ function render(
      else
           camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec) * scene.camera.T
           if camera_type == "per"
-		     (bool_print==true) && (println("Using perspective camera"))
+		     (bool_print==true) && (println("Choosen perspective camera..."))
 		     camera = PerspectiveCamera(scene.camera.d, scene.camera.a, camera_tr)
 	     elseif camera_type == "ort"
-		     (bool_print==true) && (println("Using orthogonal camera"))
+		     (bool_print==true) && (println("Choosen orthogonal camera..."))
 		     camera = OrthogonalCamera(scene.camera.a, camera_tr) 
 	     else
-		     throw(ArgumentError("Unknown camera: $camera_type"))
+		     throw(ArgumentError("Unknown camera: \"$(camera_type)\""))
 	     end
 
      end
     
    
      if typeof(renderer) == OnOffRenderer
-		(bool_print==true) && (println("Using on/off renderer"))
+		(bool_print==true) && (println("Choosen on-off renderer..."))
 	elseif typeof(renderer) == FlatRenderer
-		(bool_print==true) && (println("Using flat renderer"))
+		(bool_print==true) && (println("Choosen flat renderer..."))
 	elseif typeof(renderer) == PathTracer
-		(bool_print==true) && (println("Using path tracing renderer"))
+		(bool_print==true) && (println("Choosen path-tracing renderer..."))
 	elseif typeof(renderer) == PointLightRenderer
-          (bool_print==true) && (println("Using point-light renderer"))
+          (bool_print==true) && (println("Choosen point-light renderer..."))
 	else
-		throw(ArgumentError("Unknown renderer: $(typeof(renderer))"))
+		throw(ArgumentError("Unknown renderer: \"$(typeof(renderer))\""))
 	end
 
-	
 	image = HDRimage(width, height)
 	tracer = ImageTracer(image, camera, samples_per_side)
 
      algorithm = copy(renderer)
 
+     (bool_print==true) && println("\nNow starts the rendering!\n")
+
 	fire_all_rays!(tracer, renderer, (r,c) -> print_progress(r,c,image.height, image.width))
-	img = tracer.img
+	
+     (bool_print==true) && println("\nRendering completed! Now saving the files...")
+
+     img = tracer.img
 
 	(bool_savepfm==true) && (open(pfm_output, "w") do outf; write(outf, img); end)
-	(bool_print==true) && (println("\nHDR demo image written to $(pfm_output)\n"))
+	(bool_print==true) && (println("\nHDR demo image written to \"$(pfm_output)\"!"))
 
      if typeof(renderer) == OnOffRenderer
 		normalize_image!(img, 0.18, nothing)
@@ -245,7 +253,7 @@ function render(
 	if (typeof(query(png_output)) == File{DataFormat{:UNKNOWN}, String})
 		(bool_print==true) && (
 			println(
-				"File{DataFormat{:UNKNOWN}, String} for $(png_output)\n"*
+				"File{DataFormat{:UNKNOWN}, String} for \"$(png_output)\"n"*
 				"Written as a .png file.\n"
 			)
 		)
@@ -254,8 +262,7 @@ function render(
 		Images.save(png_output, get_matrix(img))
 	end
 
-	(bool_print==true) && (println("\nHDR demo image written to $(png_output)\n"))
-	nothing
+	(bool_print==true) && (println("\nHDR demo image written to \"$(png_output)\"!"))
 
      time_2 = time()
      rendering_time_s = time_2 - time_1
@@ -273,4 +280,8 @@ function render(
           declare_float,
           rendering_time_s,
      )
+
+     name_json = join(map(x->x*".", split(png_output,".")[1:end-1])) * "json"
+     (bool_print==true) && println("\nJSON file \"$(name_json)\" correctly created.")
+     (bool_print==true) && println("\nEND OF RENDERING\n")
 end

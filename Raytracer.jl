@@ -103,12 +103,12 @@ function ArgParse_command_line(arguments)
 		"--alpha", "-a"
 			help = "scaling factor for the normalization process; must be positive"
 			arg_type = Float64
-			range_tester == check_is_positive
+			range_tester = check_is_positive
 			default = 0.18
 		"--gamma", "-g"
 			help = "gamma value for the tone mapping process; must be positive"
 			arg_type = Float64
-			range_tester == check_is_positive
+			range_tester = check_is_positive
 			default = 1.27
 	end
 
@@ -145,7 +145,6 @@ function ArgParse_command_line(arguments)
 		"--alpha"
 			help = "angle of view around z-axis, in degrees"
 			arg_type = Float64
-			range_tester == check_is_positive
 			default = 0.
 		"--width"
 			help = "pixel number on the width of the resulting demo image."
@@ -429,7 +428,6 @@ function ArgParse_command_line(arguments)
 		"--alpha"
 			help = "angle of view around z-axis, in degrees"
 			arg_type = Float64
-			range_tester == check_is_positive
 			default = 0.
 		"--width"
 			help = "pixel number on the width of the resulting demo image."

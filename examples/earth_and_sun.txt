@@ -11,11 +11,28 @@
 #
 #    ./Raytracer.jl render examples/earth_and_sun.txt flat
 #
-# As you probably have already understood, there are four possible renderer algorithms:
-# - onoff : 
-# - flat :
-# - pathtracer : 
-# - pointlight : 
+# As you probably have already understood, there are four possible renderer algorithms.
+# Each of them connects with different rules the color of a pixel and the light ray that starts
+# from that pixel and hit (or not) an object of the rendered scene:
+# - onoff : each pixel is set to the "background_color" if no shape is hitten by its light ray, 
+#         otherwise is set to "color"; this renderer exists only for debugging purposes
+# - flat : each pixel is set to the "background_color" if no shape is hitten by its light ray, 
+#         otherwise is set to the color of the hitted shape point; this renderer is very efficient,
+#         but it does not solve the rendering equation.
+#         Consequently, no shadows or brightness are rendered.
+# - pathtracer : this is the TRUE renderer. It solves the rendering equation in the "standard"
+#         way, and for this reason its very burdensome to be used, specifically for the rendereing
+#         times needed to create the image.
+#         Nevertheless, the rendered images are incomparably more realistic that the ones
+#         maded with the other three renderers; USE THIS RENDERER WITH FORESIGHT!
+# - pointlight : it's the "cheap solution" for a realistic image. This renderer creates an image
+#         setting each pixel colored or not depending on the "line of sight" between that point
+#         and the point-light sources in the scene.
+#         It's very fast, and the images rendered are perfect for an astrophysical context or for
+#         very bright days of summer; it's, nevertheless, a simple solution in order to avoid
+#         the longer times needed for the pathtracer algorithm.
+
+
 # This type of image is very long to be rendered with "pathtracer"; use "pointlight"
 # or "flat" instead!
 

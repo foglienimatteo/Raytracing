@@ -281,13 +281,17 @@ function parse_demo_settings(dict::Dict{String, T}) where {T}
         dict["renderer"]
     elseif haskey(dict, "%COMMAND%")
         if dict["%COMMAND%"] == "onoff"
-            OnOffRenderer(parse_onoff_settings(dict["onoff"])...)
+            options = haskey(dict, "onoff") ? dict["onoff"] : Dict{String, Any}()
+            OnOffRenderer(parse_onoff_settings(options)...)
         elseif dict["%COMMAND%"] == "flat"
-            FlatRenderer(parse_flat_settings(dict["flat"])...)
+            options = haskey(dict, "flat") ? dict["flat"] : Dict{String, Any}()
+            FlatRenderer(parse_flat_settings(options)...)
         elseif dict["%COMMAND%"] == "pathtracer"
-            PathTracer(parse_pathtracer_settings(dict["pathtracer"])...)
+            options = haskey(dict, "pathtracer") ? dict["pathtracer"] : Dict{String, Any}()
+            PathTracer(parse_pathtracer_settings(options)...)
         elseif dict["%COMMAND%"] == "pointlight"
-            PointLightRenderer(parse_pointlight_settings(dict["pointlight"])...)
+            options = haskey(dict, "pointlight") ? dict["pointlight"] : Dict{String, Any}()
+            PointLightRenderer(parse_pointlight_settings(options)...)
         end
 	else
 		FlatRenderer()
@@ -399,13 +403,17 @@ function parse_demoanimation_settings(dict::Dict{String, T}) where {T}
         dict["renderer"]
     elseif haskey(dict, "%COMMAND%")
         if dict["%COMMAND%"] == "onoff"
-            OnOffRenderer(parse_onoff_settings(dict["onoff"])...)
+            options = haskey(dict, "onoff") ? dict["onoff"] : Dict{String, Any}()
+            OnOffRenderer(parse_onoff_settings(options)...)
         elseif dict["%COMMAND%"] == "flat"
-            FlatRenderer(parse_flat_settings(dict["flat"])...)
+            options = haskey(dict, "flat") ? dict["flat"] : Dict{String, Any}()
+            FlatRenderer(parse_flat_settings(options)...)
         elseif dict["%COMMAND%"] == "pathtracer"
-            PathTracer(parse_pathtracer_settings(dict["pathtracer"])...)
+            options = haskey(dict, "pathtracer") ? dict["pathtracer"] : Dict{String, Any}()
+            PathTracer(parse_pathtracer_settings(options)...)
         elseif dict["%COMMAND%"] == "pointlight"
-            PointLightRenderer(parse_pointlight_settings(dict["pointlight"])...)
+            options = haskey(dict, "pointlight") ? dict["pointlight"] : Dict{String, Any}()
+            PointLightRenderer(parse_pointlight_settings(options)...)
         end
 	else
 		FlatRenderer()
@@ -564,18 +572,24 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
         declare_float2dict(dict["declare_float"]) : 
         nothing
 
-    if haskey(dict, "%COMMAND%")
+   renderer = if haskey(dict, "renderer")
+        dict["renderer"]
+    elseif haskey(dict, "%COMMAND%")
         if dict["%COMMAND%"] == "onoff"
-            renderer = OnOffRenderer(parse_onoff_settings(dict["onoff"])...)
+            options = haskey(dict, "onoff") ? dict["onoff"] : Dict{String, Any}()
+            OnOffRenderer(parse_onoff_settings(options)...)
         elseif dict["%COMMAND%"] == "flat"
-            renderer = FlatRenderer(parse_flat_settings(dict["flat"])...)
+            options = haskey(dict, "flat") ? dict["flat"] : Dict{String, Any}()
+            FlatRenderer(parse_flat_settings(options)...)
         elseif dict["%COMMAND%"] == "pathtracer"
-            renderer = PathTracer(parse_pathtracer_settings(dict["pathtracer"])...)
+            options = haskey(dict, "pathtracer") ? dict["pathtracer"] : Dict{String, Any}()
+            PathTracer(parse_pathtracer_settings(options)...)
         elseif dict["%COMMAND%"] == "pointlight"
-            renderer = PointLightRenderer(parse_pointlight_settings(dict["pointlight"])...)
+            options = haskey(dict, "pointlight") ? dict["pointlight"] : Dict{String, Any}()
+            PointLightRenderer(parse_pointlight_settings(options)...)
         end
 	else
-		renderer = FlatRenderer()
+		FlatRenderer()
 	end
 
     return (
