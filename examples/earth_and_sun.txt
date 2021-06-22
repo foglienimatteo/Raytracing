@@ -1,79 +1,103 @@
+# -*- encoding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
+#
+#
+# EARTH AND SUN
+# Here we create an image of the earth and the Sun inside the Milky-Way.
+# In order to render this image, run in the CLI:
+#
+#    ./Raytracer.jl render examples/earth_and_sun.txt flat
+#
+# As you probably have already understood, there are four possible renderer algorithms:
+# - onoff : 
+# - flat :
+# - pathtracer : 
+# - pointlight : 
+# This type of image is very long to be rendered with "pathtracer"; use "pointlight"
+# or "flat" instead!
 
 
-camera(perspective, translation([-2, 0, 1]), 1.0, 1.0)
+CAMERA(PERSPECTIVE, TRANSLATION([-2, 0, 1]), 1.0, 1.0)
 
-vector earth_pos([0.5, -1.0, 0.0])
-float earth_radius(1.0)
-float earth_lum(0.001)
-string earth_path ("images/earth.jpg")
-brdf earth_brdf (diffuse(image(earth_path)))
-pigment earth_emitted_pigment ( uniform(<earth_lum,earth_lum,earth_lum>) )
-
-
-vector sun_pos([4.0, 3.0, 0.0])
-float sun_radius(1.0)
-float sun_lum(0.0)
-string sun_path ("images/sun.jpg")
-brdf sun_brdf (diffuse(image(sun_path)))
-pigment sun_emitted_pigment ( uniform(<sun_lum, sun_lum, sun_lum>) )
-bool sun(true)
-
-vector milky_way_pos([0.0, 0.0, 0.0])
-float milky_way_radius(20.0)
-float milky_way_lum(0.00)
-string milky_way_path ("images/milky_way_HD.jpg")
-brdf milky_way_brdf (diffuse(image(milky_way_path)))
-pigment milky_way_emitted_pigment ( uniform(<milky_way_lum,milky_way_lum,milky_way_lum>) )
+VECTOR earth_pos([0.5, -1.0, 0.0])
+FLOAT earth_radius(1.0)
+FLOAT earth_lum(0.001)
+STRING earth_path ("images/earth.jpg")
+BRDF earth_BRDF (DIFFUSE(image(earth_path)))
+PIGMENT earth_emitted_pigment ( UNIFORM(<earth_lum,earth_lum,earth_lum>) )
 
 
-material earth_material( 
+VECTOR sun_pos([4.0, 3.0, 0.0])
+FLOAT sun_radius(1.0)
+FLOAT sun_lum(0.0)
+STRING sun_path ("images/sun.jpg")
+BRDF sun_brdf (DIFFUSE(image(sun_path)))
+PIGMENT sun_emitted_pigment ( UNIFORM(<sun_lum, sun_lum, sun_lum>) )
+BOOL sun(true) # This bool for the sun is fundamental for the pointlight algorithm!
+# It allows to the rays emitted from the pointlight (that is placed inside the sun
+# in this spatial configuration, see below) not to be stopped by the sun surface.
+# If you set this to "false" or do not pass it, the image will be dark, except for
+# the sun itself.
+
+VECTOR milky_way_pos([0.0, 0.0, 0.0])
+FLOAT milky_way_radius(20.0)
+FLOAT milky_way_lum(0.00)
+STRING milky_way_path ("images/milky_way_HD.jpg")
+BRDF milky_way_brdf (DIFFUSE(image(milky_way_path)))
+PIGMENT milky_way_emitted_pigment ( UNIFORM(<milky_way_lum,milky_way_lum,milky_way_lum>) )
+
+
+MATERIAL earth_material( 
      earth_brdf, 
      earth_emitted_pigment
 )
-material sun_material( 
+MATERIAL sun_material( 
      sun_brdf, 
      sun_emitted_pigment
 )
-material milky_way_material(
+MATERIAL milky_way_material(
      milky_way_brdf, 
      milky_way_emitted_pigment
 )
 
-transformation earth_trans(
-     translation(earth_pos)
-     * scaling([earth_radius, earth_radius, earth_radius])
+TRANSFORMATION earth_trans(
+     TRANSLATION(earth_pos)
+     * SCALING([earth_radius, earth_radius, earth_radius])
 )
-sphere(
+SPHERE(
      earth_material,
      earth_trans
      )
 
 
-transformation sun_trans(
-     translation(sun_pos)
-     * scaling([sun_radius, sun_radius, sun_radius])
+TRANSFORMATION sun_trans(
+     TRANSLATION(sun_pos)
+     * SCALING([sun_radius, sun_radius, sun_radius])
 )
 
-sphere(
-     sun_material,
+SPHERE(
+     sun_MATERIAL,
      sun_trans,
      sun
      )
 
 
-transformation milky_way_trans (
-     translation(milky_way_pos)
-     * scaling([milky_way_radius, milky_way_radius, milky_way_radius])
+TRANSFORMATION milky_way_trans (
+     TRANSLATION(milky_way_pos)
+     * SCALING([milky_way_radius, milky_way_radius, milky_way_radius])
 )
    
-sphere(
+SPHERE(
      milky_way_material,
      milky_way_trans
      )
 
-float pl_lum(1.0)
-color sun_pointlight_lum(<pl_lum, pl_lum, pl_lum>)
-pointlight(
+FLOAT pl_lum(1.0)
+COLOR sun_pointlight_lum(<pl_lum, pl_lum, pl_lum>)
+POINTLIGHT(
      sun_pos, 
      sun_pointlight_lum
      )

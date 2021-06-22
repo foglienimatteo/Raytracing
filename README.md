@@ -41,10 +41,10 @@ or download the source code from the github repository https://github.com/cosmof
 
 To star of and checks the correct behavior of the software run one of the following command inside the main directory
 ```bash
-./Raytracer.jl demo_animation --camera_type=per --algorithm=flat --width=640 --height=480
+./Raytracer.jl demo_animation --camera_type=per --width=640 --height=480 flat
 ```
 ```bash
-./Raytracer.jl demo --world_type=B --camera_type=per --algorithm=pathtracing --camera_position=-1,0,1 --width=640 --height=480
+./Raytracer.jl demo --world_type=B --camera_type=per --camera_position="[-1, 0, 1]" --width=640 --height=480 pathtracing 
 ```
 and enjoy respectively the animation `demo/demo_anim_Flat_640x480x360.mp4` and the image `demo/demo_B_PathTracing_640x480.png`
 
@@ -65,7 +65,7 @@ In order to understand how to write such a file, take a look at the [examples](e
 
 Here we insert another example of usage, that renders the [earth_and_sun.txt](examples/earth_and_sun.txt) file:
 ```bash
-./Raytracer.jl demo --world_type=C --camera_type=per --algorithm=flat
+pathtracing 
 ./Raytracer.jl tonemapping demo.pfm demo.png -a=0.18 -g=1.0
 ```
 (it's possible you have to adjust the `-g` value to your computer monitor gamma value)

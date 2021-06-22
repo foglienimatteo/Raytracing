@@ -407,9 +407,9 @@ end
 end
 
 
-
+cd("..")
 @testset "test_tutorial_basic_sintax.txt" begin
-     open("../examples/tutorial_basic_sintax.txt") do stream
+     open("examples/tutorial_basic_sintax.txt") do stream
           scene = parse_scene(InputStream(stream, "tutorial_basic_sintax.txt"))
           @test 1==1
      end
@@ -417,14 +417,11 @@ end
      @test 1==1
 end
 
-#=
-
 @testset "test_demo_world_B.txt" begin
-     open("../examples/demo_world_B.txt") do stream
+     open("examples/demo_world_B.txt") do stream
           scene = parse_scene(InputStream(stream, "demo_world_B.txt"))
           @test 1==1
      end
 
      @test 1==1
 end
-=#

@@ -6,15 +6,20 @@
 #
 # DEMO WORLD B
 # This is a simple tutorial scene-file that explains the basic syntax
-# of how scene can be defined for this program
+# of how scene can be defined for this program.
 # 
 # In order to check the correct behaviour of this file (i.e. that is correctly parsed,
-# without throwing exceptions, and render the demo image of the world type "B) run the 
+# without throwing exceptions, and render the demo image of the world type "B") run the 
 # following command in the CLI (or another equivalent):
 #
-#    ./Raytracer.jl render examples/demo_world_B.txt onoff 
+#    ./Raytracer.jl render examples/demo_world_B.txt pathtracer
+#
+# You should obtain the same image if you run the demo command with the world "B":
+#
+#   ./Raytracer.jl demo --world_type="B" --camera_position="[-2, 0, 1]" pathtracer 
 #
 # And now let's start explaining how to define a scene!
+
 
 # First of all, let's define the materials of the objects
 MATERIAL sky_material (
@@ -61,7 +66,7 @@ MATERIAL mirror_material_2 (
 #        input a float number defining the rotation angle IN RADIANTS 
 
 # The Coordinate System is defined as follows, for a default camera (placed in [-1,0,0],
-# i.e  X = -1, Y = 0, Z = 0):
+# i.e  X = -1, Y = 0, Z = 0, see later):
 # - the positive x-axis is entering in the display of the observer;
 # - the positive x-axis is oriented on the left of the observer;
 # - the positive z-axis is oriented on the top of the observer;
@@ -84,7 +89,6 @@ SPHERE(
 # it's made bigger with a factor of 50 on the radius)
 
 # All the other shapes are defined in the same manner!
-
 
 PLANE(
     ground_material,
@@ -109,6 +113,31 @@ SPHERE(
     mirror_material,
     TRANSLATION([0.4, 1.5, 0]) * SCALING([s2, s2, s2])
 )
+
+# The definition of the CAMERA (i.e. the point of view) works like follows:
+# - first argument : choosen projection , PERSPECTIVE or ORTHOGONAL
+# - second argument : transformation defining the point of view and the orientation
+# The third and fourth argument depends on the choosen projection
+# - for PERSPECTIVE, you must insert a float defining the distance from the screen
+#       and the aspect ratio of the image
+# - for ORTHOGONAL, only the aspect ratio must be specified (because the orthogonal 
+#       projection it's a specifical perspective projection with an infinite distance
+#       between the observer and the screen)
+
+CAMERA(
+    PERSPECTIVE, 
+    TRANSLATION([-2, 0, 1]), 
+    1.0, 
+    1.0
+)
+
+# If you do not define a camera, the following default one will be used:
+#   CAMERA(
+#       PERSPECTIVE,
+#       TRANSLATION([-1, 0, 0]),
+#       1.0,
+#       1.0
+#   )
 
 # Last but not least, it's appropriate to define also a pointlight source.
 # This source does matter only if you choose to render the image with
