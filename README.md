@@ -23,6 +23,7 @@ Physics "Aldo Pontremoli"](http://eng.fisica.unimi.it/ecm/home).
 - [Raytracing](#raytracing)
   - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
+  - [Demo and Demo Animation](#demo-and-demo-animation)
   - [Tutorial](#tutorial)
   - [Usage](#usage)
   - [Licence](#licence)
@@ -36,7 +37,7 @@ git clone https://github.com/cosmofico97/Raytracing
 ```
 or download the source code from the github repository https://github.com/cosmofico97/Raytracing.
 
-## Tutorial
+## Demo and Demo Animation
 
 To star of and checks the correct behavior of the software run one of the following command inside the main directory
 ```bash
@@ -57,7 +58,12 @@ Animation with FlatRenderer            | Image with PathTracing
 
 It may takes few minutes to renderer the animation; you might also gives smaller (integer and even) values to `--width` and `--height` in order to obtain the same animation in a smaller amount of time (the price to pay is a worse definition of the animation itself).
 
-Try also the fllowing sequence of instructions:
+## Tutorial
+
+This software is able to read a file that describes a scene (i.e a set of object, pigments, materials, etc. that we want to renderer).
+In order to understand how to write such a file, take a look at the [examples](esamples) directory, particularly to the [tutorial_basic_sintax.txt](examples/tutorial_basic_sintax.txt) and the [demo_world_B.txt](examples/demo_world_B.txt) files.
+
+Here we insert another example of usage, that renders the [earth_and_sun.txt](examples/earth_and_sun.txt) file:
 ```bash
 ./Raytracer.jl demo --world_type=C --camera_type=per --algorithm=flat
 ./Raytracer.jl tonemapping demo.pfm demo.png -a=0.18 -g=1.0

@@ -42,12 +42,49 @@ MATERIAL mirror_material_2 (
         UNIFORM( <0, 0, 0> )
 )
 
+# All the shapes implemented in this program (exception made for triangles)
+# are created by default as "unitary", i.e. :
+# - the spheres are centered in the origin with radius 1
+# - the cubes are axis-aligned, centered in the origin with side 1
+# - the planes are created as the x-y plane (i.e. all the 3D point with z-component =0)
+# In order to create an arbitrary sized-placed-oriented shape, you must apply to the
+# unitary shape the appropriate sequence of transformations!
 
+# The transformations defined in this software are:
+# - IDENTITY : the identity transformation
+# - SCALING : a scaling transformation, must take as input a 3D vector defining the scaling
+# - ROTATION_X : a left-handed rotation around the x axis; it must take as
+#        input a float number defining the rotation angle IN RADIANTS 
+# - ROTATION_Y : a left-handed rotation around the you axis; it must take as
+#        input a float number defining the rotation angle IN RADIANTS 
+# - ROTATION_Z : a left-handed rotation around the z axis; it must take as
+#        input a float number defining the rotation angle IN RADIANTS 
 
+# The Coordinate System is defined as follows, for a default camera (placed in [-1,0,0],
+# i.e  X = -1, Y = 0, Z = 0):
+# - the positive x-axis is entering in the display of the observer;
+# - the positive x-axis is oriented on the left of the observer;
+# - the positive z-axis is oriented on the top of the observer;
+
+# The positive sign for the rotations of all the three axis is given, as already said,
+# the right-hand rule, therefore a clockwise rotation for entering (x,y,z)-axis 
+# corresponds to a positive input rotation angle. 
+
+# You can concatenate an arbitrary number of transformations through the star symbol "*";
+# the application order for the transformations is FROM RIGHT TO LEFT! 
+
+# Now let's define an object!
 SPHERE(
-    sky_material,
-    SCALING([50, 50, 50]) * TRANSLATION([0, 0, 0])
+    sky_material,   # material to be used
+    SCALING([50, 50, 50]) * TRANSLATION([0, 0, 0]) # transformations to apply on the shape
 )
+
+# for the previous sphere, first is applied a TRANSLATION of a vector [0,0,0] (i.e.
+# no translation) and therefore a SCALING of 50 on all the three axes (i.e. the sphere
+# it's made bigger with a factor of 50 on the radius)
+
+# All the other shapes are defined in the same manner!
+
 
 PLANE(
     ground_material,
@@ -72,6 +109,11 @@ SPHERE(
     mirror_material,
     TRANSLATION([0.4, 1.5, 0]) * SCALING([s2, s2, s2])
 )
+
+# Last but not least, it's appropriate to define also a pointlight source.
+# This source does matter only if you choose to render the image with
+# the `pointlight` renderer algorithm, but in such case is required
+# (otherwise all the image would appear black!)
 
 POINTLIGHT(
     [-1.0, 4.0, 2.0], 
