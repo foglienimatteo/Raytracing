@@ -169,19 +169,24 @@ See also: [`InputStream`](@ref)
 """        
 function skip_whitespaces_and_comments(inputstream::InputStream)
      ch = read_char(inputstream)
-     while ( (ch in WHITESPACE) || (ch == "#") || (ch == "@"))
+     while ( (ch in WHITESPACE) || (ch == "#"))
+
           if ch == "#"
+               ch = read_char(inputstream)
+               !(ch == "") || (return nothing)
+
+               if ch =="="
+                    while true
+                         if read_char(inputstream) == "=" && read_char(inputstream)=="#"
+                              break
+                         end
+                    end
+               end
+
+
                # It's a comment! Keep reading until the end of the line 
                #(include the case "", the end-of-file)
                while read_char(inputstream) ∉ ["\r", "\n", ""]
-                    nothing
-               end
-          end
-
-          if ch == "@"
-               # It's a comment! Keep reading until another @ is found
-               #(include the case "", the end-of-file)
-               while read_char(inputstream) ∉ ["@", ""]
                     nothing
                end
           end

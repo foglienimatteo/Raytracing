@@ -243,8 +243,8 @@ function parse_function(inputstream::InputStream, scene::Scene)
 
           elseif typeof(token.value) == SymbolToken && token.value.symbol ∈ OPEN_BRACKETS
                result *= token.value.symbol*parse_function(inputstream, scene)
-               expect_symbol(inputstream, closed_bracket(token.value.symbol))
-               result *= closed_bracket(token.value.symbol)
+               expect_symbol(inputstream, close_bracket(token.value.symbol))
+               result *= close_bracket(token.value.symbol)
 
           elseif typeof(token.value) == SymbolToken && token.value.symbol ∉ CLOSED_BRACKETS
                result *= token.value.symbol
@@ -292,7 +292,7 @@ function parse_function(inputstream::InputStream, scene::Scene)
                     if var isa Function
                          open_sym = expect_symbol(inputstream, ["{", "[", "("])
                          result *= sym*parse_function(inputstream, scene)
-                         closed_sym = closed_bracket(open_sym)
+                         closed_sym = close_bracket(open_sym)
                          expect_symbol(inputstream, closed_sym)
                          result *= closed_sym
                     else
@@ -306,7 +306,7 @@ function parse_function(inputstream::InputStream, scene::Scene)
                     if var isa Function
                          open_sym = expect_symbol(inputstream, ["{", "[", "("])
                          result *= sym*parse_function(inputstream, scene)
-                         closed_sym = closed_bracket(open_sym)
+                         closed_sym = close_bracket(open_sym)
                          expect_symbol(inputstream, closed_sym)
                          result *= closed_sym
                     else

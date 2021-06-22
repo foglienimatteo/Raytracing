@@ -41,6 +41,22 @@ end
 end
 
 
+@testset "test_close_bracket" begin
+     @test Raytracing.Interpreter.close_bracket("(") == ")"
+     @test Raytracing.Interpreter.close_bracket("[") == "]"
+     @test Raytracing.Interpreter.close_bracket("{") == "}"
+     @test Raytracing.Interpreter.close_bracket("<") == ">"
+     @test_throws ArgumentError Raytracing.Interpreter.close_bracket(" (")
+     @test_throws ArgumentError Raytracing.Interpreter.close_bracket(")")
+     @test_throws ArgumentError Raytracing.Interpreter.close_bracket("]")
+     @test_throws ArgumentError Raytracing.Interpreter.close_bracket("}")
+     @test_throws ArgumentError Raytracing.Interpreter.close_bracket(">")
+     @test_throws ArgumentError Raytracing.Interpreter.close_bracket("ag ")
+     @test_throws ArgumentError Raytracing.Interpreter.close_bracket("123")
+     @test_throws ArgumentError Raytracing.Interpreter.close_bracket("*")
+     @test_throws ArgumentError Raytracing.Interpreter.close_bracket("(1")
+end
+
 function assert_is_keyword(token::Token, keyword::KeywordEnum) 
      @assert isa(token.value, KeywordToken) "Token '$(token.value)' is not a KeywordToken"
      @assert token.value.keyword == keyword "Token '$(token.value)' is not equal to keyword '$(keyword)'"
@@ -113,6 +129,34 @@ end
      @test Raytracing.Interpreter.read_char(stream) == ""
 end
 
+@testset "test_skip_whitespaces_and_comments" begin
+     stream = IOBuffer("""
+     # This is a comment
+     # This is another comment
+     #=
+     this is a longer
+     comment that i want to avoid
+     =# 
+
+     #=
+     this is anothe long comment where i want to use
+     the symbols = and # indifferently, because inside
+     this sequence made of # + = and = + # i want to
+     ignore anything.
+     =# 
+     FLOAT var(150) # Comment at the end of the line
+
+""")
+
+     scene = parse_scene(InputStream(stream, "test_skip_whitespaces_and_comments"))
+
+     @test length(scene.float_variables) == 1
+     @test "var" ∈ keys(scene.float_variables)
+     @test scene.float_variables["var"] == 150.0
+
+end
+
+
 @testset "test_lexer" begin
 
      stream = IOBuffer("""
@@ -124,7 +168,7 @@ end
      ) # Comment at the end of the line
 """)
 
-     input_file = InputStream(stream)
+     input_file = InputStream(stream, "test_lexer")
 
      assert_is_keyword(read_token(input_file), Raytracing.Interpreter.NEW)
      assert_is_keyword(read_token(input_file), Raytracing.Interpreter.MATERIAL)
@@ -170,7 +214,7 @@ end
      CAMERA(PERSPECTIVE, ROTATION_Z(30) * TRANSLATION([-4, 0, 1]), 1.0, 2.0)
      """)
 
-     scene = parse_scene(InputStream(stream))
+     scene = parse_scene(InputStream(stream, "test_parser"))
 
      # Check that the FLOAT variables are ok
 
@@ -259,7 +303,7 @@ end
           ASSERT(var5, -2.5)
      """)
 
-     scene = parse_scene(InputStream(stream))
+     scene = parse_scene(InputStream(stream, "test_math_operations_1"))
      @test 1==1
 end
 
@@ -283,7 +327,7 @@ end
           ASSERT (try*1.0, -1.0*[-7,-7,-7])
      """)
 
-     scene = parse_scene(InputStream(stream))
+     scene = parse_scene(InputStream(stream, "test_return_token_value_1"))
      @test 1==1
 end
 
@@ -304,7 +348,7 @@ end
           ASSERT(v2-v1*0, 3*[1,1,1] )
      """)
 
-     scene = parse_scene(InputStream(stream))
+     scene = parse_scene(InputStream(stream, "test_parse_VECTOR_1"))
      @test 1==1
 end
 
@@ -325,7 +369,7 @@ end
           ASSERT(c2-c1*0, 3*<1,1,1> )
      """)
 
-     scene = parse_scene(InputStream(stream))
+     scene = parse_scene(InputStream(stream, "test_parse_COLOR_1"))
      @test 1==1
 end
 
@@ -349,7 +393,7 @@ end
           ASSERT(3, 2.0, ">=")
      """)
 
-     scene = parse_scene(InputStream(stream))
+     scene = parse_scene(InputStream(stream, "test_ASSERT_1"))
      @test 1==1
 end
 
@@ -363,9 +407,10 @@ end
 end
 
 
+
 @testset "test_tutorial_basic_sintax.txt" begin
      open("../examples/tutorial_basic_sintax.txt") do stream
-          scene = parse_scene(InputStream(stream))
+          scene = parse_scene(InputStream(stream, "tutorial_basic_sintax.txt"))
           @test 1==1
      end
 
@@ -376,7 +421,7 @@ end
 
 @testset "test_demo_world_B.txt" begin
      open("../examples/demo_world_B.txt") do stream
-          scene = parse_scene(InputStream(stream))
+          scene = parse_scene(InputStream(stream, "demo_world_B.txt"))
           @test 1==1
      end
 

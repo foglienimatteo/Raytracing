@@ -468,14 +468,12 @@ function parse_color(inputstream::InputStream, scene::Scene, open::Bool=false)
      end
           
      while true
-          println(token)
           if (typeof(token.value) == SymbolToken) && (token.value.symbol ∈ OPERATIONS)
                result *= token.value.symbol
           elseif (typeof(token.value) == IdentifierToken) && (token.value.identifier ∈ keys(SYM_NUM))
                result *=  string(SYM_NUM[token.value.identifier])
           elseif typeof(token.value) == IdentifierToken
                variable_name = token.value.identifier
-               println(variable_name)
                
                if (variable_name ∈ keys(scene.color_variables) )
                     next_color = scene.color_variables[variable_name]
@@ -538,7 +536,6 @@ function parse_color(inputstream::InputStream, scene::Scene, open::Bool=false)
      if open == true
           return result
      else
-          println(result)
           return eval(Meta.parse(result))
      end
 end

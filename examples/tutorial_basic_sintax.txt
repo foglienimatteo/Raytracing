@@ -29,13 +29,13 @@
 # Everything that follows an hashtag symbol ("#") it's a comment
 # and will be ignored by lexer and parser.
 
-@
-It's also possible to comment large parts of scene-code thanks to the
-"at" symbol; this will comment everything between two of them.
+#=
 
-PAY ATTENTION: This grammar is a LL(1) one, so you cannot put another "at"
-symbol inside this section!
-@
+It's also possible to comment large parts of scene-code thanks to a combination of
+"#" and "=" symbols; this will comment everything between the "coniugate " symbol made
+of "=" and "#".
+
+=#
 
 # Let's now define a variable!
 FLOAT my_float(1.0)
