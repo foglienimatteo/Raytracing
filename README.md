@@ -24,8 +24,8 @@ Physics "Aldo Pontremoli"](http://eng.fisica.unimi.it/ecm/home).
   - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
   - [Demo and Demo Animation](#demo-and-demo-animation)
-  - [Tutorial](#tutorial)
-  - [Usage](#usage)
+  - [Usage from the Command Line](#usage-from-the-command-line)
+  - [Usage from the REPL](#usage-from-the-repl)
   - [Licence](#licence)
   - [Contributors ✨](#contributors-)
 
@@ -58,7 +58,8 @@ Animation with FlatRenderer            | Image with PathTracing
 
 It may takes few minutes to renderer the animation; you might also gives smaller (integer and even) values to `--width` and `--height` in order to obtain the same animation in a smaller amount of time (the price to pay is a worse definition of the animation itself).
 
-## Tutorial
+
+## Usage from the Command Line Interface
 
 This software is able to read a file that describes a scene (i.e a set of object, pigments, materials, etc. that we want to renderer).
 In order to understand how to write such a file, take a look at the [examples](esamples) directory, particularly to the [tutorial_basic_sintax.txt](examples/tutorial_basic_sintax.txt) and the [demo_world_B.txt](examples/demo_world_B.txt) files.
@@ -74,9 +75,11 @@ Earth with FlatRenderer            |
 :---------------------------------:|
 ![](examples/earth_and_sun.png) 
 
-Refer to the latest [stable documentation](https://cosmofico97.github.io/Raytracing/stable) for more examples.
+Refer to the latest [stable documentation](https://cosmofico97.github.io/Raytracing/stable) for explanation of the functions used.
 
-## Usage
+
+## Usage from the REPL
+
 You can use Raytracer both form bash line and Julia repl. From bash you just need to type
 ```bash
 ./Raytracer.jl
