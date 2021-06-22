@@ -236,7 +236,7 @@ function return_token_value(inputstream::InputStream, scene::Scene, open::Bool =
 
                     if var isa Function
                          open_sym = expect_symbol(inputstream, ["{", "[", "("])
-                         result *= sym*parse_function(inputstream, scene)
+                         result *= open_sym*parse_function(inputstream, scene)
                          closed_sym = close_bracket(open_sym)
                          expect_symbol(inputstream, closed_sym)
                          result *= closed_sym
@@ -323,6 +323,8 @@ function assert(inputstream::InputStream, scene::Scene)
                @assert value1 > value2 "$(value1) is not > $(value2)!"
           elseif operator == ">="
                @assert value1 >= value2 "$(value1) is not >= $(value2)!"
+          elseif operator == "approx"
+               @assert value1 ≈ value2 "$(value1) is not ≈ $(value2)!"
           else
                throw(GrammarError(token.location, "operator $(operator)  is not valid"))
           end

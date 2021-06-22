@@ -98,4 +98,8 @@ using .Interpreter
 include("Render.jl")
 include("PrintFunctions.jl")
 
+# Here is were you can define your own functions to be used in
+# the scene-files!
+include("YOUR_FUNCTIONS.jl")
+
 end

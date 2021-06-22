@@ -21,7 +21,7 @@
 # without throwing exceptions) run the followinf command in the CLI (or another equivalent):
 #
 #    ./Raytracer.jl render examples/tutorial_basic_sintax.txt onoff 
-
+#
 #
 # And now let's start explaining how the scene-file must be written!
 
@@ -53,10 +53,10 @@ STRING my_str("let's create a string")  # Strings, BUT DOUBLE QUOTES "" ARE REQU
 # - Pigments, that can be of three types:
 PIGMENT my_uniform( UNIFORM(<1,1,1>) )                      # Uniform Pigment, created from an input color
 PIGMENT my_checkered( CHECKERED( <1,1,1> , <2,2,2>, 4 ) )   # Checkered Pigment, created from two input color and an integer fo the number of steps
-PIGMENT my_image( IMAGE("../images/milky_way.jpg"))          # Image Pigment, created from an image loaded from the specified input path
+PIGMENT my_image( IMAGE("images/milky_way.jpg"))          # Image Pigment, created from an image loaded from the specified input path
 
 # - BRDF, created from an input pigment, that can be of two types:
-BRDF my_diffuse( DIFFUSE(IMAGE("../images/milky_way.jpg")) )   # Diffuse BRDF, as a opaque object
+BRDF my_diffuse( DIFFUSE(IMAGE("images/milky_way.jpg")) )   # Diffuse BRDF, as a opaque object
 BRDF my_specular( SPECULAR(UNIFORM(<1,1,1>)) )              # Specular BRDF, as a mirror object          
 
 # - Material, created from a BRDF (first argument) that describes the object surface,
@@ -74,25 +74,37 @@ FLOAT another_float( float + 1.0 - float/(pi + 3.5*e))
 # ...between float and color and between colors...
 COLOR color(<1,1,1> * float)
 COLOR another_color( color + <1, 1, 1.0> - color*1.0/(pi + 3.5*e) )     # use *1.0/... to divide a color for a number
-# ...between float and vector and between vectors...
+# ...and between float and vector and between vectors.
 VECTOR vector([1,1,1] * float)
 VECTOR another_vector( vector + [1.0, 1, 1] - vector*1.0/(pi + 3.5*e) ) 
 
+# You can use all the functions define inside the Raytracing package
+# or inside the Base Julia Module!
+FLOAT value_cos(cos(pi) + sin(pi/4))
+PRINT(value_cos)
+
+# You can also define your own functions inside the "src/YOUR_FUNCTIONS.jl" file
+# and use them here!
+FLOAT value_my_function (my_function(1.0))   # "my_function" is defined in that file
+PRINT(value_my_function)
 
 # It's also possible to check if a variable has a specific value
 # or is greater that/less than another with the ASSERT keyword
-ASSERT(1, 1)        # Checking that 1==1, throws AssertionError otherwise
-ASSERT(1, 1, "=")   # Checking that 1==1 again
-ASSERT(1, 1, "==")  # Checking that 1==1 again
-ASSERT(1, 2, "<")   # Checking that 1<2
-ASSERT(1, 2, "<=")  # Checking that 1<=2
-ASSERT(3, 2, ">")   # Checking that 3>2
-ASSERT(3, 2, ">=")  # Checking that 3>=2
+ASSERT(1, 1)             # Checking that 1==1, throws AssertionError otherwise
+ASSERT(1, 1, "=")        # Checking that 1==1 again
+ASSERT(1, 1, "==")       # Checking that 1==1 again
+ASSERT(1, 1, "approx")   # Checking that 1 approx 1 
+ASSERT(1, 2, "<")        # Checking that 1<2
+ASSERT(1, 2, "<=")       # Checking that 1<=2
+ASSERT(3, 2, ">")        # Checking that 3>2
+ASSERT(3, 2, ">=")       # Checking that 3>=2
+ASSERT(value_my_function, 2)
 
 # in a more complicated manner:
 ASSERT(another_float, pi + 3.5*e)
 ASSERT(another_color, (pi + 3.5*e)*<1,1,1>)
 ASSERT(another_vector, (pi + 3.5*e)*[1,1,1])
+ASSERT(value_cos, -1 + sqrt(2)/2 , "approx")
 
 
 # Last but not least, you can print to stdout the value of a variable or identifier
