@@ -58,12 +58,9 @@ export PCG, random
 export create_onb_from_z
 #from ScatterRay.jl
 export scatter_ray
-#from SceneFiles.jl
-export KeywordEnum, GrammarError, InputStream
-export Token, KeywordToken, IdentifierToken, StringToken
-export LiteralNumberToken, SymbolToken, StopToken
-export read_token, skip_whitespaces_and_comments
-export Scene, parse_scene
+#from Interpreter.jl
+# see the module Interpreter.jl
+
 #from Render.jl
 export render
 # from PrintFunctions.jl
@@ -72,6 +69,8 @@ export print_not_black
 CAMERAS = ["ort", "per"]
 RENDERERS = ["onoff", "flat", "pathtracer", "pointlight"]
 DEMO_WORLD_TYPES = ["A", "B"]
+
+SYM_NUM = Dict("e"=>ℯ, "pi"=>π)
 
 export CAMERAS, RENDERERS, DEMO_WORLD_TYPES
 
@@ -90,7 +89,9 @@ include("Pigment.jl")
 include("Renderers.jl")
 include("OrthoNormalBasis.jl")
 include("ScatterRay.jl")
-include("SceneFiles.jl")
+
+include("Interpreter.jl")
+
 include("Render.jl")
 include("PrintFunctions.jl")
 

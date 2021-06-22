@@ -81,12 +81,3 @@ function print_not_black(img::HDRimage)
      nothing
 end
 
-# Token print functions
-function println(io::IO, token::Token)
-     print(io, "Token: \t")
-     print(io, "token.location = [", token.location.file_name, "(", token.location.line_num, ", ", token.location.col_num, ") ]")
-     println(io, "token.value = ", token.value)
-end
-print(io::IO, token::Token) = println(io, token)
-println(token::Token) = println(stdout, token)
-print(token::Token) = print(stdout, token)

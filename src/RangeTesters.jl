@@ -5,8 +5,6 @@
 # Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
 #
 
-SYM_NUM = Dict("e"=>ℯ, "pi"=>π)
-
 
 """
     check_is_positive(string::String="") :: Bool

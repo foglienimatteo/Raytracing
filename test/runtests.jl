@@ -16,7 +16,8 @@
 # CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
-using Raytracing, Test, LinearAlgebra, StaticArrays
+using Raytracing, Raytracing.Interpreter
+using Test, LinearAlgebra, StaticArrays
 import ColorTypes:RGB
 
 
@@ -100,6 +101,6 @@ end
 	include("test_RangeTesters.jl")
 end
 
-@testset "test_SceneFiles" begin
-	include("test_SceneFiles.jl")
+@testset "test_Interpreter" begin
+	include("test_Interpreter.jl")
 end

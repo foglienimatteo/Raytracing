@@ -7,37 +7,37 @@
 
 
 @testset "test_isdigit" begin
-     @test Raytracing.isdigit("2")
-     @test Raytracing.isdigit("1")
-     @test !Raytracing.isdigit("10")
-     @test !Raytracing.isdigit("a")
-     @test !Raytracing.isdigit("")
+     @test Raytracing.Interpreter.isdigit("2")
+     @test Raytracing.Interpreter.isdigit("1")
+     @test !Raytracing.Interpreter.isdigit("10")
+     @test !Raytracing.Interpreter.isdigit("a")
+     @test !Raytracing.Interpreter.isdigit("")
 end
 
 @testset "test_isdecimal" begin
-     @test Raytracing.isdecimal("2")
-     @test Raytracing.isdecimal("1123129")
-     @test !Raytracing.isdecimal("10.9")
-     @test !Raytracing.isdecimal("ag")
-     @test !Raytracing.isdecimal("10ag")
-     @test !Raytracing.isdecimal("")
+     @test Raytracing.Interpreter.isdecimal("2")
+     @test Raytracing.Interpreter.isdecimal("1123129")
+     @test !Raytracing.Interpreter.isdecimal("10.9")
+     @test !Raytracing.Interpreter.isdecimal("ag")
+     @test !Raytracing.Interpreter.isdecimal("10ag")
+     @test !Raytracing.Interpreter.isdecimal("")
 end
 
 @testset "test_isalpha" begin
-     @test Raytracing.isalpha("a")
-     @test Raytracing.isalpha("ADcLopnb__o")
-     @test !Raytracing.isalpha("1")
-     @test !Raytracing.isalpha("aD1sd")
-     @test !Raytracing.isalpha("")
+     @test Raytracing.Interpreter.isalpha("a")
+     @test Raytracing.Interpreter.isalpha("ADcLopnb__o")
+     @test !Raytracing.Interpreter.isalpha("1")
+     @test !Raytracing.Interpreter.isalpha("aD1sd")
+     @test !Raytracing.Interpreter.isalpha("")
 end
 
 @testset "test_isalnum" begin
-     @test Raytracing.isalnum("adf_g")
-     @test Raytracing.isalnum("1239")
-     @test Raytracing.isalnum("A1__Def98")
-     @test !Raytracing.isalnum("78KO.b")
-     @test !Raytracing.isalnum("78KO@b")
-     @test !Raytracing.isalnum("")
+     @test Raytracing.Interpreter.isalnum("adf_g")
+     @test Raytracing.Interpreter.isalnum("1239")
+     @test Raytracing.Interpreter.isalnum("A1__Def98")
+     @test !Raytracing.Interpreter.isalnum("78KO.b")
+     @test !Raytracing.Interpreter.isalnum("78KO@b")
+     @test !Raytracing.Interpreter.isalnum("")
 end
 
 
@@ -72,45 +72,45 @@ end
      @test stream.location.line_num == 1
      @test stream.location.col_num == 1
 
-     @test Raytracing.read_char(stream) == "a"
+     @test Raytracing.Interpreter.read_char(stream) == "a"
      @test stream.location.line_num == 1
      @test stream.location.col_num == 2
 
-     Raytracing.unread_char(stream, "A")
+     Raytracing.Interpreter.unread_char(stream, "A")
      @test stream.location.line_num == 1
      @test stream.location.col_num == 1
 
-     @test Raytracing.read_char(stream) == "A"
+     @test Raytracing.Interpreter.read_char(stream) == "A"
      @test stream.location.line_num == 1
      @test stream.location.col_num == 2
 
-     @test Raytracing.read_char(stream) == "b"
+     @test Raytracing.Interpreter.read_char(stream) == "b"
      @test stream.location.line_num == 1
      @test stream.location.col_num == 3
 
-     @test Raytracing.read_char(stream) == "c"
+     @test Raytracing.Interpreter.read_char(stream) == "c"
      @test stream.location.line_num == 1
      @test stream.location.col_num == 4
 
      skip_whitespaces_and_comments(stream)
 
-     @test Raytracing.read_char(stream) == "d"
+     @test Raytracing.Interpreter.read_char(stream) == "d"
      @test stream.location.line_num == 2
      @test stream.location.col_num == 2
 
-     @test Raytracing.read_char(stream) == "\n"
+     @test Raytracing.Interpreter.read_char(stream) == "\n"
      @test stream.location.line_num == 3
      @test stream.location.col_num == 1
 
-     @test Raytracing.read_char(stream) == "e"
+     @test Raytracing.Interpreter.read_char(stream) == "e"
      @test stream.location.line_num == 3
      @test stream.location.col_num == 2
 
-     @test Raytracing.read_char(stream) == "f"
+     @test Raytracing.Interpreter.read_char(stream) == "f"
      @test stream.location.line_num == 3
      @test stream.location.col_num == 3
 
-     @test Raytracing.read_char(stream) == ""
+     @test Raytracing.Interpreter.read_char(stream) == ""
 end
 
 @testset "test_lexer" begin
@@ -126,13 +126,13 @@ end
 
      input_file = InputStream(stream)
 
-     assert_is_keyword(read_token(input_file), Raytracing.NEW)
-     assert_is_keyword(read_token(input_file), Raytracing.MATERIAL)
+     assert_is_keyword(read_token(input_file), Raytracing.Interpreter.NEW)
+     assert_is_keyword(read_token(input_file), Raytracing.Interpreter.MATERIAL)
      assert_is_identifier(read_token(input_file), "sky_material")
      assert_is_symbol(read_token(input_file), "(")
-     assert_is_keyword(read_token(input_file), Raytracing.DIFFUSE)
+     assert_is_keyword(read_token(input_file), Raytracing.Interpreter.DIFFUSE)
      assert_is_symbol(read_token(input_file), "(")
-     assert_is_keyword(read_token(input_file), Raytracing.IMAGE)
+     assert_is_keyword(read_token(input_file), Raytracing.Interpreter.IMAGE)
      assert_is_symbol(read_token(input_file), "(")
      assert_is_string(read_token(input_file), "my file.pfm")
      assert_is_symbol(read_token(input_file), ")")
@@ -361,3 +361,25 @@ end
      @test_throws AssertionError parse_scene(InputStream(IOBuffer("""ASSERT(1.0, 1, "<")""")))
      @test_throws AssertionError parse_scene(InputStream(IOBuffer("""ASSERT(1.0, 0, "<=")""")))
 end
+
+
+@testset "test_tutorial_basic_sintax.txt" begin
+     open("../examples/tutorial_basic_sintax.txt") do stream
+          scene = parse_scene(InputStream(stream))
+          @test 1==1
+     end
+
+     @test 1==1
+end
+
+#=
+
+@testset "test_demo_world_B.txt" begin
+     open("../examples/demo_world_B.txt") do stream
+          scene = parse_scene(InputStream(stream))
+          @test 1==1
+     end
+
+     @test 1==1
+end
+=#

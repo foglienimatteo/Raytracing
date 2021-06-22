@@ -7,11 +7,21 @@
 # TUTORIAL BASIC SYNTAX
 # This is a simple tutorial scene-file that explains the basic syntax
 # of how scene can be defined for this program
+#
+#
+#
+#    PAY ATTENTION: THIS FILE IS USED FOR THE INTERPRETER TESTS,
+#    in order to check that eventual changes to any of the lexer/parser
+#    functions do not affect the ability of parse a scene-file.
+#    DO NOT MODIFY THIS FILE IF YOU ARE NOT SURE OF WHAT YOU ARE DOING!
+#
+#
 # 
 # In order to check the correct behaviour of this file (i.e. that is correctòy parsed,
 # without throwing exceptions) run the followinf command in the CLI (or another equivalent):
 #
 #    ./Raytracer.jl render examples/tutorial_basic_sintax.txt onoff 
+
 #
 # And now let's start explaining how the scene-file must be written!
 
@@ -43,10 +53,10 @@ STRING my_str("let's create a string")  # Strings, BUT DOUBLE QUOTES "" ARE REQU
 # - Pigments, that can be of three types:
 PIGMENT my_uniform( UNIFORM(<1,1,1>) )                      # Uniform Pigment, created from an input color
 PIGMENT my_checkered( CHECKERED( <1,1,1> , <2,2,2>, 4 ) )   # Checkered Pigment, created from two input color and an integer fo the number of steps
-PIGMENT my_image( IMAGE("images/milky_way.jpg"))          # Image Pigment, created from an image loaded from the specified input path
+PIGMENT my_image( IMAGE("../images/milky_way.jpg"))          # Image Pigment, created from an image loaded from the specified input path
 
 # - BRDF, created from an input pigment, that can be of two types:
-BRDF my_diffuse( DIFFUSE(IMAGE("images/milky_way.jpg")) )   # Diffuse BRDF, as a opaque object
+BRDF my_diffuse( DIFFUSE(IMAGE("../images/milky_way.jpg")) )   # Diffuse BRDF, as a opaque object
 BRDF my_specular( SPECULAR(UNIFORM(<1,1,1>)) )              # Specular BRDF, as a mirror object          
 
 # - Material, created from a BRDF (first argument) that describes the object surface,
