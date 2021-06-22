@@ -10,6 +10,7 @@ function print_JSON(
      png_output::String,
      pfm_output::Union{String, Nothing},
      scenefile::String,
+     time_of_start::String,
      algorithm::Renderer,
      camera::Camera,
      samples_per_side::Int64,
@@ -50,8 +51,8 @@ function print_JSON(
                     "algorithm" => "Path-Tracing Renderer",
                     "background color" => algorithm.background_color,
                     "PCG" => Dict(
-                         "initial state" => Int64(algorithm.PCG.state),
-                         "initial sequence" => Int64(algorithm.PCG.inc),
+                         "initial state" => get_state(algorithm.pcg),
+                         "initial sequence" => get_inc(algorithm.pcg),
                          ),
                     "number of rays" => algorithm.num_of_rays,
                     "max depth" => algorithm.max_depth,
@@ -68,6 +69,7 @@ function print_JSON(
 
      data = Dict(
           "scene file" => scenefile,
+          "time of start" => time_of_start,
           "png output" => png_output,
           "pfm output" => pfm_output,
           "camera" => dict_camera, 
@@ -105,14 +107,15 @@ function render(
           declare_float::Union{Dict{String,Float64}, Nothing} = nothing,
      )
 
+     time_of_start = Dates.format(now(), DateFormat("Y-m-d : H:M:S"))
      time_1 = time()
 
      scene = open(scenefile, "r") do stream
           if isnothing(declare_float)
-               inputstream = InputStream(stream)
+               inputstream = InputStream(stream, scenefile)
                parse_scene(inputstream)
           else
-               inputstream = InputStream(stream)
+               inputstream = InputStream(stream, scenefile)
                parse_scene(inputstream, declare_float)
           end
      end
@@ -216,7 +219,7 @@ function render(
 	image = HDRimage(width, height)
 	tracer = ImageTracer(image, camera, samples_per_side)
 
-     algorithm = renderer
+     algorithm = copy(renderer)
 
 	fire_all_rays!(tracer, renderer, (r,c) -> print_progress(r,c,image.height, image.width))
 	img = tracer.img
@@ -263,6 +266,7 @@ function render(
           png_output,
           pfm,
           scenefile,
+          time_of_start,
           algorithm,
           camera,
           samples_per_side,

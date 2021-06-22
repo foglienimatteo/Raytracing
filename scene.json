@@ -1,5 +1,5 @@
 {
-    "samples per pixel (0 means no antialiasing)": 0,
+    "samples per pixel (0 means no antialiasing)": 4,
     "png output": "scene.png",
     "camera": {
         "distance": 1.0,
@@ -26,27 +26,30 @@
             [
                 -1.0,
                 0.0,
-                0.0,
+                1.0,
                 1.0
             ]
         ],
         "projection": "orthogonal"
     },
     "declared float from Command Line": null,
-    "scene file": "examples/tutorial_basic_sintax.txt",
+    "scene file": "examples/demo_world_B.txt",
     "renderer": {
-        "algorithm": "On-Off Renderer",
+        "PCG": {
+            "initial sequence": 219,
+            "initial state": 17474718066368155821
+        },
+        "russian roulette limit": 2,
+        "number of rays": 10,
+        "algorithm": "Path-Tracing Renderer",
         "background color": {
             "r": 0.0,
             "g": 0.0,
             "b": 0.0
         },
-        "color": {
-            "r": 0.0,
-            "g": 0.0,
-            "b": 0.0
-        }
+        "max depth": 3
     },
-    "rendering time (in s)": "9.760",
+    "rendering time (in s)": "6.489",
+    "time of start": "2021-6-22 : 17:1:15",
     "pfm output": "scene.pfm"
 }

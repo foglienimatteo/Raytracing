@@ -28,17 +28,17 @@ MATERIAL ground_material (
 )
 
 MATERIAL sphere_material (
-        DIFFUSE( UNIFORM( to_RGB{<0, 128, 240>} ,  <0, 0, 0> , 2 ) ),
+        DIFFUSE( UNIFORM( to_RGB(0, 128, 240) ) ),
         UNIFORM( <0, 0, 0> )
 )
 
 MATERIAL mirror_material (
-        DIFFUSE( UNIFORM( to_RGB{<232, 10, 10>} ) ),
+        DIFFUSE( UNIFORM( to_RGB(232, 10, 10) ) ),
         UNIFORM( <0, 0, 0> )
 )
 
 MATERIAL mirror_material_2 (
-        DIFFUSE( UNIFORM( to_RGB{<178, 255, 102>} ) ),
+        DIFFUSE( UNIFORM( to_RGB(178, 255, 102) ) ),
         UNIFORM( <0, 0, 0> )
 )
 
@@ -56,7 +56,7 @@ PLANE(
 
 PLANE(
     mirror_material_2,
-    TRANSLATION([0., -2., 0]) * ROTATION_Z(π/6.) * ROTATION_X(pi/2.) 
+    TRANSLATION([0., -2., 0]) * ROTATION_Z(pi/6.) * ROTATION_X(pi/2.) 
 )
 
 FLOAT s1(0.6)

@@ -21,7 +21,7 @@ export KeywordEnum, GrammarError, InputStream
 export Token, KeywordToken, IdentifierToken, StringToken
 export LiteralNumberToken, SymbolToken, StopToken
 export read_token, skip_whitespaces_and_comments
-export Scene, parse_scene
+export Scene, InputStream, parse_scene
 
 
 import Raytracing.SYM_NUM

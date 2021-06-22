@@ -8,15 +8,21 @@
 const BLACK = RGB{Float32}(0.0, 0.0, 0.0)
 const WHITE = RGB{Float32}(1.0, 1.0, 1.0)
 
-
-"""
-    to_RGB(r::Int64, g::Int64, b::Int64) :: RGB{Float32}
-
-Return the RGB color with values inside the `[0,1]` interval.
-"""
 function to_RGB(r::Int64, g::Int64, b::Int64)
     return RGB{Float32}(r/255., g/255., b/255.)
 end
+
+function to_RGB(r::Float64, g::Float64, b::Float64)
+    return RGB{Float32}(r/255., g/255., b/255.)
+end
+
+"""
+    to_RGB(r::Int64, g::Int64, b::Int64) :: RGB{Float32}
+    to_RGB(r::Float64, g::Float64, b::Float64) :: RGB{Float32}
+
+Return the RGB color with values inside the `[0,1]` interval.
+"""
+to_RGB
 
 
 ##########################################################################################92
@@ -803,6 +809,10 @@ mutable struct OnOffRenderer <: Renderer
     OnOffRenderer(w = World(), bc = BLACK, c = WHITE) = new(w, bc, c)
 end
 
+function copy(renderer::OnOffRenderer)
+    return OnOffRenderer(World(), renderer.background_color, renderer.color)
+end
+
 """
     FlatRenderer <: Renderer(
         world::World = World()
@@ -820,6 +830,10 @@ mutable struct FlatRenderer <: Renderer
     world::World
     background_color::RGB{Float32}
     FlatRenderer(w = World(), bc = BLACK) = new(w, bc)
+end
+
+function copy(renderer::FlatRenderer)
+    return FlatRenderer(World(), renderer.background_color)
 end
 
 """
@@ -870,6 +884,17 @@ mutable struct PathTracer <: Renderer
         new(w, bc, pcg, n, md, RRlim)
 end
 
+function copy(renderer::PathTracer)
+    return PathTracer(
+        World(), 
+        renderer.background_color, 
+        PCG(renderer.pcg.state, renderer.pcg.inc),
+        renderer.num_of_rays,
+        renderer.max_depth,
+        renderer.russian_roulette_limit,
+    )
+end
+
 """
     PointLightRenderer <: Renderer (
         world::World,
@@ -899,6 +924,10 @@ mutable struct PointLightRenderer <: Renderer
             bc=RGB{Float32}(0., 0., 0.), 
             ac=RGB{Float32}(0.1, 0.1, 0.1)
         ) = new(w, bc, ac)
+end
+
+function copy(renderer::PointLightRenderer)
+    return PointLightRenderer(World(), renderer.background_color, renderer.ambient_color)
 end
 
 ##########################################################################################92

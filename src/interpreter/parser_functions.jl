@@ -93,7 +93,7 @@ end
 function expect_symbol(inputstream::InputStream, vec_symbol::Vector{String})
      token = read_token(inputstream)
      if (typeof(token.value) ≠ SymbolToken) || (token.value.symbol ∉ vec_symbol)
-          throw(GrammarError(token.location, "got $(token) insted of $(vec_symbol)"))
+          throw(GrammarError(token.location, "got $(token) instead of $(vec_symbol)"))
      end
      return token.value.symbol
 end
@@ -180,18 +180,9 @@ function expect_number(inputstream::InputStream, scene::Scene, open::Bool=false)
                if (variable_name ∈ keys(scene.float_variables) )
                     next_number = scene.float_variables[variable_name]
                     result *= repr(next_number)
-               elseif isdefined(Raytracing, Symbol(variable_name))
-                    result *= "Raytracing."*variable_name
-                    expect_symbol(inputstream, "{")
-                    result *= "("*parse_function(inputstream, scene)
-                    expect_symbol(inputstream, "}")
-                    result *= ")"
-               elseif isdefined(Base, Symbol(variable_name))
-                    result *= "Base."*variable_name
-                    expect_symbol(inputstream, "{")
-                    result *= "("*parse_function(inputstream, scene)
-                    expect_symbol(inputstream, "}")
-                    result *= ")"
+               elseif isdefined(Raytracing, Symbol(variable_name)) || isdefined(Base, Symbol(variable_name))
+                    unread_token(inputstream, token)
+                    result *= parse_function(inputstream, scene)
                else
                     throw(GrammarError(token.location, "unknown variable '$(token)'"))
                end
@@ -354,18 +345,9 @@ function parse_vector(inputstream::InputStream, scene::Scene, open::Bool=false)
                elseif (variable_name ∈ keys(scene.float_variables) )
                     next_number = scene.float_variables[variable_name]
                     result *= repr(next_number)
-               elseif isdefined(Raytracing, Symbol(variable_name))
-                    result *= "Raytracing."*variable_name
-                    expect_symbol(inputstream, "{")
-                    result *= "("*parse_function(inputstream, scene)
-                    expect_symbol(inputstream, "}")
-                    result *= ")"
-               elseif isdefined(Base, Symbol(variable_name))
-                    result *= "Base."*variable_name
-                    expect_symbol(inputstream, "{")
-                    result *= "("*parse_function(inputstream, scene)
-                    expect_symbol(inputstream, "}")
-                    result *= ")"
+               elseif isdefined(Raytracing, Symbol(variable_name)) || isdefined(Base, Symbol(variable_name))
+                    unread_token(inputstream, token)
+                    result *= parse_function(inputstream, scene)
                else
                     throw(GrammarError(token.location, "unknown float/vector variable '$(token)'"))
                end
@@ -481,18 +463,9 @@ function parse_color(inputstream::InputStream, scene::Scene, open::Bool=false)
                elseif (variable_name ∈ keys(scene.float_variables) )
                     next_number = scene.float_variables[variable_name]
                     result *= repr(next_number)
-               elseif isdefined(Raytracing, Symbol(variable_name))
-                    result *= "Raytracing."*variable_name
-                    expect_symbol(inputstream, "{")
-                    result *= "("*parse_function(inputstream, scene)
-                    expect_symbol(inputstream, "}")
-                    result *= ")"
-               elseif isdefined(Base, Symbol(variable_name))
-                    result *= "Base."*variable_name
-                    expect_symbol(inputstream, "{")
-                    result *= "("*parse_function(inputstream, scene)
-                    expect_symbol(inputstream, "}")
-                    result *= ")"
+               elseif isdefined(Raytracing, Symbol(variable_name)) || isdefined(Base, Symbol(variable_name))
+                    unread_token(inputstream, token)
+                    result *= parse_function(inputstream, scene)
                else
                     throw(GrammarError(token.location, "unknown float/color variable '$(token)'"))
                end

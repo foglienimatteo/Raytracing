@@ -11,11 +11,13 @@ using Colors, Images, ImageIO, FileIO, Polynomials, Test
 using ColorTypes:RGB
 using LinearAlgebra, StaticArrays
 using Printf, ProgressBars
-using Documenter, DocStringExtensions, JSON
+using Documenter, DocStringExtensions, JSON, Dates
 
 import Base.:+; import Base.:-; import Base.:≈; import Base.:/; import Base.:*
 import Base: write, read, print, println, copy;
 import LinearAlgebra.:⋅; import LinearAlgebra.:×
+
+
 
 # from Structs.jl
 export BLACK, WHITE, to_RGB, HDRimage, get_matrix, Parameters
@@ -91,6 +93,7 @@ include("OrthoNormalBasis.jl")
 include("ScatterRay.jl")
 
 include("Interpreter.jl")
+using .Interpreter
 
 include("Render.jl")
 include("PrintFunctions.jl")

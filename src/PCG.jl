@@ -42,6 +42,16 @@ mutable struct PCG
      end
 end
 
+function get_state(pcg::PCG)
+     value = pcg.state
+     return Int128(value)
+end     
+
+function get_inc(pcg::PCG)
+     value = pcg.inc
+     return Int128(value)
+end
+
 """
      random(pcg::PCG, ::Type{UInt32}) :: UInt32
 
