@@ -241,28 +241,13 @@ function parse_function(inputstream::InputStream, scene::Scene)
           elseif typeof(token.value) == StringToken
                result *= repr(token.value.string)
 
-          elseif typeof(token.value) == SymbolToken && token.value.symbol ∈ union(OPERATIONS, [",", "."])
+          elseif typeof(token.value) == SymbolToken && token.value.symbol ∈ OPEN_BRACKETS
+               result *= token.value.symbol*parse_function(inputstream, scene)
+               expect_symbol(inputstream, closed_bracket(token.value.symbol))
+               result *= closed_bracket(token.value.symbol)
+
+          elseif typeof(token.value) == SymbolToken && token.value.symbol ∉ CLOSED_BRACKETS
                result *= token.value.symbol
-
-          elseif typeof(token.value) == SymbolToken && token.value.symbol=="["
-               unread_token(inputstream, token)
-               result *= repr(parse_vector(inputstream, scene))
-               expect_symbol(inputstream, "]")
-
-          elseif typeof(token.value) == SymbolToken && token.value.symbol=="<"
-               unread_token(inputstream, token)
-               result *= repr(parse_color(inputstream, scene))
-               expect_symbol(inputstream, ">")
-
-          elseif typeof(token.value) == SymbolToken && token.value.symbol=="("
-               result *= "("*parse_function(inputstream, scene)
-               expect_symbol(inputstream, ")")
-               result *= ")"
-
-          elseif typeof(token.value) == SymbolToken && token.value.symbol =="{"
-               result *= "("*parse_function(inputstream, scene)
-               expect_symbol(inputstream, "}")
-               result *= ")"
 
           elseif typeof(token.value) == KeywordToken
                keyword = token.value.keyword
@@ -274,26 +259,15 @@ function parse_function(inputstream::InputStream, scene::Scene)
                     result *= repr(parse_pigment(inputstream, scene))
                else
                     throw(GrammarError(token.location, 
-                    "keyword '$(keyword)' do not define anything that can be compared"))
+                    "keyword '$(keyword)' do not define anything that can be inside a function"))
                end
 
 
           elseif typeof(token.value) == IdentifierToken
                variable_name = token.value.identifier
+
                if (variable_name ∈ keys(SYM_NUM))
                     result *=  string(SYM_NUM[token.value.identifier])
-               elseif isdefined(Raytracing, Symbol(variable_name))
-                    result *= "Raytracing."*variable_name
-                    expect_symbol(inputstream, "{")
-                    result *= "("*expect_number(inputstream, scene, true)
-                    expect_symbol(inputstream, "}")
-                    result *= ")"
-               elseif isdefined(Base, Symbol(variable_name))
-                    result *= "Base."*variable_name
-                    expect_symbol(inputstream, "{")
-                    result *= "("*expect_number(inputstream, scene, true)
-                    expect_symbol(inputstream, "}")
-                    result *= ")"
                elseif variable_name ∈ keys(scene.float_variables)
                     result *= repr(scene.float_variables[variable_name])
                elseif variable_name ∈ keys(scene.string_variables)
@@ -310,6 +284,35 @@ function parse_function(inputstream::InputStream, scene::Scene)
                     result *= repr(scene.brdf_variables[variable_name])
                elseif variable_name ∈ keys(scene.transformation_variables)
                     result *= repr(scene.transformation_variables[variable_name])
+
+               elseif isdefined(Raytracing, Symbol(variable_name))
+                    result *= variable_name
+                    var = eval(Symbol(variable_name))
+
+                    if var isa Function
+                         open_sym = expect_symbol(inputstream, ["{", "[", "("])
+                         result *= sym*parse_function(inputstream, scene)
+                         closed_sym = closed_bracket(open_sym)
+                         expect_symbol(inputstream, closed_sym)
+                         result *= closed_sym
+                    else
+                         nothing
+                    end
+
+               elseif isdefined(Base, Symbol(variable_name))
+                    result *= variable_name
+                    var = eval(Symbol(variable_name))
+
+                    if var isa Function
+                         open_sym = expect_symbol(inputstream, ["{", "[", "("])
+                         result *= sym*parse_function(inputstream, scene)
+                         closed_sym = closed_bracket(open_sym)
+                         expect_symbol(inputstream, closed_sym)
+                         result *= closed_sym
+                    else
+                         nothing
+                    end
+
                else
                     throw(GrammarError(token.location, 
                     "identifier '$(variable_name)' do not define anything that can be compared"))

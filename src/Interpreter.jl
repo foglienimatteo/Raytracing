@@ -8,6 +8,7 @@
 
 module Interpreter
 
+using StaticArrays: eachindex
 import Base: println, print, copy #, IteratorSize
 
 using Raytracing, FileIO, Test
@@ -26,7 +27,9 @@ export Scene, parse_scene
 import Raytracing.SYM_NUM
 WHITESPACE = [" ", "\t", "\n", "\r"]
 OPERATIONS = ["*", "/", "+", "-"]
-SYMBOLS = union(["(", ")", "<", ">", "[", "]", "{", "}", ",", "@"], OPERATIONS)
+OPEN_BRACKETS = ["{", "[", "(", "<"]
+CLOSED_BRACKETS = ["}", "]", ")", ">"]
+SYMBOLS = union(OPEN_BRACKETS, CLOSED_BRACKETS, [",", "@"], OPERATIONS)
 LETTERS = [
      'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 
      'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 
@@ -90,6 +93,30 @@ function isalnum(a::String)
      end
      !(a=="") || (return false)
      return true 
+end
+
+
+"""
+     closed_bracket(open::String) :: String
+
+Given in input a string of an open braket ($(OPEN_BRACKETS)) return
+the corresponding closed one ($(CLOSED_BRACKETS)).
+"""
+function closed_bracket(open::String)
+     (open ∈ OPEN_BRACKETS) || (throw(ArgumentError("you must insert an open braket!")))
+     
+     for i in eachindex(OPEN_BRACKETS)
+          (open == OPEN_BRACKETS[i]) || (return CLOSED_BRACKETS[i])
+     end
+
+     #=
+     (open == "{") || (return "}")
+     (open == "[") || (return "]")
+     (open == "(") || (return ")")
+     (open == "<") || (return ">")
+     =#
+
+     throw(ArgumentError("you must insert an open braket!"))
 end
 
 
