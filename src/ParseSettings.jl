@@ -24,11 +24,13 @@ A tuple `(pfm, png, a, γ)` containing:
 
 - `png::String = dict["outfile"]` : output LDR filename (required)
 
-- `a::Float64 = dict["alpha"]` : scale factor (default = 0.18)
+- `a::Float64 = string2positive(dict["alpha"])` : scale factor (default = 0.18); it's converted 
+  through `string2positive` to a positive floating point number.
 
-- `γ::Float64 = dict["gamma"]` : gamma factor (default = 1.0)
+- `γ::Float64 = string2positive(dict["gamma"])` : gamma factor (default = 1.0); it's converted 
+  through `string2positive` to a positive floating point number.
 
-See also:  [`tone_mapping`](@ref)
+See also:  [`tone_mapping`](@ref), [`string2positive`](@ref)
 """
 function parse_tonemapping_settings(dict::Dict{String, T}) where {T}
 
@@ -52,13 +54,9 @@ function parse_tonemapping_settings(dict::Dict{String, T}) where {T}
         png::String = dict["outfile"] : 
         throw(ArgumentError("need to specify the output LDR filename to be saved"))
 
-    haskey(dict, "alpha") ? 
-        a::Float64 = dict["alpha"] : 
-        a = 0.18
+    a::Float64 = haskey(dict, "alpha") ? string2positive(dict["alpha"]) : 0.18
 
-    haskey(dict, "gamma") ? 
-        γ::Float64 = dict["gamma"] : 
-        γ = 1.0
+    γ::Float64 = haskey(dict, "gamma") ? string2positive(dict["gamma"]) : 1.0
 
     return (pfm, png, a, γ)
 end
@@ -67,6 +65,39 @@ end
 ##########################################################################################92
 
 
+"""
+    parse_onoff_settings(dict::Dict{String, T}) where {T}
+        :: (World, RGB{Float32}, RGB{Float32})
+
+Parse a `Dict{String, T} where {T}` for the initialisation of a `OnOffRenderer`.
+
+## Input
+
+A `dict::Dict{String, T} where {T}`
+
+## Returns
+
+A tuple `(World(), background_color, color)` containing the following variables 
+(the corresponding keys are also showed):
+
+- `World():: World` : is the default constructor of the `World` class, which creates
+  an empty world; it will be populated in the function that will use the renderer.
+
+- `background_color::RGB{Float32} = string2color(dict["background_color"])` : set the 
+  color returned by a light ray which does not hit any object in the scene; the default
+  value is `BLACK`, i.e. `RGB{Float32}(0.0, 0.0, 0.0)`.
+  The input color value `dict["background_color"]` must be a `String` written in RGB
+  components as `"< R , G , B >"`, and it's parsed with the `string2color` function.
+
+- `color::RGB{Float32} = string2color(dict["color"])` : set the color returned by a 
+  light ray which does hit any object in the scene; the default value is `WHITE`, i.e. 
+  `RGB{Float32}(1.0, 1.0, 1.0)`.
+  The input color value `dict["color"]` must be a `String` written in RGB
+  components as `"< R , G , B >"`, and it's parsed with the `string2color` function.
+
+See also:  [`Renderer`](@ref), [`OnOffRenderer`](@ref), 
+[`World`](@ref), [`string2color`](@ref)
+"""
 function parse_onoff_settings(dict::Dict{String, T}) where {T}
 
     keys = [
@@ -89,13 +120,41 @@ function parse_onoff_settings(dict::Dict{String, T}) where {T}
 
     color::RGB{Float32} = haskey(dict, "color") ? 
         string2color(dict["color"]) : 
-        RGB{Float32}(0.0, 0.0, 0.0)
+        RGB{Float32}(1.0, 1.0, 1.0)
 
   
     return (World(), background_color, color)
 end
 
 
+
+"""
+    parse_flat_settings(dict::Dict{String, T}) where {T}
+        :: (World, RGB{Float32})
+
+Parse a `Dict{String, T} where {T}` for the initialisation of a `FlatRenderer`.
+
+## Input
+
+A `dict::Dict{String, T} where {T}`
+
+## Returns
+
+A tuple `(World(), background_color)` containing the following variables 
+(the corresponding keys are also showed):
+
+- `World():: World` : is the default constructor of the `World` class, which creates
+  an empty world; it will be populated in the function that will use the renderer.
+
+- `background_color::RGB{Float32} = string2color(dict["background_color"])` : set the 
+  color returned by a light ray which does not hit any object in the scene; the default
+  value is `BLACK`, i.e. `RGB{Float32}(0.0, 0.0, 0.0)`.
+  The input color value `dict["background_color"]` must be a `String` written in RGB
+  components as `"< R , G , B >"`, and it's parsed with the `string2color` function.
+
+See also:  [`Renderer`](@ref), [`FlatRenderer`](@ref), 
+[`World`](@ref), [`string2color`](@ref)
+"""
 function parse_flat_settings(dict::Dict{String, T}) where {T}
 
     keys = [
@@ -121,6 +180,57 @@ function parse_flat_settings(dict::Dict{String, T}) where {T}
 end
 
 
+"""
+    parse_pathtracer_settings(dict::Dict{String, T}) where {T}
+        :: (World(), RGB{Float32}, PCG, Int64, Int64, Int64)
+
+Parse a `Dict{String, T} where {T}` for the initialisation of a `PathTracer`.
+
+## Input
+
+A `dict::Dict{String, T} where {T}`
+
+## Returns
+
+A tuple `(World(), background_color, PCG(init_state, init_seq), num_of_rays, 
+max_depth, russian_roulette_limit)` containing the following variables 
+(the corresponding keys are also showed):
+
+- `World():: World` : is the default constructor of the `World` class, which creates
+  an empty world; it will be populated in the function that will use the renderer.
+
+- `background_color::RGB{Float32} = string2color(dict["background_color"])` : set the 
+  color returned by a light ray which does not hit any object in the scene; the default
+  value is `BLACK`, i.e. `RGB{Float32}(0.0, 0.0, 0.0)`.
+  The input color value `dict["background_color"]` must be a `String` written in RGB
+  components as `"< R , G , B >"`, and it's parsed with the `string2color` function.
+
+- `PCG(init_state, init_seq)::PCG` : a mutable struct of the Permuted Congruential 
+  Generator (PCG), which is a uniform pseudo-random number generator; you can pass as 
+  input two usigned integer that initialize the generator:
+  - `init_state::UInt64 = string2int64(dict["init_state"], true)` : set the initial state
+    of the PCG; the input value `dict["init_state"]` is parsed thanks to the `string2int64`
+    function.
+  - `init_seq::UInt64 = string2int64(dict["init_seq"], true)` : set the initial sequence
+    of the PCG; the input value `dict["init_seq"]` is parsed thanks to the `string2int64`
+    function.
+
+- `num_of_rays::Int64 = string2int64(dict["num_of_rays"])` : set the number of secondary 
+  rays that will be fired from each surface point hitted by a light ray; the input value 
+  `dict["num_of_rays"]` is parsed thanks to the `string2int64` function.
+
+- `max_depth::Int64 = string2int64(dict["max_depth"])` : set the maximum depth number that 
+  the secondary rays are allowed to have; if that value is exceeded, no more secondary rays
+  are generated in the hitten points, and the returned color is `BLACK`; the input value 
+  `dict["max_depth"]` is parsed thanks to the `string2int64` function.
+
+- `russian_roulette_limit::Int64 = string2int64(dict["russian_roulette_limit"])` : set the 
+  depth over which a secondary ray is created with the russian roulette algorithm; the input 
+  value `dict["russian_roulette_limit"]` is parsed thanks to the `string2int64` function. 
+
+See also:  [`Renderer`](@ref), [`PathTracer`](@ref), 
+[`World`](@ref), [`PCG`](@ref), [`string2color`](@ref), [`string2int64`](@ref)
+"""
 function parse_pathtracer_settings(dict::Dict{String, T}) where {T}
 
     keys = [
@@ -165,6 +275,41 @@ function parse_pathtracer_settings(dict::Dict{String, T}) where {T}
 end
 
 
+
+"""
+    parse_pointlight_settings(dict::Dict{String, T}) where {T}
+        :: (World, RGB{Float32}, RGB{Float32})
+
+Parse a `Dict{String, T} where {T}` for the initialisation of a `PointLightRenderer`.
+
+## Input
+
+A `dict::Dict{String, T} where {T}`
+
+## Returns
+
+A tuple `(World(), background_color, color)` containing the following variables 
+(the corresponding keys are also showed):
+
+- `World():: World` : is the default constructor of the `World` class, which creates
+  an empty world; it will be populated in the function that will use the renderer.
+
+- `background_color::RGB{Float32} = string2color(dict["background_color"])` : set the 
+  color returned by a light ray which does not hit any object in the scene;
+  the default value is `BLACK`, i.e. `RGB{Float32}(0.0, 0.0, 0.0)`.
+  The input color value `dict["background_color"]` must be a `String` written in RGB
+  components as `"< R , G , B >"`, and it's parsed with the `string2color` function.
+
+- `ambient_color::RGB{Float32} = string2color(dict["ambient_color"])` : set the minimum 
+  color returned by a light ray which hits an object on a point, indipendently that is 
+  or is not directy visible from any of the point-light sources in the scene; the default 
+  value is `BLACK`, i.e. `RGB{Float32}(0.0, 0.0, 0.0)`.
+  The input color value `dict["ambient_color"]` must be a `String` written in RGB
+  components as `"< R , G , B >"`, and it's parsed with the `string2color` function.
+
+See also:  [`Renderer`](@ref), [`PointLightRenderer`](@ref), 
+[`World`](@ref), [`string2color`](@ref)
+"""
 function parse_pointlight_settings(dict::Dict{String, T}) where {T}
 
     keys = [

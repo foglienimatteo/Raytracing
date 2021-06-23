@@ -5,13 +5,6 @@
 # Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
 #
 
-
-"""
-    check_is_positive(string::String="") :: Bool
-
-Checks if the input `string` is a number that can be parsed as 
-a positive Float64.
-"""
 function check_is_positive(string::String="")
 	var = filter(x -> !isspace(x) && x≠"\"", string)
      (var == "") && (return true)
@@ -23,14 +16,16 @@ end
 
 check_is_positive(number::Number) = check_is_positive(string(number))
 
-
 """
-    string2positive(string::String) :: Float64
+     check_is_positive(string::String="") :: Bool
+     check_is_positive(number::Number) = check_is_positive(string(number))
 
 Checks if the input `string` is a number that can be parsed as 
-a positive Float64 with [`check_is_positive`](@ref), and return it as
-a `Float64`.
+a positive Float64.
 """
+check_is_positive
+
+
 function string2positive(string::String, uint::Bool=false)
      if check_is_positive(string)==false
           throw(ArgumentError(
@@ -46,15 +41,21 @@ end
 
 string2positive(number::Number, uint::Bool=false) = string2positive(string(number), uint)
 
+"""
+     string2positive(string::String) :: Float64
+     string2positive(number::Number, uint::Bool=false) = 
+          string2positive(string(number), uint)
+
+Checks if the input `string` is a number that can be parsed as 
+a positive Float64 with [`check_is_positive`](@ref), and return it as
+a `Float64`.
+"""
+string2positive
+
+
 ##########################################################################################92
 
 
-"""
-    check_is_uint64(string::String="") :: Bool
-
-Checks if the input `string` is a number that can be parsed as 
-a positive Int64.
-"""
 function check_is_uint64(string::String="")
 	var = filter(x -> !isspace(x) && x≠"\"", string)
      (var == "") && (return true)
@@ -68,14 +69,16 @@ end
 
 check_is_uint64(number::Number) = check_is_uint64(string(number))
 
-
 """
-    string2int64(string::String, uint::Bool=false) :: Union{Int64, UInt64}
+     check_is_uint64(string::String="") :: Bool
+     check_is_uint64(number::Number) = check_is_uint64(string(number))
 
 Checks if the input `string` is a number that can be parsed as 
-a positive Int64 with [`check_is_uint64`](@ref), and return it as
-a `Int64` if `uint==false`or as a `UInt64` if `uint==true`.
+a positive Int64.
 """
+check_is_uint64
+
+
 function string2int64(string::String, uint::Bool=false)
      if check_is_uint64(string)==false
           throw(ArgumentError(
@@ -93,16 +96,22 @@ end
 
 string2int64(number::Number, uint::Bool=false) = string2int64(string(number), uint)
 
+"""
+     string2int64(string::String, uint::Bool=false) :: Union{Int64, UInt64}
+     string2int64(number::Number, uint::Bool=false) = 
+          string2int64(string(number), uint)
+
+
+Checks if the input `string` is a number that can be parsed as 
+a positive Int64 with [`check_is_uint64`](@ref), and return it as
+a `Int64` if `uint==false`or as a `UInt64` if `uint==true`.
+"""
+string2int64
+
 
 ##########################################################################################92
 
 
-"""
-    check_is_even_uint64(string::String="") :: Bool
-
-Checks if the input `string` is a number that can be parsed as 
-an even positive Int64.
-"""
 function check_is_even_uint64(string::String="")
 	var = filter(x -> !isspace(x) && x≠"\"", string)
      (var == "") && (return true)
@@ -117,14 +126,17 @@ end
 
 check_is_even_uint64(number::Number) = check_is_even_uint64(string(number))
 
-
 """
-    string2evenint64(string::String, uint::Bool=false) :: Union{Int64, UInt64}
+     check_is_even_uint64(string::String="") :: Bool
+     check_is_even_uint64(number::Number) = check_is_even_uint64(string(number))
 
 Checks if the input `string` is a number that can be parsed as 
-an even positive Int64 with [`check_is_even_uint64`](@ref), and return it as
-a `Int64` if `uint==false`or as a `UInt64` if `uint==true`.
+an even positive Int64.
 """
+check_is_even_uint64
+
+
+
 function string2evenint64(string::String, uint::Bool=false)
      if check_is_even_uint64(string)==false
           throw(ArgumentError(
@@ -140,19 +152,22 @@ function string2evenint64(string::String, uint::Bool=false)
           convert(UInt64,parse(Float64, var))
 end
 
-
 string2evenint64(number::Number, uint::Bool=false) = string2evenint64(string(number), uint)
+
+"""
+     string2evenint64(string::String, uint::Bool=false) :: Union{Int64, UInt64}
+     string2evenint64(number::Number, uint::Bool=false) = string2evenint64(string(number), uint)
+
+Checks if the input `string` is a number that can be parsed as 
+an even positive Int64 with [`check_is_even_uint64`](@ref), and return it as
+a `Int64` if `uint==false`or as a `UInt64` if `uint==true`.
+"""
+string2evenint64
 
 
 ##########################################################################################92
 
 
-"""
-    check_is_square(string::String="") :: Bool
-
-Checks if the input `string` is a number that can be parsed as 
-a squared positive Int64.
-"""
 function check_is_square(string::String="")
 	var = filter(x -> !isspace(x) && x≠"\"", string)
      (var == "") && (return true)
@@ -166,14 +181,16 @@ end
 
 check_is_square(number::Number) = check_is_square(string(number))
 
-
 """
-    string2rootint64(string::String) :: Int64
+     check_is_square(string::String="") :: Bool
+     check_is_square(number::Number) = check_is_square(string(number))
 
 Checks if the input `string` is a number that can be parsed as 
-a squared positive Int64 with [`check_is_square`](@ref), and return
-the square root as a `Int64`.
+a squared positive Int64.
 """
+check_is_square
+
+
 function string2rootint64(string::String)
      if check_is_square(string)==false
           throw(ArgumentError(
@@ -186,16 +203,25 @@ function string2rootint64(string::String)
      return convert(Int64, √parse(Float64,var))
 end
 
-
 string2rootint64(number::Number) = string2rootint64(string(number))
+
+
+"""
+     string2rootint64(string::String) :: Int64
+     string2rootint64(number::Number) = string2rootint64(string(number))
+
+Checks if the input `string` is a number that can be parsed as 
+a squared positive Int64 with [`check_is_square`](@ref), and return
+the square root as a `Int64`.
+"""
+string2rootint64
 
 
 ##########################################################################################92
 
 
-
 """
-    check_is_color(string::String="") :: Bool
+     check_is_color(string::String="") :: Bool
 
 Checks if the input `string` is a color written in RGB components
 as "<R, G, B>".
@@ -221,7 +247,7 @@ end
 
 
 """
-    string2color(string::String="") :: RGB{Float32}
+     string2color(string::String="") :: RGB{Float32}
 
 Checks if the input `string` is a color written in RGB components
 as "<R, G, B>" with [`check_is_color`](@ref), and return it.
@@ -252,7 +278,7 @@ end
 
 
 """
-    check_is_vector(string::String="") :: Bool
+     check_is_vector(string::String="") :: Bool
 
 Checks if the input `string` is a vector written in X,Y,Z components
 as "[X, Y, Z]".
@@ -277,7 +303,7 @@ function check_is_vector(string::String="")
 end
 
 """
-    string2vector(string::String="") :: Union{Vec, Nothing}
+     string2vector(string::String="") :: Union{Vec, Nothing}
 
 Checks if the input `string` is  a vector written in X,Y,Z components
 as "[X, Y, Z]" with [`check_is_vector`](@ref), and return `Vec(X,Y,Z)`.
@@ -310,7 +336,7 @@ end
 
 
 """
-    check_is_declare_float(string::String="") 
+     check_is_declare_float(string::String="") 
 
 Checks if the input `string` is a declaration of one (or more) floats
 in the form "NAME:VALUE" with [`check_is_declare_float`](@ref).
@@ -336,7 +362,7 @@ function check_is_declare_float(string::String="")
 end
 
 """
-    declare_float2dict(string::String) :: Union{Dict{String, Float64}, Nothing}
+     declare_float2dict(string::String) :: Union{Dict{String, Float64}, Nothing}
 
 Checks if the input `string` is a declaration of one (or more) floats
 in the form "NAME:VALUE" with [`check_is_declare_float`](@ref).
