@@ -294,6 +294,9 @@ end
 		bool_savepfm::Bool = true,
           )
 
+	demo(x::(Pair{T1,T2} where {T1,T2})...) = 
+		demo( parse_demo_settings(  Dict( pair for pair in [x...]) )... )
+
 Creates a demo image with the specified options. 
 
 There are two possible demo image "world" to be rendered, specified through the
@@ -313,27 +316,40 @@ the rendering software, specifically the orientation upside-down and left-right.
 
 ## Arguments
 
+The following input arguments refers to the first method presented in the signature;
+it's obviously very uncomfortable to use that method, so it's recommended to take 
+advantage of the second one, which allows to write the input values in a dictionary
+like syntax with arbitrary order and comfort. See the documentation of  
+[`parse_demo_settings`](@ref) to learn how to use the keys:
+
+- `renderer::Renderer = FlatRenderer()` : renderer to be used in the rendering, with all
+  the settings already setted (exception made for the `world`, that will be overridden
+  and created here)
+
 - `camera_type::String = "per"` : set the perspective projection view:
-		- `camera_type=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
-		- `camera_type=="ort"`  -> set [`OrthogonalCamera`](@ref)
+  - `camera_type=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
+  - `camera_type=="ort"`  -> set [`OrthogonalCamera`](@ref)
 
-- `camera_position::Point = Point(-1.,0.,0.)` : set the point of observation 
-  in (`X`,`Y,`Z`) coordinates
-
-- `renderer::String = "flat"` : renderer to be used in the rendered:
-  - `renderer=="onoff"` -> [`OnOffRenderer`](@ref) renderer 
-  - `renderer=="flat"` -> [`FlatRenderer`](@ref) renderer (default value)
-  - `renderer=="pathtracing"` -> [`PathTracer`](@ref) renderer 
-  - `renderer=="pointlight"` -> [`PointLightRenderer`](@ref) renderer
+- `camera_position::Union{Point, Vec} = Point(-1.,0.,0.)` : set the point of observation 
+  in (`X`,`Y,`Z`) coordinates, as a `Point`or a `Vec` input object.
 
 - `α::Float64 = 0.` : angle of rotation _*IN RADIANTS*_, relative to the vertical
-  (i.e. z) axis, of the view direction
+  (i.e. z) axis with a right-handed rule convention (clockwise rotation for entering (x,y,z)-axis 
+  corresponds to a positive input rotation angle)
 
-- `width::Int64 = 640` and `height::Int64 = 480` : pixel dimensions of the demo image
+- `width::Int64 = 640` and `height::Int64 = 480` : pixel dimensions of the demo image;
+  they must be both even positive integers.
 
 - `pfm_output::String = "demo.pfm"` : name of the output pfm file
 
 - `png_output::String = "demo.png"` : name of the output LDR file
+
+- `samples_per_pixel::Int64 = 0` : number of rays per pixel to be used (antialiasing);
+  it must be a perfect square positive integer (0, 1, 4, 9, ...) and if is set to
+  0 (default value) is choosen, no anti-aliasing occurs, and only one pixel-centered 
+  ray is fired for each pixel.
+
+- `world_type::String = "A"` : specifies the type of world to be rendered ("A" or "B")
 
 - `bool_print::Bool = true` : specifies if the WIP messages of the demo
   function should be printed or not (useful option for [`demo_animation`](@ref))
@@ -341,16 +357,9 @@ the rendering software, specifically the orientation upside-down and left-right.
 - `bool_savepfm::Bool = true` : bool that specifies if the pfm file should be saved
   or not (useful option for [`demo_animation`](@ref))
 
-- `world_type::String = "A"` : specifies the type of world to be rendered ("A", "B" or "C")
-
-- `init_state::Int64 = 45` : initial state of the PCG random number generator
-
-- `init_seq::Int64 = 54` : initial sequence of the PCG random number generator
-
-- `samples_per_pixel::Int64 = 0` : number of rays per pixel to be used (antialiasing)
-
-See also: [`Point`](@ref) ,[`OnOffRenderer`](@ref), [`FlatRenderer`](@ref), 
-[`PathTracer`](@ref), [`demo_animation`](@ref)
+See also: [`Point`](@ref), [`Vec`](@ref), [`Renderer`](@ref) [`OnOffRenderer`](@ref), 
+[`FlatRenderer`](@ref), [`PathTracer`](@ref), [`PointLightRenderer`](@ref),
+[`demo_animation`](@ref), [`parse_demo_settings`](@ref)
 """ 
 demo
 
@@ -417,6 +426,10 @@ end
 			samples_per_pixel::Int64 = 0,
 			world_type::String = "A", 
 		)
+
+	demo_animation(x::(Pair{T1,T2} where {T1,T2})...) = 
+		demo_animation( parse_demoanimation_settings(  Dict( pair for pair in [x...]) )... )
+
 	
 Creates an animation of the demo image with the specified options. It's
 necessary to have istalled the ffmpeg software to run this function.
@@ -434,26 +447,40 @@ This function works following this steps:
 
 ## Arguments
 
+The following input arguments refers to the first method presented in the signature;
+it's obviously very uncomfortable to use that method, so it's recommended to take 
+advantage of the second one, which allows to write the input values in a dictionary
+like syntax with arbitrary order and comfort. See the documentation of  
+[`parse_demoanimation_settings`](@ref) to learn how to use the keys:
+
+- `renderer::Renderer = FlatRenderer()` : renderer to be used in the rendering, with all
+  the settings already setted (exception made for the `world`, that will be overridden
+  and created here)
+
 - `camera_type::String = "per"` : set the perspective projection view:
-		- `camera_type=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
-		- `camera_type=="ort"`  -> set [`OrthogonalCamera`](@ref)
-		
-- `renderer::String = "flat"` : renderer to be used in the rendered:
-  - `renderer=="onoff"` -> [`OnOffRenderer`](@ref) renderer 
-  - `renderer=="flat"` -> [`FlatRenderer`](@ref) renderer (default value)
-  - `renderer=="pathtracing"` -> [`PathTracer`](@ref) renderer
-  - `renderer=="pointlight"` -> [`PointLightRenderer`](@ref) renderer
+  - `camera_type=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
+  - `camera_type=="ort"`  -> set [`OrthogonalCamera`](@ref)
 
-- `width::Int64 = 640` and `height::Int64 = 480` : pixel dimensions of the demo image
+- `camera_position::Union{Point, Vec} = Point(-1.,0.,0.)` : set the point of observation 
+  in (`X`,`Y,`Z`) coordinates, as a `Point`or a `Vec` input object.
 
-- `world_type::String = "A"` : specifies the type of world to be rendered ("A", "B" or "C")
+- `width::Int64 = 640` and `height::Int64 = 480` : pixel dimensions of the demo image;
+  they must be both even positive integers.
 
-- `anim_output::String = "demo-animation.mp4"` : name of the output animation file
+- `pfm_output::String = "demo.pfm"` : name of the output pfm file
 
-- `samples_per_pixel::Int64 = 0` : number of rays per pixel to be used (antialiasing)
+- `png_output::String = "demo.png"` : name of the output LDR file
 
-See also: [`OnOffRenderer`](@ref), [`FlatRenderer`](@ref), 
-[`PathTracer`](@ref), [`demo`](@ref)
+- `samples_per_pixel::Int64 = 0` : number of rays per pixel to be used (antialiasing);
+  it must be a perfect square positive integer (0, 1, 4, 9, ...) and if is set to
+  0 (default value) is choosen, no anti-aliasing occurs, and only one pixel-centered 
+  ray is fired for each pixel.
+
+- `world_type::String = "A"` : specifies the type of world to be rendered ("A" or "B")
+
+See also: [`Point`](@ref), [`Vec`](@ref), [`Renderer`](@ref) [`OnOffRenderer`](@ref), 
+[`FlatRenderer`](@ref), [`PathTracer`](@ref), [`PointLightRenderer`](@ref),
+[`demo`](@ref), [`parse_demoanimation_settings`](@ref)
 """
 demo_animation
 

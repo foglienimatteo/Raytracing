@@ -249,7 +249,7 @@ following variables (the corresponding keys are also showed):
   - else, it must be a `String` written in the form "[X, Y, Z]" , and it's parsed through 
     string2vector` to a `Vec` object
 
-- `α::String = dict["alpha"]` : choosen angle of rotation respect to vertical (i.e. z) 
+- `α::String = dict["alpha"]` : choosen angle of rotation _*IN RADIANTS*_ respect to vertical (i.e. z) 
   axis with a right-handed rule convention (clockwise rotation for entering (x,y,z)-axis 
   corresponds to a positive input rotation angle)
 
@@ -577,7 +577,7 @@ following variables (the corresponding keys are also showed):
   - else, it must be a `String` written in the form "[X, Y, Z]" , and it's parsed through 
     string2vector` to a `Vec` object
 
-- `α::String = dict["alpha"]` : choosen angle of rotation respect to vertical (i.e. z) 
+- `α::String = dict["alpha"]` : choosen angle of rotation _*IN RADIANTS*_ respect to vertical (i.e. z) 
   axis with a right-handed rule convention (clockwise rotation for entering (x,y,z)-axis 
   corresponds to a positive input rotation angle)
 
