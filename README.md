@@ -40,7 +40,7 @@ or download the source code from the github repository https://github.com/cosmof
 
 ## Demo and Demo Animation
 
-To star of and checks the correct behavior of the software run one of the following command inside the main directory
+To start off and check the correct behavior of this software run one of the following command inside the main directory
 ```bash
 ./Raytracer.jl demo_animation --camera_type=per --width=640 --height=480 flat
 ```
@@ -57,14 +57,14 @@ Demo Animation A  with FlatRenderer       | Demo Image B with PathTracing
 :----------------------------------------:|:-------------------------:
 ![](demo/demo_anim_Flat_640x480x360.gif)  |  ![](demo/demo_B_PathTracing_640x480.png)
 
-It may takes few minutes to renderer the animation; you might also gives smaller (integer and even) values to `--width` and `--height` in order to obtain the same animation in a smaller amount of time (the price to pay is a worse definition of the animation itself).
+It may takes few minutes to render the animation; you might also give smaller (integer and even) values to `--width` and `--height` in order to obtain the same animation in a smaller amount of time (the price to pay is a worse definition of the animation itself).
 
 
 
 ## Usage from the Command Line Interface
 
 This software is able to read a file that describes a scene (i.e a set of object, pigments, materials, etc. that we want to renderer).
-In order to understand how to write such a file, take a look at the [examples](esamples) directory, particularly to the [tutorial_basic_sintax.txt](examples/tutorial_basic_sintax.txt) and the [demo_world_B.txt](examples/demo_world_B.txt) files.
+To understand how to write such a file, take a look at the [examples](esamples) directory, particularly to the [tutorial_basic_sintax.txt](examples/tutorial_basic_sintax.txt) and the [demo_world_B.txt](examples/demo_world_B.txt) files.
 
 The basic struct of a command in the CLI able to render such a scenefile is the following:
 
@@ -72,12 +72,12 @@ The basic struct of a command in the CLI able to render such a scenefile is the 
 ./Raytracer.jl render [OPTIONS_FOR_THE_IMAGE] NAME_OF_THE_SCENEFILE {onoff|flat|pathtracer|pointlight}[OPTIONS_FOR_THE_RENDERER]
 ```
 
-There are four possible renderer algorithms, each of them connects with different rules the color of a pixel and the light ray that starts from that pixel and hit (or not) an object of the rendered scene:
+There are four possible rendering algorithms; each of them connects with different rules the color of a pixel and the light ray that starts from that pixel and hits (or not) an object of the rendered scene:
 
-- `onoff` : each pixel is set to the `background_color` if no shape is hitten by its light ray, otherwise is set to `color`; this renderer exists only for debugging purposes
+- `onoff` : each pixel is set to the `background_color` if no shape is hitten by its light ray, otherwise is set to `color`; this renderer exists only for debugging purposes.
  
-- `flat` : each pixel is set to the `background_color` if no shape is hitten by its light ray, otherwise is set to the color of the hitted shape point; this renderer is very efficient, but it does not solve the rendering equation. 
-  Consequently, no shadows or brightness are rendered.
+- `flat` : each pixel is set to the `background_color` if no shape is hitten by its light ray, otherwise is set to the color of the hitted shape point.
+  This renderer is very efficient, but it does not solve the rendering equation, and consequently no shadows or brightness are rendered.
 
 - `pathtracer` : this is the TRUE renderer. It solves the rendering equation in the "standard" way, and for this reason its very burdensome to be used, specifically for the rendering.
   Nevertheless, the rendered images are incomparably more realistic that the ones made with the other three renderers; USE THIS RENDERER WITH FORESIGHT!
@@ -88,17 +88,17 @@ There are four possible renderer algorithms, each of them connects with differen
 Written the scenefile, choosen the renderer and executed the rendering, the resulting files created are three:
 - the PFM image (`scene.pfm` is the default name, if none is specified from the command line)
 - the LDR image (`scene.png` is the default name, if none is specified from the command line)
--  the JSON file (`scene.json` is the default name, if none is specified from the command line), that saves some datas about input commands, rendering time etc.
+-  the JSON file (which has the same name of the LDR image and `.json` estention, so `scene.json` is the default name, if none LDR image name is specified from the command line), that saves some datas about input commands, rendering time etc.
   
 Probably, the LDR image will not be "correctly" converted with the standard values used in the `render` function to tone-map the PFM file; it's consequently appropriate
 to manually apply the tone mapping algorithm to the PFM image!
-The command it's simple:
+The tonemapping command is simple:
 ```bash
 ./Raytracer.jl tonemapping [-a ALPHA] [-g GAMMA] FILE_PFM_TO_BE_TONEMAPPED NAME_OF_THE_RESULTING_LDR
 ```
 where `ALPHA` is the scaling factor for the normalisation process (default `a=0.18`)
 and `GAMMA` is YOUR monitor gamma value (default `g=1.0`).
-This algorithm it's by far more efficient and computationally cheaper than the rendering, so choose your `a` and `g` values without any fear to try again!
+This algorithm is by far more efficient and computationally cheaper than the rendering, so choose your `a` and `g` values without any fear to try again!
 
 
 Here we insert an example of usage, that renders the [earth_and_sun.txt](examples/earth_and_sun.txt) file
@@ -110,8 +110,6 @@ and tone-map the resulting PFM image
 ./Raytracer.jl tonemapping scene.pfm scene.png -a=0.18 -g=1.0
 ```
 
-(it's possible you have to adjust the `-g` value to your computer monitor gamma value)
-
 Earth with FlatRenderer            | 
 :---------------------------------:|
 ![](examples/earth_and_sun.png) 
@@ -121,14 +119,14 @@ Refer to the latest [stable documentation](https://cosmofico97.github.io/Raytrac
 
 ## Usage from the REPL
 
-If you prefer using Julia REPL, first of alll you have to include the software with the known command:
+If you prefer to use the Julia REPL, first of all you need to include the software with the known command in the REPL:
 
 ```julia
 include("Raytracer.jl")
 ```
 
 You can obviously visualize the options for each function thanks to the help option (by typing `?`, than write the function name) and set the parameters in a dictionary-like sintax.
-The only main difference is that in order to specify the renderer algorithm, the key is the not-so-intuitive string `%COMMAND%` (due to the [`ArgParge.jl`](https://github.com/carlobaldassi/ArgParse.jl) package used for the command line parsing operation).
+The only main difference is that in order to specify the renderer algorithm, the key is the not-so-intuitive string `%COMMAND%` (due to the [`ArgParse.jl`](https://github.com/carlobaldassi/ArgParse.jl) package used for the command line parsing operation).
 
 For example, in order to render the demo image B previously showed:
 ```julia
@@ -139,7 +137,7 @@ Instead, for rendering the `examples/earth_and_sun.txt`
 ```julia
 render("scenefile"=>"examples/earth_and_sun.txt", "width"=>2880, "height"=>1880, "%COMMAND%"=>"flat")
 ```
-and for tonemapping it
+and for tone-map it
 ```julia
 tone_mapping("infile"=>"scene.pfm", "outfile"=>"scene.png", "alpha"=>0.18, "gamma"=>0.6)
 ```
