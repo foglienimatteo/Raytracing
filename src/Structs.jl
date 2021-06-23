@@ -620,7 +620,7 @@ struct Sphere <: Shape
     Sphere(M::Material, T::Transformation, b::Bool=false) = new(T,M,b,AABB(Sphere, T))
     Sphere(T::Transformation, b::Bool=false) = new(T, Material(), b, AABB(Sphere, T))
     Sphere(M::Material, b::Bool=false) = new(Transformation(), M, b, AABB(Sphere, Transformation()))
-    Sphere(b::Bool=false) = new(Transformation(), Material(), b, AABB(Sphere, Transformation())
+    Sphere(b::Bool=false) = new(Transformation(), Material(), b, AABB(Sphere, Transformation()) )
 end
 
 function AABB(::Type{Sphere}, T::Transformation)
