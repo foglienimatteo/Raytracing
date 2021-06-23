@@ -15,7 +15,7 @@
 [![Dev](https://img.shields.io/badge/docs-dev-blue?style=flat)](https://cosmofico97.github.io/Raytracing/dev)  
 
 This software is a simple raytracing program written in the [Julia Programming Language](https://julialang.org).
-It's based on the lectures of the [*Numerical techniques for photorealistic image generation*]( https://www.unimi.it/en/education/degree-programme-courses/2021/numerical-tecniques-photorealistic-image-generation) curse (AY2020-2021), held by Associate Professor [Maurizio Tomasi](http://cosmo.fisica.unimi.it/persone/maurizio-tomasi) at University of Milan [Department of
+It's based on the lectures of the [*Numerical techniques for photorealistic image generation*]( https://www.unimi.it/en/education/degree-programme-courses/2021/numerical-tecniques-photorealistic-image-generation) course (AY2020-2021), held by Associate Professor [Maurizio Tomasi](http://cosmo.fisica.unimi.it/persone/maurizio-tomasi) at University of Milan [Department of
 Physics "Aldo Pontremoli"](http://eng.fisica.unimi.it/ecm/home).
 
 ## Table of Contents
@@ -63,32 +63,32 @@ It may takes few minutes to render the animation; you might also give smaller (i
 
 ## Usage from the Command Line Interface
 
-This software is able to read a file that describes a scene (i.e a set of object, pigments, materials, etc. that we want to renderer).
-To understand how to write such a file, take a look at the [examples](esamples) directory, particularly to the [tutorial_basic_sintax.txt](examples/tutorial_basic_sintax.txt) and the [demo_world_B.txt](examples/demo_world_B.txt) files.
+This software is able to read a file that describes a scene (i.e a set of objects, pigments, materials, etc. that we want  render).
+To understand how to write such a file, take a look at the [tutorial_basic_sintax.txt](examples/tutorial_basic_sintax.txt) and the [demo_world_B.txt](examples/demo_world_B.txt) files in the [examples](esamples) directory.
 
-The basic struct of a command in the CLI able to render such a scenefile is the following:
+The basic structure of a command in the CLI is the following:
 
 ```bash
 ./Raytracer.jl render [OPTIONS_FOR_THE_IMAGE] NAME_OF_THE_SCENEFILE {onoff|flat|pathtracer|pointlight}[OPTIONS_FOR_THE_RENDERER]
 ```
 
-There are four possible rendering algorithms; each of them connects with different rules the color of a pixel and the light ray that starts from that pixel and hits (or not) an object of the rendered scene:
+There are four possible rendering algorithms; each of them is linked to different rules for the color of a pixel and the light ray that starts from that pixel and hits (or not) an object of the rendered scene:
 
-- `onoff` : each pixel is set to the `background_color` if no shape is hitten by its light ray, otherwise is set to `color`; this renderer exists only for debugging purposes.
+- `onoff` : each pixel is set to the `background_color` if no shape is hit by its light ray, otherwise is set to `color`; this renderer exists only for debugging purposes.
  
 - `flat` : each pixel is set to the `background_color` if no shape is hitten by its light ray, otherwise is set to the color of the hitted shape point.
   This renderer is very efficient, but it does not solve the rendering equation, and consequently no shadows or brightness are rendered.
 
-- `pathtracer` : this is the TRUE renderer. It solves the rendering equation in the "standard" way, and for this reason its very burdensome to be used, specifically for the rendering.
-  Nevertheless, the rendered images are incomparably more realistic that the ones made with the other three renderers; USE THIS RENDERER WITH FORESIGHT!
+- `pathtracer` : this is the TRUE renderer. It solves the rendering equation in the "standard" way, and for this reason it's very demanding.
+  Nevertheless, the rendered images are incomparably more realistic than the ones made with the other three renderers; USE THIS RENDERER WITH FORESIGHT!
 
 - `pointlight` : it's the "cheap solution" for a realistic image. This renderer creates an image setting each pixel colored or not depending on the "line of sight" between that point and the point-light sources in the scene.
-  It's very fast, and the images rendered are perfect for an astrophysical context or for very bright days of summer; it's, nevertheless, a simple solution in order to avoid the longer times needed for the pathtracer algorithm.
+  It's very efficient, and the images rendered are perfect for an astrophysical context or for very bright days of summer. Nevertheless it's a simple solution in order to avoid the longer times needed for the pathtracer algorithm.
 
-Written the scenefile, choosen the renderer and executed the rendering, the resulting files created are three:
+The resulting files created at the end of the rendering are three:
 - the PFM image (`scene.pfm` is the default name, if none is specified from the command line)
 - the LDR image (`scene.png` is the default name, if none is specified from the command line)
--  the JSON file (which has the same name of the LDR image and `.json` estention, so `scene.json` is the default name, if none LDR image name is specified from the command line), that saves some datas about input commands, rendering time etc.
+-  the JSON file, that saves some datas about input commands, rendering time etc. It has the same name of the LDR image and `.json` extention, so `scene.json` is the default name.
   
 Probably, the LDR image will not be "correctly" converted with the standard values used in the `render` function to tone-map the PFM file; it's consequently appropriate
 to manually apply the tone mapping algorithm to the PFM image!
@@ -98,14 +98,14 @@ The tonemapping command is simple:
 ```
 where `ALPHA` is the scaling factor for the normalisation process (default `a=0.18`)
 and `GAMMA` is YOUR monitor gamma value (default `g=1.0`).
-This algorithm is by far more efficient and computationally cheaper than the rendering, so choose your `a` and `g` values without any fear to try again!
+Choose your `a` and `g` values without any fear to try again! This algorithm is indeed by far more efficient and computationally cheaper than the rendering.
 
 
-Here we insert an example of usage, that renders the [earth_and_sun.txt](examples/earth_and_sun.txt) file
+Here we show an example of usage, which renders the [earth_and_sun.txt](examples/earth_and_sun.txt) file
 ```bash
 ./Raytracer.jl render examples/earth_and_sun.txt --width=2880 --height=1800 flat
 ```
-and tone-map the resulting PFM image
+and of the tone-map the resulting PFM
 ```bash
 ./Raytracer.jl tonemapping scene.pfm scene.png -a=0.18 -g=1.0
 ```
