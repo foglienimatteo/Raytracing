@@ -4,8 +4,7 @@
 [![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-![julia-version](https://img.shields.io/badge/julia_version-v1.6-9558B2?style=flat&logo=julia)
-![status](https://img.shields.io/badge/project_status-🚧_work--in--progress-ba8a11?style=flat) 
+![julia-version](https://img.shields.io/badge/julia_version-v1.6-9558B2?style=flat&logo=julia) 
 ![package-version](https://img.shields.io/github/v/release/cosmofico97/Raytracing?include_prereleases)
 ![CI-build](https://img.shields.io/github/workflow/status/cosmofico97/Raytracing/Unit%20tests)
 ![size](https://img.shields.io/github/repo-size/cosmofico97/Raytracing) 
