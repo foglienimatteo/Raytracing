@@ -21,8 +21,11 @@ See also: [`World`](@ref), [`demo`](@ref), [`demo_animation`](@ref)
 """
 function first_world()
 	material1 = Material(DiffuseBRDF(UniformPigment(RGB(0.7, 0.3, 0.2))))
-    	material2 = Material(DiffuseBRDF(
-		    		CheckeredPigment(RGB(0.2, 0.7, 0.3), RGB(0.3, 0.2, 0.7), 4) )	)
+
+   	material2 = Material(DiffuseBRDF(CheckeredPigment(RGB(0.2, 0.7, 0.3), 
+	    											  RGB(0.3, 0.2, 0.7), 
+									                  4) )	)
+
 
 	sphere_texture = HDRimage(2, 2)
 	set_pixel(sphere_texture, 0, 0, RGB(0.1, 0.2, 0.3))
@@ -63,7 +66,7 @@ function first_world()
 
 	add_light!(
 		world, 
-		PointLight(Point(5.0, 0.0, 10.0), 
+		PointLight(Point(-10.0, 10.0, 10.0), 
 		RGB{Float32}(1.0, 1.0, 1.0))
 	)
 
@@ -175,77 +178,6 @@ function second_world()
 	return world
 end
 
-"""
-	third_world() :: World
-
-Render the third world (identified with the string "C").
-
-See also: [`World`](@ref), [`demo`](@ref), [`demo_animation`](@ref)
-"""
-function third_world()
-	world = World()
-
-	earth_pos = Point(0.5, -1.0, 0.0)
-	earth_radius = 1.0
-	earth_lum = 0.0
-	earth_brdf = DiffuseBRDF(ImagePigment(load_image("$(pwd())/images/earth.jpg")))
-	earth_radiance = UniformPigment(RGB{Float32}(earth_lum, earth_lum, earth_lum))
-	earth_material = Material(earth_brdf, earth_radiance)
-
-	sun_pos = Point(4.0, 3.0, 0.0)
-	sun_radius = 1.0
-	sun_lum = 0.0
-	sun_brdf = DiffuseBRDF(ImagePigment(load_image("$(pwd())/images/sun.jpg")))
-	sun_radiance = UniformPigment(RGB{Float32}(sun_lum, sun_lum, sun_lum))
-	sun_pointlight_lum = RGB{Float32}(sun_lum, sun_lum, sun_lum)
-	sun_material = Material(sun_brdf, sun_radiance)
-	
-	milky_way_pos = Point(0.0, 0.0, 0.0)
-	milky_way_radius = 50.0
-	milky_way_lum = 0.00
-	milky_way_brdf = DiffuseBRDF(ImagePigment(load_image("$(pwd())/images/milky_way.jpg")))
-	milky_way_radiance = UniformPigment(RGB{Float32}(milky_way_lum, milky_way_lum, milky_way_lum))
-	milky_way_material = Material(milky_way_brdf, milky_way_radiance)
-
-	
-	add_shape!(
-		world,
-		Sphere(
-			translation(Vec(earth_pos))
-			* scaling(Vec(earth_radius, earth_radius, earth_radius)),
-			earth_material,
-		)
-	)
-
-	add_shape!(
-		world,
-		Sphere(
-			translation(Vec(sun_pos))
-			* scaling(Vec(sun_radius, sun_radius, sun_radius)),
-			sun_material,
-		)
-	)
-
-	add_shape!(
-		world,
-		Sphere(
-			translation(Vec(milky_way_pos))
-			* scaling(Vec(milky_way_radius, milky_way_radius, milky_way_radius)),
-			milky_way_material,
-		)
-	)
-
-	add_light!(
-		world, 
-		PointLight(
-			sun_pos, 
-			sun_pointlight_lum
-		)
-	)
-
-	return world
-end
-
 
 """
 	select_world(type_world::String) ::Function
@@ -255,53 +187,47 @@ Select which demo world is used
 function select_world(type_world::String)
 	(type_world=="A") && (return first_world())
 	(type_world=="B") && (return second_world())
-	(type_world=="C") && (return third_world())
 
 	throw(ArgumentError("The input type of world $type does not exists"))
 end
 
 ##########################################################################################92
 
-#=
-demo() = demo(false, "onoff", 0., 640, 480, "demo.pfm", "demo.png")
-demo(ort::Bool) = demo(ort, "onoff", 0., 640, 480, "demo.pfm", "demo.png")
-demo(al::String) = demo(false, al, 0., 640, 480, "demo.pfm", "demo.png")
-demo(ort::Bool, al::String) = demo(ort, al, 0., 640, 480, "demo.pfm", "demo.png")
-demo(ort::Bool, α::Float64) = demo(ort, "onoff", α, 640, 480, "demo.pfm", "demo.png")
-demo(w::Int64, h::Int64) = demo(false, "onoff", 0., w, h, "demo.pfm", "demo.png")
-=#
+function print_progress(row::Int64, col::Int64, height::Int64, width::Int64)
+	print("Rendered row $(height - row)/$(height) \t= ")
+	@printf "%.2f" 100*((height - row)/height)
+	print("%\n")
+end
 
 function demo(x::(Pair{T1,T2} where {T1,T2})...)
 	demo( parse_demo_settings(  Dict( pair for pair in [x...]) )... )
 end
 
 function demo(
-     	camera_type::String = "per",
-		camera_position::Point = Point(-1.,0.,0.), 
-		algorithm::String = "flat",
+		renderer::Renderer = FlatRenderer(),
+		camera_type::String = "per",
+		camera_position::Union{Point, Vec} = Point(-1.,0.,0.), 
      	α::Float64 = 0., 
      	width::Int64 = 640, 
      	height::Int64 = 480, 
      	pfm_output::String = "demo.pfm", 
         	png_output::String = "demo.png",
+		samples_per_pixel::Int64 = 0, 
+		world_type::String = "A",
 		bool_print::Bool = true,
 		bool_savepfm::Bool = true,
-		world_type::String = "A",
-		init_state::Int64 = 45,
-		init_seq::Int64 = 54,
-		samples_per_pixel::Int64 = 0
+		ONLY_FOR_TESTS::Bool = false,
     )
 
-	samples_per_side = Int64(floor(√samples_per_pixel))
-    (samples_per_side^2 ≈ samples_per_pixel) ||
-		throw(ArgumentError(
-				"the number of samples per pixel "*
-				"$(samples_per_pixel) must be a perfect square")
-	)
+    (ONLY_FOR_TESTS==false) || (return nothing)  
 
-	world = select_world(world_type)
+	renderer.world = select_world(world_type)
 
-	observer_vec = camera_position - Point(0., 0., 0.)
+	samples_per_side = string2rootint64(string(samples_per_pixel))
+
+	observer_vec = typeof(camera_position) == Point ?
+		camera_position - Point(0., 0., 0.) :
+		camera_position
 
 	camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec)
 	aspect_ratio = width / height
@@ -315,41 +241,25 @@ function demo(
 	else
 		throw(ArgumentError("Unknown camera: $camera_type"))
 	end
-	
+
+
+	if typeof(renderer) == OnOffRenderer
+		(bool_print==true) && (println("Using on/off renderer"))
+	elseif typeof(renderer) == FlatRenderer
+		(bool_print==true) && (println("Using flat renderer"))
+	elseif typeof(renderer) == PathTracer
+		(bool_print==true) && (println("Using path tracing renderer"))
+	elseif typeof(renderer) == PointLightRenderer
+          (bool_print==true) && (println("Using point-light renderer"))
+	else
+		throw(ArgumentError("Unknown renderer: $(typeof(renderer))"))
+	end
+
 	# Run the ray-tracer
 	image = HDRimage(width, height)
 	tracer = ImageTracer(image, camera, samples_per_side)
 
-	if algorithm == "onoff"
-		(bool_print==true) && (println("Using on/off renderer"))
-		renderer = OnOffRenderer(world, BLACK)
-	elseif algorithm == "flat"
-		(bool_print==true) && (println("Using flat renderer"))
-		renderer = FlatRenderer(world, BLACK)
-	elseif algorithm == "pathtracing"
-		(bool_print==true) && (println("Using path tracing renderer"))
-		renderer = PathTracer(
-					world, 
-					BLACK, 
-					PCG(UInt64(init_state), UInt64(init_seq)), 
-					10, 
-					2, 
-					3
-				)
-	elseif algorithm == "pointlight"
-         print("Using a point-light tracer")
-         renderer = PointLightRenderer(world, BLACK)
-	else
-		throw(ArgumentError("Unknown renderer: $algorithm"))
-	end
-
-	function print_progress(row::Int64, col::Int64)
-     	print("Rendered row $(image.height - row)/$(image.height) \t= ")
-		@printf "%.2f" 100*((image.height - row)/image.height)
-		print("%\n")
-	end
-
-	fire_all_rays!(tracer, renderer, print_progress)
+	fire_all_rays!(tracer, renderer, (r,c) -> print_progress(r,c,image.height, image.width) )
 	img = tracer.img
 
 	# Save the HDR image
@@ -357,15 +267,18 @@ function demo(
 	(bool_print==true) && (println("\nHDR demo image written to $(pfm_output)\n"))
 
 	# Apply tone-mapping to the image
-	if algorithm == "onoff"
+	 if typeof(renderer) == OnOffRenderer
 		normalize_image!(img, 0.18, nothing)
-	elseif algorithm == "flat"
+	elseif typeof(renderer) == FlatRenderer
 		normalize_image!(img, 0.18, 0.5)
-	elseif algorithm == "pathtracing"
+	elseif typeof(renderer) == PathTracer
 		normalize_image!(img, 0.18, 0.1)
-	elseif algorithm == "pointlight"
-		normalize_image!(img, 0.18, 0.1)
+	elseif typeof(renderer) == PointLightRenderer
+          normalize_image!(img, 0.18, 0.1)
+	else
+		throw(ArgumentError("Unknown renderer: $(typeof(renderer))"))
 	end
+
 	clamp_image!(img)
 	γ_correction!(img, 1.27)
 
@@ -389,21 +302,23 @@ end
 
 """
 	demo(
-          camera_type::String = "per",
-		camera_position::Point = Point(-1.,0.,0.), 
-		algorithm::String = "flat",
-          α::Float64 = 0., 
-          width::Int64 = 640, 
-          height::Int64 = 480, 
-          pfm_output::String = "demo.pfm", 
-          png_output::String = "demo.png",
+         	renderer::Renderer = FlatRenderer(),
+		camera_type::String = "per",
+		camera_position::Union{Point, Vec} = Point(-1.,0.,0.), 
+     	α::Float64 = 0., 
+     	width::Int64 = 640, 
+     	height::Int64 = 480, 
+     	pfm_output::String = "demo.pfm", 
+        	png_output::String = "demo.png",
+		samples_per_pixel::Int64 = 0, 
+		world_type::String = "A",
 		bool_print::Bool = true,
 		bool_savepfm::Bool = true,
-		world_type::String = "A",
-		init_state::Int64 = 45,
-		init_seq::Int64 = 54,
-		samples_per_pixel::Int64 = 0
+		ONLY_FOR_TESTS::Bool = false,
           )
+
+	demo(x::(Pair{T1,T2} where {T1,T2})...) = 
+		demo( parse_demo_settings(  Dict( pair for pair in [x...]) )... )
 
 Creates a demo image with the specified options. 
 
@@ -419,34 +334,45 @@ The `type=="B"` demo image world consists in a checked x-y plane, a blue opaque
 sphere, a red reflecting sphere, and a green oblique reflecting plane, all
 inside a giant emetting sphere.
 
-The `type=="C"` demo image world consists in... discover yourself!
-
 The creation of the demo image has the objective to check the correct behaviour of
 the rendering software, specifically the orientation upside-down and left-right.
 
 ## Arguments
 
+The following input arguments refers to the first method presented in the signature;
+it's obviously very uncomfortable to use that method, so it's recommended to take 
+advantage of the second one, which allows to write the input values in a dictionary
+like syntax with arbitrary order and comfort. See the documentation of  
+[`parse_demo_settings`](@ref) to learn how to use the keys:
+
+- `renderer::Renderer = FlatRenderer()` : renderer to be used in the rendering, with all
+  the settings already setted (exception made for the `world`, that will be overridden
+  and created here)
+
 - `camera_type::String = "per"` : set the perspective projection view:
-		- `camera_type=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
-		- `camera_type=="ort"`  -> set [`OrthogonalCamera`](@ref)
+  - `camera_type=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
+  - `camera_type=="ort"`  -> set [`OrthogonalCamera`](@ref)
 
-- `camera_position::Point = Point(-1.,0.,0.)` : set the point of observation 
-  in (`X`,`Y,`Z`) coordinates
-
-- `algorithm::String = "flat"` : algorithm to be used in the rendered:
-  - `algorithm=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
-  - `algorithm=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
-  - `algorithm=="pathtracing"` -> [`PathTracer`](@ref) algorithm 
-  - `algorithm=="pointlight"` -> [`PointLightRenderer`](@ref) algorithm
+- `camera_position::Union{Point, Vec} = Point(-1.,0.,0.)` : set the point of observation 
+  in (`X`,`Y,`Z`) coordinates, as a `Point`or a `Vec` input object.
 
 - `α::Float64 = 0.` : angle of rotation _*IN RADIANTS*_, relative to the vertical
-  (i.e. z) axis, of the view direction
+  (i.e. z) axis with a right-handed rule convention (clockwise rotation for entering (x,y,z)-axis 
+  corresponds to a positive input rotation angle)
 
-- `width::Int64 = 640` and `height::Int64 = 480` : pixel dimensions of the demo image
+- `width::Int64 = 640` and `height::Int64 = 480` : pixel dimensions of the demo image;
+  they must be both even positive integers.
 
 - `pfm_output::String = "demo.pfm"` : name of the output pfm file
 
 - `png_output::String = "demo.png"` : name of the output LDR file
+
+- `samples_per_pixel::Int64 = 0` : number of rays per pixel to be used (antialiasing);
+  it must be a perfect square positive integer (0, 1, 4, 9, ...) and if is set to
+  0 (default value) is choosen, no anti-aliasing occurs, and only one pixel-centered 
+  ray is fired for each pixel.
+
+- `world_type::String = "A"` : specifies the type of world to be rendered ("A" or "B")
 
 - `bool_print::Bool = true` : specifies if the WIP messages of the demo
   function should be printed or not (useful option for [`demo_animation`](@ref))
@@ -454,45 +380,33 @@ the rendering software, specifically the orientation upside-down and left-right.
 - `bool_savepfm::Bool = true` : bool that specifies if the pfm file should be saved
   or not (useful option for [`demo_animation`](@ref))
 
-- `world_type::String = "A"` : specifies the type of world to be rendered ("A", "B" or "C")
+- `ONLY_FOR_TESTS::Bool = false` : it's a bool variable conceived only to
+  test the correct behaviour of the renderer for the input arguments; if set to `true`, 
+  no rendering is made!
 
-- `init_state::Int64 = 45` : initial state of the PCG random number generator
-
-- `init_seq::Int64 = 54` : initial sequence of the PCG random number generator
-
-- `samples_per_pixel::Int64 = 0` : number of rays per pixel to be used (antialiasing)
-
-See also: [`Point`](@ref) ,[`OnOffRenderer`](@ref), [`FlatRenderer`](@ref), 
-[`PathTracer`](@ref), [`demo_animation`](@ref)
+See also: [`Point`](@ref), [`Vec`](@ref), [`Renderer`](@ref) [`OnOffRenderer`](@ref), 
+[`FlatRenderer`](@ref), [`PathTracer`](@ref), [`PointLightRenderer`](@ref),
+[`demo_animation`](@ref), [`parse_demo_settings`](@ref)
 """ 
 demo
 
 ##########################################################################################92
 
-#=
-demo_animation() = demo_animation(false, "onoff", 200, 150, "demo-animation.mp4")
-demo_animation(ort::Bool) = demo_animation(ort, "onoff", 200, 150, "demo-animation.mp4")
-demo_animation(al::String) = demo_animation(false, al, 200, 150, "demo-animation.mp4")
-demo_animation(ort::Bool, al::String) = 
-					demo_animation(ort, al, 200, 150, "demo-animation.mp4")
-demo_animation(al::String, w::Int64, h::Int64) = 
-					demo_animation(false, al, w, h, "demo-animation.mp4")
-demo_animation(ort::Bool, al::String, w::Float64, h::Float64) = 
-					demo_animation(ort, al, w, h, "demo-animation.mp4")
-=#
 
 function demo_animation(x::(Pair{T1,T2} where {T1,T2})...)
 	demo_animation( parse_demoanimation_settings(  Dict( pair for pair in [x...]) )... )
 end
 
-function demo_animation( 
+function demo_animation(
+			renderer::Renderer = FlatRenderer(),
 			camera_type::String = "per",
-			algorithm::String = "flat",
+			camera_position::Union{Point, Vec} = Point(-1.,0.,0.), 
         		width::Int64 = 200, 
         		height::Int64 = 150,
-			world_type::String = "A",
        		anim_output::String = "demo-animation.mp4",
-			samples_per_pixel::Int64 = 0  
+			samples_per_pixel::Int64 = 0,
+			world_type::String = "A", 
+			ONLY_FOR_TESTS::Bool = false,
 		)
 
 	run(`rm -rf .wip_animation`)
@@ -500,15 +414,19 @@ function demo_animation(
 	
 	dict_gen = Dict(
 			"camera_type"=>camera_type,
-			"algorithm"=>algorithm, 
+			"camera_position"=>camera_position,
+			"renderer"=>renderer, 
 			"width"=>width,
 			"height"=>height,
-			"world_type" => world_type,
 			"samples_per_pixel"=>samples_per_pixel,
+			"world_type" => world_type,
+			"set_pfm_name"=>".wip_animation/demo.pfm",
 			"bool_print"=>false,
 			"bool_savepfm"=>false,
-			"set_pfm_name"=>".wip_animation/demo.pfm",
+			"ONLY_FOR_TESTS"=>ONLY_FOR_TESTS,
 			)
+
+	(ONLY_FOR_TESTS==false) || (return nothing)
 
 	iter = ProgressBar(0:359)
 	for angle in iter
@@ -531,13 +449,19 @@ end
 
 """
 	demo_animation( 
+			renderer::Renderer = FlatRenderer(),
 			camera_type::String = "per",
-			algorithm::String = "flat",
         		width::Int64 = 200, 
         		height::Int64 = 150,
-			world_type::String = "A",
        		anim_output::String = "demo-animation.mp4",
+			samples_per_pixel::Int64 = 0,
+			world_type::String = "A", 
+			ONLY_FOR_TESTS::Bool = false,
 		)
+
+	demo_animation(x::(Pair{T1,T2} where {T1,T2})...) = 
+		demo_animation( parse_demoanimation_settings(  Dict( pair for pair in [x...]) )... )
+
 	
 Creates an animation of the demo image with the specified options. It's
 necessary to have istalled the ffmpeg software to run this function.
@@ -546,7 +470,7 @@ This function works following this steps:
 - creates an hidden directory, called ".wip_animation"; if it already exists,
   it will be destroyed and recreated.
 - inside ".wpi_animation", creates 360 png images of the demo image (using the 
-  [`demo`](@ref) function with the specified projection, algorithm and image 
+  [`demo`](@ref) function with the specified projection, renderer and image 
   dims); each image correspons to a frame of the future animation
 - through the `ffmpeg` software, the 360 png images are converted into the
   animation mp4 file, and saved in the main directory
@@ -555,26 +479,44 @@ This function works following this steps:
 
 ## Arguments
 
+The following input arguments refers to the first method presented in the signature;
+it's obviously very uncomfortable to use that method, so it's recommended to take 
+advantage of the second one, which allows to write the input values in a dictionary
+like syntax with arbitrary order and comfort. See the documentation of  
+[`parse_demoanimation_settings`](@ref) to learn how to use the keys:
+
+- `renderer::Renderer = FlatRenderer()` : renderer to be used in the rendering, with all
+  the settings already setted (exception made for the `world`, that will be overridden
+  and created here)
+
 - `camera_type::String = "per"` : set the perspective projection view:
-		- `camera_type=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
-		- `camera_type=="ort"`  -> set [`OrthogonalCamera`](@ref)
-		
-- `algorithm::String = "flat"` : algorithm to be used in the rendered:
-  - `algorithm=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
-  - `algorithm=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
-  - `algorithm=="pathtracing"` -> [`PathTracer`](@ref) algorithm
-  - `algorithm=="pointlight"` -> [`PointLightRenderer`](@ref) algorithm
+  - `camera_type=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
+  - `camera_type=="ort"`  -> set [`OrthogonalCamera`](@ref)
 
-- `width::Int64 = 640` and `height::Int64 = 480` : pixel dimensions of the demo image
+- `camera_position::Union{Point, Vec} = Point(-1.,0.,0.)` : set the point of observation 
+  in (`X`,`Y,`Z`) coordinates, as a `Point`or a `Vec` input object.
 
-- `world_type::String = "A"` : specifies the type of world to be rendered ("A", "B" or "C")
+- `width::Int64 = 640` and `height::Int64 = 480` : pixel dimensions of the demo image;
+  they must be both even positive integers.
 
-- `anim_output::String = "demo-animation.mp4"` : name of the output animation file
+- `pfm_output::String = "demo.pfm"` : name of the output pfm file
 
-- `samples_per_pixel::Int64 = 0` : number of rays per pixel to be used (antialiasing)
+- `png_output::String = "demo.png"` : name of the output LDR file
 
-See also: [`OnOffRenderer`](@ref), [`FlatRenderer`](@ref), 
-[`PathTracer`](@ref), [`demo`](@ref)
+- `samples_per_pixel::Int64 = 0` : number of rays per pixel to be used (antialiasing);
+  it must be a perfect square positive integer (0, 1, 4, 9, ...) and if is set to
+  0 (default value) is choosen, no anti-aliasing occurs, and only one pixel-centered 
+  ray is fired for each pixel.
+
+- `world_type::String = "A"` : specifies the type of world to be rendered ("A" or "B")
+
+- `ONLY_FOR_TESTS::Bool = false` : it's a bool variable conceived only to
+  test the correct behaviour of the renderer for the input arguments; if set to `true`, 
+  no rendering is made!
+
+See also: [`Point`](@ref), [`Vec`](@ref), [`Renderer`](@ref) [`OnOffRenderer`](@ref), 
+[`FlatRenderer`](@ref), [`PathTracer`](@ref), [`PointLightRenderer`](@ref),
+[`demo`](@ref), [`parse_demoanimation_settings`](@ref)
 """
 demo_animation
 

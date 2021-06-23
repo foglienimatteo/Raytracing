@@ -702,7 +702,9 @@ function is_point_visible(world::World, point::Point, observer_pos::Point)
 
     ray = Ray(observer_pos, direction, 1e-2 / dir_norm, 1.0)
     for shape in world.shapes
-        (quick_ray_intersection(shape, ray) == false) || (return false)
+        if (quick_ray_intersection(shape, ray) == true) && (shape.flag_pointlight==false) 
+            return false
+        end
     end
 
     return true

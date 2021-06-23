@@ -8,7 +8,8 @@
 """
      PCG(state::UInt64 = UInt64(42), inc::UInt64 = UInt64(54))
 
-A mutable struct for the PCG Uniform Pseudo-random Number Generator.
+A mutable struct for the Permuted Congruential Generator (PCG) 
+which is a uniform pseudo-random number generator.
 
 ## Parameters
 
@@ -40,6 +41,16 @@ mutable struct PCG
           random(self, UInt32)
           return self
      end
+end
+
+function get_state(pcg::PCG)
+     value = pcg.state
+     return Int128(value)
+end     
+
+function get_inc(pcg::PCG)
+     value = pcg.inc
+     return Int128(value)
 end
 
 """

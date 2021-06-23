@@ -65,3 +65,35 @@ end
      @test_throws ArgumentError tone_mapping(["abracadabra"])
      @test_throws ArgumentError tone_mapping(["a", "b", "c", "d", "e"])
 end
+
+
+@testset "test_parse_tonemapping_settings" begin
+     @test isnothing(tone_mapping( 
+                         "infile"=>"prova.pfm", 
+                         "outfile"=>"prova.png", 
+                         "alpha"=>0.18,
+                         "gamma"=>1.0, 
+                         "ONLY_FOR_TESTS"=>true,
+                    ))
+
+     @test isnothing(tone_mapping( 
+                         "alpha"=>0.18,
+                         "infile"=>"prova.pfm", 
+                         "ONLY_FOR_TESTS"=>true,
+                         "outfile"=>"prova.png", 
+                    ))
+
+     @test_throws ArgumentError tone_mapping( 
+                         "infile"=>"prova.pfm", 
+                         "ONLY_FOR_TESTS"=>true,
+                    )
+     @test_throws ArgumentError tone_mapping( 
+                         "outfile"=>"prova.png", 
+                         "ONLY_FOR_TESTS"=>true,
+                    )
+
+     @test_throws ArgumentError tone_mapping( 
+                         "ONLY_FOR_TESTS"=>true,
+                    )
+end
+

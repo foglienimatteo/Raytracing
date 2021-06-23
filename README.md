@@ -15,7 +15,7 @@
 [![Dev](https://img.shields.io/badge/docs-dev-blue?style=flat)](https://cosmofico97.github.io/Raytracing/dev)  
 
 This software is a simple raytracing program written in the [Julia Programming Language](https://julialang.org).
-It's based on the lectures of the [*Numerical techniques for photorealistic image generation*]( https://www.unimi.it/en/education/degree-programme-courses/2021/numerical-tecniques-photorealistic-image-generation) curse (AY2020-2021), held by Associate Professor [Maurizio Tomasi](http://cosmo.fisica.unimi.it/persone/maurizio-tomasi) at University of Milan [Department of
+It's based on the lectures of the [*Numerical techniques for photorealistic image generation*]( https://www.unimi.it/en/education/degree-programme-courses/2021/numerical-tecniques-photorealistic-image-generation) course (AY2020-2021), held by Associate Professor [Maurizio Tomasi](http://cosmo.fisica.unimi.it/persone/maurizio-tomasi) at University of Milan [Department of
 Physics "Aldo Pontremoli"](http://eng.fisica.unimi.it/ecm/home).
 
 ## Table of Contents
@@ -23,8 +23,9 @@ Physics "Aldo Pontremoli"](http://eng.fisica.unimi.it/ecm/home).
 - [Raytracing](#raytracing)
   - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
-  - [Tutorial](#tutorial)
-  - [Usage](#usage)
+  - [Demo and Demo Animation](#demo-and-demo-animation)
+  - [Usage from the Command Line Interface](#usage-from-the-command-line-interface)
+  - [Usage from the REPL](#usage-from-the-repl)
   - [Licence](#licence)
   - [Contributors ✨](#contributors-)
 
@@ -36,14 +37,15 @@ git clone https://github.com/cosmofico97/Raytracing
 ```
 or download the source code from the github repository https://github.com/cosmofico97/Raytracing.
 
-## Tutorial
 
-To star of and checks the correct behavior of the software run one of the following command inside the main directory
+## Demo and Demo Animation
+
+To start off and check the correct behavior of this software run one of the following command inside the main directory
 ```bash
-./Raytracer.jl demo_animation --camera_type=per --algorithm=flat --width=640 --height=480
+./Raytracer.jl demo_animation --camera_type=per --width=640 --height=480 flat
 ```
 ```bash
-./Raytracer.jl demo --world_type=B --camera_type=per --algorithm=pathtracing --camera_position=-1,0,1 --width=640 --height=480
+./Raytracer.jl demo --world_type=B --camera_type=per --camera_position="[-1, 0, 1]" --width=640 --height=480 pathtracing 
 ```
 and enjoy respectively the animation `demo/demo_anim_Flat_640x480x360.mp4` and the image `demo/demo_B_PathTracing_640x480.png`
 
@@ -51,35 +53,94 @@ and enjoy respectively the animation `demo/demo_anim_Flat_640x480x360.mp4` and t
 <video width="640" height="480"  type="video/mp4" "src="https://user-images.githubusercontent.com/79974922/119556147-ef2b3200-bd9e-11eb-956f-17de6ea6bdda.mp4"  autoplay loop> </video>"
 -->
 
-Animation with FlatRenderer            | Image with PathTracing
-:-------------------------------------:|:-------------------------:
+Demo Animation A  with FlatRenderer       | Demo Image B with PathTracing
+:----------------------------------------:|:-------------------------:
 ![](demo/demo_anim_Flat_640x480x360.gif)  |  ![](demo/demo_B_PathTracing_640x480.png)
 
-It may takes few minutes to renderer the animation; you might also gives smaller (integer and even) values to `--width` and `--height` in order to obtain the same animation in a smaller amount of time (the price to pay is a worse definition of the animation itself).
+It may takes few minutes to render the animation; you might also give smaller (integer and even) values to `--width` and `--height` in order to obtain the same animation in a smaller amount of time (the price to pay is a worse definition of the animation itself).
 
-Try also the fllowing sequence of instructions:
+
+
+## Usage from the Command Line Interface
+
+This software is able to read a file that describes a scene (i.e a set of objects, pigments, materials, etc. that we want  render).
+To understand how to write such a file, take a look at the [tutorial_basic_sintax.txt](examples/tutorial_basic_sintax.txt) and the [demo_world_B.txt](examples/demo_world_B.txt) files in the [examples](esamples) directory.
+
+The basic structure of a command in the CLI is the following:
+
 ```bash
-./Raytracer.jl demo --world_type=C --camera_type=per --algorithm=flat
-./Raytracer.jl tonemapping demo.pfm demo.png -a=0.18 -g=1.0
+./Raytracer.jl render [OPTIONS_FOR_THE_IMAGE] NAME_OF_THE_SCENEFILE {onoff|flat|pathtracer|pointlight}[OPTIONS_FOR_THE_RENDERER]
 ```
-(it's possible you have to adjust the `-g` value to your computer monitor gamma value)
+
+There are four possible rendering algorithms; each of them is linked to different rules for the color of a pixel and the light ray that starts from that pixel and hits (or not) an object of the rendered scene:
+
+- `onoff` : each pixel is set to the `background_color` if no shape is hit by its light ray, otherwise is set to `color`; this renderer exists only for debugging purposes.
+ 
+- `flat` : each pixel is set to the `background_color` if no shape is hitten by its light ray, otherwise is set to the color of the hitted shape point.
+  This renderer is very efficient, but it does not solve the rendering equation, and consequently no shadows or brightness are rendered.
+
+- `pathtracer` : this is the TRUE renderer. It solves the rendering equation in the "standard" way, and for this reason it's very demanding.
+  Nevertheless, the rendered images are incomparably more realistic than the ones made with the other three renderers; USE THIS RENDERER WITH FORESIGHT!
+
+- `pointlight` : it's the "cheap solution" for a realistic image. This renderer creates an image setting each pixel colored or not depending on the "line of sight" between that point and the point-light sources in the scene.
+  It's very efficient, and the images rendered are perfect for an astrophysical context or for very bright days of summer. Nevertheless it's a simple solution in order to avoid the longer times needed for the pathtracer algorithm.
+
+The resulting files created at the end of the rendering are three:
+- the PFM image (`scene.pfm` is the default name, if none is specified from the command line)
+- the LDR image (`scene.png` is the default name, if none is specified from the command line)
+-  the JSON file, that saves some datas about input commands, rendering time etc. It has the same name of the LDR image and `.json` extention, so `scene.json` is the default name.
+  
+Probably, the LDR image will not be "correctly" converted with the standard values used in the `render` function to tone-map the PFM file; it's consequently appropriate
+to manually apply the tone mapping algorithm to the PFM image!
+The tonemapping command is simple:
+```bash
+./Raytracer.jl tonemapping [-a ALPHA] [-g GAMMA] FILE_PFM_TO_BE_TONEMAPPED NAME_OF_THE_RESULTING_LDR
+```
+where `ALPHA` is the scaling factor for the normalisation process (default `a=0.18`)
+and `GAMMA` is YOUR monitor gamma value (default `g=1.0`).
+Choose your `a` and `g` values without any fear to try again! This algorithm is indeed by far more efficient and computationally cheaper than the rendering.
+
+
+Here we show an example of usage, which renders the [earth_and_sun.txt](examples/earth_and_sun.txt) file
+```bash
+./Raytracer.jl render examples/earth_and_sun.txt --width=2880 --height=1800 flat
+```
+and of the tone-map the resulting PFM
+```bash
+./Raytracer.jl tonemapping scene.pfm scene.png -a=0.18 -g=1.0
+```
 
 Earth with FlatRenderer            | 
 :---------------------------------:|
-![](demo/demo_C_Flat_640x480.png) 
+![](examples/earth_and_sun.png) 
 
-Refer to the latest [stable documentation](https://cosmofico97.github.io/Raytracing/stable) for more examples.
+Refer to the latest [stable documentation](https://cosmofico97.github.io/Raytracing/stable) for explanation of the functions used.
 
-## Usage
-You can use Raytracer both form bash line and Julia repl. From bash you just need to type
-```bash
-./Raytracer.jl
+
+## Usage from the REPL
+
+If you prefer to use the Julia REPL, first of all you need to include the software with the known command in the REPL:
+
+```julia
+include("Raytracer.jl")
+
 ```
-followed by `demo`, `demo_animation` or `tonemapping`. If nothing is given from command line, default variables are used; if you insted want to specify your preferences just type the options with the following scheme (as seen previousliy in the tutorial): `--option=op`, following the help table.
 
-If you prefer using Julia repl, after having included Raytracer.jl, you can visualize the options for each function thanks to the help option (by typing `?`, than write the function name) and set the parameters, e.g.:
-```repl
-demo("camera_type"=>"ort", "world_type"=>"B")
+You can obviously visualize the options for each function thanks to the help option (by typing `?`, than write the function name) and set the parameters in a dictionary-like sintax.
+The only main difference is that in order to specify the renderer algorithm, the key is the not-so-intuitive string `%COMMAND%` (due to the [`ArgParse.jl`](https://github.com/carlobaldassi/ArgParse.jl) package used for the command line parsing operation).
+
+For example, in order to render the demo image B previously showed:
+```julia
+demo("camera_type"=>"ort", "world_type"=>"B", "camera_position"=>"[-1, 0, 1]", "width"=>640, "height"=>480, "%COMMAND%"=>"flat")
+```
+
+Instead, for rendering the `examples/earth_and_sun.txt`
+```julia
+render("scenefile"=>"examples/earth_and_sun.txt", "width"=>2880, "height"=>1880, "%COMMAND%"=>"flat")
+```
+and for tone-map it
+```julia
+tone_mapping("infile"=>"scene.pfm", "outfile"=>"scene.png", "alpha"=>0.18, "gamma"=>0.6)
 ```
 
 ## Licence

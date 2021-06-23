@@ -16,8 +16,10 @@
 # CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
-using Raytracing, Test, LinearAlgebra, StaticArrays
+using Raytracing, Raytracing.Interpreter
+using Test, LinearAlgebra, StaticArrays
 import ColorTypes:RGB
+
 
 ##########################################################################################92
 
@@ -39,7 +41,9 @@ end
 	include("test_ToneMapping.jl")
 end
 
+
 ##########################################################################################92
+
 
 @testset "test_Geometry" begin
 	include("test_Geometry.jl")
@@ -53,6 +57,7 @@ end
 	include("test_Rays-Cameras-ImageTracer.jl")
 
 end
+
 
 ##########################################################################################92
 
@@ -80,7 +85,9 @@ end
 	include("test_Shapes-World.jl")
 end
 
+
 ##########################################################################################92
+
 
 @testset "test_Pigment" begin
 	include("test_Pigment.jl")
@@ -101,3 +108,18 @@ end
 @testset "test_Antialiasing" begin
 	include("test_antialiasing.jl")
 end
+
+##########################################################################################92
+
+@testset "test_RangeTesters" begin
+	include("test_RangeTesters.jl")
+end
+
+@testset "test_Interpreter" begin
+	include("test_Interpreter.jl")
+end
+
+@testset "test_Demo-Render.jl" begin
+	include("test_Demo-Render.jl")
+end
+

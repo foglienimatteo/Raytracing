@@ -1,0 +1,53 @@
+{
+    "samples per pixel (0 means no antialiasing)": 0,
+    "png output": "scene.png",
+    "camera": {
+        "distance": 1.0,
+        "aspect ratio": 1.0,
+        "transformation": [
+            [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+            ],
+            [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+            ],
+            [
+                -3.0,
+                0.0,
+                1.0,
+                1.0
+            ]
+        ],
+        "projection": "orthogonal"
+    },
+    "declared float from Command Line": null,
+    "scene file": "examples/earth_and_sun.txt",
+    "renderer": {
+        "algorithm": "Point-Light Renderer",
+        "background color": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "color": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        }
+    },
+    "rendering time (in s)": "56.104",
+    "time of start": "2021-6-23 : 11:38:32",
+    "pfm output": "scene.pfm"
+}

@@ -10,7 +10,8 @@ Documenter.makedocs(
 	pages = [
 			"Introduction" => "index.md",
 			"Demo" => "demo.md",
-			"Demo animation" => "demo_animation.md",
+			"The Render Function" => "render.md",
+			"Interpreter for the Scene File" => "interpreter.md",
 			"Base Structs" => "base_structs.md",
 			"Reading and Writing PFM files" => "readingwritingpfm.md",
 			"BRDFs and Pigments" => "brdfs_and_pigments.md",
@@ -19,6 +20,7 @@ Documenter.makedocs(
 			"Renderers" => "renderers.md",
 			"Transformations" => "transformations.md",
 			"Avaiable Shapes" => "shapes.md",
+			"Range Tester Functions" => "range_testers.md",
 			],
 )
 

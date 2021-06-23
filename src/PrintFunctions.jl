@@ -105,3 +105,4 @@ function print_not_black(img::HDRimage)
 
      nothing
 end
+

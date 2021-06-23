@@ -14,7 +14,8 @@
 # LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
 # SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
 # CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-# IN THE SOFTWARE.
+# IN THE SOFTWARE
+#
 
 
 using Pkg
@@ -26,7 +27,6 @@ import FileIO: @format_str, query
 using Raytracing
 
 FILE_NAME = split(PROGRAM_FILE, "/")[end]
-RENDERERS = ["onoff", "flat", "pathtracing", "pointlight"]
 
 function parse_commandline_error_handler(settings::ArgParseSettings, err, err_code::Int = 1)
 	help_string = 
@@ -56,6 +56,8 @@ function parse_commandline_error_handler(settings::ArgParseSettings, err, err_co
 	#return err_code
 end
 
+
+
 function ArgParse_command_line(arguments)
 	s = ArgParseSettings()
 
@@ -73,9 +75,18 @@ function ArgParse_command_line(arguments)
 		"tonemapping"
 			action = :command
 			help = "apply tone mapping to a pfm image and save it as a ldr file"
+		"render"
+			action = :command
+			help = "render an image from a file"
+
 	end
 
+
+	#### TONE MAPPING ###################################################################92
+
+
 	s["tonemapping"].description = "Apply tone mapping to a pfm image and save it as a ldr file"
+	
 	add_arg_group!(s["tonemapping"], "tonemapping filenames");
 	@add_arg_table! s["tonemapping"] begin
 		"infile"
@@ -86,17 +97,24 @@ function ArgParse_command_line(arguments)
 			help = "output file name"
 			required = true
 	end
+
 	add_arg_group!(s["tonemapping"], "tonemapping settings");
 	@add_arg_table! s["tonemapping"] begin
 		"--alpha", "-a"
-			help = "scaling factor for the normalization process"
+			help = "scaling factor for the normalization process; must be positive"
 			arg_type = Float64
+			range_tester = check_is_positive
 			default = 0.18
 		"--gamma", "-g"
-			help = "gamma value for the tone mapping process"
+			help = "gamma value for the tone mapping process; must be positive"
 			arg_type = Float64
+			range_tester = check_is_positive
 			default = 1.27
 	end
+
+
+	#### DEMO ###########################################################################92
+
 
 	s["demo"].description = 
 		"""Creates a demo image with the specified options.\n"""*
@@ -111,62 +129,42 @@ function ArgParse_command_line(arguments)
 		"""The creation of the demo image has the objective to check the correct behaviour of
 		the rendering software, specifically the orientation upside-down and left-right."""
 
-	add_arg_group!(s["demo"], "demo options");
+	add_arg_group!(s["demo"], "render options");
 	@add_arg_table! s["demo"] begin
 		"--camera_type"
 			help = "option for the camera type:\n"*
 	    				"ort -> Orthogonal camera, per -> Perspective camera"
           	arg_type = String
 			default = "per"
-			range_tester = input -> (input ∈ ["ort", "per"])
-    		"--algorithm"
-			help = "option for the renderer algorithm"
-          	arg_type = String
-			default = "flat"
-			range_tester = input -> (input ∈ RENDERERS)
-		"--world_type"
-			help = "flag for the world to be rendered"
-          	arg_type = String
-			default = "A"
-			range_tester = input -> (input ∈ ["A", "B", "C"])
-    		"--init_state"
-    			arg_type = Int64
-    			help = "Initial seed for the random number generator (positive number)."
-    			default = 45
-			range_tester = input -> (input>0)
-    		"--init_seq"
-    			arg_type = Int64
-    			help = "Identifier of the sequence produced by the "*
-			    "random number generator (positive number)."
-    			default = 54
-			range_tester = input -> (input>0)
+			range_tester = input -> check_is_one_of(input, CAMERAS)
 		"--camera_position"
-          	help = "camera position in the scene as 'X,Y,Z'"
+          	help = "camera position in the scene as '[X,Y,Z]'"
           	arg_type = String
-          	default = "-1,0,0"
-          	range_tester = input -> (length(split(input, ",")) == 3)
+          	default = "[-1,0,0]"
+          	range_tester = check_is_vector
 		"--alpha"
-			help = "angle of view, in degrees"
+			help = "angle of view around z-axis, in degrees"
 			arg_type = Float64
 			default = 0.
 		"--width"
 			help = "pixel number on the width of the resulting demo image."
-			arg_type = Int64
 			default = 640
-			range_tester = input -> (iseven(input) && input>0)
+			range_tester = check_is_even_uint64
 		"--height"
 			help = "pixel number on the height of the resulting demo image."
-			arg_type = Int64
 			default = 480
-			range_tester =  input -> (iseven(input) && input>0)
+			range_tester = check_is_even_uint64
      	"--samples_per_pixel"
-			help = "Number of samples per pixel (must be a perfect square, e.g., 16)."
-     		arg_type = Int64
+			help = "Number of samples per pixel for the antialiasing algorithm\n"*
+					"It must be an integer perfect square, i.e. 0,1,4,9,16,...\n"*
+					"If =0 (default value), antialiasing does not occurs."
      		default = 0
-			range_tester =  input -> ((input>=0) && (√input - floor(√input) ≈ 0.))
-	end
-	add_arg_group!(s["demo"], "demo optional filenames");
-	@add_arg_table! s["demo"] begin
+			range_tester = check_is_square
+		"--world_type"
+          	help = "world type to be rendered; valid values: $(DEMO_WORLD_TYPES)"
+          	arg_type = String
+          	default = "A"
+          	range_tester = input -> check_is_one_of(input, DEMO_WORLD_TYPES)
 		"--set_pfm_name"
 			help = "name of the pfm file to be saved"
 			nargs = '?'
@@ -180,42 +178,378 @@ function ArgParse_command_line(arguments)
 			default = "demo.png"
 			constant = "demo.png"
 	end
+	
+	
+	add_arg_group!(s["demo"], "renderer to be used");
+	@add_arg_table! s["demo"] begin
+		"onoff"
+			action = :command
+			help = "onoff renderer"
+			#dest_name = "onoff"
+		"flat"
+			action = :command
+			help = "flat-renderer"
+			#dest_name = "flat"
+		"pathtracer"
+			action = :command
+			help = "path tracing renderer"
+			#dest_name = "pathtracer"
+		"pointlight"
+			action = :command
+			help = "point-light tracing renderer"
+			#dest_name = "pointlight"
+	end
+
+	add_arg_group!(s["demo"]["onoff"], "onoff renderer options");
+	@add_arg_table! s["demo"]["onoff"] begin
+		"--background_color"
+			help = "background color specified as '<R,G,B>' components. Example: --background_color=<1,2,3>"
+          	arg_type = String
+          	default = "<0,0,0>"
+          	range_tester = check_is_color
+		"--color"
+			help = "hit color specified as '<R,G,B>' components. Example: --ambient_color=<1,2,3>"
+          	arg_type = String
+          	default = "<0,0,0>"
+          	range_tester = check_is_color
+	end
+
+	add_arg_group!(s["demo"]["flat"], "flat renderer options");
+	@add_arg_table! s["demo"]["flat"] begin
+		"--background_color"
+			help = "background color specified as '<R,G,B>' components. Example: --background_color=<1,2,3>"
+          	arg_type = String
+          	default = "<0,0,0>"
+          	range_tester = check_is_color
+	end
+
+	add_arg_group!(s["demo"]["pathtracer"], "pathtracing renderer options");
+	@add_arg_table! s["demo"]["pathtracer"] begin
+		"--init_state"
+    			help = "Initial seed for the random number generator (positive integer number)."
+    			default = 45
+			range_tester = check_is_uint64
+    		"--init_seq"
+    			help = "Identifier of the sequence produced by the "*
+			    "random number generator (positive integer number)."
+    			default = 54
+			range_tester = check_is_uint64
+		"--background_color"
+			help = "background color specified as '<R,G,B>' components. Example: --background_color=<1,2,3>"
+          	arg_type = String
+          	default = "<0,0,0>"
+          	range_tester = check_is_color
+		"--num_of_rays" 
+			help = "number of `Ray`s generated for each integral evaluation"
+			default = 10
+			range_tester = check_is_uint64
+		"--max_depth"
+			help = "maximal number recursive integrations"
+			default = 3
+			range_tester = check_is_uint64
+		"--russian_roulette_limit"
+			help = "depth at whitch the Russian Roulette algorithm begins"
+			default = 2
+			range_tester = check_is_uint64
+	end
+
+	add_arg_group!(s["demo"]["pointlight"], "pointlight renderer options");
+	@add_arg_table! s["demo"]["pointlight"] begin
+		"--background_color"
+			help = "background color specified as '<R,G,B>' components. Example: --background_color=<1,2,3>"
+          	arg_type = String
+          	default = "<0,0,0>"
+          	range_tester = check_is_color
+		"--ambient_color"
+			help = "ambient color specified as '<R,G,B>' components. Example: --ambient_color=<1,2,3>"
+          	arg_type = String
+          	default = "<0,0,0>"
+          	range_tester = check_is_color
+	end
+
+
+	#### DEMO_ANIMATION #################################################################92
+
 
 	s["demo_animation"].description = "creates an animation of a 360 degree rotation around"*
 								"vertical axis of the demo image."
-	add_arg_group!(s["demo_animation"], "demo-animation settings");
+
+	add_arg_group!(s["demo_animation"], "demo_animation settings");
 	@add_arg_table! s["demo_animation"] begin
 		"--camera_type"
-			help = "flag for the camera type:\n"*
+			help = "option for the camera type:\n"*
 	    				"ort -> Orthogonal camera, per -> Perspective camera"
           	arg_type = String
 			default = "per"
-			range_tester = input -> (input ∈ ["ort", "per"])
-    		"--algorithm"
-			help = "flag for the renderer algorithm"
+			range_tester = input -> check_is_one_of(input, CAMERAS)
+		"--camera_position"
+          	help = "camera position in the scene as '[X,Y,Z]'"
           	arg_type = String
-			default = "onoff"
-			range_tester = input -> (input ∈ RENDERERS)
+          	default = "[-1,0,0]"
+          	range_tester = check_is_vector
 		"--width"
-			help = "pixel number on the width of the resulting demo image animation."
-			arg_type = Int64
-			default = 200
-			range_tester = iseven
+			help = "pixel number on the width of the resulting demo image."
+			default = 640
+			range_tester = check_is_even_uint64
 		"--height"
-			help = "pixel number on the height of the resulting demo image animation."
-			arg_type = Int64
-			default = 150
-			range_tester = iseven
-	end
-	add_arg_group!(s["demo_animation"], "demo-animation optional filename");
-	@add_arg_table! s["demo_animation"] begin
+			help = "pixel number on the height of the resulting demo image."
+			default = 480
+			range_tester = check_is_even_uint64
+     	"--samples_per_pixel"
+			help = "Number of samples per pixel for the antialiasing algorithm\n"*
+					"It must be an integer perfect square, i.e. 0,1,4,9,16,...\n"*
+					"If =0 (default value), antialiasing does not occurs."
+     		default = 0
+			range_tester = check_is_square
+		"--world_type"
+          	help = "world type to be rendered; valid values: $(DEMO_WORLD_TYPES)"
+          	arg_type = String
+          	default = "A"
+          	range_tester = input -> check_is_one_of(input, DEMO_WORLD_TYPES)
 		"--set_anim_name"
 			help = "name of the animation file to be saved"
 			nargs = '?'
 			arg_type = String
-			default = "demo-animation.mp4"
-			constant = "demo-animation.mp4"
+			default = "demo_animation.mp4"
+			constant = "demo_animation.mp4"
 	end
+
+	add_arg_group!(s["demo_animation"], "renderer to be used");
+	@add_arg_table! s["demo_animation"] begin
+		"onoff"
+			action = :command
+			help = "onoff renderer"
+			#dest_name = "onoff"
+		"flat"
+			action = :command
+			help = "flat-renderer"
+			#dest_name = "flat"
+		"pathtracer"
+			action = :command
+			help = "path tracing renderer"
+			#dest_name = "pathtracer"
+		"pointlight"
+			action = :command
+			help = "point-light tracing renderer"
+			#dest_name = "pointlight"
+	end
+
+	add_arg_group!(s["demo_animation"]["onoff"], "onoff renderer options");
+	@add_arg_table! s["demo_animation"]["onoff"] begin
+		"--background_color"
+			help = "background color specified as '<R,G,B>' components. Example: --background_color=<1,2,3>"
+          	arg_type = String
+          	default = "<0,0,0>"
+          	range_tester = check_is_color
+		"--color"
+			help = "hit color specified as '<R,G,B>' components. Example: --ambient_color=<1,2,3>"
+          	arg_type = String
+          	default = "<0,0,0>"
+          	range_tester = check_is_color
+	end
+
+	add_arg_group!(s["demo_animation"]["flat"], "flat renderer options");
+	@add_arg_table! s["demo_animation"]["flat"] begin
+		"--background_color"
+			help = "background color specified as '<R,G,B>' components. Example: --background_color=<1,2,3>"
+          	arg_type = String
+          	default = "<0,0,0>"
+          	range_tester = check_is_color
+	end
+
+	add_arg_group!(s["demo_animation"]["pathtracer"], "pathtracing renderer options");
+	@add_arg_table! s["demo_animation"]["pathtracer"] begin
+		"--init_state"
+    			help = "Initial seed for the random number generator (positive integer number)."
+    			default = 45
+			range_tester = check_is_uint64
+    		"--init_seq"
+    			help = "Identifier of the sequence produced by the "*
+			    "random number generator (positive integer number)."
+    			default = 54
+			range_tester = check_is_uint64
+		"--background_color"
+			help = "background color specified as '<R,G,B>' components. Example: --background_color=<1,2,3>"
+          	arg_type = String
+          	default = "<0,0,0>"
+          	range_tester = check_is_color
+		"--num_of_rays" 
+			help = "number of `Ray`s generated for each integral evaluation"
+			default = 10
+			range_tester = check_is_uint64
+		"--max_depth"
+			help = "maximal number recursive integrations"
+			default = 3
+			range_tester = check_is_uint64
+		"--russian_roulette_limit"
+			help = "depth at whitch the Russian Roulette algorithm begins"
+			default = 2
+			range_tester = check_is_uint64
+	end
+
+	add_arg_group!(s["demo_animation"]["pointlight"], "pointlight renderer options");
+	@add_arg_table! s["demo_animation"]["pointlight"] begin
+		"--background_color"
+			help = "background color specified as '<R,G,B>' components. Example: --background_color=<1,2,3>"
+          	arg_type = String
+          	default = "<0,0,0>"
+          	range_tester = check_is_color
+		"--ambient_color"
+			help = "ambient color specified as '<R,G,B>' components. Example: --ambient_color=<1,2,3>"
+          	arg_type = String
+          	default = "<0,0,0>"
+          	range_tester = check_is_color
+	end
+
+
+	#### RENDER #########################################################################92
+
+	@add_arg_table! s["render"] begin
+		"scenefile"
+			help = "path to the file describing the scene to be rendered."
+			arg_type = String
+			#range_tester = input -> (typeof(query(input))<:File{format"PFM"})
+			required = true
+	end
+
+	add_arg_group!(s["render"], "render options");
+	@add_arg_table! s["render"] begin
+		"--camera_type"
+			help = "option for the camera type:\n"*
+	    				"ort -> Orthogonal camera, per -> Perspective camera"
+          	arg_type = String
+			default = "per"
+			range_tester = input -> check_is_one_of(input, CAMERAS)
+		"--camera_position"
+          	help = "camera position in the scene as '[X,Y,Z]'"
+          	arg_type = String
+          	default = "[-1,0,0]"
+          	range_tester = check_is_vector
+		"--alpha"
+			help = "angle of view around z-axis, in degrees"
+			arg_type = Float64
+			default = 0.
+		"--width"
+			help = "pixel number on the width of the resulting demo image."
+			default = 640
+			range_tester = check_is_even_uint64
+		"--height"
+			help = "pixel number on the height of the resulting demo image."
+			default = 480
+			range_tester = check_is_even_uint64
+     	"--samples_per_pixel"
+			help = "Number of samples per pixel for the antialiasing algorithm\n"*
+					"It must be an integer perfect square, i.e. 0,1,4,9,16,...\n"*
+					"If =0 (default value), antialiasing does not occurs."
+     		default = 0
+			range_tester = check_is_square
+	end
+
+	add_arg_group!(s["render"], 
+		"render declare options for a scene; this options"*
+		"allows to modify values of the scene without changing"*
+		"the scenefile directly."
+	);
+	@add_arg_table! s["render"] begin
+		"--declare_float"
+			help = "Declare a variable. The syntax is «--declare-float=VAR:VALUE». Example: --declare_float=clock:150"
+          	arg_type = String
+			default = ""
+			range_tester = check_is_declare_float
+		end
+
+	add_arg_group!(s["render"], "renderer to be used");
+	@add_arg_table! s["render"] begin
+		"onoff"
+			action = :command
+			help = "onoff renderer"
+			#dest_name = "onoff"
+		"flat"
+			action = :command
+			help = "flat-renderer"
+			#dest_name = "flat"
+		"pathtracer"
+			action = :command
+			help = "path tracing renderer"
+			#dest_name = "pathtracer"
+		"pointlight"
+			action = :command
+			help = "point-light tracing renderer"
+			#dest_name = "pointlight"
+	end
+
+	add_arg_group!(s["render"]["onoff"], "onoff renderer options");
+	@add_arg_table! s["render"]["onoff"] begin
+		"--background_color"
+			help = "background color specified as '<R,G,B>' components. Example: --background_color=<1,2,3>"
+          	arg_type = String
+          	default = "<0,0,0>"
+          	range_tester = check_is_color
+		"--color"
+			help = "hit color specified as '<R,G,B>' components. Example: --ambient_color=<1,2,3>"
+          	arg_type = String
+          	default = "<0,0,0>"
+          	range_tester = check_is_color
+	end
+
+	add_arg_group!(s["render"]["flat"], "flat renderer options");
+	@add_arg_table! s["render"]["flat"] begin
+		"--background_color"
+			help = "background color specified as '<R,G,B>' components. Example: --background_color=<1,2,3>"
+          	arg_type = String
+          	default = "<0,0,0>"
+          	range_tester = check_is_color
+	end
+
+	add_arg_group!(s["render"]["pathtracer"], "pathtracing renderer options");
+	@add_arg_table! s["render"]["pathtracer"] begin
+		"--init_state"
+    			help = "Initial seed for the random number generator (positive integer number)."
+    			default = 45
+			range_tester = check_is_uint64
+    		"--init_seq"
+    			help = "Identifier of the sequence produced by the "*
+			    "random number generator (positive integer number)."
+    			default = 54
+			range_tester = check_is_uint64
+		"--background_color"
+			help = "background color specified as '<R,G,B>' components. Example: --background_color=<1,2,3>"
+          	arg_type = String
+          	default = "<0,0,0>"
+          	range_tester = check_is_color
+		"--num_of_rays" 
+			help = "number of `Ray`s generated for each integral evaluation"
+			default = 10
+			range_tester = check_is_uint64
+		"--max_depth"
+			help = "maximal number recursive integrations"
+			default = 3
+			range_tester = check_is_uint64
+		"--russian_roulette_limit"
+			help = "depth at whitch the Russian Roulette algorithm begins"
+			default = 2
+			range_tester = check_is_uint64
+	end
+
+	add_arg_group!(s["render"]["pointlight"], "pointlight renderer options");
+	@add_arg_table! s["render"]["pointlight"] begin
+		"--background_color"
+			help = "background color specified as '<R,G,B>' components. Example: --background_color=<1,2,3>"
+          	arg_type = String
+          	default = "<0,0,0>"
+          	range_tester = check_is_color
+		"--ambient_color"
+			help = "ambient color specified as '<R,G,B>' components. Example: --ambient_color=<1,2,3>"
+          	arg_type = String
+          	default = "<0,0,0>"
+          	range_tester = check_is_color
+	end
+
+
+	#### parse_args #####################################################################92
+
+##########################################################################################92
+
 
 	parse_args(arguments, s)
 end
@@ -236,7 +570,7 @@ main(x::Union{String, Float64, Int64}...) = main([string(var) for var in [x...]]
 function main(args)
 	parsed_arguments = ArgParse_command_line(args) # the result is a Dict{String,Any}
 	(isnothing(parsed_arguments)) && (return nothing)
-	#print_ArgParseSettings(parsed_arguments)
+	print_ArgParseSettings(parsed_arguments)
 
 	parsed_command = parsed_arguments["%COMMAND%"]
 	parsed_settings = parsed_arguments[parsed_command]
@@ -244,16 +578,17 @@ function main(args)
 	if parsed_command=="demo"
 		#println(parse_demo_settings(parsed_settings))
 		demo(parse_demo_settings(parsed_settings)...)
-	end
-
-	if parsed_command=="tonemapping"
+	elseif parsed_command=="tonemapping"
 		#println(parse_tonemapping_settings(parsed_settings))
 		tone_mapping(parse_tonemapping_settings(parsed_settings)...)
-	end
-
-	if parsed_command=="demo-animation"
+	elseif parsed_command=="demo_animation"
 		#println(parse_tonemapping_settings(parsed_settings))
 		demo_animation(parse_demoanimation_settings(parsed_settings)...)
+	elseif parsed_command=="render"
+		#println(parse_render_settings(parsed_settings))
+		render(parse_render_settings(parsed_settings)...)
+	else
+		throw(ArgumentError("unknown command $(parsed_command)"))
 	end
 
 	return nothing

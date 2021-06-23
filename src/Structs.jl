@@ -7,18 +7,26 @@
 
 const BLACK = RGB{Float32}(0.0, 0.0, 0.0)
 const WHITE = RGB{Float32}(1.0, 1.0, 1.0)
+
+function to_RGB(r::Int64, g::Int64, b::Int64)
+    return RGB{Float32}(r/255., g/255., b/255.)
+end
+
+function to_RGB(r::Float64, g::Float64, b::Float64)
+    return RGB{Float32}(r/255., g/255., b/255.)
+end
+
 mutable struct mutable_for_test
     num_rays::Int64
 end
 
 """
     to_RGB(r::Int64, g::Int64, b::Int64) :: RGB{Float32}
+    to_RGB(r::Float64, g::Float64, b::Float64) :: RGB{Float32}
 
 Return the RGB color with values inside the `[0,1]` interval.
 """
-function to_RGB(r::Int64, g::Int64, b::Int64)
-    return RGB{Float32}(r/255., g/255., b/255.)
-end
+to_RGB
 
 
 ##########################################################################################92
@@ -151,10 +159,13 @@ struct Vec
     x::Float64
     y::Float64
     z::Float64
-    Vec(x, y, z) = new(x, y, z)
+    Vec(x::Float64, y::Float64, z::Float64) = new(x, y, z)
     Vec() = new(0.0, 0.0, 0.0)
     Vec(P::Point) = new(P.x, P.y, P.z)
     Vec(v::SVector{4, Float64}) = new(v[1], v[2], v[3])
+    function Vec(x::T1, y::T2, z::T3) where {T1<:Number,T2<:Number, T3<:Number}
+        Vec(convert(Float64, x), convert(Float64, y), convert(Float64, z))
+    end
 end
 
 length(::Vec) = 3
@@ -602,13 +613,14 @@ See also: [`Shape`](@ref), [`Transformation`](@ref), [`Material`](@ref)
 struct Sphere <: Shape
     T::Transformation
     Material::Material
+    flag_pointlight::Bool
     AABB::AABB
     
-    Sphere(T::Transformation, M::Material) = new(T,M, AABB(Sphere, T))
-    Sphere(M::Material, T::Transformation) = new(T,M, AABB(Sphere, T))
-    Sphere(T::Transformation) = new(T, Material(), AABB(Sphere, T))
-    Sphere(M::Material) = new(Transformation(), M, AABB(Sphere, Transformation()))
-    Sphere() = new(Transformation(), Material(), AABB(Sphere, Transformation()))
+    Sphere(T::Transformation, M::Material, b::Bool=false) = new(T,M,b,AABB(Sphere, T))
+    Sphere(M::Material, T::Transformation, b::Bool=false) = new(T,M,b,AABB(Sphere, T))
+    Sphere(T::Transformation, b::Bool=false) = new(T, Material(), b, AABB(Sphere, T))
+    Sphere(M::Material, b::Bool=false) = new(Transformation(), M, b, AABB(Sphere, Transformation()))
+    Sphere(b::Bool=false) = new(Transformation(), Material(), b, AABB(Sphere, Transformation())
 end
 
 function AABB(::Type{Sphere}, T::Transformation)
@@ -635,6 +647,7 @@ function AABB(::Type{Sphere}, T::Transformation)
         minimum([v2[i].z for i in eachindex(v2)]) 
     )
     AABB(P1, P2)
+
 end
 
 """
@@ -656,13 +669,13 @@ See also: [`Shape`](@ref), [`Transformation`](@ref), [`Material`](@ref)
 struct Plane <: Shape
     T::Transformation
     Material::Material
+    flag_pointlight::Bool
     
-    Plane(T::Transformation, M::Material) = new(T,M)
-    Plane(M::Material, T::Transformation) = new(T,M)
-    Plane(T::Transformation) = new(T, Material())
-    Plane(M::Material) = new(Transformation(), M)
-    Plane() = new(Transformation(), Material())
-    #Plane(T=Transformation(), M=Material()) = new(T,M)
+    Plane(T::Transformation, M::Material, b::Bool=false) = new(T,M,b)
+    Plane(M::Material, T::Transformation, b::Bool=false) = new(T,M,b)
+    Plane(T::Transformation, b::Bool=false) = new(T, Material(), b)
+    Plane(M::Material, b::Bool=false) = new(Transformation(), M, b)
+    Plane(b::Bool=false) = new(Transformation(), Material(), b)
 end
 
 
@@ -685,13 +698,14 @@ See also: [`Shape`](@ref), [`Transformation`](@ref), [`Material`](@ref)
 struct Cube <: Shape
     T::Transformation
     Material::Material
+    flag_pointlight::Bool
     AABB::AABB
     
-    Cube(T::Transformation, M::Material) = new(T,M, AABB(Cube, T))
-    Cube(M::Material, T::Transformation) = new(T,M,  AABB(Cube, T))
-    Cube(T::Transformation) = new(T, Material(),  AABB(Cube, T))
-    Cube(M::Material) = new(Transformation(), M,  AABB(Cube, Transformation()))
-    Cube() = new(Transformation(), Material(), AABB(Cube, Transformation()))
+    Cube(T::Transformation, M::Material, b::Bool=false) = new(T,M,b, AABB(Cube, T))
+    Cube(M::Material, T::Transformation, b::Bool=false) = new(T,M,b,  AABB(Cube, T))
+    Cube(T::Transformation, b::Bool=false) = new(T, Material(), b,  AABB(Cube, T))
+    Cube(M::Material, b::Bool=false) = new(Transformation(), M, b,  AABB(Cube, Transformation()))
+    Cube(b::Bool=false) = new(Transformation(), Material(), b, AABB(Cube, Transformation()))
 end
 
 
@@ -724,6 +738,7 @@ end
 
 
 VERTEXES = SVector{3}(Point(√3/2, 0, 0), Point(0, 0.5, 0), Point(0, -0.5, 0))
+        
 """
     Triangle <: Shape(
         vertexes::SVector{3, Point} = 
@@ -744,14 +759,15 @@ See also: [`Shape`](@ref), [`Material`](@ref)
 struct Triangle <: Shape
     vertexes::SVector{3, Point}
     Material::Material
+    flag_pointlight::Bool
     
-    Triangle(v::SVector{3, Point}, M::Material) = new(v, M)
-    Triangle(P1::Point, P2::Point, P3::Point,  M::Material) = new(SVector{3}(P1,P2,P3), M)
-    Triangle(M::Material, v::SVector{3, Point}) = new(v, M)
-    Triangle(v::SVector{3, Point}) = new(v, Material())
-    Triangle(P1::Point, P2::Point, P3::Point) = new(SVector{3}(P1,P2,P3), Material())
-    Triangle(M::Material) = new(VERTEXES, M)
-    Triangle() = new(VERTEXES, Material())
+    Triangle(v::SVector{3, Point}, M::Material, b::Bool=false) = new(v, M, b)
+    Triangle(P1::Point, P2::Point, P3::Point,  M::Material, b::Bool=false) = new(SVector{3}(P1,P2,P3), M, b)
+    Triangle(M::Material, v::SVector{3, Point}, b::Bool=false) = new(v, M, b)
+    Triangle(v::SVector{3, Point}, b::Bool=false) = new(v, Material(), b)
+    Triangle(P1::Point, P2::Point, P3::Point, b::Bool=false) = new(SVector{3}(P1,P2,P3), Material(), b)
+    Triangle(M::Material, b::Bool=false) = new(VERTEXES, M, b)
+    Triangle(b::Bool=false) = new(VERTEXES, Material(),b)
 end
 
 """
@@ -791,7 +807,8 @@ struct Torus <: Shape
     Material::Material
     r::Float64
     R::Float64
-    Torus(T=Transformation(), M=Material(), r=0.5, R=1.0) = new(T, M, r, R)
+    flag_pointlight::Bool
+    Torus(T=Transformation(), M=Material(), r=0.5, R=1.0, b::Bool=false) = new(T, M, r, R, b)
 end
 
 
@@ -893,7 +910,7 @@ For the `PointLightRenderer` algorithm, you can also add point-lights source
 using `add_light!`, and `world` will keep a list of all of them.
 
 See also: [`Shape`](@ref), [`add_shape!`](@ref),
-[`PointLight`](@ref), [`add_light`](@ref), [`PointLightRenderer`](@ref)
+[`PointLight`](@ref), [`add_light!`](@ref), [`PointLightRenderer`](@ref)
 [`ray_intersection`](@ref), [`Ray`](@ref)
 """
 struct World
@@ -943,11 +960,15 @@ as it is really fast, but it produces boring images.
 
 See also: [`Renderer`](@ref), [`World`](@ref)
 """
-struct OnOffRenderer <: Renderer
+mutable struct OnOffRenderer <: Renderer
     world::World
     background_color::RGB{Float32}
     color::RGB{Float32}
     OnOffRenderer(w = World(), bc = BLACK, c = WHITE) = new(w, bc, c)
+end
+
+function copy(renderer::OnOffRenderer)
+    return OnOffRenderer(World(), renderer.background_color, renderer.color)
 end
 
 """
@@ -963,10 +984,14 @@ determine how to compute the final radiance.
 
 See also: [`Renderer`](@ref), [`World`](@ref)
 """
-struct FlatRenderer <: Renderer
+mutable struct FlatRenderer <: Renderer
     world::World
     background_color::RGB{Float32}
     FlatRenderer(w = World(), bc = BLACK) = new(w, bc)
+end
+
+function copy(renderer::FlatRenderer)
+    return FlatRenderer(World(), renderer.background_color)
 end
 
 """
@@ -974,7 +999,7 @@ end
             world::World, 
             background_color::RGB{Float32} = RGB{Float32}(0.0, 0.0, 0.0),
             pcg::PCG = PCG(),
-            N::Int64 = 10,
+            num_of_rays::Int64 = 10,
             max_depth::Int64 = 2,
             russian_roulette_limit::Int64 = 3
         )
@@ -998,22 +1023,34 @@ max_depth to `Inf`.
 
 - `num_of_rays::Int64` : number of `Ray`s generated for each integral evaluation
 
-- `max_depth::Int64` : maximal number recursive integrations
+- `max_depth::Int64` : maximal number recursive integrations; if a ray intersecting
+  a surface has `depth>max_depth`, the returned color is `RGB{Float32}(0,0,0)`
 
 - `russian_roulette_limit::Int64`: depth at whitch the Russian 
   Roulette algorithm begins
 
 See also: [`Renderer`](@ref), [`Ray`](@ref), [`World`](@ref), [`PCG`](@ref)
 """
-struct PathTracer <: Renderer
+mutable struct PathTracer <: Renderer
     world::World
     background_color::RGB{Float32}
     pcg::PCG
     num_of_rays::Int64
     max_depth::Int64
     russian_roulette_limit::Int64
-    PathTracer(w::World, bc=BLACK, pcg=PCG(), n=10, md=2, RRlim=3) = 
+    PathTracer(w::World = World(), bc=BLACK, pcg=PCG(), n=10, md=2, RRlim=3) = 
         new(w, bc, pcg, n, md, RRlim)
+end
+
+function copy(renderer::PathTracer)
+    return PathTracer(
+        World(), 
+        renderer.background_color, 
+        PCG(renderer.pcg.state, renderer.pcg.inc),
+        renderer.num_of_rays,
+        renderer.max_depth,
+        renderer.russian_roulette_limit,
+    )
 end
 
 """
@@ -1036,13 +1073,19 @@ A simple point-light tracing renderer.
 
 See also: [`Renderer`](@ref), [`World`](@ref)
 """
-struct PointLightRenderer <: Renderer
+mutable struct PointLightRenderer <: Renderer
     world::World
     background_color::RGB{Float32}
     ambient_color::RGB{Float32}
     PointLightRenderer(
-            w::World, 
+            w::World = World(), 
             bc=RGB{Float32}(0., 0., 0.), 
             ac=RGB{Float32}(0.1, 0.1, 0.1)
         ) = new(w, bc, ac)
 end
+
+function copy(renderer::PointLightRenderer)
+    return PointLightRenderer(World(), renderer.background_color, renderer.ambient_color)
+end
+
+##########################################################################################92

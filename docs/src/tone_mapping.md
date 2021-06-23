@@ -9,7 +9,7 @@ end
 ```@docs
 Raytracing.luminosity
 Raytracing.lum_max
-Raytracing.avr_lum
+Raytracing.avg_lum
 Raytracing.clamp
 Raytracing.normalize_image!
 Raytracing.clamp_image!

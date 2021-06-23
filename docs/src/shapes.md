@@ -6,8 +6,9 @@ end
 
 # Avaiable shapes
 
-```@index
-Pages = ["shapes.md"]
+```@docs
+ray_intersection(::Shape, ::Ray)
+ray_intersection(::World, ::Ray)
 ```
 
 ## Sphere
@@ -27,6 +28,16 @@ Raytracing.Plane
 Raytracing.plane_point_to_uv
 Raytracing.plane_normal
 Raytracing.ray_intersection(::Plane, ::Ray)
+```
+
+
+## Torus
+
+```@docs
+Raytracing.Torus
+Raytracing.torus_point_to_uv
+Raytracing.torus_normal
+Raytracing.ray_intersection(::Torus, ::Ray)
 ```
 
 ## Cube
