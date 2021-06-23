@@ -50,6 +50,31 @@ print(io::IO, uv::Vec2d) =  print(io, "Vec2d = (", uv.u, ", ", uv.v, ")" )
 print(uv::Vec2d) =  print(stdout, "Vec2d = (", uv.u, ", ", uv.v, ")" )
 
 
+# HitRecord print functions
+function println(io::IO, hit::HitRecord)
+     println(io, "HitRecord with  the following criteria:")
+     println(io, "world point :\t" , hit.world_point)
+     println(io, "normal :\t" , hit.normal)
+     println(io, "surface point :\t" , hit.surface_point)
+     println(io, "t of hit :\t" , hit.t)
+     println(io, "ray :\t" , hit.ray)
+     println(io, "shape = ", typeof(hit.shape))
+end
+print(io::IO, hit::HitRecord) = println(io, hit)
+println(hit::HitRecord) = println(stdout, hit)
+print(hit::HitRecord) = print(stdout, hit)
+
+
+# AABB print functions
+function println(io::IO, aabb::AABB)
+     println(io, "AABB with the following points:")
+     println(io, "minimum point m :\t" , aabb.m)
+     println(io, "maximum point M :\t" , aabb.M)
+end
+print(io::IO,  aabb::AABB) = println(io, aabb)
+println(aabb::AABB) = println(stdout, aabb)
+print(aabb::AABB) = print(stdout, aabb)
+
 function println(img::HDRimage, n::Int64=5)
      n>=1 || throw(ArgumentError("not a valid index; $n must be >0"))
      n<=50 || throw(ArgumentError("too big index; $n must be <=50"))

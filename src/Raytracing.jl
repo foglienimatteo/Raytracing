@@ -11,21 +11,22 @@ using Colors, Images, ImageIO, FileIO, Polynomials, Test
 using ColorTypes:RGB
 using LinearAlgebra, StaticArrays
 using Printf, ProgressBars
-using Documenter, DocStringExtensions, JSON, Dates
+using Documenter, DocStringExtensions, JSON, Dates,  Intervals
 
 import Base.:+; import Base.:-; import Base.:≈; import Base.:/; import Base.:*
-import Base: write, read, print, println, copy;
+import Base: write, read, print, println, copy, length;
+
 import LinearAlgebra.:⋅; import LinearAlgebra.:×
 
 
 
 # from Structs.jl
-export BLACK, WHITE, to_RGB, HDRimage, get_matrix, Parameters
+export BLACK, WHITE, mutable_for_test, to_RGB, HDRimage, get_matrix, Parameters
 export Point, Vec, Normal, VEC_X, VEC_Y, VEC_Z, Transformation
 export Ray, Camera, OrthogonalCamera, PerspectiveCamera, ImageTracer
 export Pigment, UniformPigment, CheckeredPigment, ImagePigment
 export BRDF, DiffuseBRDF, SpecularBRDF, Material
-export Shape, Sphere, Plane, Torus
+export Shape, Sphere, Plane, Torus, Triangle, Cube, AABB
 export Vec2d, HitRecord, PointLight, World
 export Renderer, OnOffRenderer, FlatRenderer, PathTracer, PointLightRenderer
 # from Operations.jl

@@ -16,6 +16,10 @@ function to_RGB(r::Float64, g::Float64, b::Float64)
     return RGB{Float32}(r/255., g/255., b/255.)
 end
 
+mutable struct mutable_for_test
+    num_rays::Int64
+end
+
 """
     to_RGB(r::Int64, g::Int64, b::Int64) :: RGB{Float32}
     to_RGB(r::Float64, g::Float64, b::Float64) :: RGB{Float32}
@@ -50,7 +54,7 @@ Define a image in the format 2D  High-Dynamic-Range.
 struct HDRimage
     width::Int64
     height::Int64
-    rgb_m::Array{RGB{Float32}} # Array
+    rgb_m::Array{RGB{Float32}}
     HDRimage(w,h) = new(w,h, fill(RGB(0.0, 0.0, 0.0), (w*h,)) )
     function HDRimage(w,h, rgb_m) 
         @assert size(rgb_m) == (w*h,)
@@ -163,6 +167,8 @@ struct Vec
         Vec(convert(Float64, x), convert(Float64, y), convert(Float64, z))
     end
 end
+
+length(::Vec) = 3
 
 const VEC_X = Vec(1.0, 0.0, 0.0)
 const VEC_Y = Vec(0.0, 1.0, 0.0)
@@ -556,6 +562,37 @@ defining different types of shapes that can be created:
 """
 abstract type Shape end
 
+
+
+
+"""
+    AABB <: Shape(
+        vertexes::SVector{6, Float32}
+    )
+
+An Axis-Aligned Boundary Box.
+
+This shape is not conceived to be rendered in the image, it has the only purpose
+to optimize the various `ray_intersection` functions.
+
+## Arguments
+
+- `vertexes::SVector{6, Float32}` : the 6 coordinates of the exterior vertexes
+  defining the AABB
+
+
+See also: [`Shape`](@ref), [`ray_intersection`](@ref)
+"""
+struct AABB <: Shape
+    m::Point
+    M::Point
+    AABB(P1::Point, P2::Point) = new(P1, P2)
+    AABB(p1x::Float64, p1y::Float64, p1z::Float64, p2x::Float64, p2y::Float64, p2z::Float64) = 
+        new(Point(p1x, p1y, p1z), Point(p2x, p2y, p2z))
+    AABB() = new(Point(-1.0, -1.0, -1.0), Point(1.0, 1.0, 1.0))
+end
+
+
 """
     Sphere <: Shape(
         T::Transformation = Transformation(),
@@ -577,12 +614,40 @@ struct Sphere <: Shape
     T::Transformation
     Material::Material
     flag_pointlight::Bool
+    AABB::AABB
     
-    Sphere(T::Transformation, M::Material, b::Bool=false) = new(T,M,b)
-    Sphere(M::Material, T::Transformation, b::Bool=false) = new(T,M,b)
-    Sphere(T::Transformation, b::Bool=false) = new(T, Material(), b)
-    Sphere(M::Material, b::Bool=false) = new(Transformation(), M, b)
-    Sphere() = new(Transformation(), Material(), false)
+    Sphere(T::Transformation, M::Material, b::Bool=false) = new(T,M,b,AABB(Sphere, T))
+    Sphere(M::Material, T::Transformation, b::Bool=false) = new(T,M,b,AABB(Sphere, T))
+    Sphere(T::Transformation, b::Bool=false) = new(T, Material(), b, AABB(Sphere, T))
+    Sphere(M::Material, b::Bool=false) = new(Transformation(), M, b, AABB(Sphere, Transformation()))
+    Sphere(b::Bool=false) = new(Transformation(), Material(), b, AABB(Sphere, Transformation())
+end
+
+function AABB(::Type{Sphere}, T::Transformation)
+    v1 = SVector{8, Point}(
+        Point(1.0, 1.0, 1.0),
+        Point(-1.0, 1.0, 1.0),
+        Point(1.0, -1.0, 1.0),
+        Point(1.0, 1.0, -1.0),
+        Point(1.0, -1.0, -1.0),
+        Point(-1.0, 1.0, -1.0),
+        Point(-1.0, -1.0, 1.0),
+        Point(-1.0, -1.0, -1.0),
+    )
+
+    v2 = SVector{8, Point}([T*p for p in v1])
+    P2 = Point(
+        maximum([v2[i].x for i in eachindex(v2)]),
+        maximum([v2[i].y for i in eachindex(v2)]),
+        maximum([v2[i].z for i in eachindex(v2)]) 
+    )
+    P1 = Point(
+        minimum([v2[i].x for i in eachindex(v2)]),
+        minimum([v2[i].y for i in eachindex(v2)]),
+        minimum([v2[i].z for i in eachindex(v2)]) 
+    )
+    AABB(P1, P2)
+
 end
 
 """
@@ -610,7 +675,99 @@ struct Plane <: Shape
     Plane(M::Material, T::Transformation, b::Bool=false) = new(T,M,b)
     Plane(T::Transformation, b::Bool=false) = new(T, Material(), b)
     Plane(M::Material, b::Bool=false) = new(Transformation(), M, b)
-    Plane() = new(Transformation(), Material(), false)
+    Plane(b::Bool=false) = new(Transformation(), Material(), b)
+end
+
+
+"""
+    Cube <: Shape(
+        T::Transformation = Transformation(),
+        Material::Material = Material()
+    )
+
+A 3D unit cube, i.e. an axis aligned cube with side 1 centered in the origin.
+
+## Arguments
+
+- `T::Transformation` : transformation associated to the cube.
+
+- `Material::Material` : material that constitutes the cube.
+
+See also: [`Shape`](@ref), [`Transformation`](@ref), [`Material`](@ref)
+"""
+struct Cube <: Shape
+    T::Transformation
+    Material::Material
+    flag_pointlight::Bool
+    AABB::AABB
+    
+    Cube(T::Transformation, M::Material, b::Bool=false) = new(T,M,b, AABB(Cube, T))
+    Cube(M::Material, T::Transformation, b::Bool=false) = new(T,M,b,  AABB(Cube, T))
+    Cube(T::Transformation, b::Bool=false) = new(T, Material(), b,  AABB(Cube, T))
+    Cube(M::Material, b::Bool=false) = new(Transformation(), M, b,  AABB(Cube, Transformation()))
+    Cube(b::Bool=false) = new(Transformation(), Material(), b, AABB(Cube, Transformation()))
+end
+
+
+function AABB(::Type{Cube}, T::Transformation)
+    v1 = SVector{8, Point}(
+        Point(0.5, 0.5, 0.5),
+        Point(-0.5, 0.5, 0.5),
+        Point(0.5, -0.5, 0.5),
+        Point(0.5, 0.5, -0.5),
+        Point(0.5, -0.5, -0.5),
+        Point(-0.5, 0.5, -0.5),
+        Point(-0.5, -0.5, 0.5),
+        Point(-0.5, -0.5, -0.5),
+    )
+
+    v2 = SVector{8, Point}([T*p for p in v1])
+    P2 = Point(
+        maximum([v2[i].x for i in eachindex(v2)]),
+        maximum([v2[i].y for i in eachindex(v2)]),
+        maximum([v2[i].z for i in eachindex(v2)]) 
+    )
+    P1 = Point(
+        minimum([v2[i].x for i in eachindex(v2)]),
+        minimum([v2[i].y for i in eachindex(v2)]),
+        minimum([v2[i].z for i in eachindex(v2)]) 
+    )
+    AABB(P1, P2)
+end
+
+
+
+VERTEXES = SVector{3}(Point(√3/2, 0, 0), Point(0, 0.5, 0), Point(0, -0.5, 0))
+        
+"""
+    Triangle <: Shape(
+        vertexes::SVector{3, Point} = 
+            SVector{3, Point}(Point(√3/2, 0, 0), Point(0, 0.5, 0), Point(0, -0.5, 0)),
+        Material::Material = Material()
+    )
+
+A 3D triangle.
+
+## Arguments
+
+- `vertexes::SVector{3, Point}` : points associated to the triangle.
+
+- `Material::Material` : material that constitutes the triangle.
+
+See also: [`Shape`](@ref), [`Material`](@ref)
+"""
+struct Triangle <: Shape
+    vertexes::SVector{3, Point}
+    Material::Material
+    flag_pointlight::Bool
+    
+    Triangle(v::SVector{3, Point}, M::Material, b::Bool=false) = new(v, M, b)
+    Triangle(P1::Point, P2::Point, P3::Point,  M::Material, b::Bool=false) = new(SVector{3}(P1,P2,P3), M, b)
+    Triangle(M::Material, v::SVector{3, Point}, b::Bool=false) = new(v, M, b)
+    Triangle(v::SVector{3, Point}, b::Bool=false) = new(v, Material(), b)
+    Triangle(P1::Point, P2::Point, P3::Point, b::Bool=false) = new(SVector{3}(P1,P2,P3), Material(), b)
+    Triangle(M::Material, b::Bool=false) = new(VERTEXES, M, b)
+    Triangle(b::Bool=false) = new(VERTEXES, Material(),b)
 end
 
 """
@@ -650,7 +807,8 @@ struct Torus <: Shape
     Material::Material
     r::Float64
     R::Float64
-    Torus(T=Transformation(), M=Material(), r=0.5, R=1.0) = new(T, M, r, R)
+    flag_pointlight::Bool
+    Torus(T=Transformation(), M=Material(), r=0.5, R=1.0, b::Bool=false) = new(T, M, r, R, b)
 end
 
 

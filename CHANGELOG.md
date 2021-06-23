@@ -2,6 +2,11 @@
 
 - added the `render` function and implemented lexer and parser; now it's possible to read a scene from a file and render it; see PR[#18](https://github.com/cosmofico97/Raytracing/pull/18)
 
+- Added the shape AABB, see PR[#22](https://github.com/cosmofico97/Raytracing/pull/22)
+  
+- Added the shape Cube, see PR[#21](https://github.com/cosmofico97/Raytracing/pull/21)
+
+- Added the shape Triangle, see PR[#20](https://github.com/cosmofico97/Raytracing/pull/20)
 
 # VERSION 0.5.0
 
@@ -19,30 +24,32 @@
 
 # VERSION 0.2.0
 
-- Modified `demo` function: now two possible world versions can be rendered
-- New struct for generate a better image considering lights and angles (`PathTracer`) and tests
-- New shape `Torus` with relative struct and functions
-- Implemented scalar and vector products between two `Normal` and between `Normal` and `Vec`
-- New struct `SpecularBRDF`
-- Implemented PCG new struct (`PCG`) and algorithm for random numbers
-- Functions to decide which type of render use
-- Functions to get the color from a pigment and evaluete it thanks to the BRDF
-- New structs for rendering (`OnOffRenderer`, `FlatRRenderer`) and tests
-- New struct for implement the material of a Shape (`Material`) and tests
-- New structs for BRDF implementtion (`BRDF`, `DiffuseBRDF`) and tests
-- New structs for pigment implementation (`Pigment`, `UniformPigment`, `CheckeredPigment`, `ImagePigment`) and tests
-- New struct from Shape: `Plane`
-- Modified operations and constructors between `Transformation` and `Normal`, `Vec` and `Point` for time optimization
-- Added test for `World`, modified test for `Sphere`
-- Added feature: now can create an animation
-- New interface from command line
-- Added test for camera orientation ([PR#8](https://github.com/cosmofico97/Raytracing/pull/8#issue-631504956))
-- Fixed bug in the code ([PR#7](https://github.com/cosmofico97/Raytracing/pull/7#issue-630790415))
+- Feature: it's possible to create animations of `demo` (required [ffmpeg](https://www.ffmpeg.org) software)
+  
+- Implemented `demo` function: two possible world versions can be rendered
+
+- Impleented an ortho-normal basis (ONB) generator algorithm based on [Duff et al. 2017](https://graphics.pixar.com/library/OrthonormalB/paper.pdf) 
+  
+- Implemented `PCG` random number generator (see Melissa E. O’Neill (2014), ["PCG: A Family of Simple Fast Space-Efficient Statistically Good Algorithms for Random Number Generation"](https://www.pcg-random.org/paper.html)
+
+- Implemented Renderers: `OnOffRenderer`, `FlatRRenderer`, `PathTracer`
+
+- Implemented BRDFs: `BRDF`, `DiffuseBRDF`, `SpecularBRDF`
+  
+- Implemented Pigments: `Pigment`, `UniformPigment`, `CheckeredPigment`, `ImagePigment`
+
+- Implemented Shapes: `Shape`, `Sphere`, `World`, `Plane`
+  
+- First bug fixed in the code (!); see PR[#7](https://github.com/cosmofico97/Raytracing/pull/7#issue-630790415))
+  
+- Implemented interface from command line
+  
 - Implemented a first main interface
-- Implemented structs: `Shape`, `Sphere`, `World` for a first image creation
 
 
 # VERSION 0.1.0
 
 - Added feature: now can convert from a .pfm image to .png and .tiff one 
+
 - Completed function for reading and writing a .pfm image file format
+  

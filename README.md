@@ -123,6 +123,7 @@ If you prefer to use the Julia REPL, first of all you need to include the softwa
 
 ```julia
 include("Raytracer.jl")
+
 ```
 
 You can obviously visualize the options for each function thanks to the help option (by typing `?`, than write the function name) and set the parameters in a dictionary-like sintax.

@@ -61,6 +61,9 @@ end
 
 ##########################################################################################92
 
+@testset "test_AABB" begin
+	include("test_AABB.jl")
+end
 
 @testset "test_Sphere" begin
 	include("test_Sphere.jl")
@@ -68,6 +71,14 @@ end
 
 @testset "test_Plane" begin
 	include("test_Plane.jl")
+end
+
+@testset "test_Cube" begin
+	include("test_Cube.jl")
+end
+
+@testset "test_Triangle" begin
+	include("test_Triangle.jl")
 end
 
 @testset "test_Shapes-World" begin
@@ -94,6 +105,9 @@ end
 	include("test_OrthoNormalBasis.jl")
 end
 
+@testset "test_Antialiasing" begin
+	include("test_antialiasing.jl")
+end
 
 ##########################################################################################92
 
@@ -108,3 +122,4 @@ end
 @testset "test_Demo-Render.jl" begin
 	include("test_Demo-Render.jl")
 end
+
