@@ -35,14 +35,19 @@
     "declared float from Command Line": null,
     "scene file": "examples/earth_and_sun.txt",
     "renderer": {
-        "algorithm": "Flat Renderer",
+        "algorithm": "Point-Light Renderer",
         "background color": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "color": {
             "r": 0.0,
             "g": 0.0,
             "b": 0.0
         }
     },
-    "rendering time (in s)": "38.466",
-    "time of start": "2021-6-23 : 1:8:36",
+    "rendering time (in s)": "56.104",
+    "time of start": "2021-6-23 : 11:38:32",
     "pfm output": "scene.pfm"
 }

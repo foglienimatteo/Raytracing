@@ -198,63 +198,91 @@ end
 
 
 """
-    parse_demo_settings(dict::Dict{String, Any}) 
+    parse_demo_settings(dict::Dict{String, T}) where {T}
         :: (
-            String, Point, String, Float64, Int64, Int64, String, String,
-            Bool, Bool, String, Int64, Int64, Int64
+            Renderer, Point, Vec, Float64, Int64, Int64, String, String,
+            Int64, String, Bool, Bool,
             )
 
-Parse a `Dict{String, T} where {T}` for the [`demo`](@ref) function.
+Parse a `Dict{String, T} where {T}` for the `demo` function.
 
 ## Input
 
-A `dict::Dict{String, T} where {T}
+A `dict::Dict{String, T} where {T}`
 
 ## Returns
 
-A tuple `(ct, cp, al, α, w, h, pfm, png, bp, bs, wt, ist, ise, spp)`
-containing the following variables; the corresponding keys are also showed:
+A tuple `(renderer, camera_type, camera_position, α, width, height, pfm, png,
+samples_per_pixel, world_type, bool_print, bool_savepfm)` containing the 
+following variables (the corresponding keys are also showed):
 
-- `ct::String = dict["camera_type"]` : set the perspective projection view:
-  - `ct=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
-  - `ct=="ort"`  -> set [`OrthogonalCamera`](@ref)
+- `renderer::Renderer = haskey(dict, "renderer") ? dict["renderer"] : dict["%COMMAND%"]` :
+  it's the renderer to be used (with a default empy `World` that will be populated
+  in the `demo` function); the possible keys are two, and must be used differently:
+    - the `dict["renderer"]` must contain the renderer itself (i.e. a `Renderer` object);
+      if this key exists, it has the priority on the latter key
+    - the `dict["%COMMAND%"]` must contain a string that identifies the type of renderer
+      to be used, i.e. one of the following strings:
+      - `"dict["%COMMAND%"]=>onoff"` -> [`OnOffRenderer`](@ref) algorithm 
+      - `"dict["%COMMAND%"]=>"flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
+      - `"dict["%COMMAND%"]=>"pathtracing"` -> [`PathTracer`](@ref) algorithm 
+      - `"dict["%COMMAND%"]=>"pointlight"` -> [`PointLightRenderer`](@ref) algorithm
+      Moreover, in this second case, you can specify the options for the correspoding
+      renderer through another dictionary associated with the kkey of the renderer name;
+      that options will be parsed thanks to the corresponding functions.
+      We shows in the next lines the key-value syntax described:
+      - `"onoff"=>Dict{String, T} where {T}` : parsed with [`parse_onoff_settings`](@ref)
+      - `"flat"=>Dict{String, T} where {T}` : parsed with [`parse_flat_settings`](@ref)
+      - `"pathtracer"=>Dict{String, T} where {T}` : parsed with [`parse_pathtracer_settings`](@ref)
+      - `"pointlight"=>Dict{String, T} where {T}` : parsed with [`parse_pointlight_settings`](@ref)
 
-- `cp::String = dict["camera_position"]` : "X,Y,Z" coordinates of the 
-  choosen observation point of view 
+- `camera_type::String = dict["camera_type"]` : set the perspective projection view;
+  it must be one of the following values, and this is checked with the 
+  `string2stringoneof` function:
+  - `"per"` -> set [`PerspectiveCamera`](@ref)  (default value)
+  - `"ort"`  -> set [`OrthogonalCamera`](@ref)
 
-- `al::String = dict["algorithm"]` : algorithm to be used in the rendered:
-  - `al=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
-  - `al=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
-  - `al=="pathtracing"` -> [`PathTracer`](@ref) algorithm 
-  - `algorithm=="pointlight"` -> [`PointLightRenderer`](@ref) algorithm
+- `camera_position::String = typeof(dict["camera_position"]) ∈ [Vec, Point] ? dict["camera_position"] :
+  string2vector(dict["camera_position"]) ` : "[X, Y, Z]" coordinates of the 
+  choosen observation point of view; it can be specified in two ways:
+  - if `typeof(dict["camera_position"])` is a `Vec` or a `Point`, it's passed as-is
+  - else, it must be a `String` written in the form "[X, Y, Z]" , and it's parsed through 
+    string2vector` to a `Vec` object
 
-- `α::String = dict["alpha"]` : choosen angle of rotation respect to vertical 
-  (i.e. z) axis
+- `α::String = dict["alpha"]` : choosen angle of rotation respect to vertical (i.e. z) 
+  axis with a right-handed rule convention (clockwise rotation for entering (x,y,z)-axis 
+  corresponds to a positive input rotation angle)
 
-- `w::Int64 = dict["width"]` : number of pixels on the horizontal axis to be rendered
+- `width::Int64 = string2evenint64(dict["width"])` : number of pixels on the horizontal 
+  axis to be rendered; it's converted through `string2evenint64` to a even positive integer.
 
-- `h::Int64 = dict["height"]` : number of pixels on the vertical axis to be rendered 
+- `height::Int64 = string2evenint64(dict["height"])` : number of pixels on the vertical
+  axis to be rendered; it's converted through `string2evenint64` to a even positive integer.
 
-- `pfm::String = dict["set_pfm_name"]` : output pfm filename
+- `pfm::String = dict["set_pfm_name"]` : output pfm filename (default `"demo.pfm"`)
 
-- `png::String` = dict["set_png_name"]` : output LDR filename
+- `png::String` = dict["set_png_name"]` : output LDR filename (default `"demo.png"`)
 
-- `bp::Bool = dict["bool_print"]` : if `true`, WIP message of `demo` 
-  function are printed (otherwise no)
+- `samples_per_pixel::Int64  = dict["samples_per_pixel"]` : number of ray to be 
+  generated for each pixel, implementing the anti-aliasing algorithm; it must be 
+  a perfect integer square (0,1,4,9,...) and this is checked with the 
+  `string2rootint64` function; if 0 (default value) is choosen, no anti-aliasing 
+  occurs, and only one pixel-centered ray is fired for each pixel.
 
-- `bs::Bool = dict["bool_savepfm"]` : if `true`, `demo` function saves the 
-  pfm file to disk
+- `world_type::String = dict["world_type"]` : type of the world to be rendered; it
+  must be `"A"` or `"B"`, and this is checked with the `string2stringoneof` function
 
-- `wt::String = dict["world_type"]` : type of the world to be rendered
+- `bool_print::Bool = dict["bool_print"]` : if `true` (default value), WIP message of 
+  `demo` function are printed (otherwise no; it's useful for the `demo_animation` 
+  function)
 
-- `ist::Int64 = dict["init_state"]` : initial state of the PCG generator
+- `bool_savepfm::Bool = dict["bool_savepfm"]` : if `true` (default value), `demo` 
+  function saves the pfm file to disk (otherwise no; it's useful for the 
+  `demo_animation` function)
 
-- `ise::Int64 = dict["init_seq"]` : initial sequence of the PCG generator
-
-- `spp::Int64  = dict["samples_per_pixel"]` : number of ray to be 
-  generated for each pixel
-
-See also:  [`demo`](@ref), [`Point`](@ref), [`PCG`](@ref)
+See also:  [`demo`](@ref), [`demo_animation`](@ref), [`Renderer`](@ref),
+[`Vec`](@ref), [`string2evenint64`](@ref), [`string2stringoneof`](@ref), 
+[`string2positive`](@ref), [`string2vector`](@ref), [`string2rootint64`](@ref)
 """
 function parse_demo_settings(dict::Dict{String, T}) where {T}
 
@@ -322,7 +350,10 @@ function parse_demo_settings(dict::Dict{String, T}) where {T}
     world_type::String = haskey(dict, "world_type") ? 
         string2stringoneof(dict["world_type"], DEMO_WORLD_TYPES) : "A"
 
-    samples_per_pixel::Int64 = haskey(dict, "samples_per_pixel") ? string2evenint64(dict["samples_per_pixel"]) : 0
+    samples_per_pixel::Int64 = haskey(dict, "samples_per_pixel") ? begin
+        check = string2rootint64(dict["samples_per_pixel"])
+        string2evenint64(dict["samples_per_pixel"]) 
+        end : 0
 
     bool_print::Bool = haskey(dict, "bool_print") ?  dict["bool_print"] : true
     
@@ -344,9 +375,12 @@ end
 
 """
     parse_demoanimation_settings(dict::Dict{String, T}) where {T}
-        :: (String, String, Int64, Int64, String, String, Int64)
+        :: (
+            Renderer, String, Vec, Int64, Int64, String,
+            Int64, String,
+            )
 
-Parse a `Dict{String, T} where {T}` for the [`demo_animation`](@ref) function.
+Parse a `Dict{String, T} where {T}` for the `demo_animation` function.
 
 ## Input
 
@@ -354,31 +388,65 @@ A `dict::Dict{String, T} where {T}`
 
 ## Returns
 
-A tuple `(ct, al, w, h, wt, anim, spp)` containing the following
-variables; the corresponding keys are also showed:
+A tuple `(renderer, camera_type, camera_position, width, height, anim, 
+samples_per_pixel, world_type)` containing the following variables 
+(the corresponding keys are also showed):
 
-- `ct::String = dict["camera_type"]` : set the perspective projection view:
-		- `ct=="per"` -> set [`PerspectiveCamera`](@ref)  (default value)
-		- `ct=="ort"`  -> set [`OrthogonalCamera`](@ref)
+- `renderer::Renderer = haskey(dict, "renderer") ? dict["renderer"] : dict["%COMMAND%"]` :
+  it's the renderer to be used (with a default empy `World` that will be populated
+  in the `demo` function); the possible keys are two, and must be used differently:
+    - the `dict["renderer"]` must contain the renderer itself (i.e. a `Renderer` object);
+      if this key exists, it has the priority on the latter key
+    - the `dict["%COMMAND%"]` must contain a string that identifies the type of renderer
+      to be used, i.e. one of the following strings:
+      - `"dict["%COMMAND%"]=>onoff"` -> [`OnOffRenderer`](@ref) algorithm 
+      - `"dict["%COMMAND%"]=>"flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
+      - `"dict["%COMMAND%"]=>"pathtracing"` -> [`PathTracer`](@ref) algorithm 
+      - `"dict["%COMMAND%"]=>"pointlight"` -> [`PointLightRenderer`](@ref) algorithm
+      Moreover, in this second case, you can specify the options for the correspoding
+      renderer through another dictionary associated with the kkey of the renderer name;
+      that options will be parsed thanks to the corresponding functions.
+      We shows in the next lines the key-value syntax described:
+      - `"onoff"=>Dict{String, T} where {T}` : parsed with [`parse_onoff_settings`](@ref)
+      - `"flat"=>Dict{String, T} where {T}` : parsed with [`parse_flat_settings`](@ref)
+      - `"pathtracer"=>Dict{String, T} where {T}` : parsed with [`parse_pathtracer_settings`](@ref)
+      - `"pointlight"=>Dict{String, T} where {T}` : parsed with [`parse_pointlight_settings`](@ref)
 
-- `al::String = dict["algorithm"]` : algorithm to be used in the rendered:
-  - `al=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
-  - `al=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
-  - `al=="pathtracing"` -> [`PathTracer`](@ref) algorithm 
-  - `algorithm=="pointlight"` -> [`PointLightRenderer`](@ref) algorithm
+- `camera_type::String = dict["camera_type"]` : set the perspective projection view;
+  it must be one of the following values, and this is checked with the 
+  `string2stringoneof` function:
+  - `"per"` -> set [`PerspectiveCamera`](@ref)  (default value)
+  - `"ort"`  -> set [`OrthogonalCamera`](@ref)
 
-- `w::Int64 = dict["width"]` : number of pixels on the horizontal axis to be rendered 
+- `camera_position::String = typeof(dict["camera_position"]) ∈ [Vec, Point] ? dict["camera_position"] :
+  string2vector(dict["camera_position"]) ` : "[X, Y, Z]" coordinates of the 
+  choosen observation point of view; it can be specified in two ways:
+  - if `typeof(dict["camera_position"])` is a `Vec` or a `Point`, it's passed as-is
+  - else, it must be a `String` written in the form "[X, Y, Z]" , and it's parsed through 
+    string2vector` to a `Vec` object
 
-- `h::Int64 = dict["height"]` : width and height of the rendered image
+- `width::Int64 = string2evenint64(dict["width"])` : number of pixels on the horizontal 
+  axis to be rendered; it's converted through `string2evenint64` to a even positive integer.
 
-- `wt::String = dict["world_type"]` : type of the world to be rendered
+- `height::Int64 = string2evenint64(dict["height"])` : number of pixels on the vertical
+  axis to be rendered; it's converted through `string2evenint64` to a even positive integer.
 
-- `anim::String = dict["set_anim_name"]` : output animation name
+- `anim::String = dict["set_anim_name"]` : output animation filename (default 
+  `"demo_animation.mp4"`)
 
-- `spp::Int64  = dict["samples_per_pixel"]` : number of ray to be 
-  generated for each pixel
+- `samples_per_pixel::Int64  = dict["samples_per_pixel"]` : number of ray to be 
+  generated for each pixel, implementing the anti-aliasing algorithm; it must be 
+  a perfect integer square (0,1,4,9,...) and this is checked with the 
+  `string2rootint64` function; if 0 (default value) is choosen, no anti-aliasing 
+  occurs, and only one pixel-centered ray is fired for each pixel.
 
-See also:  [`demo_animation`](@ref), [`demo`](@ref)
+- `world_type::String = dict["world_type"]` : type of the world to be rendered; it
+  must be `"A"` or `"B"`, and this is checked with the `string2stringoneof` function
+
+
+See also:  [`demo`](@ref), [`demo_animation`](@ref), [`Renderer`](@ref),
+[`Vec`](@ref), [`string2evenint64`](@ref), [`string2stringoneof`](@ref), 
+[`string2positive`](@ref), [`string2vector`](@ref), [`string2rootint64`](@ref)
 """
 function parse_demoanimation_settings(dict::Dict{String, T}) where {T}
 
@@ -433,7 +501,10 @@ function parse_demoanimation_settings(dict::Dict{String, T}) where {T}
 
     anim::String = haskey(dict, "set_anim_name") ? dict["set_anim_name"] : "demo_animation.mp4"
 
-    samples_per_pixel::Int64 = haskey(dict, "samples_per_pixel") ? string2evenint64(dict["samples_per_pixel"]) : 0
+    samples_per_pixel::Int64 = haskey(dict, "samples_per_pixel") ? begin
+        check = string2rootint64(dict["samples_per_pixel"])
+        string2evenint64(dict["samples_per_pixel"]) 
+        end : 0
 
     world_type::String = haskey(dict, "world_type") ? 
         string2stringoneof(dict["world_type"], DEMO_WORLD_TYPES) : "A"
@@ -449,66 +520,103 @@ end
 ##########################################################################################92
 
 
+
 """
-    parse_render_settings(dict::Dict{String, Any}) 
+    parse_render_settings(dict::Dict{String, T}) where {T}
         :: (
-            String, Union{String, Nothing}, Union{Point, Nothing}, String,
-            Float64, Int64, Int64, String, String, Bool, Bool, Int64, 
-            Int64, Int64
+            String, Renderer, Point, Vec, Float64, Int64, Int64, String,
+            String, Int64, String, Bool, Bool, 
             )
 
-Parse a `Dict{String, T} where {T}` for the [`render`](@ref) function.
+Parse a `Dict{String, T} where {T}` for the `render` function.
 
 ## Input
 
-A `dict::Dict{String, T} where {T}
+A `dict::Dict{String, T} where {T}`
 
 ## Returns
 
-A tuple `(sf, ct, cp, al, α, w, h, pfm, png, bp, bs,  ist, ise, spp)`
-containing the following variables; the corresponding keys are also showed:
+A tuple `(scenefile, renderer, camera_type, camera_position, α, width, height, pfm, png,
+samples_per_pixel, world_type, bool_print, bool_savepfm, declare_float,)` containing the 
+following variables (the corresponding keys are also showed):
 
-- `sf::String = dict["scenefile"]` : input scene file name (required)
+- `scenefile::String = dict["scenefile"]` : name of the scene file to be rendered;
+  it must be written with the correct syntax, see the [`tutorial_basic_sintax.txt`](../examples/tutorial_basic_sintax.txt)
+  and the [`demo_world_B.txt`](../examples/demo_world_B.txt) files.
 
-- `ct::Union{String, Nothing} = dict["camera_type"]` : set the perspective projection view:
-  - `ct=="per"` -> set [`PerspectiveCamera`](@ref) 
-  - `ct=="ort"`  -> set [`OrthogonalCamera`](@ref)
-  - `nothing` : default return value if not specified
+- `renderer::Renderer = haskey(dict, "renderer") ? dict["renderer"] : dict["%COMMAND%"]` :
+  it's the renderer to be used (with a default empy `World` that will be populated
+  in the `demo` function); the possible keys are two, and must be used differently:
+    - the `dict["renderer"]` must contain the renderer itself (i.e. a `Renderer` object);
+      if this key exists, it has the priority on the latter key
+    - the `dict["%COMMAND%"]` must contain a string that identifies the type of renderer
+      to be used, i.e. one of the following strings:
+      - `"dict["%COMMAND%"]=>onoff"` -> [`OnOffRenderer`](@ref) algorithm 
+      - `"dict["%COMMAND%"]=>"flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
+      - `"dict["%COMMAND%"]=>"pathtracing"` -> [`PathTracer`](@ref) algorithm 
+      - `"dict["%COMMAND%"]=>"pointlight"` -> [`PointLightRenderer`](@ref) algorithm
+      Moreover, in this second case, you can specify the options for the correspoding
+      renderer through another dictionary associated with the kkey of the renderer name;
+      that options will be parsed thanks to the corresponding functions.
+      We shows in the next lines the key-value syntax described:
+      - `"onoff"=>Dict{String, T} where {T}` : parsed with [`parse_onoff_settings`](@ref)
+      - `"flat"=>Dict{String, T} where {T}` : parsed with [`parse_flat_settings`](@ref)
+      - `"pathtracer"=>Dict{String, T} where {T}` : parsed with [`parse_pathtracer_settings`](@ref)
+      - `"pointlight"=>Dict{String, T} where {T}` : parsed with [`parse_pointlight_settings`](@ref)
 
-- `cp::Union{String, Nothing} = dict["camera_position"]` : "X,Y,Z" coordinates of the 
-  choosen observation point of view (`nothing` default return value, else `Point(X,Y,Z)`)
+- `camera_type::String = dict["camera_type"]` : set the perspective projection view;
+  it must be one of the following values, and this is checked with the 
+  `string2stringoneof` function:
+  - `"per"` -> set [`PerspectiveCamera`](@ref)  (default value)
+  - `"ort"`  -> set [`OrthogonalCamera`](@ref)
 
-- `al::String = dict["algorithm"]` : algorithm to be used in the rendered:
-  - `al=="onoff"` -> [`OnOffRenderer`](@ref) algorithm 
-  - `al=="flat"` -> [`FlatRenderer`](@ref) algorithm (default value)
-  - `al=="pathtracing"` -> [`PathTracer`](@ref) algorithm 
-  - `algorithm=="pointlight"` -> [`PointLightRenderer`](@ref) algorithm
+- `camera_position::String = typeof(dict["camera_position"]) ∈ [Vec, Point] ? dict["camera_position"] :
+  string2vector(dict["camera_position"]) ` : "[X, Y, Z]" coordinates of the 
+  choosen observation point of view; it can be specified in two ways:
+  - if `typeof(dict["camera_position"])` is a `Vec` or a `Point`, it's passed as-is
+  - else, it must be a `String` written in the form "[X, Y, Z]" , and it's parsed through 
+    string2vector` to a `Vec` object
 
-- `α::String = dict["alpha"]` : choosen angle of rotation respect to vertical 
-  (i.e. z) axis
+- `α::String = dict["alpha"]` : choosen angle of rotation respect to vertical (i.e. z) 
+  axis with a right-handed rule convention (clockwise rotation for entering (x,y,z)-axis 
+  corresponds to a positive input rotation angle)
 
-- `w::Int64 = dict["width"]` : number of pixels on the horizontal axis to be rendered
+- `width::Int64 = string2evenint64(dict["width"])` : number of pixels on the horizontal 
+  axis to be rendered; it's converted through `string2evenint64` to a even positive integer.
 
-- `h::Int64 = dict["height"]` : number of pixels on the vertical axis to be rendered 
+- `height::Int64 = string2evenint64(dict["height"])` : number of pixels on the vertical
+  axis to be rendered; it's converted through `string2evenint64` to a even positive integer.
 
-- `pfm::String = dict["set_pfm_name"]` : output pfm filename
+- `pfm::String = dict["set_pfm_name"]` : output pfm filename (default `"scene.pfm"`)
 
-- `png::String` = dict["set_png_name"]` : output LDR filename
+- `png::String` = dict["set_png_name"]` : output LDR filename (default `"scene.png"`)
 
-- `bp::Bool = dict["bool_print"]` : if `true`, WIP message of `render` 
-  function are printed (otherwise no)
+- `samples_per_pixel::Int64  = dict["samples_per_pixel"]` : number of ray to be 
+  generated for each pixel, implementing the anti-aliasing algorithm; it must be 
+  a perfect integer square (0,1,4,9,...) and this is checked with the 
+  `string2rootint64` function; if 0 (default value) is choosen, no anti-aliasing 
+  occurs, and only one pixel-centered ray is fired for each pixel.
 
-- `bs::Bool = dict["bool_savepfm"]` : if `true`, `render` function saves the 
-  pfm file to disk
+- `bool_print::Bool = dict["bool_print"]` : if `true` (default value), WIP message of 
+  `demo` function are printed (otherwise no; it's useful for the `demo_animation` 
+  function)
 
-- `ist::Int64 = dict["init_state"]` : initial state of the PCG generator
+- `bool_savepfm::Bool = dict["bool_savepfm"]` : if `true` (default value), `demo` 
+  function saves the pfm file to disk (otherwise no; it's useful for the 
+  `demo_animation` function)
 
-- `ise::Int64 = dict["init_seq"]` : initial sequence of the PCG generator
+- `declare_float::Union{Dict{String, Float64}, Nothing} = declare_float2dict(dict["declare_float"])` 
+  : an option for the command line to manually override the values of the float variables in 
+  the scene file.
+  The input `dict["declare_float"]` must be a `String` written such as `"var1:0.1, var2 : 2.5"`; 
+  such a string is parsed through the `declare_float2dict` in a `Dict{String, Float64}` 
+  where each overriden variable name (the key) is associated with its float value 
+  (`declare_float=>Dict("var1"=>0.1, "var2"=>2.5)`)
 
-- `spp::Int64  = dict["samples_per_pixel"]` : number of ray to be 
-  generated for each pixel
-
-See also:  [`render`](@ref), [`Point`](@ref), [`PCG`](@ref)
+See also:  [`render`](@ref),  [`Renderer`](@ref),
+[`Vec`](@ref), [`string2evenint64`](@ref), [`string2stringoneof`](@ref), 
+[`string2positive`](@ref), [`string2vector`](@ref), [`string2rootint64`](@ref),
+[`declare_float2dict`](@ref)
 """
 function parse_render_settings(dict::Dict{String, T}) where {T}
 
@@ -566,7 +674,10 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
     
     bool_savepfm::Bool = haskey(dict, "bool_savepfm") ? dict["bool_savepfm"] : true
 
-    samples_per_pixel::Int64 = haskey(dict, "samples_per_pixel") ? string2evenint64(dict["samples_per_pixel"]) : 0
+    samples_per_pixel::Int64 = haskey(dict, "samples_per_pixel") ? begin
+        check = string2rootint64(dict["samples_per_pixel"])
+        string2evenint64(dict["samples_per_pixel"]) 
+        end : 0
 
     declare_float::Union{Dict{String, Float64}, Nothing} = haskey(dict, "declare_float") ?
         declare_float2dict(dict["declare_float"]) : 
@@ -600,8 +711,8 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
             α, 
             width, height, 
             pfm, png, 
-            bool_print, bool_savepfm, 
             samples_per_pixel, 
+            bool_print, bool_savepfm, 
             declare_float,
         )
 end

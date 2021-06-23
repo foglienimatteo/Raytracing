@@ -101,9 +101,9 @@ function render(
      	height::Int64 = 480, 
      	pfm_output::String = "scene.pfm", 
         	png_output::String = "scene.png",
+          samples_per_pixel::Int64 = 0,
 		bool_print::Bool = true,
 		bool_savepfm::Bool = true,
-		samples_per_pixel::Int64 = 0,
           declare_float::Union{Dict{String,Float64}, Nothing} = nothing,
      )
 
