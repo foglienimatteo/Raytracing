@@ -8,7 +8,7 @@
 
 """
     parse_tonemapping_settings(dict::Dict{String, Any}) 
-        :: (String, String, Float64, Float64)
+        :: (String, String, Float64, Float64, Bool)
 
 Parse a `Dict{String, T} where {T}` for the [`tone_mapping`](@ref) function.
 
@@ -18,7 +18,7 @@ A `dict::Dict{String, T} where {T}`
 
 ## Returns
 
-A tuple `(pfm, png, a, γ)` containing:
+A tuple `(pfm, png, a, γ, ONLY_FOR_TESTS)` containing:
 
 - `pfm::String = dict["infile"]` : input pfm filename (required)
 
@@ -30,11 +30,15 @@ A tuple `(pfm, png, a, γ)` containing:
 - `γ::Float64 = string2positive(dict["gamma"])` : gamma factor (default = 1.0); it's converted 
   through `string2positive` to a positive floating point number.
 
+- `ONLY_FOR_TESTS::Bool = dict["ONLY_FOR_TESTS"]` : it's a bool variable conceived only to
+  test the correct behaviour of the renderer for the input arguments; if set to `true`, 
+  no rendering is made!
+
 See also:  [`tone_mapping`](@ref), [`string2positive`](@ref)
 """
 function parse_tonemapping_settings(dict::Dict{String, T}) where {T}
 
-    keys = ["infile", "outfile", "alpha", "gamma"]
+    keys = ["infile", "outfile", "alpha", "gamma", "ONLY_FOR_TESTS"]
 
     for pair in dict
         if (pair[1] in keys) ==false
@@ -58,7 +62,9 @@ function parse_tonemapping_settings(dict::Dict{String, T}) where {T}
 
     γ::Float64 = haskey(dict, "gamma") ? string2positive(dict["gamma"]) : 1.0
 
-    return (pfm, png, a, γ)
+    ONLY_FOR_TESTS::Bool = haskey(dict, "ONLY_FOR_TESTS") ? dict["ONLY_FOR_TESTS"] : false
+
+    return (pfm, png, a, γ, ONLY_FOR_TESTS)
 end
 
 
@@ -77,8 +83,8 @@ A `dict::Dict{String, T} where {T}`
 
 ## Returns
 
-A tuple `(World(), background_color, color)` containing the following variables 
-(the corresponding keys are also showed):
+A tuple `(World(), background_color, color)` containing the  
+following variables (the corresponding keys are also showed):
 
 - `World():: World` : is the default constructor of the `World` class, which creates
   an empty world; it will be populated in the function that will use the renderer.
@@ -122,7 +128,6 @@ function parse_onoff_settings(dict::Dict{String, T}) where {T}
         string2color(dict["color"]) : 
         RGB{Float32}(1.0, 1.0, 1.0)
 
-  
     return (World(), background_color, color)
 end
 
@@ -175,8 +180,7 @@ function parse_flat_settings(dict::Dict{String, T}) where {T}
         string2color(dict["background_color"]) : 
         RGB{Float32}(0.0, 0.0, 0.0)
 
-  
-    return (World(), background_color)
+    return (World(), background_color,)
 end
 
 
@@ -193,7 +197,7 @@ A `dict::Dict{String, T} where {T}`
 ## Returns
 
 A tuple `(World(), background_color, PCG(init_state, init_seq), num_of_rays, 
-max_depth, russian_roulette_limit)` containing the following variables 
+max_depth, russian_roulette_limit, ONLY_FOR_TESTS)` containing the following variables 
 (the corresponding keys are also showed):
 
 - `World():: World` : is the default constructor of the `World` class, which creates
@@ -236,7 +240,7 @@ function parse_pathtracer_settings(dict::Dict{String, T}) where {T}
     keys = [
         "init_state", "init_seq", 
         "background_color", "num_of_rays", "max_depth",
-        "russian_roulette_limit"
+        "russian_roulette_limit",
     ]
 
     for pair in dict
@@ -265,12 +269,11 @@ function parse_pathtracer_settings(dict::Dict{String, T}) where {T}
     russian_roulette_limit::Int64 = haskey(dict, "russian_roulette_limit") ? 
         string2int64(dict["russian_roulette_limit"]) : 2
 
-
     return (World(),
             background_color,
             PCG(init_state, init_seq), 
             num_of_rays, max_depth, 
-            russian_roulette_limit
+            russian_roulette_limit,
             )
 end
 
@@ -288,7 +291,7 @@ A `dict::Dict{String, T} where {T}`
 
 ## Returns
 
-A tuple `(World(), background_color, color)` containing the following variables 
+A tuple `(World(), background_color, color, ONLY_FOR_TESTS)` containing the following variables 
 (the corresponding keys are also showed):
 
 - `World():: World` : is the default constructor of the `World` class, which creates
@@ -334,7 +337,6 @@ function parse_pointlight_settings(dict::Dict{String, T}) where {T}
         string2color(dict["ambient_color"]) : 
         RGB{Float32}(0.0, 0.0, 0.0)
 
-  
     return (World(), background_color, ambient_color)
 end
 
@@ -346,7 +348,7 @@ end
     parse_demo_settings(dict::Dict{String, T}) where {T}
         :: (
             Renderer, Point, Vec, Float64, Int64, Int64, String, String,
-            Int64, String, Bool, Bool,
+            Int64, String, Bool, Bool, Bool,
             )
 
 Parse a `Dict{String, T} where {T}` for the `demo` function.
@@ -425,6 +427,10 @@ following variables (the corresponding keys are also showed):
   function saves the pfm file to disk (otherwise no; it's useful for the 
   `demo_animation` function)
 
+- `ONLY_FOR_TESTS::Bool = dict["ONLY_FOR_TESTS"]` : it's a bool variable conceived only to
+  test the correct behaviour of the renderer for the input arguments; if set to `true`, 
+  no rendering is made!
+
 See also:  [`demo`](@ref), [`demo_animation`](@ref), [`Renderer`](@ref),
 [`Vec`](@ref), [`string2evenint64`](@ref), [`string2stringoneof`](@ref), 
 [`string2positive`](@ref), [`string2vector`](@ref), [`string2rootint64`](@ref)
@@ -438,6 +444,7 @@ function parse_demo_settings(dict::Dict{String, T}) where {T}
         "set_pfm_name", "set_png_name", 
         "samples_per_pixel", "world_type",
         "bool_print", "bool_savepfm",  
+        "ONLY_FOR_TESTS",
     ], RENDERERS)
 
     for pair in dict
@@ -504,6 +511,9 @@ function parse_demo_settings(dict::Dict{String, T}) where {T}
     
     bool_savepfm::Bool = haskey(dict, "bool_savepfm") ? dict["bool_savepfm"] : true
 
+    ONLY_FOR_TESTS::Bool = haskey(dict, "ONLY_FOR_TESTS") ? dict["ONLY_FOR_TESTS"] : false
+
+
     return (
             renderer,
             camera_type,
@@ -514,6 +524,7 @@ function parse_demo_settings(dict::Dict{String, T}) where {T}
             samples_per_pixel,
             world_type,
             bool_print, bool_savepfm, 
+            ONLY_FOR_TESTS,
         )
 end
 
@@ -522,7 +533,7 @@ end
     parse_demoanimation_settings(dict::Dict{String, T}) where {T}
         :: (
             Renderer, String, Vec, Int64, Int64, String,
-            Int64, String,
+            Int64, String, Bool,
             )
 
 Parse a `Dict{String, T} where {T}` for the `demo_animation` function.
@@ -588,6 +599,9 @@ samples_per_pixel, world_type)` containing the following variables
 - `world_type::String = dict["world_type"]` : type of the world to be rendered; it
   must be `"A"` or `"B"`, and this is checked with the `string2stringoneof` function
 
+- `ONLY_FOR_TESTS::Bool = dict["ONLY_FOR_TESTS"]` : it's a bool variable conceived only to
+  test the correct behaviour of the renderer for the input arguments; if set to `true`, 
+  no rendering is made!
 
 See also:  [`demo`](@ref), [`demo_animation`](@ref), [`Renderer`](@ref),
 [`Vec`](@ref), [`string2evenint64`](@ref), [`string2stringoneof`](@ref), 
@@ -600,6 +614,7 @@ function parse_demoanimation_settings(dict::Dict{String, T}) where {T}
         "camera_type", "camera_position",
         "width", "height",  "world_type",
         "set_anim_name", "samples_per_pixel",
+        "ONLY_FOR_TESTS",
     ], RENDERERS)
 
     for pair in dict
@@ -654,11 +669,15 @@ function parse_demoanimation_settings(dict::Dict{String, T}) where {T}
     world_type::String = haskey(dict, "world_type") ? 
         string2stringoneof(dict["world_type"], DEMO_WORLD_TYPES) : "A"
 
+    ONLY_FOR_TESTS::Bool = haskey(dict, "ONLY_FOR_TESTS") ? dict["ONLY_FOR_TESTS"] : false
+
 
     return (renderer, 
             camera_type, camera_position,
             width, height, anim, 
-            samples_per_pixel, world_type)
+            samples_per_pixel, world_type, 
+            ONLY_FOR_TESTS
+            )
 end
 
 
@@ -669,8 +688,8 @@ end
 """
     parse_render_settings(dict::Dict{String, T}) where {T}
         :: (
-            String, Renderer, Point, Vec, Float64, Int64, Int64, String,
-            String, Int64, String, Bool, Bool, 
+            String, Renderer, String, Vec, Float64, Int64, Int64, String,
+            String, Int64, Bool, Bool, Dict{String, Float64}, Bool,
             )
 
 Parse a `Dict{String, T} where {T}` for the `render` function.
@@ -682,8 +701,8 @@ A `dict::Dict{String, T} where {T}`
 ## Returns
 
 A tuple `(scenefile, renderer, camera_type, camera_position, α, width, height, pfm, png,
-samples_per_pixel, world_type, bool_print, bool_savepfm, declare_float,)` containing the 
-following variables (the corresponding keys are also showed):
+samples_per_pixel, world_type, bool_print, bool_savepfm, declare_float, ONLY_FOR_TESTS)` 
+containing the following variables (the corresponding keys are also showed):
 
 - `scenefile::String = dict["scenefile"]` : name of the scene file to be rendered;
   it must be written with the correct syntax, see the [`tutorial_basic_sintax.txt`](../examples/tutorial_basic_sintax.txt)
@@ -758,6 +777,10 @@ following variables (the corresponding keys are also showed):
   where each overriden variable name (the key) is associated with its float value 
   (`declare_float=>Dict("var1"=>0.1, "var2"=>2.5)`)
 
+- `ONLY_FOR_TESTS::Bool = dict["ONLY_FOR_TESTS"]` : it's a bool variable conceived only to
+  test the correct behaviour of the renderer for the input arguments; if set to `true`, 
+  no rendering is made!
+
 See also:  [`render`](@ref),  [`Renderer`](@ref),
 [`Vec`](@ref), [`string2evenint64`](@ref), [`string2stringoneof`](@ref), 
 [`string2positive`](@ref), [`string2vector`](@ref), [`string2rootint64`](@ref),
@@ -775,8 +798,9 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
         "bool_print", "bool_savepfm", 
         "init_state", "init_seq", "samples_per_pixel",
         "declare_float",
+        "ONLY_FOR_TESTS",
     ]
-
+  
     for pair in dict
         if (pair[1] in keys)==false
             throw(ArgumentError(
@@ -790,6 +814,26 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
     haskey(dict, "scenefile") ? 
         scenefile::String = dict["scenefile"] : 
         throw(ArgumentError("need to specify the input scenefile to be rendered"))
+
+    renderer = if haskey(dict, "renderer")
+        dict["renderer"]
+    elseif haskey(dict, "%COMMAND%")
+    if dict["%COMMAND%"] == "onoff"
+        options = haskey(dict, "onoff") ? dict["onoff"] : Dict{String, Any}()
+        OnOffRenderer(parse_onoff_settings(options)...)
+    elseif dict["%COMMAND%"] == "flat"
+        options = haskey(dict, "flat") ? dict["flat"] : Dict{String, Any}()
+        FlatRenderer(parse_flat_settings(options)...)
+    elseif dict["%COMMAND%"] == "pathtracer"
+        options = haskey(dict, "pathtracer") ? dict["pathtracer"] : Dict{String, Any}()
+        PathTracer(parse_pathtracer_settings(options)...)
+    elseif dict["%COMMAND%"] == "pointlight"
+        options = haskey(dict, "pointlight") ? dict["pointlight"] : Dict{String, Any}()
+        PointLightRenderer(parse_pointlight_settings(options)...)
+    end
+    else
+        FlatRenderer()
+    end
 
     camera_type::Union{String, Nothing} = haskey(dict, "camera_type") ? 
         string2stringoneof(dict["camera_type"], CAMERAS) : 
@@ -828,25 +872,8 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
         declare_float2dict(dict["declare_float"]) : 
         nothing
 
-   renderer = if haskey(dict, "renderer")
-        dict["renderer"]
-    elseif haskey(dict, "%COMMAND%")
-        if dict["%COMMAND%"] == "onoff"
-            options = haskey(dict, "onoff") ? dict["onoff"] : Dict{String, Any}()
-            OnOffRenderer(parse_onoff_settings(options)...)
-        elseif dict["%COMMAND%"] == "flat"
-            options = haskey(dict, "flat") ? dict["flat"] : Dict{String, Any}()
-            FlatRenderer(parse_flat_settings(options)...)
-        elseif dict["%COMMAND%"] == "pathtracer"
-            options = haskey(dict, "pathtracer") ? dict["pathtracer"] : Dict{String, Any}()
-            PathTracer(parse_pathtracer_settings(options)...)
-        elseif dict["%COMMAND%"] == "pointlight"
-            options = haskey(dict, "pointlight") ? dict["pointlight"] : Dict{String, Any}()
-            PointLightRenderer(parse_pointlight_settings(options)...)
-        end
-	else
-		FlatRenderer()
-	end
+    ONLY_FOR_TESTS::Bool = haskey(dict, "ONLY_FOR_TESTS") ? dict["ONLY_FOR_TESTS"] : false
+
 
     return (
             scenefile,
@@ -859,5 +886,6 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
             samples_per_pixel, 
             bool_print, bool_savepfm, 
             declare_float,
+            ONLY_FOR_TESTS,
         )
 end

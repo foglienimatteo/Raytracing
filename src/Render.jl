@@ -105,10 +105,13 @@ function render(
 		bool_print::Bool = true,
 		bool_savepfm::Bool = true,
           declare_float::Union{Dict{String,Float64}, Nothing} = nothing,
+          ONLY_FOR_TESTS::Bool = false,
      )
 
      (bool_print==true) && println("\n\nStarting the image rendering of \"$(scenefile)\"...")
 
+     (ONLY_FOR_TESTS==false) || (return nothing)  
+     
      time_of_start = Dates.format(now(), DateFormat("Y-m-d : H:M:S"))
      time_1 = time()
 
@@ -304,6 +307,7 @@ end
 		bool_print::Bool = true,
 		bool_savepfm::Bool = true,
           declare_float::Union{Dict{String,Float64}, Nothing} = nothing,
+          ONLY_FOR_TESTS::Bool = false,
           )
 
 	render(x::(Pair{T1,T2} where {T1,T2})...) = 
@@ -363,6 +367,10 @@ like syntax with arbitrary order and comfort. See the documentation of
   command line in particularly) to manually override the values of the float variables in 
   the scene file; each overriden variable name (the key) is associated with its float value 
   (i.e. `declare_float = Dict("var1"=>0.1, "var2"=>2.5)`)
+
+- `ONLY_FOR_TESTS::Bool = false` : it's a bool variable conceived only to
+  test the correct behaviour of the renderer for the input arguments; if set to `true`, 
+  no rendering is made!
 
 See also: [`Point`](@ref), [`Vec`](@ref), [`Renderer`](@ref) [`OnOffRenderer`](@ref), 
 [`FlatRenderer`](@ref), [`PathTracer`](@ref), [`PointLightRenderer`](@ref),

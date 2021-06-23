@@ -104,3 +104,7 @@ end
 @testset "test_Interpreter" begin
 	include("test_Interpreter.jl")
 end
+
+@testset "test_Demo-Render.jl" begin
+	include("test_Demo-Render.jl")
+end

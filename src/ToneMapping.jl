@@ -154,7 +154,14 @@ function tone_mapping(x::(Pair{T1,T2} where {T1,T2})...)
 	tone_mapping( parse_tonemapping_settings(  Dict( pair for pair in [x...]) )... )
 end
 
-function tone_mapping(infile::String, outfile::String, a::Float64=0.18, γ::Float64=1.0)
+function tone_mapping(
+            infile::String, 
+            outfile::String, 
+            a::Float64=0.18, 
+            γ::Float64=1.0, 
+            ONLY_FOR_TESTS::Bool=false
+            )
+    (ONLY_FOR_TESTS==false) || (return nothing)       
     tone_mapping(["$(infile)", "$(outfile)", "$a", "$γ"])
 end
 

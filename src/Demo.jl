@@ -196,8 +196,10 @@ function demo(
 		world_type::String = "A",
 		bool_print::Bool = true,
 		bool_savepfm::Bool = true,
+		ONLY_FOR_TESTS::Bool = false,
     )
 
+    (ONLY_FOR_TESTS==false) || (return nothing)  
 
 	renderer.world = select_world(world_type)
 
@@ -292,6 +294,7 @@ end
 		world_type::String = "A",
 		bool_print::Bool = true,
 		bool_savepfm::Bool = true,
+		ONLY_FOR_TESTS::Bool = false,
           )
 
 	demo(x::(Pair{T1,T2} where {T1,T2})...) = 
@@ -357,6 +360,10 @@ like syntax with arbitrary order and comfort. See the documentation of
 - `bool_savepfm::Bool = true` : bool that specifies if the pfm file should be saved
   or not (useful option for [`demo_animation`](@ref))
 
+- `ONLY_FOR_TESTS::Bool = false` : it's a bool variable conceived only to
+  test the correct behaviour of the renderer for the input arguments; if set to `true`, 
+  no rendering is made!
+
 See also: [`Point`](@ref), [`Vec`](@ref), [`Renderer`](@ref) [`OnOffRenderer`](@ref), 
 [`FlatRenderer`](@ref), [`PathTracer`](@ref), [`PointLightRenderer`](@ref),
 [`demo_animation`](@ref), [`parse_demo_settings`](@ref)
@@ -379,6 +386,7 @@ function demo_animation(
        		anim_output::String = "demo-animation.mp4",
 			samples_per_pixel::Int64 = 0,
 			world_type::String = "A", 
+			ONLY_FOR_TESTS::Bool = false,
 		)
 
 	run(`rm -rf .wip_animation`)
@@ -395,7 +403,10 @@ function demo_animation(
 			"set_pfm_name"=>".wip_animation/demo.pfm",
 			"bool_print"=>false,
 			"bool_savepfm"=>false,
+			"ONLY_FOR_TESTS"=>ONLY_FOR_TESTS,
 			)
+
+	(ONLY_FOR_TESTS==false) || (return nothing)
 
 	iter = ProgressBar(0:359)
 	for angle in iter
@@ -425,6 +436,7 @@ end
        		anim_output::String = "demo-animation.mp4",
 			samples_per_pixel::Int64 = 0,
 			world_type::String = "A", 
+			ONLY_FOR_TESTS::Bool = false,
 		)
 
 	demo_animation(x::(Pair{T1,T2} where {T1,T2})...) = 
@@ -477,6 +489,10 @@ like syntax with arbitrary order and comfort. See the documentation of
   ray is fired for each pixel.
 
 - `world_type::String = "A"` : specifies the type of world to be rendered ("A" or "B")
+
+- `ONLY_FOR_TESTS::Bool = false` : it's a bool variable conceived only to
+  test the correct behaviour of the renderer for the input arguments; if set to `true`, 
+  no rendering is made!
 
 See also: [`Point`](@ref), [`Vec`](@ref), [`Renderer`](@ref) [`OnOffRenderer`](@ref), 
 [`FlatRenderer`](@ref), [`PathTracer`](@ref), [`PointLightRenderer`](@ref),
