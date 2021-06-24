@@ -209,3 +209,23 @@ end
      @test_throws ArgumentError Raytracing.string2stringoneof("   ", CAMERAS)
      @test_throws ArgumentError Raytracing.string2stringoneof("prova ", CAMERAS)
 end
+
+
+##########################################################################################92
+
+
+@testset "test_check_is_iterable" begin
+     @test Raytracing.check_is_iterable(1)
+     @test Raytracing.check_is_iterable(1:5)
+     @test Raytracing.check_is_iterable([0.1 , 2, 14])
+
+     @test Raytracing.check_is_iterable(1, Int64)
+     @test Raytracing.check_is_iterable(1, Number)
+     @test Raytracing.check_is_iterable(1:5, Int64)
+     @test Raytracing.check_is_iterable(1:5, Number)
+     @test Raytracing.check_is_iterable([0.1 , 2, 14], Float64)
+     @test Raytracing.check_is_iterable([0.1 , 2, 14], Number)
+
+     @test !Raytracing.check_is_iterable([0.1 , 2, 14], String)
+     @test !Raytracing.check_is_iterable("prova", Number)
+end

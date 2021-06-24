@@ -416,3 +416,101 @@ function string2stringoneof(string::String, vec::Vector{String})
 
      return filter(x -> !isspace(x) && x≠"\"", string)
 end
+
+
+##########################################################################################92
+
+
+"""
+    check_is_iterable(object::T, type::Union{Type, Nothing} = nothing) where T<:Any :: Bool
+
+Checks if the input `object` is iterable, returning `true` if it is, 
+otherwise `false`.
+If specified an input `type`, check also if all the elements contained 
+in `object` are of a type `T` such that `T <: type`. 
+"""
+function check_is_iterable(object::T, type::Union{Type, Nothing} = nothing) where T<:Any
+     #applicable(length, object) || (return false)
+     applicable(iterate, object) || (return false)
+
+     next = iterate(object)
+     while !isnothing(next)
+          (val, state) = next
+          
+          if !isnothing(type) 
+               (typeof(val) <: type) ||  (return false)
+          end
+
+          next = iterate(object, state)
+     end
+
+     return true
+end
+
+"""
+     string2iterable(string::String="") :: Vector{String}
+
+Checks if the input `string` is a vector of variable names written
+as "[namevar1, namevar2, ...]" with [`check_is_vec_variables`](@ref), 
+and return a `Vector{String} = ["namevar1", "namevar2", ...]`.
+"""
+function string2iterable(object::T, type::Union{Type, Nothing} = nothing) where T<:Any
+     if check_is_vec_variables(string)==false
+          throw(ArgumentError(
+               "invalid vector of variables syntax; must be: [namevar1, namevar2, ...]\n"*
+               "Example: --vec_variables=\"[ namevar1 , namevar2 , ...]\" "
+          ))
+     end
+
+     var = filter(x -> !isspace(x) && x≠"\"", string)
+
+     !(var=="") || ( throw(ArgumentError("need to specify the variables to be changes between the frames")))
+
+	return iterable
+end
+
+
+##########################################################################################92
+
+
+"""
+     check_is_vec_variables(string::String="") :: Bool
+
+Checks if the input `string` is a vector of variable names written
+as "[namevar1, namevar2, ...]".
+"""
+function check_is_vec_variables(string::String="")
+	vector = filter(x -> !isspace(x), string)
+     (vector == "") && (return true)
+
+	(vector[begin] == '[' && vector[end] == ']') || (return false)
+
+	vector = vector[begin+1:end-1]
+	vector = split(vector, ",")
+	(length(vector)≥1) || (return false)
+
+	return true
+end
+
+"""
+     string2vector(string::String="") :: Vector{String}
+
+Checks if the input `string` is a vector of variable names written
+as "[namevar1, namevar2, ...]" with [`check_is_vec_variables`](@ref), 
+and return a `Vector{String} = ["namevar1", "namevar2", ...]`.
+"""
+function string2vec_variables(string::String)
+     if check_is_vec_variables(string)==false
+          throw(ArgumentError(
+               "invalid vector of variables syntax; must be: [namevar1, namevar2, ...]\n"*
+               "Example: --vec_variables=\"[ namevar1 , namevar2 , ...]\" "
+          ))
+     end
+
+     var = filter(x -> !isspace(x) && x≠"\"", string)
+
+     !(var=="") || ( throw(ArgumentError("need to specify the variables to be changes between the frames")))
+
+	return Vector{String}(filter(x -> !isspace(x) && x≠"\"", var)[begin+1:end-1])
+end
+
