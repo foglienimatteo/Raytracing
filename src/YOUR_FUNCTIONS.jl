@@ -17,3 +17,9 @@ end
 #
 #    => DO NOT DEFINE FUNCTIONS THAT TAKE AS ARGUMENTS INTEGER VALUES,
 #         THEY WILL NEVER BE USED!!!
+
+
+function func(x::Real, y::Real)
+     return (x/2, y/2)
+end
+

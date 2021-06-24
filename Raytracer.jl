@@ -78,7 +78,9 @@ function ArgParse_command_line(arguments)
 		"render"
 			action = :command
 			help = "render an image from a file"
-
+		"animation"
+			action = :command
+			help = "render an animation from a file"
 	end
 
 
@@ -545,6 +547,165 @@ function ArgParse_command_line(arguments)
           	range_tester = check_is_color
 	end
 
+	#### RENDER_ANIMATION #########################################################################92
+
+	@add_arg_table! s["animation"] begin
+		"--function"
+			help = "name of the function that will be used to render the animation."
+			arg_type = String
+			range_tester = check_is_function
+			required = true
+		"--vec_variables"
+			help = "vector of variable names that will change from frame to frame.\n"*
+					"Must be declared as:  --vec_variables= \"[name1, name2, ...] \""
+			arg_type = String
+			range_tester = check_is_vec_variables
+			required = true
+		"--iterable"
+			help = "iterable object from with the function will calcuate le variable values."
+			arg_type = String
+			range_tester = check_is_iterable
+			required = true
+		"scenefile"
+			help = "path to the file describing the scene to be rendered."
+			arg_type = String
+			#range_tester = input -> (typeof(query(input))<:File{format"PFM"})
+			required = true
+	end
+
+	add_arg_group!(s["animation"], "animation options");
+	@add_arg_table! s["animation"] begin
+		"--camera_type"
+			help = "option for the camera type:\n"*
+	    				"ort -> Orthogonal camera, per -> Perspective camera"
+          	arg_type = String
+			default = "per"
+			range_tester = input -> check_is_one_of(input, CAMERAS)
+		"--camera_position"
+          	help = "camera position in the scene as '[X,Y,Z]'"
+          	arg_type = String
+          	default = "[-1,0,0]"
+          	range_tester = check_is_vector
+		"--alpha"
+			help = "angle of view around z-axis, in degrees"
+			arg_type = Float64
+			default = 0.
+		"--width"
+			help = "pixel number on the width of the resulting demo image."
+			default = 640
+			range_tester = check_is_even_uint64
+		"--height"
+			help = "pixel number on the height of the resulting demo image."
+			default = 480
+			range_tester = check_is_even_uint64
+     	"--samples_per_pixel"
+			help = "Number of samples per pixel for the antialiasing algorithm\n"*
+					"It must be an integer perfect square, i.e. 0,1,4,9,16,...\n"*
+					"If =0 (default value), antialiasing does not occurs."
+     		default = 0
+			range_tester = check_is_square
+	end
+
+	add_arg_group!(s["animation"], 
+		"animation declare options for a scene; this options"*
+		"allows to modify values of the scene without changing"*
+		"the scenefile directly."
+	);
+	@add_arg_table! s["animation"] begin
+		"--declare_float"
+			help = "Declare a variable. The syntax is «--declare-float=VAR:VALUE». Example: --declare_float=clock:150"
+          	arg_type = String
+			default = ""
+			range_tester = check_is_declare_float
+		end
+
+	add_arg_group!(s["animation"], "renderer to be used");
+	@add_arg_table! s["animation"] begin
+		"onoff"
+			action = :command
+			help = "onoff renderer"
+			#dest_name = "onoff"
+		"flat"
+			action = :command
+			help = "flat-renderer"
+			#dest_name = "flat"
+		"pathtracer"
+			action = :command
+			help = "path tracing renderer"
+			#dest_name = "pathtracer"
+		"pointlight"
+			action = :command
+			help = "point-light tracing renderer"
+			#dest_name = "pointlight"
+	end
+
+	add_arg_group!(s["animation"]["onoff"], "onoff renderer options");
+	@add_arg_table! s["animation"]["onoff"] begin
+		"--background_color"
+			help = "background color specified as '<R,G,B>' components. Example: --background_color=<1,2,3>"
+          	arg_type = String
+          	default = "<0,0,0>"
+          	range_tester = check_is_color
+		"--color"
+			help = "hit color specified as '<R,G,B>' components. Example: --ambient_color=<1,2,3>"
+          	arg_type = String
+          	default = "<0,0,0>"
+          	range_tester = check_is_color
+	end
+
+	add_arg_group!(s["animation"]["flat"], "flat renderer options");
+	@add_arg_table! s["animation"]["flat"] begin
+		"--background_color"
+			help = "background color specified as '<R,G,B>' components. Example: --background_color=<1,2,3>"
+          	arg_type = String
+          	default = "<0,0,0>"
+          	range_tester = check_is_color
+	end
+
+	add_arg_group!(s["animation"]["pathtracer"], "pathtracing renderer options");
+	@add_arg_table! s["animation"]["pathtracer"] begin
+		"--init_state"
+    			help = "Initial seed for the random number generator (positive integer number)."
+    			default = 45
+			range_tester = check_is_uint64
+    		"--init_seq"
+    			help = "Identifier of the sequence produced by the "*
+			    "random number generator (positive integer number)."
+    			default = 54
+			range_tester = check_is_uint64
+		"--background_color"
+			help = "background color specified as '<R,G,B>' components. Example: --background_color=<1,2,3>"
+          	arg_type = String
+          	default = "<0,0,0>"
+          	range_tester = check_is_color
+		"--num_of_rays" 
+			help = "number of `Ray`s generated for each integral evaluation"
+			default = 10
+			range_tester = check_is_uint64
+		"--max_depth"
+			help = "maximal number recursive integrations"
+			default = 3
+			range_tester = check_is_uint64
+		"--russian_roulette_limit"
+			help = "depth at whitch the Russian Roulette algorithm begins"
+			default = 2
+			range_tester = check_is_uint64
+	end
+
+	add_arg_group!(s["animation"]["pointlight"], "pointlight renderer options");
+	@add_arg_table! s["animation"]["pointlight"] begin
+		"--background_color"
+			help = "background color specified as '<R,G,B>' components. Example: --background_color=<1,2,3>"
+          	arg_type = String
+          	default = "<0,0,0>"
+          	range_tester = check_is_color
+		"--ambient_color"
+			help = "ambient color specified as '<R,G,B>' components. Example: --ambient_color=<1,2,3>"
+          	arg_type = String
+          	default = "<0,0,0>"
+          	range_tester = check_is_color
+	end
+
 
 	#### parse_args #####################################################################92
 
@@ -587,6 +748,9 @@ function main(args)
 	elseif parsed_command=="render"
 		#println(parse_render_settings(parsed_settings))
 		render(parse_render_settings(parsed_settings)...)
+	elseif parsed_command=="animation"
+		#println(parse_render_settings(parsed_settings))
+		render_animation(parse_render_animation_settings(parsed_settings)...)
 	else
 		throw(ArgumentError("unknown command $(parsed_command)"))
 	end

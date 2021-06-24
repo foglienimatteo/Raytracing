@@ -465,7 +465,7 @@ end
 
 
 function render_animation(x::(Pair{T1,T2} where {T1,T2})...)
-	render( parse_render_settings(  Dict( pair for pair in [x...]) )... )
+	render( parse_render_animation_settings(  Dict( pair for pair in [x...]) )... )
 end
 
 function render_animation(

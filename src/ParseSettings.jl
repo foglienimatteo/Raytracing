@@ -897,13 +897,14 @@ end
 
 
 """
-    parse_render_settings(dict::Dict{String, T}) where {T}
+    parse_render_animation_settings(dict::Dict{String, T}) where {T}
         :: (
+            Function, Vector{String}, Any,
             String, Renderer, String, Vec, Float64, Int64, Int64, String,
-            String, Int64, Bool, Bool, Dict{String, Float64}, Bool,
+            Int64, Bool, Dict{String, Float64}, Bool,
             )
 
-Parse a `Dict{String, T} where {T}` for the `render` function.
+Parse a `Dict{String, T} where {T}` for the `render_animation` function.
 
 ## Input
 
@@ -911,8 +912,8 @@ A `dict::Dict{String, T} where {T}`
 
 ## Returns
 
-A tuple `(scenefile, renderer, camera_type, camera_position, α, width, height, pfm, png,
-samples_per_pixel, world_type, bool_print, bool_savepfm, declare_float, ONLY_FOR_TESTS)` 
+A tuple `(func, vec_variables, iterable, scenefile, renderer, camera_type, camera_position, 
+α, width, height, anim, samples_per_pixel, bool_print, declare_float, ONLY_FOR_TESTS)` 
 containing the following variables (the corresponding keys are also showed):
 
 - `scenefile::String = dict["scenefile"]` : name of the scene file to be rendered;
@@ -962,9 +963,7 @@ containing the following variables (the corresponding keys are also showed):
 - `height::Int64 = string2evenint64(dict["height"])` : number of pixels on the vertical
   axis to be rendered; it's converted through `string2evenint64` to a even positive integer.
 
-- `pfm::String = dict["set_pfm_name"]` : output pfm filename (default `"scene.pfm"`)
-
-- `png::String` = dict["set_png_name"]` : output LDR filename (default `"scene.png"`)
+- `anim::String = dict["set_anim_name"]` : output animation name (default `"animation.mp4"`)
 
 - `samples_per_pixel::Int64  = dict["samples_per_pixel"]` : number of ray to be 
   generated for each pixel, implementing the anti-aliasing algorithm; it must be 
@@ -975,10 +974,6 @@ containing the following variables (the corresponding keys are also showed):
 - `bool_print::Bool = dict["bool_print"]` : if `true` (default value), WIP message of 
   `demo` function are printed (otherwise no; it's useful for the `demo_animation` 
   function)
-
-- `bool_savepfm::Bool = dict["bool_savepfm"]` : if `true` (default value), `demo` 
-  function saves the pfm file to disk (otherwise no; it's useful for the 
-  `demo_animation` function)
 
 - `declare_float::Union{Dict{String, Float64}, Nothing} = declare_float2dict(dict["declare_float"])` 
   : an option for the command line to manually override the values of the float variables in 
@@ -992,10 +987,10 @@ containing the following variables (the corresponding keys are also showed):
   test the correct behaviour of the renderer for the input arguments; if set to `true`, 
   no rendering is made!
 
-See also:  [`render`](@ref),  [`Renderer`](@ref),
+See also:  [`render_animation`](@ref),  [`Renderer`](@ref),
 [`Vec`](@ref), [`string2evenint64`](@ref), [`string2stringoneof`](@ref), 
 [`string2positive`](@ref), [`string2vector`](@ref), [`string2rootint64`](@ref),
-[`declare_float2dict`](@ref)
+[`declare_float2dict`](@ref), [`string2iterable`](@ref), [`string2vec_variables`](@ref)
 """
 function parse_render_animation_settings(dict::Dict{String, T}) where {T}
 
@@ -1022,11 +1017,8 @@ function parse_render_animation_settings(dict::Dict{String, T}) where {T}
         end
     end
 
-    haskey(dict, "function") ? begin
-        idefined(Raytracing, Symbol(dict["scenefile"])) || throw(ArgumentError("$(dict["scenefile"]) is not a function defined in Raytracing module"))
-        isa(eval(Symbol(dict["scenefile"])),  Function) || throw(ArgumentError("$(dict["scenefile"]) is not a function!"))
-        func::Function = eval(Symbol(dict["scenefile"]))
-      end : 
+    haskey(dict, "function") ? 
+        func::Function = string2function(dict["scenefile"]) : 
         throw(ArgumentError("need to specify the function name to be used in the rendering"))
 
     haskey(dict, "vec_variables") ? 

@@ -524,3 +524,41 @@ function string2vec_variables(string::String)
 	return vector
 end
 
+
+##########################################################################################92
+
+
+"""
+     check_is_function(string::String="") :: Bool
+
+Checks if the input `string` is a function name defined in `Raytracing`.
+"""
+function check_is_function(string::String="")
+	name = filter(x -> !isspace(x), string)
+     (name == "") && (return false)
+
+     isdefined(Raytracing, Symbol(name)) || (return false)
+     isa(eval(Symbol(name)),  Function) || (return false)
+     try
+          func::Function = eval(Symbol(name))
+     catch
+          return false
+     end
+
+	return true
+end
+
+"""
+     string2function(string::String="") :: Function
+
+Checks if the input `string` is a function name defined in `Raytracing`
+ with [`check_is_function`](@ref), and return it.
+"""
+function string2function(string::String)
+     if check_is_function(string)==false
+          throw(ArgumentError("$(string) is not a function defined in Raytracing module"))
+     end
+     
+	return  eval(Symbol(string))
+end
+
