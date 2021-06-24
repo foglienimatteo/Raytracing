@@ -348,8 +348,8 @@ Examples:
 ```
 """
 function check_is_declare_float(string::String="")
-	(string == "") && (return true)
 	string_without_spaces = filter(x -> !isspace(x), string)
+     (string_without_spaces == "") && (return true)
 
 	vec_nameval = split.(split(string_without_spaces, ","), ":" )
 	for declare_float ∈ vec_nameval
@@ -422,14 +422,17 @@ end
 
 
 """
-    check_is_iterable(object::T, type::Union{Type, Nothing} = nothing) where T<:Any :: Bool
+     check_is_iterable(string::String, type::Union{Type, Nothing} = nothing) :: Bool
+     check_is_iterable(object::T, type::Union{Type, Nothing} = nothing) where T<:Any 
+          = check_is_iterable(string(object), type)
 
-Checks if the input `object` is iterable, returning `true` if it is, 
-otherwise `false`.
+Checks if the input `string` can be parsed in a iterable object,
+returning `true` if it is, otherwise `false`.
 If specified an input `type`, check also if all the elements contained 
 in `object` are of a type `T` such that `T <: type`. 
 """
-function check_is_iterable(object::T, type::Union{Type, Nothing} = nothing) where T<:Any
+function check_is_iterable(string::String, type::Union{Type, Nothing} = nothing)
+     object = eval(Meta.parse(string))
      #applicable(length, object) || (return false)
      applicable(iterate, object) || (return false)
 
@@ -447,6 +450,8 @@ function check_is_iterable(object::T, type::Union{Type, Nothing} = nothing) wher
      return true
 end
 
+check_is_iterable(object::T, type::Union{Type, Nothing} = nothing) where T<:Any = check_is_iterable(string(object), type)
+
 """
      string2iterable(string::String="") :: Vector{String}
 
@@ -454,19 +459,20 @@ Checks if the input `string` is a vector of variable names written
 as "[namevar1, namevar2, ...]" with [`check_is_vec_variables`](@ref), 
 and return a `Vector{String} = ["namevar1", "namevar2", ...]`.
 """
-function string2iterable(object::T, type::Union{Type, Nothing} = nothing) where T<:Any
-     if check_is_vec_variables(string)==false
+function string2iterable(string::String, type::Union{Type, Nothing} = nothing)
+     if check_is_iterable(string)==false
           throw(ArgumentError(
-               "invalid vector of variables syntax; must be: [namevar1, namevar2, ...]\n"*
-               "Example: --vec_variables=\"[ namevar1 , namevar2 , ...]\" "
+               "invalid input: it is not an iterable object"
           ))
      end
 
-     var = filter(x -> !isspace(x) && x≠"\"", string)
+     if check_is_iterable(string, Float64)==false && check_is_iterable(string, Int64)==false
+          throw(ArgumentError(
+               "invalid input iterable: its elements cannot be converted to Float64 "
+          ))
+     end
 
-     !(var=="") || ( throw(ArgumentError("need to specify the variables to be changes between the frames")))
-
-	return iterable
+	return eval(Meta.parse(string))
 end
 
 
@@ -485,6 +491,8 @@ function check_is_vec_variables(string::String="")
 
 	(vector[begin] == '[' && vector[end] == ']') || (return false)
 
+     ':' ∉ vector || (return false)
+
 	vector = vector[begin+1:end-1]
 	vector = split(vector, ",")
 	(length(vector)≥1) || (return false)
@@ -493,7 +501,7 @@ function check_is_vec_variables(string::String="")
 end
 
 """
-     string2vector(string::String="") :: Vector{String}
+     string2vector(string::String="") :: Union{Vector{String}, Nothing}
 
 Checks if the input `string` is a vector of variable names written
 as "[namevar1, namevar2, ...]" with [`check_is_vec_variables`](@ref), 
@@ -507,10 +515,12 @@ function string2vec_variables(string::String)
           ))
      end
 
-     var = filter(x -> !isspace(x) && x≠"\"", string)
+     vector = filter(x -> !isspace(x) && x≠"\"", string)
+     !(vector=="") || (return nothing)
 
-     !(var=="") || ( throw(ArgumentError("need to specify the variables to be changes between the frames")))
-
-	return Vector{String}(filter(x -> !isspace(x) && x≠"\"", var)[begin+1:end-1])
+     vector = vector[begin+1:end-1]
+     vector = Vector{String}(split(vector, ","))
+     
+	return vector
 end
 

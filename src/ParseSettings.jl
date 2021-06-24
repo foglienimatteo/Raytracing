@@ -1114,19 +1114,3 @@ function parse_render_animation_settings(dict::Dict{String, T}) where {T}
             ONLY_FOR_TESTS,
         )
 end
-
-func::Function,
-          vec_variables::Vector{String},
-          iterable::Any,
-          scenefile::String,
-          renderer_model::Renderer = FlatRenderer(),
-     	camera_type::Union{String, Nothing} = nothing,
-		camera_position::Union{Point, Vec, Nothing} = nothing, 
-     	α::Float64 = 0., 
-     	width::Int64 = 640, 
-     	height::Int64 = 480, 
-     	anim_output::String = "animation.mp4", 
-          samples_per_pixel::Int64 = 0,
-		bool_print::Bool = true,
-          declare_float::Union{Dict{String,Float64}, Nothing} = nothing,
-          ONLY_FOR_TESTS::Bool = false,
