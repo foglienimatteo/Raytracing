@@ -114,5 +114,10 @@ PRINT(another_color)
 PRINT(another_vector)
 
 
+FLOAT var_anim(1.0)
+FLOAT another_var_anim(2.0)
+PRINT(var_anim)
+PRINT(another_var_anim)
+
 # Now move to read the "examples/demo_world_B.txt" file to understand
 # how create a scene!

@@ -495,7 +495,7 @@ function render_animation(
           throw(ArgumentError("the input iterable $(iterable) does not contains numbers convertable to Float64"))
      end     
 
-     hasmethod(func, Tuple{Float64}) || throw(ArgumentError("function $(func) does not have a method for $(eltype(iterable)))"))
+     hasmethod(func, Tuple{Float64}) || throw(ArgumentError("function $(func) does not have a method for Tuple{Float64})"))
      length(func(1.0)) == length(vec_variables) || throw(ArgumentError("length of vec_variables and func return do not match"))
 
      (bool_print==true) && println("\n\nStart the reading of \"$(scenefile)\"...") 

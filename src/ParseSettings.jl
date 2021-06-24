@@ -995,7 +995,7 @@ See also:  [`render_animation`](@ref),  [`Renderer`](@ref),
 function parse_render_animation_settings(dict::Dict{String, T}) where {T}
 
     keys = [
-        "function", "variables", "iterable",
+        "function", "vec_variables", "iterable",
         "scenefile",
         "%COMMAND%",
         "onoff", "flat", "pathtracer", "pointlight",
@@ -1018,11 +1018,11 @@ function parse_render_animation_settings(dict::Dict{String, T}) where {T}
     end
 
     haskey(dict, "function") ? 
-        func::Function = string2function(dict["scenefile"]) : 
+        func::Function = string2function(dict["function"]) : 
         throw(ArgumentError("need to specify the function name to be used in the rendering"))
 
     haskey(dict, "vec_variables") ? 
-        vec_variables::Vec{String} = string2vec_variables(dict["vec_variables"]) : 
+        vec_variables = string2vec_variables(dict["vec_variables"]) : 
         throw(ArgumentError("need to specify the variables to be changed between the frames"))
 
     haskey(dict, "iterable") ? 

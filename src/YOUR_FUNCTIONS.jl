@@ -19,7 +19,7 @@ end
 #         THEY WILL NEVER BE USED!!!
 
 
-function func(x::Real, y::Real)
-     return (x/2, y/2)
+function func(x::T) where {T<:Real}
+     return (x/2, x*2)
 end
 

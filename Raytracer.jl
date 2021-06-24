@@ -28,6 +28,7 @@ using Raytracing
 
 FILE_NAME = split(PROGRAM_FILE, "/")[end]
 
+#=
 function parse_commandline_error_handler(settings::ArgParseSettings, err, err_code::Int = 1)
 	help_string = 
 		"execute one of the following to get the help instructions:\n"*
@@ -55,14 +56,14 @@ function parse_commandline_error_handler(settings::ArgParseSettings, err, err_co
 	#exit(err_code)
 	#return err_code
 end
-
+=#
 
 
 function ArgParse_command_line(arguments)
 	s = ArgParseSettings()
 
 	s.description = "Raytracer for the generation of photorealistic images in Julia."
-	s.exc_handler = parse_commandline_error_handler
+	#s.exc_handler = parse_commandline_error_handler
 	s.version = @project_version
 
 	@add_arg_table! s begin
@@ -112,6 +113,9 @@ function ArgParse_command_line(arguments)
 			arg_type = Float64
 			range_tester = check_is_positive
 			default = 1.27
+		"--ONLY_FOR_TESTS"
+			help = "only for testing flag; do not use it"
+			action = :store_true
 	end
 
 
@@ -179,6 +183,9 @@ function ArgParse_command_line(arguments)
 			arg_type = String
 			default = "demo.png"
 			constant = "demo.png"
+		"--ONLY_FOR_TESTS"
+			help = "only for testing flag; do not use it"
+			action = :store_true
 	end
 	
 	
@@ -314,6 +321,9 @@ function ArgParse_command_line(arguments)
 			arg_type = String
 			default = "demo_animation.mp4"
 			constant = "demo_animation.mp4"
+		"--ONLY_FOR_TESTS"
+			help = "only for testing flag; do not use it"
+			action = :store_true
 	end
 
 	add_arg_group!(s["demo_animation"], "renderer to be used");
@@ -445,6 +455,9 @@ function ArgParse_command_line(arguments)
 					"If =0 (default value), antialiasing does not occurs."
      		default = 0
 			range_tester = check_is_square
+		"--ONLY_FOR_TESTS"
+			help = "only for testing flag; do not use it"
+			action = :store_true
 	end
 
 	add_arg_group!(s["render"], 
@@ -604,6 +617,9 @@ function ArgParse_command_line(arguments)
 					"If =0 (default value), antialiasing does not occurs."
      		default = 0
 			range_tester = check_is_square
+		"--ONLY_FOR_TESTS"
+			help = "only for testing flag; do not use it"
+			action = :store_true
 	end
 
 	add_arg_group!(s["animation"], 

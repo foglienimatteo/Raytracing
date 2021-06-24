@@ -310,3 +310,23 @@ end
      @test_throws ArgumentError Raytracing.string2vec_variables("prova")
 end
 
+
+
+##########################################################################################92
+
+
+@testset "test_check_is_function" begin
+     @test !Raytracing.check_is_function("")
+     @test !Raytracing.check_is_function("  ")
+     @test !Raytracing.check_is_function("[nome1,nome2]")
+     @test Raytracing.check_is_function("check_is_function")
+     @test Raytracing.check_is_function("check_is_declare_float")
+end
+
+@testset "test_string2vec_variables" begin
+     @test_throws ArgumentError Raytracing.string2function("")
+     @test_throws ArgumentError Raytracing.string2function("  ")
+     @test_throws ArgumentError Raytracing.string2function("[nome1,nome2]")
+     @test Raytracing.string2function("check_is_declare_float") == check_is_declare_float
+end
+
