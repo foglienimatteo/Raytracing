@@ -1,5 +1,8 @@
 # HEAD
 
+
+# VERSION 1.0.0
+
 - added the `render` function and implemented lexer and parser; now it's possible to read a scene from a file and render it; see PR[#18](https://github.com/cosmofico97/Raytracing/pull/18)
 
 - Added the shape AABB, see PR[#22](https://github.com/cosmofico97/Raytracing/pull/22)
