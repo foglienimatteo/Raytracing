@@ -300,7 +300,11 @@ function demo(
 	end
 
 	fire_all_rays!(tracer, renderer, print_progress)
+
 	img = tracer.img
+
+#	set_pixel(img, 259, 229, RGB{Float32}(1e9, 1e9, 1e9))
+set_pixel(img, 34, 7, RGB{Float32}(1e9, 1e9, 1e9))
 
 	# Save the HDR image
 	(bool_savepfm==true) && (open(pfm_output, "w") do outf; write(outf, img); end)

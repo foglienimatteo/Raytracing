@@ -136,6 +136,11 @@ function fire_all_rays!(
                 v_pixel = (inter_pixel_row + random(pcg)) / smp4side
                 ray = fire_ray(ImTr, col, row, u_pixel, v_pixel)
                 cum_color += func(ray)
+
+#=               if (row == 0) && (col == 24)
+                    printstyled(ray, "\n", color=:light_magenta)
+                end
+=#
             end
 
             set_pixel(ImTr.img,
@@ -159,8 +164,17 @@ function fire_all_rays!(
 
             # current_time = time() # use if @elapsed doesn't work propely for our pourpose
             t = time() - last_call_time# current_time - last_call_time # use if @elapsed doesn't work propely for our pourpose
-
-            if (callback ≠ nothing) && (t > callback_time_s)
+                if (row == 31) && (col == 7)
+                    printstyled("\n\n", ray, "\n", color=:light_yellow)
+                    printstyled(func(ray), "\n\n", color=:light_yellow)
+                end
+#=                if (row == 229) && (col == 259)
+                    printstyled("\nPixel: ", color=:red)
+                    printstyled("(", col, "; ", row, ")", color=:light_red)
+                    printstyled("\n", ray, "\n", color=:light_yellow)
+                    printstyled(func(ray), "\n\n", color=:light_yellow)
+                end
+=#            if (callback ≠ nothing) && (t > callback_time_s)
                 callback(row, col)
                 last_call_time = time()    # use if @elapsed doesn't work propely for our pourpose
             end

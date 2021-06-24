@@ -89,7 +89,7 @@ function (renderer::PathTracer)(ray::Ray)
                             hit_record.normal,
                             ray.depth + 1,
                         )
-            
+            # printstyled("\nnumber ray  ", ray_index, " : ", " dir - ", new_ray.dir, "\t obj - ", hit_record.shape)
             # Recursive call
             new_radiance = renderer(new_ray)
 

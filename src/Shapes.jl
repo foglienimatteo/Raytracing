@@ -296,7 +296,7 @@ function ray_intersection(torus::Torus, ray::Ray)
     for i in t_ints
         if (typeof(i) == ComplexF64) && (abs(i.im) > 1e-10) #1e-8
             continue
-        elseif ((typeof(i) == Float64) && (1e-6 < i < inv_ray.tmax)) || ((typeof(i) == ComplexF64) && (abs(i.im) < 1e-8)) # (inv_ray.tmin < i < inv_ray.tmax)) || ((typeof(i) == ComplexF64) && (abs(i.im) < 1e-8))
+        elseif ((typeof(i) == Float64) && (1e-3 < i < inv_ray.tmax)) || ((typeof(i) == ComplexF64) && (abs(i.im) < 1e-8)) # (inv_ray.tmin < i < inv_ray.tmax)) || ((typeof(i) == ComplexF64) && (abs(i.im) < 1e-8))
             (typeof(i) == Float64) && push!(hit_ts, i)
             (typeof(i) == ComplexF64) && push!(hit_ts, i.re)
         else
