@@ -787,26 +787,15 @@ See also:  [`render`](@ref),  [`Renderer`](@ref),
 [`declare_float2dict`](@ref)
 """
 function parse_render_settings(dict::Dict{String, T}) where {T}
-
-    keys = [
-        "scenefile",
-        "%COMMAND%",
-        "onoff", "flat", "pathtracer", "pointlight",
-        "camera_type", "camera_position", 
-        "alpha", "width", "height",
-        "set_pfm_name", "set_png_name", 
-        "bool_print", "bool_savepfm", 
-        "samples_per_pixel",
-        "declare_float",
-        "ONLY_FOR_TESTS",
-    ]
     keys = union([
+        "scenefile",
         "%COMMAND%", "renderer",
         "camera_type", "camera_position",
         "alpha", "width", "height",
         "set_pfm_name", "set_png_name", 
-        "samples_per_pixel", "world_type",
-        "bool_print", "bool_savepfm",  
+        "samples_per_pixel", 
+        "bool_print", "bool_savepfm", 
+        "declare_float", 
         "ONLY_FOR_TESTS",
     ], RENDERERS)
   

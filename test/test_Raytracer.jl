@@ -228,8 +228,8 @@ end
 
 
 @testset "test_parse_render_onoff_settings" begin
-     string="""./Raytracer.jl render --ONLY_FOR_TESTS onoff --background_color="<1,2,3>" """*
-     """--color="<4,  5,  6>" """
+     string="""./Raytracer.jl render --ONLY_FOR_TESTS examples/tutorial_basic_sintax.txt onoff """*
+     """--background_color="<1,2,3>" --color="<4,  5,  6>" """
      args = Raytracing.from_CLI_to_vecstring(string)
      parsed_arguments = ArgParse_command_line(args)
 	(isnothing(parsed_arguments)) && (return nothing)
@@ -247,7 +247,8 @@ end
 end
 
 @testset "test_parse_render_flat_settings" begin
-     string="""./Raytracer.jl render --ONLY_FOR_TESTS flat --background_color="<1,2,3>" """
+     string="""./Raytracer.jl render --ONLY_FOR_TESTS examples/tutorial_basic_sintax.txt flat """*
+     """--background_color="<1,2,3>" """
      args = Raytracing.from_CLI_to_vecstring(string)
      parsed_arguments = ArgParse_command_line(args)
 	(isnothing(parsed_arguments)) && (return nothing)
@@ -265,8 +266,8 @@ end
 end
 
 @testset "test_parse_render_pathtracer_settings" begin
-     string="""./Raytracer.jl render --ONLY_FOR_TESTS pathtracer --background_color="<1,2,3>" """*
-     """--init_state=1 --init_seq=2 --num_of_rays=15 --max_depth=3 --russian_roulette_limit=1"""
+     string="""./Raytracer.jl render --ONLY_FOR_TESTS examples/tutorial_basic_sintax.txt pathtracer """*
+     """--background_color="<1,2,3>" --init_state=1 --init_seq=2 --num_of_rays=15 --max_depth=3 --russian_roulette_limit=1"""
      args = Raytracing.from_CLI_to_vecstring(string)
      parsed_arguments = ArgParse_command_line(args)
 	(isnothing(parsed_arguments)) && (return nothing)
@@ -284,9 +285,9 @@ end
 end
 
 @testset "test_parse_render_pointlight_settings" begin
-     args="""./Raytracer.jl render --ONLY_FOR_TESTS pointlight --background_color="<1,2,3>" """*
-     """--ambient_color="<4,  5,  6>" """
-
+     string="""./Raytracer.jl render --ONLY_FOR_TESTS examples/tutorial_basic_sintax.txt pointlight """*
+     """--background_color="<1,2,3>" --ambient_color="<4,  5,  6>" """
+     args = Raytracing.from_CLI_to_vecstring(string)
      parsed_arguments = ArgParse_command_line(args)
 	(isnothing(parsed_arguments)) && (return nothing)
 
