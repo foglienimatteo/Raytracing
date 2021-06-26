@@ -800,6 +800,15 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
         "declare_float",
         "ONLY_FOR_TESTS",
     ]
+    keys = union([
+        "%COMMAND%", "renderer",
+        "camera_type", "camera_position",
+        "alpha", "width", "height",
+        "set_pfm_name", "set_png_name", 
+        "samples_per_pixel", "world_type",
+        "bool_print", "bool_savepfm",  
+        "ONLY_FOR_TESTS",
+    ], RENDERERS)
   
     for pair in dict
         if (pair[1] in keys)==false

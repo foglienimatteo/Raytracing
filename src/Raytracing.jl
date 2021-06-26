@@ -7,7 +7,7 @@
 module Raytracing
 
 using Base: Bool, String, Int64
-using Colors, Images, ImageIO, FileIO, Polynomials, Test
+using Colors, Images, ImageIO, FileIO, Polynomials, Test, ArgParse
 using ColorTypes:RGB
 using LinearAlgebra, StaticArrays
 using Printf, ProgressBars
@@ -64,11 +64,12 @@ export create_onb_from_z
 export scatter_ray
 #from Interpreter.jl
 # see the module Interpreter.jl
-
 #from Render.jl
 export render, render_animation
 # from PrintFunctions.jl
 export print_not_black
+# from ArgParse_CLI.jl
+export ArgParse_command_line, print_ArgParseSettings
 
 CAMERAS = ["ort", "per"]
 RENDERERS = ["onoff", "flat", "pathtracer", "pointlight"]
@@ -99,6 +100,7 @@ using .Interpreter
 
 include("Render.jl")
 include("PrintFunctions.jl")
+include("ArgParse_CLI.jl")
 
 # Here is were you can define your own functions to be used in
 # the scene-files!

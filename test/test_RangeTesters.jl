@@ -330,3 +330,17 @@ end
      @test Raytracing.string2function("check_is_declare_float") == check_is_declare_float
 end
 
+
+##########################################################################################92
+
+
+@testset "test_from_CLI_to_vecstring" begin
+     string="""./Raytracer.jl render --ONLY_FOR_TESTS pathtracer --background_color="<1,2,3>" """*
+     """--init_state=1 --init_seq=2 --num_of_rays=15 --max_depth=3 --russian_roulette_limit 1"""
+     vec_string = ["render", "--ONLY_FOR_TESTS", "pathtracer", "--background_color=<1,2,3>", 
+     "--init_state=1", "--init_seq=2", "--num_of_rays=15", "--max_depth=3", "--russian_roulette_limit", "1"]
+     @test Raytracing.from_CLI_to_vecstring(string) == vec_string
+end
+
+
+string="""./Raytracer.jl render --ONLY_FOR_TESTS pathtracer --background_color="<1,2,3>" --init_state=1 --init_seq=2 --num_of_rays=15 --max_depth=3 --russian_roulette_limit 1"""

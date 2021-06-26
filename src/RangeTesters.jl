@@ -562,3 +562,52 @@ function string2function(string::String)
 	return  eval(Symbol(string))
 end
 
+
+
+##########################################################################################92
+
+
+function from_CLI_to_vecstring(string::String)
+     cmd = lstrip(rstrip(string))
+     if lstrip(cmd) == ""
+          return Vector{String}()
+     end
+
+     arglist = Vector{String}()
+     parsestack = Vector{Char}()
+     insideliteral = false
+
+     for i in 1:length(cmd)
+          #global insideliteral
+          islast = i >= length(cmd)
+          if cmd[i] == ' ' && (insideliteral==true)
+               # Whitespace within literal is kept
+               push!(parsestack, cmd[i])
+          elseif cmd[i] == ' '
+               # Whitespace delimits arguments
+               push!(arglist, join(parsestack))
+               empty!(parsestack)
+          elseif !islast && cmd[i]  == '\\' && cmd[i+1] == '\"'
+               # Escaped double quote
+               push!(parsestack, cmd[i+1])
+               i+=1
+          elseif cmd[i] == '\"' && insideliteral==false
+               # Begin literal
+               insideliteral = true
+          elseif cmd[i]=='\"' && insideliteral==true
+               # End literal
+               insideliteral = false
+          else
+               push!(parsestack, cmd[i])
+          end
+     end
+     push!(arglist, join(parsestack))
+     empty!(parsestack)
+
+     println(arglist)
+     if arglist[1] == "./Raytracer.jl"
+          return arglist[begin+1:end]
+     else
+          throw(ArgumentError("first argument must be './Raytracer.jl', not $(vec[1])"))
+     end
+end
