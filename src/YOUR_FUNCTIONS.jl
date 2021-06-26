@@ -20,6 +20,6 @@ end
 
 
 function func(x::T) where {T<:Real}
-     return (x/2, x*2)
+     return (x, 0.5)
 end
 

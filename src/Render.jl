@@ -465,7 +465,7 @@ end
 
 
 function render_animation(x::(Pair{T1,T2} where {T1,T2})...)
-	render( parse_render_animation_settings(  Dict( pair for pair in [x...]) )... )
+	render_animation( parse_render_animation_settings(  Dict( pair for pair in [x...]) )... )
 end
 
 function render_animation(
@@ -496,12 +496,10 @@ function render_animation(
      end     
 
      hasmethod(func, Tuple{Float64}) || throw(ArgumentError("function $(func) does not have a method for Tuple{Float64})"))
-     length(func(1.0)) == length(vec_variables) || throw(ArgumentError("length of vec_variables and func return do not match"))
+     length(func(1.0)) == length(vec_variables) || 
+          throw(ArgumentError("length of vec_variables $(length(vec_variables)) and func return $(length(func(1.0))) do not match"))
 
      (bool_print==true) && println("\n\nStart the reading of \"$(scenefile)\"...") 
-     
-     time_of_start = Dates.format(now(), DateFormat("Y-m-d : H:M:S"))
-     time_1 = time()
 
      scene_model = open(scenefile, "r") do stream
           if isnothing(declare_float)
@@ -521,11 +519,46 @@ function render_animation(
 
      (bool_print==true) && println("\nReaded and parsed \"$(scenefile)\", now start the animation rendering...\n")
 
-     algorithm = copy(renderer_model)
+     (ONLY_FOR_TESTS==false) || (return nothing)
+     time_of_start = Dates.format(now(), DateFormat("Y-m-d : H:M:S"))
+     time_1 = time()
+
 
      run(`rm -rf .wip_animation`)
 	run(`mkdir .wip_animation`)
+	
+	dict_gen = Dict(
+               "scenefile"=>scenefile,
+               "camera_type"=>camera_type,
+			"camera_position"=>camera_position,
+               "alpha"=>α,
+			"width"=>width,
+			"height"=>height,
+			"samples_per_pixel"=>samples_per_pixel,
+			"set_pfm_name"=>".wip_animation/scene.pfm",
+			"bool_print"=>false,
+			"bool_savepfm"=>false,
+			"ONLY_FOR_TESTS"=>ONLY_FOR_TESTS,
+			)
 
+
+	iter = ProgressBar(iterable_float)
+	for (index, value) in enumerate(iter)
+          values = func(value)
+          dict = Dict(x=>y for (x,y) in zip(vec_variables, values))
+          new_declare_float = isnothing(declare_float) ? dict : merge(dict, declare_float)
+
+		NNN = @sprintf "%03d" index
+		dict_spec = Dict(
+                         "renderer" => copy(renderer_model),
+					"set_png_name"=>".wip_animation/image$(NNN).png",
+                         "declare_float"=>new_declare_float,
+					)
+		render(parse_render_settings(merge(dict_gen, dict_spec))...)
+		set_description(iter, string(@sprintf("Frame generated: ")))
+	end
+
+     #=
      iter = ProgressBar(iterable_float)
      for (index, value) in enumerate(iter)
           
@@ -642,6 +675,7 @@ function render_animation(
 
           set_description(iter, string(@sprintf("Frame generated: ")))
      end
+     =#
 
      time_2 = time()
      rendering_time_s = time_2 - time_1
@@ -656,7 +690,7 @@ function render_animation(
           anim_output,
           scenefile,
           time_of_start,
-          algorithm,
+          copy(renderer_model),
           camera,
           samples_per_side,
           declare_float,
