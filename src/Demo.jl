@@ -226,7 +226,7 @@ function demo(
 
 	if camera_type == "per"
 		if bool_print==true
-			printstyled("Using", color=:magenta)
+			printstyled("USING", color=:magenta)
 			printstyled(" perspective camera", color=:light_magenta)
 			print("\n")
 		end
@@ -236,7 +236,7 @@ function demo(
 		camera = PerspectiveCamera(1., aspect_ratio, camera_tr)
 	elseif camera_type == "ort"
 		if bool_print==true
-			printstyled("Using", color=:magenta)
+			printstyled("USING", color=:magenta)
 			printstyled(" orthogonal camera", color=:light_magenta)
 			print("\n")
 		end
@@ -253,7 +253,7 @@ function demo(
 
 	if algorithm == "onoff"
 		if bool_print==true
-			printstyled("Using", color=:magenta)
+			printstyled("USING", color=:magenta)
 			printstyled(" on/off renderer", color=:light_magenta)
 			print("\n")
 		end
@@ -262,7 +262,7 @@ function demo(
 		renderer = OnOffRenderer(world, BLACK)
 	elseif algorithm == "flat"
 		if bool_print==true
-			printstyled("Using", color=:magenta)
+			printstyled("USING", color=:magenta)
 			printstyled(" flat renderer", color=:light_magenta)
 			print("\n")
 		end
@@ -271,7 +271,7 @@ function demo(
 		renderer = FlatRenderer(world, BLACK)
 	elseif algorithm == "pathtracing"
 		if bool_print==true
-			printstyled("Using", color=:magenta)
+			printstyled("USING", color=:magenta)
 			printstyled(" path tracing renderer", color=:light_magenta)
 			print("\n")
 		end
@@ -300,7 +300,6 @@ function demo(
 	end
 
 	fire_all_rays!(tracer, renderer, print_progress)
-
 	img = tracer.img
 
 #	set_pixel(img, 259, 229, RGB{Float32}(1e9, 1e9, 1e9))

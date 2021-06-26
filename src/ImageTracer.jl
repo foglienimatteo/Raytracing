@@ -117,7 +117,7 @@ function fire_all_rays!(
             ImTr::ImageTracer,
             func::Function,
             callback::Union{Nothing, Function} = nothing,
-            callback_time_s::Float64 = 2.,
+            callback_time_s::Float64 = 0.5,
             callback_kwargs::Union{Nothing, String} = nothing                
             )
     last_call_time = time()  # use if @elapsed doesn't work propely for our pourpose
@@ -130,12 +130,17 @@ function fire_all_rays!(
     if smp4side > 0
         for row in ImTr.img.height-1:-1:0, col in 0:ImTr.img.width-1
             cum_color = RGB{Float32}(0., 0., 0.)
-
             for inter_pixel_row in 0:smp4side-1, inter_pixel_col in 0:smp4side-1
                 u_pixel = (inter_pixel_col + random(pcg)) / smp4side
                 v_pixel = (inter_pixel_row + random(pcg)) / smp4side
                 ray = fire_ray(ImTr, col, row, u_pixel, v_pixel)
-                cum_color += func(ray)
+                if ray ≈ Ray(Point(-2.0, 0.0, 1.0), Vec(1.0, 1.2083333333333333, 0.4750000000000001), 1, Inf, 0)
+                    # printstyled("\nnumber ray  ", ray_index, " : ", " dir - ", new_ray.dir, "\t obj - ", hit_record.shape, color=:light_blue)
+                    cum_color += func(ray, true)
+                else
+                    cum_color += func(ray)
+                end
+#                cum_color += func(ray)
 
 #=               if (row == 0) && (col == 24)
                     printstyled(ray, "\n", color=:light_magenta)
@@ -160,13 +165,22 @@ function fire_all_rays!(
     else
         for row in ImTr.img.height-1:-1:0, col in 0:ImTr.img.width-1
             ray = fire_ray(ImTr, col, row)
-            set_pixel(ImTr.img, col, row, func(ray))
-
+        #    set_pixel(ImTr.img, col, row, func(ray))
+            # printstyled("\nBB\n", color=:light_red)
+#=            if ray ≈ Ray(Point(-2.0, 0.0, 1.0), Vec(1.0, 1.2083333333333333, 0.4750000000000001), 1, Inf, 0)
+                # printstyled("\nnumber ray  ", ray_index, " : ", " dir - ", new_ray.dir, "\t obj - ", hit_record.shape, color=:light_blue)
+                func(ray, true)
+            end
+=#
             # current_time = time() # use if @elapsed doesn't work propely for our pourpose
-            t = time() - last_call_time# current_time - last_call_time # use if @elapsed doesn't work propely for our pourpose
+        #    t = time() - last_call_time# current_time - last_call_time # use if @elapsed doesn't work propely for our pourpose
                 if (row == 31) && (col == 7)
                     printstyled("\n\n", ray, "\n", color=:light_yellow)
-                    printstyled(func(ray), "\n\n", color=:light_yellow)
+                    # printstyled(func(ray, true), "\n\n", color=:light_yellow)
+                    set_pixel(ImTr.img, col, row, func(ray, true))
+                    printstyled("\nAA\n", color=:light_red)
+                else
+                    set_pixel(ImTr.img, col, row, func(ray))
                 end
 #=                if (row == 229) && (col == 259)
                     printstyled("\nPixel: ", color=:red)
@@ -174,7 +188,9 @@ function fire_all_rays!(
                     printstyled("\n", ray, "\n", color=:light_yellow)
                     printstyled(func(ray), "\n\n", color=:light_yellow)
                 end
-=#            if (callback ≠ nothing) && (t > callback_time_s)
+                
+=#            t = time() - last_call_time
+                if (callback ≠ nothing) && (t > callback_time_s)
                 callback(row, col)
                 last_call_time = time()    # use if @elapsed doesn't work propely for our pourpose
             end
