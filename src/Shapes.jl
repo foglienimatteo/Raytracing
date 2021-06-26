@@ -22,8 +22,8 @@ v = \frac{\theta}{\pi} = \frac{\arccos (P_z)}{\pi}
 See also: [`Point`](@ref), [`Vec2d`](@ref), [`Sphere`](@ref)
 """
 function sphere_point_to_uv(point::Point)
-    v = acos(point.z) / π
-    u = atan(point.y, point.x) / (2.0 * π)
+    v = acos(point.v[3]) / π
+    u = atan(point.v[2], point.v[1]) / (2.0 * π)
     u = u>=0 ? u : u + 1.0
     return Vec2d(u,v)
 end
@@ -46,8 +46,8 @@ in order to guarantee that ``u, v \in [0, 1)``.
 See also: [`Point`](@ref), [`Vec2d`](@ref), [`Plane`](@ref)
 """
 function plane_point_to_uv(point::Point)
-    u = point.x - floor(point.x)
-    v = point.y - floor(point.y)
+    u = point.v[1] - floor(point.v[1])
+    v = point.v[2] - floor(point.v[2])
     return Vec2d(u,v)
 end
 
@@ -83,12 +83,12 @@ P_z \neq \frac{1}{2},  -\frac{1}{2}
 See also: [`Point`](@ref), [`Vec2d`](@ref), [`Cube`](@ref)
 """
 function cube_point_to_uv(point::Point)
-    if (point.x ≈ 0.5 || point.x ≈ -0.5)
-        u, v  = point.y + 0.5, point.z + 0.5
-    elseif (point.y ≈ 0.5 || point.y ≈ -0.5)
-        u, v  = point.x + 0.5, point.z + 0.5
-    elseif (point.z ≈ 0.5 || point.z ≈ -0.5) 
-        u, v  = point.x + 0.5, point.y + 0.5 
+    if (point.v[1] ≈ 0.5 || point.v[1] ≈ -0.5)
+        u, v  = point.v[2] + 0.5, point.v[3] + 0.5
+    elseif (point.v[2] ≈ 0.5 || point.v[2] ≈ -0.5)
+        u, v  = point.v[1] + 0.5, point.v[3] + 0.5
+    elseif (point.v[3] ≈ 0.5 || point.v[3] ≈ -0.5) 
+        u, v  = point.v[1] + 0.5, point.v[2] + 0.5 
     else
         throw(ArgumentError("the given point do not belong to the unit cube."))
     end   
@@ -99,8 +99,8 @@ end
 
 function torus_point_to_uv(point::Point)
     len_point = norm(point)
-    u = asin(point.y/len_point) / π
-    v = atan(point.z, point.x) / (2.0 * π)
+    u = asin(point.v[2]/len_point) / π
+    v = atan(point.v[3], point.v[1]) / (2.0 * π)
     v>=0 ? nothing : v+= 1.0
     u>=0 ? nothing : u+= 1.0
     return Vec2d(u,v)
@@ -143,12 +143,12 @@ function triangle_point_to_uv(triangle::Triangle, point::Point)
     A, B, C = Tuple(P for P in triangle.vertexes)
     P = point
     
-    β_num = (P.x - A.x)*(C.y - A.y) - (P.y - A.y)*(C.x - A.x)
-    β_den = (B.x - A.x)*(C.y - A.y) - (B.y - A.y)*(C.x - A.x)
+    β_num = (P.v[1] - A.v[1])*(C.v[2] - A.v[2]) - (P.v[2] - A.v[2])*(C.v[1] - A.v[1])
+    β_den = (B.v[1] - A.v[1])*(C.v[2] - A.v[2]) - (B.v[2] - A.v[2])*(C.v[1] - A.v[1])
     β = β_num/β_den
 
-    γ_num = (P.x - A.x)*(B.y - A.y) - (P.y - A.y)*(B.x - A.x)
-    γ_den = (C.x - A.x)*(B.y - A.y) - (C.y - A.y)*(B.x - A.x)
+    γ_num = (P.v[1] - A.v[1])*(B.v[2] - A.v[2]) - (P.v[2] - A.v[2])*(B.v[1] - A.v[1])
+    γ_den = (C.v[1] - A.v[1])*(B.v[2] - A.v[2]) - (C.v[2] - A.v[2])*(B.v[1] - A.v[1])
     γ = γ_num/γ_den
 
     Vec2d(β, γ)
@@ -169,7 +169,7 @@ direction with respect to the given `Vec` `ray_dir`.
 See also: [`Point`](@ref), [`Ray`](@ref), [`Normal`](@ref), [`Sphere`](@ref)
 """
 function sphere_normal(point::Point, ray_dir::Vec)
-    result = Normal(point.x, point.y, point.z)
+    result = Normal(point.v[1], point.v[2], point.v[3])
     Vec(point) ⋅ ray_dir < 0.0 ? nothing : result = -result
     return result
 end
@@ -203,11 +203,11 @@ direction with respect to the given `Vec` `ray_dir`.
 See also: [`Point`](@ref), [`Ray`](@ref), [`Normal`](@ref), [`Cube`](@ref)
 """
 function cube_normal(point::Point, ray_dir::Vec)
-    if (point.x ≈ 0.5 || point.x ≈ -0.5)
+    if (point.v[1] ≈ 0.5 || point.v[1] ≈ -0.5)
         result = Normal(1., 0., 0.)
-    elseif (point.y ≈ 0.5 || point.y ≈ -0.5)
+    elseif (point.v[2] ≈ 0.5 || point.v[2] ≈ -0.5)
         result = Normal(0., 1., 0.)
-    elseif (point.z ≈ 0.5 || point.z ≈ -0.5) 
+    elseif (point.v[3] ≈ 0.5 || point.v[3] ≈ -0.5) 
         result = Normal(0., 0., 1.)
     else
         throw(ArgumentError("the given point do not belong to the unit cube."))
@@ -272,7 +272,7 @@ See also: [`Triangle`](@ref), [`Point`](@ref)
 """
 function triangle_barycenter(triangle::Triangle)
     A, B, C = Tuple(P for P in triangle.vertexes)
-    result = Point(A.x+B.x+C.x, A.y+B.y+C.y, A.z+B.z+C.z)*1/3
+    result = Point(A.v[1]+B.v[1]+C.v[1], A.v[2]+B.v[2]+C.v[2], A.v[3]+B.v[3]+C.v[3])*1/3
     return result
 end
 
@@ -305,12 +305,12 @@ See also: [`Ray`](@ref), [`AABB`](@ref), [`HitRecord`](@ref)
 """
 function ray_intersection(AABB::AABB, ray::Ray)
     (tmin, tmax) = Tuple( sort( [ 
-                        (AABB.m.x - ray.origin.x) / ray.dir.x, 
-                        (AABB.M.x - ray.origin.x) / ray.dir.x
+                        (AABB.m.v[1] - ray.origin.v[1]) / ray.dir.x, 
+                        (AABB.M.v[1] - ray.origin.v[1]) / ray.dir.x
                     ]) )
     (tymin, tymax) = Tuple( sort( [ 
-                        (AABB.m.y - ray.origin.y) / ray.dir.y, 
-                        (AABB.M.y - ray.origin.y) / ray.dir.y
+                        (AABB.m.v[2] - ray.origin.v[2]) / ray.dir.y, 
+                        (AABB.M.v[2] - ray.origin.v[2]) / ray.dir.y
                     ]) )
  
     ((tmin > tymax) || (tymin > tmax)) && (return false)
@@ -319,8 +319,8 @@ function ray_intersection(AABB::AABB, ray::Ray)
     (tymax < tmax) && (tmax = tymax)
 
     (tzmin, tzmax) = Tuple( sort( [ 
-                        (AABB.m.z - ray.origin.z) / ray.dir.z, 
-                        (AABB.M.z - ray.origin.z) / ray.dir.z
+                        (AABB.m.v[3] - ray.origin.v[3]) / ray.dir.z, 
+                        (AABB.M.v[3] - ray.origin.v[3]) / ray.dir.z
                     ]) )
  
     ((tmin > tzmax) || (tzmin > tmax)) && (return false)
@@ -395,7 +395,7 @@ function ray_intersection(plane::Plane, ray::Ray)
 
     !(inv_ray.dir.z ≈ 0.0f0) || (return nothing)
 
-    hit_t = - inv_ray.origin.z / inv_ray.dir.z
+    hit_t = - inv_ray.origin.v[3] / inv_ray.dir.z
 
     ( (hit_t > inv_ray.tmin) && (hit_t < inv_ray.tmax) ) || (return nothing)
 
@@ -430,15 +430,15 @@ function ray_intersection(cube::Cube, ray::Ray)
     d = inv_ray.dir
     O = inv_ray.origin
 
-    (tmin, tmax) = Tuple( sort( [ (-0.5f0 - O.x) / d.x, (0.5f0 - O.x) / d.x ]) )
-    (tymin, tymax) = Tuple( sort( [ (-0.5f0 - O.y) / d.y, (0.5f0 - O.y) / d.y ]) )
+    (tmin, tmax) = Tuple( sort( [ (-0.5f0 - O.v[1]) / d.x, (0.5f0 - O.v[1]) / d.x ]) )
+    (tymin, tymax) = Tuple( sort( [ (-0.5f0 - O.v[2]) / d.y, (0.5f0 - O.v[2]) / d.y ]) )
  
     ((tmin > tymax) || (tymin > tmax)) && (return false)
  
     (tymin > tmin) && (tmin = tymin)
     (tymax < tmax) && (tmax = tymax)
 
-    (tzmin, tzmax) = Tuple( sort( [ (-0.5f0 - O.z) / d.z, (0.5f0 - O.z) / d.z ]) )
+    (tzmin, tzmax) = Tuple( sort( [ (-0.5f0 - O.v[3]) / d.z, (0.5f0 - O.v[3]) / d.z ]) )
  
     ((tmin > tzmax) || (tzmin > tmax)) && (return false)
  
@@ -550,11 +550,11 @@ See also: [`Ray`](@ref), [`Triangle`](@ref), [`HitRecord`](@ref)
 function ray_intersection(triangle::Triangle, ray::Ray)
 
     A, B, C = Tuple(P for P in triangle.vertexes)
-    m = [ray.origin.x-A.x;  ray.origin.y-A.y; ray.origin.z-A.z]
+    m = [ray.origin.v[1]-A.v[1];  ray.origin.v[2]-A.v[2]; ray.origin.v[3]-A.v[3]]
     M = [
-        B.x-A.x C.x-A.x -ray.dir.x ;
-        B.y-A.y C.y-A.y -ray.dir.y ;
-        B.z-A.z C.z-A.z -ray.dir.z ;
+        B.v[1]-A.v[1] C.v[1]-A.v[1] -ray.dir.x ;
+        B.v[2]-A.v[2] C.v[2]-A.v[2] -ray.dir.y ;
+        B.v[3]-A.v[3] C.v[3]-A.v[3] -ray.dir.z ;
     ]
 
     try
@@ -678,7 +678,7 @@ function quick_ray_intersection(plane::Plane, ray::Ray)
     inv_ray = inverse(plane.T) * ray
     !(inv_ray.dir.z ≈ 0.0f0) || (return false)
 
-    t = -inv_ray.origin.z / inv_ray.dir.z
+    t = -inv_ray.origin.v[3] / inv_ray.dir.z
     return (inv_ray.tmin < t < inv_ray.tmax)
 end
 

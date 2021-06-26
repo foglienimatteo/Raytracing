@@ -128,12 +128,13 @@ A point in 3D space.
 - `Point(v::SVector{4, Float64}) = new(v[1], v[2], v[3])`
 """
 struct Point
-    x::Float32
-    y::Float32
-    z::Float32
-    Point(x, y, z) = new(convert(Float32, x), convert(Float32, y), convert(Float32, z))
-    Point() = new(0.0f0, 0.0f0, 0.0f0)
-    Point(v::SVector{4, Float32}) = new(v[1], v[2], v[3])
+    v::SVector{3, Float32}
+    Point(x, y, z) = new([convert(Float32, x), convert(Float32, y), convert(Float32, z)])
+    Point() = new([0.0f0, 0.0f0, 0.0f0])
+    Point(v::SVector{3, Float32}) = new([v[1], v[2], v[3]])
+    Point(v::SVector{4, Float32}) = new([v[1], v[2], v[3]])
+    Point(v::SVector{3, Float64}) = new([convert(Float32, v[1]), convert(Float32, v[2]), convert(Float32, v[3])])
+    Point(v::SVector{4, Float64}) = new([convert(Float32, v[1]), convert(Float32, v[2]), convert(Float32, v[3])])
 end
 
 """
@@ -161,7 +162,7 @@ struct Vec
     z::Float32
     Vec(x::Float32, y::Float32, z::Float32) = new(x, y, z)
     Vec() = new(0.0f0, 0.0f0, 0.0f0)
-    Vec(P::Point) = new(P.x, P.y, P.z)
+    Vec(P::Point) = new(P.v[1], P.v[2], P.v[3])
     Vec(v::SVector{4, Float32}) = new(v[1], v[2], v[3])
     function Vec(x::T1, y::T2, z::T3) where {T1<:Number,T2<:Number, T3<:Number}
         Vec(convert(Float32, x), convert(Float32, y), convert(Float32, z))
@@ -637,14 +638,14 @@ function AABB(::Type{Sphere}, T::Transformation)
 
     v2 = SVector{8, Point}([T*p for p in v1])
     P2 = Point(
-        maximum([v2[i].x for i in eachindex(v2)]),
-        maximum([v2[i].y for i in eachindex(v2)]),
-        maximum([v2[i].z for i in eachindex(v2)]) 
+        maximum([v2[i].v[1] for i in eachindex(v2)]),
+        maximum([v2[i].v[2] for i in eachindex(v2)]),
+        maximum([v2[i].v[3] for i in eachindex(v2)]) 
     )
     P1 = Point(
-        minimum([v2[i].x for i in eachindex(v2)]),
-        minimum([v2[i].y for i in eachindex(v2)]),
-        minimum([v2[i].z for i in eachindex(v2)]) 
+        minimum([v2[i].v[1] for i in eachindex(v2)]),
+        minimum([v2[i].v[2] for i in eachindex(v2)]),
+        minimum([v2[i].v[3] for i in eachindex(v2)]) 
     )
     AABB(P1, P2)
 
@@ -723,14 +724,14 @@ function AABB(::Type{Cube}, T::Transformation)
 
     v2 = SVector{8, Point}([T*p for p in v1])
     P2 = Point(
-        maximum([v2[i].x for i in eachindex(v2)]),
-        maximum([v2[i].y for i in eachindex(v2)]),
-        maximum([v2[i].z for i in eachindex(v2)]) 
+        maximum([v2[i].v[1] for i in eachindex(v2)]),
+        maximum([v2[i].v[2] for i in eachindex(v2)]),
+        maximum([v2[i].v[3] for i in eachindex(v2)]) 
     )
     P1 = Point(
-        minimum([v2[i].x for i in eachindex(v2)]),
-        minimum([v2[i].y for i in eachindex(v2)]),
-        minimum([v2[i].z for i in eachindex(v2)]) 
+        minimum([v2[i].v[1] for i in eachindex(v2)]),
+        minimum([v2[i].v[2] for i in eachindex(v2)]),
+        minimum([v2[i].v[3] for i in eachindex(v2)]) 
     )
     AABB(P1, P2)
 end

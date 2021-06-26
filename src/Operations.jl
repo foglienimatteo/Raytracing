@@ -30,7 +30,7 @@ function Base.:≈(a::HDRimage, b::HDRimage)
 end
 Base.:≈(a::Vec, b::Vec) = are_close(a.x, b.x) && are_close(a.y, b.y) && are_close(a.z, b.z)
 Base.:≈(a::Normal, b::Normal) = are_close(a.x, b.x) && are_close(a.y, b.y) && are_close(a.z, b.z)
-Base.:≈(a::Point, b::Point) = are_close(a.x, b.x) && are_close(a.y, b.y) && are_close(a.z, b.z)
+Base.:≈(a::Point, b::Point) = are_close(a.v[1], b.v[1]) && are_close(a.v[2], b.v[2]) && are_close(a.v[3], b.v[3])
 Base.:≈(m1::SMatrix{4,4,Float64}, m2::SMatrix{4,4,Float64}) = (B = [are_close(m,n) for (m,n) in zip(m1,m2)] ; all(i->(i==true) , B) )
 Base.:≈(t1::Transformation, t2::Transformation) = (t1.M ≈ t2.M) && ( t1.invM ≈ t2.invM )
 Base.:≈(r1::Ray, r2::Ray) = (r1.origin ≈ r2.origin) && (r1.dir ≈ r2.dir)
@@ -46,9 +46,9 @@ Base.:*(c::RGB{T}, scalar::Real) where {T} = scalar * c
 Base.:/(c::RGB{T}, scalar::Real) where {T} = RGB{T}(c.r/scalar , c.g/scalar, c.b/scalar)
 
 # Operations for Point
-Base.:*(s::Real, a::Point) = Point(s*a.x, s*a.y, s*a.z)
-Base.:*(a::Point, s::Real) = Point(s*a.x, s*a.y, s*a.z)
-Base.:/(a::Point, s::Real) = Point(a.x/s, a.y/s, a.z/s)
+Base.:*(s::Real, a::Point) = Point(s*a.v[1], s*a.v[2], s*a.v[3])
+Base.:*(a::Point, s::Real) = Point(s*a.v[1], s*a.v[2], s*a.v[3])
+Base.:/(a::Point, s::Real) = Point(a.v[1]/s, a.v[2]/s, a.v[3]/s)
 
 # Operations for Vec
 Base.:+(a::Vec, b::Vec) = Vec(a.x+b.x, a.y+b.y, a.z+b.z)
@@ -72,10 +72,10 @@ LinearAlgebra.:×(a::Normal, b::Vec) = Vec(a.y*b.z-a.z*b.y, b.x*a.z-a.x*b.z, a.x
 LinearAlgebra.:×(a::Vec, b::Normal) = Vec(a.y*b.z-a.z*b.y, b.x*a.z-a.x*b.z, a.x*b.y-a.y*b.x)
 
 # Operations between Vec and Point
-Base.:+(p::Point, v::Vec) = Point(p.x+v.x, p.y+v.y, p.z+v.z)
-Base.:+(v::Vec, p::Point) = Point(p.x+v.x, p.y+v.y, p.z+v.z)
-Base.:-(p::Point, v::Vec) = Point(p.x-v.x, p.y-v.y, p.z-v.z)
-Base.:-(a::Point, b::Point) = Vec(a.x-b.x, a.y-b.y, a.z-b.z)
+Base.:+(p::Point, v::Vec) = Point(p.v[1]+v.x, p.v[2]+v.y, p.v[3]+v.z)
+Base.:+(v::Vec, p::Point) = Point(p.v[1]+v.x, p.v[2]+v.y, p.v[3]+v.z)
+Base.:-(p::Point, v::Vec) = Point(p.v[1]-v.x, p.v[2]-v.y, p.v[3]-v.z)
+Base.:-(a::Point, b::Point) = Vec(a.v[1]-b.v[1], a.v[2]-b.v[2], a.v[3]-b.v[3])
 
 #=
 """
@@ -92,7 +92,7 @@ end
 # Operations for Transformations
 Base.:*(s::Transformation, t::Transformation) = Transformation(s.M*t.M, t.invM*s.invM)
 function Base.:*(t::Transformation, p::Point)
-    PV = SVector{4, Float32}(p.x, p.y, p.z, 1)
+    PV = SVector{4, Float32}(p.v[1], p.v[2], p.v[3], 1)
     res = t.M*PV
     #(res[end] == 1) || (res /= res[end])
     res /= res[4]
