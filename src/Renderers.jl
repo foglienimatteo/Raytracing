@@ -67,7 +67,7 @@ function (renderer::PathTracer)(ray::Ray)
         if random(renderer.pcg) > hit_color_lum
             # Keep the recursion going, but compensate 
             # for other potentially discarded rays
-            hit_color *= 1.0 / (1.0 - hit_color_lum)
+            hit_color *= 1.0f0 / (1.0f0 - hit_color_lum)
         else
             # Terminate prematurely
             return emitted_radiance
@@ -97,7 +97,7 @@ function (renderer::PathTracer)(ray::Ray)
         end
     end
 
-    return emitted_radiance + cum_radiance * (1.0 / num_of_rays)
+    return emitted_radiance + cum_radiance * (1.0f0 / num_of_rays)
 end
 
 function (renderer::PointLightRenderer)(ray::Ray)
@@ -118,7 +118,7 @@ function (renderer::PointLightRenderer)(ray::Ray)
             distance_factor =  
                 (cur_light.linear_radius > 0) ? 
                 (cur_light.linear_radius / distance)^2 : 
-                1.0
+                1.0f0
 
             emitted_color = get_color(hit_material.emitted_radiance, hit_record.surface_point)
             brdf_color = evaluate(

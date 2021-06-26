@@ -132,7 +132,7 @@ function second_world()
 	add_shape!(
 		world, 
 		Plane(
-			translation(Vec(0., -2., 0)) * rotation_z(π/6.) * rotation_x(π/2.), 
+			translation(Vec(0., -2., 0)) * rotation_z(convert(Float32, π/6.)) * rotation_x(convert(Float32, π/2.)), 
 			mirror_material_2,
 		)
 	)
@@ -196,7 +196,7 @@ end
 function print_progress(row::Int64, col::Int64, height::Int64, width::Int64)
 	print("Rendered row $(height - row)/$(height) \t= ")
 	@printf "%.2f" 100*((height - row)/height)
-	print("%\n")
+	print("%\r")
 end
 
 function demo(x::(Pair{T1,T2} where {T1,T2})...)
@@ -207,7 +207,7 @@ function demo(
 		renderer::Renderer = FlatRenderer(),
 		camera_type::String = "per",
 		camera_position::Union{Point, Vec} = Point(-1.,0.,0.), 
-     	α::Float64 = 0., 
+     	α::Float32 = 0.0f0, 
      	width::Int64 = 640, 
      	height::Int64 = 480, 
      	pfm_output::String = "demo.pfm", 
@@ -259,7 +259,7 @@ function demo(
 	image = HDRimage(width, height)
 	tracer = ImageTracer(image, camera, samples_per_side)
 
-	fire_all_rays!(tracer, renderer, (r,c) -> print_progress(r,c,image.height, image.width) )
+	@time fire_all_rays!(tracer, renderer, (r,c) -> print_progress(r,c,image.height, image.width) )
 	img = tracer.img
 
 	# Save the HDR image
@@ -268,13 +268,13 @@ function demo(
 
 	# Apply tone-mapping to the image
 	 if typeof(renderer) == OnOffRenderer
-		normalize_image!(img, 0.18, nothing)
+		normalize_image!(img, convert(Float32, 0.18), nothing)
 	elseif typeof(renderer) == FlatRenderer
-		normalize_image!(img, 0.18, 0.5)
+		normalize_image!(img, convert(Float32, 0.18), 0.5)
 	elseif typeof(renderer) == PathTracer
-		normalize_image!(img, 0.18, 0.1)
+		normalize_image!(img, convert(Float32, 0.18), 0.1)
 	elseif typeof(renderer) == PointLightRenderer
-          normalize_image!(img, 0.18, 0.1)
+          normalize_image!(img, convert(Float32, 0.18), 0.1)
 	else
 		throw(ArgumentError("Unknown renderer: $(typeof(renderer))"))
 	end

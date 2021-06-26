@@ -58,9 +58,9 @@ function parse_tonemapping_settings(dict::Dict{String, T}) where {T}
         png::String = dict["outfile"] : 
         throw(ArgumentError("need to specify the output LDR filename to be saved"))
 
-    a::Float64 = haskey(dict, "alpha") ? string2positive(dict["alpha"]) : 0.18
+    a::Float32 = haskey(dict, "alpha") ? string2positive(dict["alpha"]) : 0.18f0
 
-    γ::Float64 = haskey(dict, "gamma") ? string2positive(dict["gamma"]) : 1.0
+    γ::Float32 = haskey(dict, "gamma") ? string2positive(dict["gamma"]) : 1.0f0
 
     ONLY_FOR_TESTS::Bool = haskey(dict, "ONLY_FOR_TESTS") ? dict["ONLY_FOR_TESTS"] : false
 
@@ -485,11 +485,11 @@ function parse_demo_settings(dict::Dict{String, T}) where {T}
             string2vector(dict["camera_position"]) 
         end : Vec(-1.0 , 0. , 0.)
 
-    α::Float64 = haskey(dict, "alpha") ? begin 
+    α::Float32 = haskey(dict, "alpha") ? begin 
         typeof(dict["alpha"]) <: Number ?
             dict["alpha"] : 
-            parse(Float64, dict["alpha"])
-        end : 0.
+            parse(Float32, dict["alpha"])
+        end : 0.0f0
 
     width::Int64 = haskey(dict, "width") ? string2evenint64(dict["width"]) : 640
 
@@ -845,11 +845,11 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
             string2vector(dict["camera_position"]) 
         end : Vec(-1.0 , 0. , 0.)
 
-    α::Float64 = haskey(dict, "alpha") ? begin 
+    α::Float32 = haskey(dict, "alpha") ? begin 
         typeof(dict["alpha"]) <: Number ?
             dict["alpha"] : 
-            parse(Float64, dict["alpha"])
-        end : 0.
+            parse(Float32, dict["alpha"])
+        end : 0.0f0
 
     width::Int64 = haskey(dict, "width") ? string2evenint64(dict["width"]) : 640
 
@@ -868,7 +868,7 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
         string2evenint64(dict["samples_per_pixel"]) 
         end : 0
 
-    declare_float::Union{Dict{String, Float64}, Nothing} = haskey(dict, "declare_float") ?
+    declare_float::Union{Dict{String, Float32}, Nothing} = haskey(dict, "declare_float") ?
         declare_float2dict(dict["declare_float"]) : 
         nothing
 

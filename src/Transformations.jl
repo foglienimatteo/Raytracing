@@ -6,7 +6,7 @@
 #
 
 """
-    rotation_x(ϑ::Float64) :: Transformation
+    rotation_x(ϑ::Float32) :: Transformation
 
 Encoding a rotation around the x-axis of an angle `ϑ` _**in radiant**_. 
 
@@ -15,22 +15,22 @@ rotation for entering x-axis corresponds to a `ϑ>0` rotation angle.
 
 See also: [`Transformation`](@ref)
 """
-function rotation_x(ϑ::Float64)
+function rotation_x(ϑ::Float32)
     Transformation(
-        [1.0    0.0     0.0     0.0 ;   
-         0.0    cos(ϑ)  -sin(ϑ) 0.0 ;
-         0.0    sin(ϑ)  cos(ϑ)  0.0 ;
-         0.0    0.0     0.0     1.0]
+        [1.0f0    0.0f0     0.0f0     0.0f0 ;   
+         0.0f0    cos(ϑ)  -sin(ϑ) 0.0f0 ;
+         0.0f0    sin(ϑ)  cos(ϑ)  0.0f0 ;
+         0.0f0    0.0f0     0.0f0     1.0f0]
          ,
-        [1.0    0.0     0.0     0.0 ;   
-         0.0    cos(ϑ)  sin(ϑ)  0.0 ;
-         0.0    -sin(ϑ) cos(ϑ)  0.0 ;
-         0.0    0.0     0.0     1.0]
+        [1.0f0    0.0f0     0.0f0     0.0f0 ;   
+         0.0f0    cos(ϑ)  sin(ϑ)  0.0f0 ;
+         0.0f0    -sin(ϑ) cos(ϑ)  0.0f0 ;
+         0.0f0    0.0f0     0.0f0     1.0f0]
     )
 end
 
 """
-    rotation_y(ϑ::Float64) :: Transformation
+    rotation_y(ϑ::Float32) :: Transformation
 
 Encoding a rotation around the y-axis of an angle `ϑ` _**in radiant**_. 
 
@@ -39,22 +39,22 @@ rotation for entering y-axis corresponds to a `ϑ>0` rotation angle.
 
 See also: [`Transformation`](@ref)
 """
-function rotation_y(ϑ::Float64)
+function rotation_y(ϑ::Float32)
     Transformation(
-        [cos(ϑ)     0.0     sin(ϑ)  0.0 ;
-         0.0        1.      0.0     0.0 ;
-         -sin(ϑ)    0.0     cos(ϑ)  0.0 ;
-         0.0        0.0     0.0     1.  ]
+        [cos(ϑ)     0.0f0     sin(ϑ)  0.0f0 ;
+         0.0f0        1.0f0      0.0f0     0.0f0 ;
+         -sin(ϑ)    0.0f0     cos(ϑ)  0.0f0 ;
+         0.0f0        0.0f0     0.0f0     1.0f0  ]
          ,
-        [cos(ϑ)     0.0     -sin(ϑ) 0.0 ;
-         0.0        1.      0.0     0.0 ;
-         sin(ϑ)     0.0     cos(ϑ)  0.0 ;
-         0.0        0.0     0.0     1.  ]
+        [cos(ϑ)     0.0f0     -sin(ϑ) 0.0f0 ;
+         0.0f0        1.0f0      0.0f0     0.0f0 ;
+         sin(ϑ)     0.0f0     cos(ϑ)  0.0f0 ;
+         0.0f0        0.0f0     0.0f0     1.0f0  ]
     )
 end 
 
 """
-    rotation_z(ϑ::Float64) :: Transformation
+    rotation_z(ϑ::Float32) :: Transformation
 
 Encoding a rotation around the z-axis of an angle `ϑ` _**in radiant**_. 
 
@@ -63,17 +63,17 @@ rotation for entering z-axis corresponds to a `ϑ>0` rotation angle.
 
 See also: [`Transformation`](@ref)
 """
-function rotation_z(ϑ::Float64)
+function rotation_z(ϑ::Float32)
     Transformation(
         [cos(ϑ) -sin(ϑ) 0.0     0.0 ;
          sin(ϑ) cos(ϑ)  0.0     0.0 ;
          0.0    0.0     1.0     0.0 ;
          0.0    0.0     0.0     1.0]
          ,
-        [cos(ϑ)     sin(ϑ)  0.0     0.0 ;
-         -sin(ϑ)    cos(ϑ)  0.0     0.0 ;
-         0.0        0.0     1.0     0.0 ;
-         0.0        0.0     0.0     1.0]
+        [cos(ϑ)     sin(ϑ)  0.0f0     0.0f0 ;
+         -sin(ϑ)    cos(ϑ)  0.0f0     0.0f0 ;
+         0.0f0        0.0f0     1.0f0     0.0f0 ;
+         0.0f0        0.0f0     0.0f0     1.0f0]
     )
 end 
 
@@ -82,23 +82,23 @@ end
 function scaling(v::Vec)
     Transformation(
         [v.x    0.0     0.0     0.0 ;
-         0.0    v.y     0.0     0.0 ;
-         0.0    0.0     v.z     0.0 ;
-         0.0    0.0     0.0     1.0]
+         0.0f0    v.y     0.0     0.0 ;
+         0.0f0    0.0     v.z     0.0 ;
+         0.0f0    0.0     0.0     1.0]
          ,
-        [1/v.x  0.0     0.0     0.0 ;
-         0.0    1/v.y   0.0     0.0 ;
-         0.0    0.0     1/v.z   0.0 ;
-         0.0    0.0     0.0     1.0]
+        [1/v.x  0.0f0     0.0f0     0.0f0 ;
+         0.0f0    1/v.y   0.0f0     0.0f0 ;
+         0.0f0    0.0f0     1/v.z   0.0f0 ;
+         0.0f0    0.0f0    0.0f0     1.0f0]
     )
 end 
 
-scaling(x::Float64, y::Float64, z::Float64) = scaling(Vec(x,y,z))
+scaling(x::Float32, y::Float32, z::Float32) = scaling(Vec(x,y,z))
 
 
 """
     scaling(v::Vec) :: Transformation
-    scaling(x::Float64, y::Float64, z::Float64) = scaling(Vec(x,y,z))
+    scaling(x::Float32, y::Float64, z::Float64) = scaling(Vec(x,y,z))
 
 Encoding a scaling of the 3 spatial coordinates according to the
 vector `v` (negative values codify spatial reflections). 
@@ -114,19 +114,19 @@ scaling
 
 function translation(v::Vec)
    Transformation(
-        [1.0    0.0     0.0     v.x ;
-         0.0    1.0     0.0     v.y ;
-         0.0    0.0     1.0     v.z ;
-         0.0    0.0     0.0     1.0]
+        [1.0f0    0.0f0     0.0f0     v.x ;
+         0.0f0    1.0f0     0.0f0     v.y ;
+         0.0f0    0.0f0     1.0f0     v.z ;
+         0.0f0    0.0f0     0.0f0     1.0f0]
          ,
-        [1.0    0.0     0.0     -v.x ;
-         0.0    1.0     0.0     -v.y ;
-         0.0    0.0     1.0     -v.z ;
-         0.0    0.0     0.0     1.0]
+        [1.0f0    0.0f0     0.0f0     -v.x ;
+         0.0f0    1.0f0     0.0f0     -v.y ;
+         0.0f0    0.0f0     1.0f0     -v.z ;
+         0.0f0    0.0f0     0.0f0     1.0f0]
     )
 end 
 
-translation(x::Float64, y::Float64, z::Float64) = translation(Vec(x,y,z))
+translation(x::Float32, y::Float32, z::Float32) = translation(Vec(x,y,z))
 
 """
     translation(v::Vec) :: Transformation

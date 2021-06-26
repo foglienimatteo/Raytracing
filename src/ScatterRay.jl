@@ -61,7 +61,7 @@ function scatter_ray(
 
     return Ray(
                 interaction_point,
-                e1*cos(ϕ)*cos_θ + e2*sin(ϕ)*cos_θ + e3*sin_θ,
+                e1*convert(Float32, cos(ϕ)*cos_θ) + e2*convert(Float32, sin(ϕ)*cos_θ) + e3*convert(Float32, sin_θ),
                 1.0e-3,   # tmin, be generous here
                 Inf,
                 depth
@@ -116,7 +116,7 @@ function scatter_ray(
 
     return Ray(
                 interaction_point,
-                ray_dir - normal*2.0*(Vec(normal) ⋅ ray_dir),
+                ray_dir - normal*2.0f0*(Vec(normal) ⋅ ray_dir),
                 1e-3,
                 Inf,
                 depth

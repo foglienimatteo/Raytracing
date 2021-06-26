@@ -105,9 +105,9 @@ See also: [`tone_mapping`](@ref)
 struct Parameters
     infile::String
     outfile::String
-    a::Float64
-    γ::Float64
-    Parameters(in, out, a=0.18, γ=1.0) = new(in, out, a, γ)
+    a::Float32
+    γ::Float32
+    Parameters(in, out, a=0.18f0, γ=1.0f0) = new(in, out, convert(Float32, a), convert(Float32, γ))
 end
 
 
@@ -128,12 +128,12 @@ A point in 3D space.
 - `Point(v::SVector{4, Float64}) = new(v[1], v[2], v[3])`
 """
 struct Point
-    x::Float64
-    y::Float64
-    z::Float64
-    Point(x, y, z) = new(x, y, z)
-    Point() = new(0., 0. ,0.)
-    Point(v::SVector{4, Float64}) = new(v[1], v[2], v[3])
+    x::Float32
+    y::Float32
+    z::Float32
+    Point(x, y, z) = new(convert(Float32, x), convert(Float32, y), convert(Float32, z))
+    Point() = new(0.0f0, 0.0f0, 0.0f0)
+    Point(v::SVector{4, Float32}) = new(v[1], v[2], v[3])
 end
 
 """
@@ -156,15 +156,15 @@ A 3D Vector
 See also: [`Normal`](@ref)
 """
 struct Vec
-    x::Float64
-    y::Float64
-    z::Float64
-    Vec(x::Float64, y::Float64, z::Float64) = new(x, y, z)
-    Vec() = new(0.0, 0.0, 0.0)
+    x::Float32
+    y::Float32
+    z::Float32
+    Vec(x::Float32, y::Float32, z::Float32) = new(x, y, z)
+    Vec() = new(0.0f0, 0.0f0, 0.0f0)
     Vec(P::Point) = new(P.x, P.y, P.z)
-    Vec(v::SVector{4, Float64}) = new(v[1], v[2], v[3])
+    Vec(v::SVector{4, Float32}) = new(v[1], v[2], v[3])
     function Vec(x::T1, y::T2, z::T3) where {T1<:Number,T2<:Number, T3<:Number}
-        Vec(convert(Float64, x), convert(Float64, y), convert(Float64, z))
+        Vec(convert(Float32, x), convert(Float32, y), convert(Float32, z))
     end
 end
 
@@ -195,9 +195,9 @@ and its struct normalize them.
 See also: [`Vec`](@ref)
 """
 struct Normal
-    x::Float64
-    y::Float64
-    z::Float64
+    x::Float32
+    y::Float32
+    z::Float32
     function Normal(x, y, z)
         m = √(x^2+y^2+z^2)
         new(x/m, y/m, z/m)
@@ -206,12 +206,12 @@ struct Normal
         m = √(v.x^2+v.y^2+v.z^2)
         new(v.x/m, v.y/m, v.z/m)
     end
-    function Normal(v::Vector{Float64})
+    function Normal(v::Vector{Float32})
         @assert length(v) == 3
         m = √(v[1]^2+v[2]^2+v[3]^2)
         new(v[1]/m, v[2]/m, v[3]/m)
     end
-    function Normal(v::SVector{4,Float64})
+    function Normal(v::SVector{4,Float32})
         m = √(v[1]^2+v[2]^2+v[3]^2)
         new(v[1]/m, v[2]/m, v[3]/m)
     end
@@ -246,8 +246,8 @@ In order to do that, looks at `is_consistent(T::Transformation)` function.
 See also: [`is_consistent`](@ref)
 """
 struct Transformation
-    M::SMatrix{4,4,Float64}
-    invM::SMatrix{4,4,Float64}
+    M::SMatrix{4,4,Float32}
+    invM::SMatrix{4,4,Float32}
     Transformation(m, invm) = new(m, invm)
     Transformation() = 
         new( 
@@ -288,8 +288,8 @@ See also: [`Point`](@ref), [`Vec`](@ref)
 struct Ray
     origin::Point
     dir::Vec
-    tmin::Float64
-    tmax::Float64
+    tmin::Float32
+    tmax::Float32
     depth::Int64
     Ray(o, d, m=1e-5, M=Inf, n=0) = new(o, d, m, M, n)
 end
@@ -330,7 +330,7 @@ This class implements an observer seeing the world through an orthogonal project
 See also: [`Transformation`](@ref), [`Camera`](@ref)
 """
 struct OrthogonalCamera <: Camera
-    a::Float64 # aspect ratio
+    a::Float32 # aspect ratio
     T::Transformation
     OrthogonalCamera(a=1., T=Transformation()) = new(a, T)
 end
@@ -359,8 +359,8 @@ This class implements an observer seeing the world through a perspective project
 See also: [`Transformation`](@ref), [`Camera`](@ref)
 """
 struct PerspectiveCamera <: Camera
-    d::Float64
-    a::Float64
+    d::Float32
+    a::Float32
     T::Transformation
     PerspectiveCamera(d=1., a=1., T=Transformation()) = new(d, a, T)
 end
@@ -525,7 +525,7 @@ See also: [`Pigment`](@ref), [`UniformPigment`](@ref)
 """
 struct SpecularBRDF <: BRDF
     pigment::Pigment
-    theresold_angle_rad::Float64
+    theresold_angle_rad::Float32
     SpecularBRDF(p=UniformPigment(WHITE), thAngle = π/180.) = new(p, thAngle)
 end
 
@@ -587,7 +587,7 @@ struct AABB <: Shape
     m::Point
     M::Point
     AABB(P1::Point, P2::Point) = new(P1, P2)
-    AABB(p1x::Float64, p1y::Float64, p1z::Float64, p2x::Float64, p2y::Float64, p2z::Float64) = 
+    AABB(p1x::Float32, p1y::Float32, p1z::Float32, p2x::Float32, p2y::Float32, p2z::Float32) = 
         new(Point(p1x, p1y, p1z), Point(p2x, p2y, p2z))
     AABB() = new(Point(-1.0, -1.0, -1.0), Point(1.0, 1.0, 1.0))
 end
@@ -625,14 +625,14 @@ end
 
 function AABB(::Type{Sphere}, T::Transformation)
     v1 = SVector{8, Point}(
-        Point(1.0, 1.0, 1.0),
-        Point(-1.0, 1.0, 1.0),
-        Point(1.0, -1.0, 1.0),
-        Point(1.0, 1.0, -1.0),
-        Point(1.0, -1.0, -1.0),
-        Point(-1.0, 1.0, -1.0),
-        Point(-1.0, -1.0, 1.0),
-        Point(-1.0, -1.0, -1.0),
+        Point(1.0f0, 1.0f0, 1.0f0),
+        Point(-1.0f0, 1.0f0, 1.0f0),
+        Point(1.0f0, -1.0f0, 1.0f0),
+        Point(1.0f0, 1.0f0, -1.0f0),
+        Point(1.0f0, -1.0f0, -1.0f0),
+        Point(-1.0f0, 1.0f0, -1.0f0),
+        Point(-1.0f0, -1.0f0, 1.0f0),
+        Point(-1.0f0, -1.0f0, -1.0f0),
     )
 
     v2 = SVector{8, Point}([T*p for p in v1])
@@ -711,14 +711,14 @@ end
 
 function AABB(::Type{Cube}, T::Transformation)
     v1 = SVector{8, Point}(
-        Point(0.5, 0.5, 0.5),
-        Point(-0.5, 0.5, 0.5),
-        Point(0.5, -0.5, 0.5),
-        Point(0.5, 0.5, -0.5),
-        Point(0.5, -0.5, -0.5),
-        Point(-0.5, 0.5, -0.5),
-        Point(-0.5, -0.5, 0.5),
-        Point(-0.5, -0.5, -0.5),
+        Point(0.5f0, 0.5f0, 0.5f0),
+        Point(-0.5f0, 0.5f0, 0.5f0),
+        Point(0.5f0, -0.5f0, 0.5f0),
+        Point(0.5f0, 0.5f0, -0.5f0),
+        Point(0.5f0, -0.5f0, -0.5f0),
+        Point(-0.5f0, 0.5f0, -0.5f0),
+        Point(-0.5f0, -0.5f0, 0.5f0),
+        Point(-0.5f0, -0.5f0, -0.5f0),
     )
 
     v2 = SVector{8, Point}([T*p for p in v1])
@@ -805,8 +805,8 @@ See also: [`Shape`](@ref), [`Transformation`](@ref), [`Material`](@ref)
 struct Torus <: Shape
     T::Transformation
     Material::Material
-    r::Float64
-    R::Float64
+    r::Float32
+    R::Float32
     flag_pointlight::Bool
     Torus(T=Transformation(), M=Material(), r=0.5, R=1.0, b::Bool=false) = new(T, M, r, R, b)
 end
@@ -823,8 +823,8 @@ The fields are named `u` and `v` to distinguish them
 from the usual 3D coordinates `x`, `y`, `z`.
 """
 struct Vec2d
-    u::Float64
-    v::Float64
+    u::Float32
+    v::Float32
 end
 
 """
@@ -890,8 +890,8 @@ See also: [`Point`](@ref), [`PointLightRenderer`](@ref)
 struct PointLight
     position::Point
     color::RGB{Float32}
-    linear_radius::Float64
-    PointLight(p::Point, c::Color, r::Float64 = 0.0) = new(p, c, r)
+    linear_radius::Float32
+    PointLight(p::Point, c::Color, r::Float32 = 0.0f0) = new(p, c, r)
 end
 
 """

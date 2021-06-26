@@ -16,7 +16,7 @@ the Shirley & Morley proposal:
 l_i = \frac{\max\{R_i, G_i, B_i \} + \min\{R_i, G_i, B_i \}}{2}
 ```
 """
-luminosity(c::RGB{T}) where {T} = (max(c.r, c.g, c.b) + min(c.r, c.g, c.b))/2.
+luminosity(c::RGB{T}) where {T} = (max(c.r, c.g, c.b) + min(c.r, c.g, c.b))/2.0f0
 
 """
     lum_max(img::HDRimage) :: Float64
@@ -27,7 +27,7 @@ Return the maximum luminosity of the given `img` according to the
 See also: [`HDRimage`](@ref), [`luminosity`](@ref)
 """
 function lum_max(img::HDRimage) 
-    lum_max=0.0
+    lum_max=0.0f0
     for pix in img.rgb_m
         (lum_max>luminosity(pix)) || (lum_max=luminosity(pix))
     end
@@ -45,7 +45,7 @@ under-illuminated pixels.
 See also: [`HDRimage`](@ref), [`luminosity`](@ref)
 """
 function avg_lum(img::HDRimage, δ::Number=1e-10)
-    cumsum=0.0
+    cumsum=0.0f0
     for pix in img.rgb_m
         cumsum += log10(δ + luminosity(pix))
     end
@@ -77,13 +77,13 @@ See also: [`HDRimage`](@ref), [`avg_lum`](@ref)
 """
 function normalize_image!(  
             img::HDRimage, 
-            a::Float64=0.18,
+            a::Float32=0.18f0,
             lum::Union{Number, Nothing}=nothing, 
             δ::Number=1e-10
             )
 
     isnothing(lum) && (lum = avg_lum(img, δ))
-    img.rgb_m .= img.rgb_m .* a .* (1.0/lum)
+    img.rgb_m .= img.rgb_m .* a .* (1.0f0/lum)
     nothing
 end 
 
@@ -141,7 +141,7 @@ function γ_correction!(img::HDRimage, γ::Float64=1.0, k::Float64=1.0)
                           floor(255 * cur_color.g^(1/γ)),
                           floor(255 * cur_color.b^(1/γ))
         )
-        set_pixel(img, x, y, k/255.0*new_col)
+        set_pixel(img, x, y, k/255.0f0*new_col)
     end
     nothing
 end
@@ -157,8 +157,8 @@ end
 function tone_mapping(
             infile::String, 
             outfile::String, 
-            a::Float64=0.18, 
-            γ::Float64=1.0, 
+            a::Float32=0.18f0, 
+            γ::Float32=1.0f0, 
             ONLY_FOR_TESTS::Bool=false
             )
     (ONLY_FOR_TESTS==false) || (return nothing)       

@@ -352,14 +352,14 @@ function ray_intersection(sphere::Sphere, ray::Ray)
     origin_vec = Vec(inv_ray.origin)
 
     a = squared_norm(inv_ray.dir)
-    b = 2.0 * origin_vec ⋅ inv_ray.dir
-    c = squared_norm(origin_vec) - 1.0
-    Δ = b * b - 4.0 * a * c 
+    b = 2.0f0 * origin_vec ⋅ inv_ray.dir
+    c = squared_norm(origin_vec) - 1.0f0
+    Δ = b * b - 4.0f0 * a * c 
      
-    (Δ > 0.0) || (return nothing)
+    (Δ > 0.0f0) || (return nothing)
 
-    tmin = (-b - √Δ) / (2.0 * a)
-    tmax = (-b + √Δ) / (2.0 * a)
+    tmin = (-b - √Δ) / (2.0f0 * a)
+    tmax = (-b + √Δ) / (2.0f0 * a)
 
     if (tmin > inv_ray.tmin) && (tmin < inv_ray.tmax)
         first_hit_t = tmin
@@ -393,7 +393,7 @@ See also: [`Ray`](@ref), [`Plane`](@ref), [`HitRecord`](@ref)
 function ray_intersection(plane::Plane, ray::Ray)
     inv_ray = inverse(plane.T) * ray
 
-    !(inv_ray.dir.z ≈ 0.) || (return nothing)
+    !(inv_ray.dir.z ≈ 0.0f0) || (return nothing)
 
     hit_t = - inv_ray.origin.z / inv_ray.dir.z
 
@@ -430,15 +430,15 @@ function ray_intersection(cube::Cube, ray::Ray)
     d = inv_ray.dir
     O = inv_ray.origin
 
-    (tmin, tmax) = Tuple( sort( [ (-0.5 - O.x) / d.x, (0.5 - O.x) / d.x ]) )
-    (tymin, tymax) = Tuple( sort( [ (-0.5 - O.y) / d.y, (0.5 - O.y) / d.y ]) )
+    (tmin, tmax) = Tuple( sort( [ (-0.5f0 - O.x) / d.x, (0.5f0 - O.x) / d.x ]) )
+    (tymin, tymax) = Tuple( sort( [ (-0.5f0 - O.y) / d.y, (0.5f0 - O.y) / d.y ]) )
  
     ((tmin > tymax) || (tymin > tmax)) && (return false)
  
     (tymin > tmin) && (tmin = tymin)
     (tymax < tmax) && (tmax = tymax)
 
-    (tzmin, tzmax) = Tuple( sort( [ (-0.5 - O.z) / d.z, (0.5 - O.z) / d.z ]) )
+    (tzmin, tzmax) = Tuple( sort( [ (-0.5f0 - O.z) / d.z, (0.5f0 - O.z) / d.z ]) )
  
     ((tmin > tzmax) || (tzmin > tmax)) && (return false)
  
@@ -655,14 +655,14 @@ function quick_ray_intersection(sphere::Sphere, ray::Ray)
     origin_vec = Vec(inv_ray.origin)
 
     a = squared_norm(inv_ray.dir)
-    b = 2.0 * origin_vec ⋅ inv_ray.dir
-    c = squared_norm(origin_vec) - 1.0
-    Δ = b * b - 4.0 * a * c 
+    b = 2.0f0 * origin_vec ⋅ inv_ray.dir
+    c = squared_norm(origin_vec) - 1.0f0
+    Δ = b * b - 4.0f0 * a * c 
      
     (Δ > 0.0) || (return false)
 
-    tmin = (-b - √Δ) / (2.0 * a)
-    tmax = (-b + √Δ) / (2.0 * a)
+    tmin = (-b - √Δ) / (2.0f0 * a)
+    tmax = (-b + √Δ) / (2.0f0 * a)
 
     return ((inv_ray.tmin < tmin < inv_ray.tmax) || (inv_ray.tmin < tmax < inv_ray.tmax))
 end
@@ -676,7 +676,7 @@ See also: [`Plane`](@ref), [`Ray`](@ref)
 """
 function quick_ray_intersection(plane::Plane, ray::Ray)
     inv_ray = inverse(plane.T) * ray
-    !(inv_ray.dir.z ≈ 0.) || (return false)
+    !(inv_ray.dir.z ≈ 0.0f0) || (return false)
 
     t = -inv_ray.origin.z / inv_ray.dir.z
     return (inv_ray.tmin < t < inv_ray.tmax)
@@ -700,7 +700,7 @@ function is_point_visible(world::World, point::Point, observer_pos::Point)
     direction = point - observer_pos
     dir_norm = norm(direction)
 
-    ray = Ray(observer_pos, direction, 1e-2 / dir_norm, 1.0)
+    ray = Ray(observer_pos, direction, 1e-2 / dir_norm, 1.0f0)
     for shape in world.shapes
         if (quick_ray_intersection(shape, ray) == true) && (shape.flag_pointlight==false) 
             return false

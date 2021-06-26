@@ -1,4 +1,4 @@
-#!/usr/bin/env julia
+#!/usr/bin/env julia.exe
 
 # The MIT License (MIT)
 #
@@ -102,14 +102,14 @@ function ArgParse_command_line(arguments)
 	@add_arg_table! s["tonemapping"] begin
 		"--alpha", "-a"
 			help = "scaling factor for the normalization process; must be positive"
-			arg_type = Float64
+			arg_type = Float32
 			range_tester = check_is_positive
-			default = 0.18
+			default = 0.18f0
 		"--gamma", "-g"
 			help = "gamma value for the tone mapping process; must be positive"
-			arg_type = Float64
+			arg_type = Float32
 			range_tester = check_is_positive
-			default = 1.27
+			default = 1.27f0
 	end
 
 
@@ -144,8 +144,8 @@ function ArgParse_command_line(arguments)
           	range_tester = check_is_vector
 		"--alpha"
 			help = "angle of view around z-axis, in degrees"
-			arg_type = Float64
-			default = 0.
+			arg_type = Float32
+			default = 0.0f0
 		"--width"
 			help = "pixel number on the width of the resulting demo image."
 			default = 640
@@ -427,8 +427,8 @@ function ArgParse_command_line(arguments)
           	range_tester = check_is_vector
 		"--alpha"
 			help = "angle of view around z-axis, in degrees"
-			arg_type = Float64
-			default = 0.
+			arg_type = Float32
+			default = 0.0f0
 		"--width"
 			help = "pixel number on the width of the resulting demo image."
 			default = 640
@@ -566,7 +566,7 @@ function print_ArgParseSettings(vec::Dict{String,Any})
 end
 
 
-main(x::Union{String, Float64, Int64}...) = main([string(var) for var in [x...]])
+main(x::Union{String, Float32, Int64}...) = main([string(var) for var in [x...]])
 function main(args)
 	parsed_arguments = ArgParse_command_line(args) # the result is a Dict{String,Any}
 	(isnothing(parsed_arguments)) && (return nothing)

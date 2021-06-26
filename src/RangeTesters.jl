@@ -90,8 +90,8 @@ function string2int64(string::String, uint::Bool=false)
      !(var=="") || (return uint==false ? Int64(0) : UInt64(0) )
 
 	return uint==false ? 
-          convert(Int64,parse(Float64, var)) : 
-          convert(UInt64,parse(Float64, var))
+          convert(Int64,parse(Float32, var)) : 
+          convert(UInt64,parse(Float32, var))
 end
 
 string2int64(number::Number, uint::Bool=false) = string2int64(string(number), uint)
@@ -116,8 +116,8 @@ function check_is_even_uint64(string::String="")
 	var = filter(x -> !isspace(x) && x≠"\"", string)
      (var == "") && (return true)
 
-	!isnothing(tryparse(Float64, var)) || (return false)
-     number = parse(Float64, var)
+	!isnothing(tryparse(Float32, var)) || (return false)
+     number = parse(Float32, var)
      (number - floor(number) ≈ 0.0 ) || (return false)
      even = convert(Int64, number)
 

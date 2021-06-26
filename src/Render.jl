@@ -96,7 +96,7 @@ function render(
           renderer::Renderer = FlatRenderer(),
      	camera_type::Union{String, Nothing} = nothing,
 		camera_position::Union{Point, Vec, Nothing} = nothing, 
-     	α::Float64 = 0., 
+     	α::Float32 = 0.0f0, 
      	width::Int64 = 640, 
      	height::Int64 = 480, 
      	pfm_output::String = "scene.pfm", 
@@ -104,7 +104,7 @@ function render(
           samples_per_pixel::Int64 = 0,
 		bool_print::Bool = true,
 		bool_savepfm::Bool = true,
-          declare_float::Union{Dict{String,Float64}, Nothing} = nothing,
+          declare_float::Union{Dict{String,Float32}, Nothing} = nothing,
           ONLY_FOR_TESTS::Bool = false,
      )
 

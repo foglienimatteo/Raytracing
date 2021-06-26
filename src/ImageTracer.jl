@@ -16,17 +16,17 @@ from the ray's origin is equal to `t`, measured in units of the length of `Vec.d
 
 See also: [`Ray`](@ref), [`Point`](@ref), [`Vec`](@ref)
 """
-at(r::Ray, t::Float64) = r.origin + r.dir * t
+at(r::Ray, t::Float32) = r.origin + r.dir * t
 
 ##########################################################################################92
 
-function fire_ray(Ocam::OrthogonalCamera, u::Float64, v::Float64)
+function fire_ray(Ocam::OrthogonalCamera, u::Float32, v::Float32)
     origin = Point(-1.0, (1.0 - 2 * u) * Ocam.a, 2 * v -1)
     direction = Vec(1.0, 0.0, 0.0)
     return Ocam.T*Ray(origin, direction, 1.0)
 end # fire_ray
 
-function fire_ray(Pcam::PerspectiveCamera, u::Float64, v::Float64)
+function fire_ray(Pcam::PerspectiveCamera, u::Float32, v::Float32)
     origin = Point(-Pcam.d, 0.0, 0.0)
     direction = Vec(Pcam.d, (1.0 - 2 * u) * Pcam.a,  2 * v - 1)
     return Pcam.T*Ray(origin, direction, 1.0)
@@ -35,10 +35,10 @@ end # fire_ray
 function fire_ray(
                 ImTr::ImageTracer, 
                 col::Int64, row::Int64, 
-                u_px::Float64=0.5, v_px::Float64=0.5
+                u_px::Float32=0.5f0, v_px::Float32=0.5f0
             )
     u = (col + u_px) / (ImTr.img.width)
-    v = 1. - (row + v_px) / (ImTr.img.height)
+    v = 1.0f0 - (row + v_px) / (ImTr.img.height)
     return fire_ray(ImTr.cam, u, v)
 end
 
@@ -117,7 +117,7 @@ function fire_all_rays!(
             ImTr::ImageTracer,
             func::Function,
             callback::Union{Nothing, Function} = nothing,
-            callback_time_s::Float64 = 2.,
+            callback_time_s::Float32 = 2.0f0,
             callback_kwargs::Union{Nothing, String} = nothing                
             )
     last_call_time = time()  # use if @elapsed doesn't work propely for our pourpose
@@ -141,7 +141,7 @@ function fire_all_rays!(
             set_pixel(ImTr.img,
                       col,
                       row,
-                      cum_color * (1.0/smp4side^2)
+                      cum_color * (1.0f0/smp4side^2)
             )
 
             # current_time = time() # use if @elapsed doesn't work propely for our pourpose

@@ -92,7 +92,7 @@ end
 # Operations for Transformations
 Base.:*(s::Transformation, t::Transformation) = Transformation(s.M*t.M, t.invM*s.invM)
 function Base.:*(t::Transformation, p::Point)
-    PV = SVector{4, Float64}(p.x, p.y, p.z, 1)
+    PV = SVector{4, Float32}(p.x, p.y, p.z, 1)
     res = t.M*PV
     #(res[end] == 1) || (res /= res[end])
     res /= res[4]
@@ -116,7 +116,7 @@ function Base.:*(t::Transformation, p::Point)
     =#
 end
 function Base.:*(t::Transformation, p::Vec)
-    VV = SVector{4, Float64}(p.x, p.y, p.z, 0)
+    VV = SVector{4, Float32}(p.x, p.y, p.z, 0)
     res = t.M*VV
     Vec(res)
     #=
@@ -126,7 +126,7 @@ function Base.:*(t::Transformation, p::Vec)
     =#
 end
 function Base.:*(t::Transformation, n::Normal)
-    NV = SVector{4, Float64}(n.x, n.y, n.z, 0)
+    NV = SVector{4, Float32}(n.x, n.y, n.z, 0)
     Normal(transpose(t.invM)*NV)
     #Normal(transpose(@view(t.invM[1:3,1:3])) * NV)
     #=
