@@ -24,10 +24,10 @@ function func(x::T) where {T<:Real}
 end
 
 function earth_moon_sun(x::T) where {T<:Real}
-     dist = 1.0
-     period = 10
+     dist = 2.0
+     period = 20
      moon_x = dist * cos(2 * π * x/period)
-     moon_y =  dist * sen(2 * π * x/period)
+     moon_y =  dist * sin(2 * π * x/period)
      moon_z =  0.5*cos(2 * π * x/period)
      moon_rotang = 0.0
      earth_rotang = 0.0

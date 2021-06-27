@@ -1,0 +1,18 @@
+{
+    "declared float from Command Line": null,
+    "renderer": {
+        "algorithm": "Point-Light Renderer",
+        "background color": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "color": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        }
+    },
+    "height": 480,
+    "animation output": "scene_animation.mp4",
+    "function": 

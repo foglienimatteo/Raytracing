@@ -31,7 +31,6 @@ FILE_NAME = split(PROGRAM_FILE, "/")[end]
 
 main(x::Union{String, Float64, Int64}...) = main([string(var) for var in [x...]])
 function main(args)
-	println(args)
 	parsed_arguments = ArgParse_command_line(args) # the result is a Dict{String,Any}
 	(isnothing(parsed_arguments)) && (return nothing)
 	#print_ArgParseSettings(parsed_arguments)

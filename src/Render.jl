@@ -456,7 +456,7 @@ function print_JSON_render_animation(
           "rendering time (in s)"=> @sprintf("%.3f", rendering_time_s),
      )
 
-     open( join(map(x->x*".", split(png_output,".")[1:end-1])) * "json","w") do f
+     open( join(map(x->x*".", split(anim_output,".")[1:end-1])) * "json","w") do f
           JSON.print(f, data, 4)
      end
 end

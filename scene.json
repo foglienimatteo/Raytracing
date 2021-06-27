@@ -33,23 +33,16 @@
         "projection": "orthogonal"
     },
     "declared float from Command Line": null,
-    "scene file": "examples/earth_and_sun.txt",
+    "scene file": "examples/earth_moon_sun.txt",
     "renderer": {
-        "PCG": {
-            "initial sequence": 183,
-            "initial state": 11951652081458454490
-        },
-        "russian roulette limit": 2,
-        "number of rays": 10,
-        "algorithm": "Path-Tracing Renderer",
+        "algorithm": "Flat Renderer",
         "background color": {
             "r": 0.0,
             "g": 0.0,
             "b": 0.0
-        },
-        "max depth": 2
+        }
     },
-    "rendering time (in s)": "796.792",
-    "time of start": "2021-6-24 : 0:58:42",
+    "rendering time (in s)": "12.736",
+    "time of start": "2021-6-27 : 18:14:45",
     "pfm output": "scene.pfm"
 }
