@@ -10,6 +10,7 @@
      @test Raytracing.check_is_positive("")
      @test Raytracing.check_is_positive("    ")
      @test Raytracing.check_is_positive(" 3 ")
+     @test Raytracing.check_is_positive(" 0.0 ")
      @test Raytracing.check_is_positive("3.0 ")
      @test !Raytracing.check_is_positive("-3.4")
      @test !Raytracing.check_is_positive(" -3")
@@ -19,6 +20,7 @@ end
      @test Raytracing.string2positive("") == 0.0
      @test Raytracing.string2positive("    ") == 0.0
      @test Raytracing.string2positive(" 3 ") == 3.0
+     @test Raytracing.string2positive(" 0.0 ") == 0.0
      @test Raytracing.string2positive("3.0 ") == 3.0
      @test_throws ArgumentError Raytracing.string2positive("-3.4")
      @test_throws ArgumentError Raytracing.string2positive("-3")

@@ -7,8 +7,8 @@
 
 @testset "test_parse_demo_settings" begin
      string="""./Raytracer.jl demo --camera_type=per --camera_position="[1 , 2 , 3]" """*
-     """--alpha=30. --width=40 --height=30 --world_type="B" --set_pfm_name="prova.pfm" """*
-     """--set_png_name="prova.png" --samples_per_pixel=16 --ONLY_FOR_TESTS onoff"""
+     """--alpha=30. --width=40 --height=30 --normalization=0.1 --gamma=1.0 --avg_lum=1.0 """*
+     """--world_type="B" --set_pfm_name="prova.pfm" --set_png_name="prova.png" --samples_per_pixel=16 --ONLY_FOR_TESTS onoff"""
      args = Raytracing.from_CLI_to_vecstring(string)
      parsed_arguments = ArgParse_command_line(args)
 	(isnothing(parsed_arguments)) && (return nothing)
@@ -107,7 +107,7 @@ end
 @testset "test_parse_demoanimation_settings" begin
      string="""./Raytracer.jl demo_animation --camera_type="per" --camera_position="[1 , 2 , 3]" """*
      """--width=40 --height=30 --world_type="B" --set_anim_name="prova.mp4" """*
-     """--samples_per_pixel=16 --ONLY_FOR_TESTS onoff"""
+     """--samples_per_pixel=16 --ONLY_FOR_TESTS --normalization=0.1 --gamma=1.0 --avg_lum=1.0 onoff"""
      args = Raytracing.from_CLI_to_vecstring(string)
      parsed_arguments = ArgParse_command_line(args)
 	(isnothing(parsed_arguments)) && (return nothing)
@@ -209,7 +209,7 @@ end
      string="""./Raytracer.jl render --camera_type="per" --camera_position="[1 , 2 , 3]" """*
      """--alpha=30. --width=40 --height=30 --set_pfm_name="prova.pfm" """*
      """--set_png_name="prova.png" --samples_per_pixel=16 --ONLY_FOR_TESTS """*
-     """examples/tutorial_basic_sintax.txt onoff """
+     """--normalization=0.1 --gamma=1.0 --avg_lum=1.0 examples/tutorial_basic_sintax.txt onoff """
      args = Raytracing.from_CLI_to_vecstring(string)
      parsed_arguments = ArgParse_command_line(args)
 	(isnothing(parsed_arguments)) && (return nothing)

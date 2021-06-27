@@ -82,7 +82,7 @@ function normalize_image!(
             δ::Number=1e-10
             )
 
-    isnothing(lum) && (lum = avg_lum(img, δ))
+    (isnothing(lum) || lum≈0.0 ) && (lum = avg_lum(img, δ))
     img.rgb_m .= img.rgb_m .* a .* (1.0/lum)
     nothing
 end 

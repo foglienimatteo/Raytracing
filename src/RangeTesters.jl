@@ -11,7 +11,7 @@ function check_is_positive(string::String="")
 
 	!isnothing(tryparse(Float64, var)) || (return false)
 
-     return parse(Float64, var)>0 ? true : false
+     return parse(Float64, var)≥0.0 ? true : false
 end
 
 check_is_positive(number::Number) = check_is_positive(string(number))

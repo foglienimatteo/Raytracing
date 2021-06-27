@@ -79,7 +79,7 @@ function ArgParse_command_line(arguments)
 
 	add_arg_group!(s["tonemapping"], "tonemapping settings");
 	@add_arg_table! s["tonemapping"] begin
-		"--alpha", "-a"
+		"--normalization", "-a"
 			help = "scaling factor for the normalization process; must be positive"
 			arg_type = Float64
 			range_tester = check_is_positive
@@ -136,6 +136,22 @@ function ArgParse_command_line(arguments)
 			help = "pixel number on the height of the resulting demo image."
 			default = 480
 			range_tester = check_is_even_uint64
+          "--normalization", "-a"
+			help = "scaling factor for the normalization process; must be positive"
+			arg_type = Float64
+			range_tester = check_is_positive
+			default = 0.18
+		"--gamma", "-g"
+			help = "gamma value for the tone mapping process; must be positive"
+			arg_type = Float64
+			range_tester = check_is_positive
+			default = 1.27
+          "--avg_lum"
+			help = "average luminosity of the resulting pfm image; if =0 (dafault value)"*
+                    "it will be calculated automatically with the built-in avg_lum function"
+			arg_type = Float64
+			range_tester = check_is_positive
+			default = 0.0
      	"--samples_per_pixel"
 			help = "Number of samples per pixel for the antialiasing algorithm\n"*
 					"It must be an integer perfect square, i.e. 0,1,4,9,16,...\n"*
@@ -280,6 +296,22 @@ function ArgParse_command_line(arguments)
 			help = "pixel number on the height of the resulting demo image."
 			default = 480
 			range_tester = check_is_even_uint64
+          "--normalization", "-a"
+			help = "scaling factor for the normalization process; must be positive"
+			arg_type = Float64
+			range_tester = check_is_positive
+			default = 0.18
+		"--gamma", "-g"
+			help = "gamma value for the tone mapping process; must be positive"
+			arg_type = Float64
+			range_tester = check_is_positive
+			default = 1.27
+          "--avg_lum"
+			help = "average luminosity of the resulting pfm image; if =0 (dafault value)"*
+                    "it will be calculated automatically with the built-in avg_lum function"
+			arg_type = Float64
+			range_tester = check_is_positive
+			default = 0.0
      	"--samples_per_pixel"
 			help = "Number of samples per pixel for the antialiasing algorithm\n"*
 					"It must be an integer perfect square, i.e. 0,1,4,9,16,...\n"*
@@ -425,6 +457,22 @@ function ArgParse_command_line(arguments)
 			help = "pixel number on the height of the resulting demo image."
 			default = 480
 			range_tester = check_is_even_uint64
+          "--normalization", "-a"
+			help = "scaling factor for the normalization process; must be positive"
+			arg_type = Float64
+			range_tester = check_is_positive
+			default = 0.18
+		"--gamma", "-g"
+			help = "gamma value for the tone mapping process; must be positive"
+			arg_type = Float64
+			range_tester = check_is_positive
+			default = 1.27
+           "--avg_lum"
+			help = "average luminosity of the resulting pfm image; if =0 (dafault value)"*
+                    "it will be calculated automatically with the built-in avg_lum function"
+			arg_type = Float64
+			range_tester = check_is_positive
+			default = 0.0
      	"--samples_per_pixel"
 			help = "Number of samples per pixel for the antialiasing algorithm\n"*
 					"It must be an integer perfect square, i.e. 0,1,4,9,16,...\n"*
@@ -599,6 +647,22 @@ function ArgParse_command_line(arguments)
 			help = "pixel number on the height of the resulting demo image."
 			default = 480
 			range_tester = check_is_even_uint64
+          "--normalization", "-a"
+			help = "scaling factor for the normalization process; must be positive"
+			arg_type = Float64
+			range_tester = check_is_positive
+			default = 0.18
+		"--gamma", "-g"
+			help = "gamma value for the tone mapping process; must be positive"
+			arg_type = Float64
+			range_tester = check_is_positive
+			default = 1.27
+           "--avg_lum"
+			help = "average luminosity of the resulting pfm image; if =0 (dafault value)"*
+                    "it will be calculated automatically with the built-in avg_lum function"
+			arg_type = Float64
+			range_tester = check_is_positive
+			default = 0.0
      	"--samples_per_pixel"
 			help = "Number of samples per pixel for the antialiasing algorithm\n"*
 					"It must be an integer perfect square, i.e. 0,1,4,9,16,...\n"*

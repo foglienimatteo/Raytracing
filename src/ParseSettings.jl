@@ -24,7 +24,7 @@ A tuple `(pfm, png, a, γ, ONLY_FOR_TESTS)` containing:
 
 - `png::String = dict["outfile"]` : output LDR filename (required)
 
-- `a::Float64 = string2positive(dict["alpha"])` : scale factor (default = 0.18); it's converted 
+- `a::Float64 = string2positive(dict["normalization"])` : scale factor (default = 0.18); it's converted 
   through `string2positive` to a positive floating point number.
 
 - `γ::Float64 = string2positive(dict["gamma"])` : gamma factor (default = 1.0); it's converted 
@@ -38,7 +38,7 @@ See also:  [`tone_mapping`](@ref), [`string2positive`](@ref)
 """
 function parse_tonemapping_settings(dict::Dict{String, T}) where {T}
 
-    keys = ["infile", "outfile", "alpha", "gamma", "ONLY_FOR_TESTS"]
+    keys = ["infile", "outfile", "normalization", "gamma", "ONLY_FOR_TESTS"]
 
     for pair in dict
         if (pair[1] in keys) ==false
@@ -58,7 +58,7 @@ function parse_tonemapping_settings(dict::Dict{String, T}) where {T}
         png::String = dict["outfile"] : 
         throw(ArgumentError("need to specify the output LDR filename to be saved"))
 
-    a::Float64 = haskey(dict, "alpha") ? string2positive(dict["alpha"]) : 0.18
+    a::Float64 = haskey(dict, "normalization") ? string2positive(dict["normalization"]) : 0.18
 
     γ::Float64 = haskey(dict, "gamma") ? string2positive(dict["gamma"]) : 1.0
 
@@ -406,6 +406,16 @@ following variables (the corresponding keys are also showed):
 - `height::Int64 = string2evenint64(dict["height"])` : number of pixels on the vertical
   axis to be rendered; it's converted through `string2evenint64` to a even positive integer.
 
+- `a::Float64 = string2positive(dict["normalization"])` : scale factor (default = 0.18); it's converted 
+  through `string2positive` to a positive floating point number.
+
+- `γ::Float64 = string2positive(dict["gamma"])` : gamma factor (default = 1.0); it's converted 
+  through `string2positive` to a positive floating point number.
+
+- `lum::Union{Number, Nothing} = string2positive(dict["avg_lum"])` : average luminosity of the image; it's 
+  converted through `string2positive` to a positive floating point number. If not specified or equal to 0, 
+  it's calculated through [`avg_lum`](@ref)
+
 - `pfm::String = dict["set_pfm_name"]` : output pfm filename (default `"demo.pfm"`)
 
 - `png::String` = dict["set_png_name"]` : output LDR filename (default `"demo.png"`)
@@ -441,6 +451,7 @@ function parse_demo_settings(dict::Dict{String, T}) where {T}
         "%COMMAND%", "renderer",
         "camera_type", "camera_position",
         "alpha", "width", "height",
+        "normalization", "gamma", "avg_lum",
         "set_pfm_name", "set_png_name", 
         "samples_per_pixel", "world_type",
         "bool_print", "bool_savepfm",  
@@ -495,6 +506,12 @@ function parse_demo_settings(dict::Dict{String, T}) where {T}
 
     height::Int64 = haskey(dict, "height") ? string2evenint64(dict["height"]) : 480
 
+    a::Float64 = haskey(dict, "normalization") ? string2positive(dict["normalization"]) : 0.18
+
+    γ::Float64 = haskey(dict, "gamma") ? string2positive(dict["gamma"]) : 1.0
+
+    lum::Union{Float64, Nothing} = haskey(dict, "avg_lum") ? string2positive(dict["avg_lum"]) : nothing
+
     pfm::String = haskey(dict, "set_pfm_name") ? dict["set_pfm_name"] : "demo.pfm"
 
     png::String = haskey(dict, "set_png_name") ? dict["set_png_name"] : "demo.png"
@@ -520,6 +537,7 @@ function parse_demo_settings(dict::Dict{String, T}) where {T}
             camera_position, 
             α, 
             width, height, 
+            a, γ, lum,
             pfm, png,
             samples_per_pixel,
             world_type,
@@ -587,6 +605,16 @@ samples_per_pixel, world_type)` containing the following variables
 - `height::Int64 = string2evenint64(dict["height"])` : number of pixels on the vertical
   axis to be rendered; it's converted through `string2evenint64` to a even positive integer.
 
+- `a::Float64 = string2positive(dict["normalization"])` : scale factor (default = 0.18); it's converted 
+  through `string2positive` to a positive floating point number.
+
+- `γ::Float64 = string2positive(dict["gamma"])` : gamma factor (default = 1.0); it's converted 
+  through `string2positive` to a positive floating point number.
+
+- `lum::Union{Number, Nothing} = string2positive(dict["avg_lum"])` : average luminosity of the image; it's 
+  converted through `string2positive` to a positive floating point number. If not specified or equal to 0, 
+  it's calculated through [`avg_lum`](@ref)
+
 - `anim::String = dict["set_anim_name"]` : output animation filename (default 
   `"demo_animation.mp4"`)
 
@@ -612,7 +640,8 @@ function parse_demoanimation_settings(dict::Dict{String, T}) where {T}
     keys = union([
         "%COMMAND%", "renderer",
         "camera_type", "camera_position",
-        "width", "height",  "world_type",
+        "width", "height",  
+        "normalization", "gamma", "avg_lum", "world_type",
         "set_anim_name", "samples_per_pixel",
         "ONLY_FOR_TESTS",
     ], RENDERERS)
@@ -659,6 +688,12 @@ function parse_demoanimation_settings(dict::Dict{String, T}) where {T}
 
     height::Int64 = haskey(dict, "height") ? string2evenint64(dict["height"]) : 480
 
+    a::Float64 = haskey(dict, "normalization") ? string2positive(dict["normalization"]) : 0.18
+
+    γ::Float64 = haskey(dict, "gamma") ? string2positive(dict["gamma"]) : 1.0
+
+    lum::Union{Float64, Nothing} = haskey(dict, "avg_lum") ? string2positive(dict["avg_lum"]) : nothing
+
     anim::String = haskey(dict, "set_anim_name") ? dict["set_anim_name"] : "demo_animation.mp4"
 
     samples_per_pixel::Int64 = haskey(dict, "samples_per_pixel") ? begin
@@ -674,7 +709,7 @@ function parse_demoanimation_settings(dict::Dict{String, T}) where {T}
 
     return (renderer, 
             camera_type, camera_position,
-            width, height, anim, 
+            width, height, a, γ, lum, anim, 
             samples_per_pixel, world_type, 
             ONLY_FOR_TESTS
             )
@@ -751,6 +786,16 @@ containing the following variables (the corresponding keys are also showed):
 - `height::Int64 = string2evenint64(dict["height"])` : number of pixels on the vertical
   axis to be rendered; it's converted through `string2evenint64` to a even positive integer.
 
+- `a::Float64 = string2positive(dict["normalization"])` : scale factor (default = 0.18); it's converted 
+  through `string2positive` to a positive floating point number.
+
+- `γ::Float64 = string2positive(dict["gamma"])` : gamma factor (default = 1.0); it's converted 
+  through `string2positive` to a positive floating point number.
+
+- `lum::Union{Number, Nothing} = string2positive(dict["avg_lum"])` : average luminosity of the image; it's 
+  converted through `string2positive` to a positive floating point number. If not specified or equal to 0, 
+  it's calculated through [`avg_lum`](@ref)
+
 - `pfm::String = dict["set_pfm_name"]` : output pfm filename (default `"scene.pfm"`)
 
 - `png::String` = dict["set_png_name"]` : output LDR filename (default `"scene.png"`)
@@ -792,6 +837,7 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
         "%COMMAND%", "renderer",
         "camera_type", "camera_position",
         "alpha", "width", "height",
+        "normalization", "gamma", "avg_lum",
         "set_pfm_name", "set_png_name", 
         "samples_per_pixel", 
         "bool_print", "bool_savepfm", 
@@ -833,7 +879,7 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
         FlatRenderer()
     end
 
-    camera_type::Union{String, Nothing} = haskey(dict, "camera_type") ? 
+    camera_type::Union{String, Nothing} = haskey(dict, "camera_type") && !isnothing(dict["camera_type"])  ? 
         string2stringoneof(dict["camera_type"], CAMERAS) : 
         nothing
 
@@ -853,6 +899,12 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
 
     height::Int64 = haskey(dict, "height") ? string2evenint64(dict["height"]) : 480
 
+    a::Float64 = haskey(dict, "normalization") ? string2positive(dict["normalization"]) : 0.18
+
+    γ::Float64 = haskey(dict, "gamma") ? string2positive(dict["gamma"]) : 1.0
+
+    lum::Union{Float64, Nothing} = haskey(dict, "avg_lum") ? string2positive(dict["avg_lum"]) : nothing
+
     pfm::String = haskey(dict, "set_pfm_name") ? dict["set_pfm_name"] : "scene.pfm"
 
     png::String = haskey(dict, "set_png_name") ? dict["set_png_name"] : "scene.png"
@@ -867,8 +919,9 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
         end : 0
 
     declare_float::Union{Dict{String, Float64}, Nothing} = haskey(dict, "declare_float") ?
-        declare_float2dict(dict["declare_float"]) : 
-        nothing
+        (typeof(dict["declare_float"]) == Dict{String, Float64} ? 
+        dict["declare_float"] : declare_float2dict(dict["declare_float"]) 
+        ) : nothing
 
     ONLY_FOR_TESTS::Bool = haskey(dict, "ONLY_FOR_TESTS") ? dict["ONLY_FOR_TESTS"] : false
 
@@ -879,7 +932,8 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
             camera_type,
             camera_position,
             α, 
-            width, height, 
+            width, height,
+            a, γ, lum, 
             pfm, png, 
             samples_per_pixel, 
             bool_print, bool_savepfm, 
@@ -961,6 +1015,16 @@ containing the following variables (the corresponding keys are also showed):
 - `height::Int64 = string2evenint64(dict["height"])` : number of pixels on the vertical
   axis to be rendered; it's converted through `string2evenint64` to a even positive integer.
 
+- `a::Float64 = string2positive(dict["normalization"])` : scale factor (default = 0.18); it's converted 
+  through `string2positive` to a positive floating point number.
+
+- `γ::Float64 = string2positive(dict["gamma"])` : gamma factor (default = 1.0); it's converted 
+  through `string2positive` to a positive floating point number.
+
+- `lum::Union{Number, Nothing} = string2positive(dict["avg_lum"])` : average luminosity of the image; it's 
+  converted through `string2positive` to a positive floating point number. If not specified or equal to 0, 
+  it's calculated through [`avg_lum`](@ref)
+
 - `anim::String = dict["set_anim_name"]` : output animation name (default `"animation.mp4"`)
 
 - `samples_per_pixel::Int64  = dict["samples_per_pixel"]` : number of ray to be 
@@ -998,7 +1062,8 @@ function parse_render_animation_settings(dict::Dict{String, T}) where {T}
         "%COMMAND%",
         "onoff", "flat", "pathtracer", "pointlight",
         "camera_type", "camera_position", 
-        "alpha", "width", "height",
+        "alpha", "width", "height", 
+        "normalization", "gamma", "avg_lum",
         "set_anim_name", 
         "bool_print", "samples_per_pixel",
         "declare_float",
@@ -1051,7 +1116,7 @@ function parse_render_animation_settings(dict::Dict{String, T}) where {T}
         FlatRenderer()
     end
 
-    camera_type::Union{String, Nothing} = haskey(dict, "camera_type") ? 
+    camera_type::Union{String, Nothing} = haskey(dict, "camera_type") && !isnothing(dict["camera_type"]) ? 
         string2stringoneof(dict["camera_type"], CAMERAS) : 
         nothing
 
@@ -1071,6 +1136,12 @@ function parse_render_animation_settings(dict::Dict{String, T}) where {T}
 
     height::Int64 = haskey(dict, "height") ? string2evenint64(dict["height"]) : 480
 
+    a::Float64 = haskey(dict, "normalization") ? string2positive(dict["normalization"]) : 0.18
+
+    γ::Float64 = haskey(dict, "gamma") ? string2positive(dict["gamma"]) : 1.0
+
+    lum::Union{Float64, Nothing} = haskey(dict, "avg_lum") ? string2positive(dict["avg_lum"]) : nothing
+
     anim::String = haskey(dict, "set_anim_name") ? dict["set_anim_name"] : "animation.mp4"
 
     bool_print::Bool = haskey(dict, "bool_print") ?  dict["bool_print"] : true
@@ -1081,8 +1152,9 @@ function parse_render_animation_settings(dict::Dict{String, T}) where {T}
         end : 0
 
     declare_float::Union{Dict{String, Float64}, Nothing} = haskey(dict, "declare_float") ?
-        declare_float2dict(dict["declare_float"]) : 
-        nothing
+        (typeof(dict["declare_float"]) == Dict{String, Float64} ? 
+        dict["declare_float"] : declare_float2dict(dict["declare_float"]) 
+        ) : nothing
 
     ONLY_FOR_TESTS::Bool = haskey(dict, "ONLY_FOR_TESTS") ? dict["ONLY_FOR_TESTS"] : false
 
@@ -1096,7 +1168,7 @@ function parse_render_animation_settings(dict::Dict{String, T}) where {T}
             camera_type,
             camera_position,
             α, 
-            width, height, 
+            width, height, a, γ, lum,
             anim,
             samples_per_pixel, 
             bool_print,

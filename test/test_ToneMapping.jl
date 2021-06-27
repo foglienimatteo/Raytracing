@@ -71,13 +71,13 @@ end
      @test isnothing(tone_mapping( 
                          "infile"=>"prova.pfm", 
                          "outfile"=>"prova.png", 
-                         "alpha"=>0.18,
+                         "normalization"=>0.18,
                          "gamma"=>1.0, 
                          "ONLY_FOR_TESTS"=>true,
                     ))
 
      @test isnothing(tone_mapping( 
-                         "alpha"=>0.18,
+                         "normalization"=>0.18,
                          "infile"=>"prova.pfm", 
                          "ONLY_FOR_TESTS"=>true,
                          "outfile"=>"prova.png", 

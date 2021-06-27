@@ -79,11 +79,9 @@ function print_JSON_render(
           "rendering time (in s)"=> @sprintf("%.3f", rendering_time_s),
      )
 
-     (bool_savepfm==true) && open( join(map(x->x*".", split(png_output,".")[1:end-1])) * "json","w") do f
+     open( join(map(x->x*".", split(png_output,".")[1:end-1])) * "json","w") do f
           JSON.print(f, data, 4)
      end
-
-
 end
 
 
@@ -103,6 +101,9 @@ function render(
      	α::Float64 = 0., 
      	width::Int64 = 640, 
      	height::Int64 = 480, 
+          a::Float64 = 0.18,
+          γ::Float64 = 1.27,
+          lum::Union{Number, Nothing} = nothing,
      	pfm_output::String = "scene.pfm", 
         	png_output::String = "scene.png",
           samples_per_pixel::Int64 = 0,
@@ -233,7 +234,11 @@ function render(
 
      (bool_print==true) && println("\nNow starts the rendering!\n")
 
-	fire_all_rays!(tracer, renderer, (r,c) -> print_progress(r,c,image.height, image.width))
+     if (bool_print==true)
+	     fire_all_rays!(tracer, renderer, (r,c) -> print_progress(r,c,image.height, image.width))
+     else
+          fire_all_rays!(tracer, renderer) 
+     end
 	
      (bool_print==true) && println("\nRendering completed! Now saving the files...")
 
@@ -242,20 +247,9 @@ function render(
 	(bool_savepfm==true) && (open(pfm_output, "w") do outf; write(outf, img); end)
 	(bool_print==true) && (println("\nHDR demo image written to \"$(pfm_output)\"!"))
 
-     if typeof(renderer) == OnOffRenderer
-		normalize_image!(img, 0.18, nothing)
-	elseif typeof(renderer) == FlatRenderer
-		normalize_image!(img, 0.18, 0.5)
-	elseif typeof(renderer) == PathTracer
-		normalize_image!(img, 0.18, 0.1)
-	elseif typeof(renderer) == PointLightRenderer
-          normalize_image!(img, 0.18, 0.1)
-	else
-		throw(ArgumentError("Unknown renderer: $(typeof(renderer))"))
-	end
-
+     normalize_image!(img, a, lum)
 	clamp_image!(img)
-	γ_correction!(img, 1.27)
+	γ_correction!(img, γ)
 
 	if (typeof(query(png_output)) == File{DataFormat{:UNKNOWN}, String})
 		(bool_print==true) && (
@@ -274,11 +268,9 @@ function render(
      time_2 = time()
      rendering_time_s = time_2 - time_1
 
-     pfm = bool_savepfm ? pfm_output : nothing
-
-     print_JSON_render(
+     (bool_savepfm==true) && print_JSON_render(
           png_output,
-          pfm,
+          pfm_output,
           scenefile,
           time_of_start,
           algorithm,
@@ -305,6 +297,9 @@ end
      	α::Float64 = 0., 
      	width::Int64 = 640, 
      	height::Int64 = 480, 
+          a::Float64 = 0.18,
+          γ::Float64 = 1.27,
+          lum::Union{Number, Nothing} = nothing,
      	pfm_output::String = "scene.pfm", 
         	png_output::String = "scene.png",
           samples_per_pixel::Int64 = 0,
@@ -352,6 +347,13 @@ like syntax with arbitrary order and comfort. See the documentation of
 - `width::Int64 = 640` and `height::Int64 = 480` : pixel dimensions of the demo image;
   they must be both even positive integers.
 
+- `a::Float64 = 0.18` : normalization scale factor for the tone mapping.
+
+- `γ::Float64 = 1.27` : gamma factor for the tone mapping.
+
+- `lum::Union{Number, Nothing} = nothing ` : average luminosity of the image; iIf not specified or equal to 0, 
+  it's calculated through [`avg_lum`](@ref)
+
 - `pfm_output::String = "demo.pfm"` : name of the output pfm file
 
 - `png_output::String = "demo.png"` : name of the output LDR file
@@ -388,31 +390,22 @@ render
 
 
 function print_JSON_render_animation(
-     anim_output::String,
-     scenefile::String,
-     time_of_start::String,
-     algorithm::Renderer,
-     camera::Camera,
-     samples_per_side::Int64,
-     declare_float::Union{Dict, Nothing},
-     rendering_time_s::Float64,
+          func::Function,
+          vec_variables::Vector{String},
+          iterable::Any,
+          scenefile::String,
+          algorithm::Renderer,
+     	camera_type::Union{String, Nothing},
+		camera_position::Union{Point, Vec, Nothing},
+     	α::Float64, 
+     	width::Int64, 
+     	height::Int64, 
+     	anim_output::String, 
+          samples_per_pixel::Int64,
+          declare_float::Union{Dict{String, Float64}, Nothing},
+          time_of_start::String,
+          rendering_time_s::Float64,
      )
-
-     dict_camera = if typeof(camera) == OrthogonalCamera
-               Dict(
-                    "projection" => "orthogonal",
-                    "aspect_ratio" => camera.a,
-                    "transformation" => camera.T.M,
-               )
-
-          elseif typeof(camera) == PerspectiveCamera
-               Dict(
-                    "projection" => "orthogonal",
-                    "distance" => camera.d,
-                    "aspect ratio" => camera.a,
-                    "transformation" => camera.T.M,
-               )
-          end
 
      dict_renderer = if typeof(algorithm) == OnOffRenderer
               Dict(
@@ -448,12 +441,17 @@ function print_JSON_render_animation(
 
 
      data = Dict(
+          "function"=>func,
+          "vector of variables" => vec_variables,
+          "iterable" => iterable,
           "scene file" => scenefile,
           "time of start" => time_of_start,
           "animation output" => anim_output,
-          "camera" => dict_camera, 
           "renderer" => dict_renderer,
-          "samples per pixel (0 means no antialiasing)" => samples_per_side^2,
+          "samples per pixel (0 means no antialiasing)" => samples_per_pixel,
+          "alpha" => α,
+          "width" => width,
+          "height" => height,
           "declared float from Command Line" => declare_float,
           "rendering time (in s)"=> @sprintf("%.3f", rendering_time_s),
      )
@@ -479,6 +477,9 @@ function render_animation(
      	α::Float64 = 0., 
      	width::Int64 = 640, 
      	height::Int64 = 480, 
+          a::Float64 = 0.18,
+          γ::Float64 = 1.27,
+          lum::Union{Number, Nothing} = nothing,
      	anim_output::String = "animation.mp4", 
           samples_per_pixel::Int64 = 0,
 		bool_print::Bool = true,
@@ -534,6 +535,9 @@ function render_animation(
                "alpha"=>α,
 			"width"=>width,
 			"height"=>height,
+               "normalization"=>a,
+               "gamma"=>γ,
+               "avg_lum"=>lum,
 			"samples_per_pixel"=>samples_per_pixel,
 			"set_pfm_name"=>".wip_animation/scene.pfm",
 			"bool_print"=>false,
@@ -687,13 +691,20 @@ function render_animation(
 	run(`rm -rf .wip_animation`)
 
      print_JSON_render_animation(
-          anim_output,
+          func,
+          vec_variables,
+          iterable,
           scenefile,
-          time_of_start,
           copy(renderer_model),
-          camera,
-          samples_per_side,
+     	camera_type,
+		camera_position, 
+     	α, 
+     	width, 
+     	height, 
+     	anim_output, 
+          samples_per_pixel,
           declare_float,
+          time_of_start,
           rendering_time_s,
      )
 
