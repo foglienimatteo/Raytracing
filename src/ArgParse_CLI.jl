@@ -663,6 +663,12 @@ function ArgParse_command_line(arguments)
 			arg_type = Float64
 			range_tester = check_is_positive
 			default = 0.0
+          "--set_anim_name"
+			help = "name of the animation file to be saved"
+			nargs = '?'
+			arg_type = String
+			default = "scene_animation.mp4"
+			constant = "scene_animation.mp4"
      	"--samples_per_pixel"
 			help = "Number of samples per pixel for the antialiasing algorithm\n"*
 					"It must be an integer perfect square, i.e. 0,1,4,9,16,...\n"*
