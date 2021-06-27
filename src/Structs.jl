@@ -107,7 +107,7 @@ struct Parameters
     outfile::String
     a::Float32
     γ::Float32
-    Parameters(in, out, a=0.18f0, γ=1.0f0) = new(in, out, convert(Float32, a), convert(Float32, γ))
+    Parameters(in, out, a=0.18f0, γ=1.0f0) = new(in, out, a, γ)
 end
 
 
@@ -129,12 +129,11 @@ A point in 3D space.
 """
 struct Point
     v::SVector{3, Float32}
-    Point(x, y, z) = new([convert(Float32, x), convert(Float32, y), convert(Float32, z)])
+    Point(x, y, z) = new([x, y, z])
+    Point(x, y, z, w) = new([x, y, z])
     Point() = new([0.0f0, 0.0f0, 0.0f0])
-    Point(v::SVector{3, Float32}) = new([v[1], v[2], v[3]])
-    Point(v::SVector{4, Float32}) = new([v[1], v[2], v[3]])
-    Point(v::SVector{3, Float64}) = new([convert(Float32, v[1]), convert(Float32, v[2]), convert(Float32, v[3])])
-    Point(v::SVector{4, Float64}) = new([convert(Float32, v[1]), convert(Float32, v[2]), convert(Float32, v[3])])
+    Point(v::SVector{3, T}) where T = new(v[1], v[2], v[3])
+    Point(v::SVector{4, T}) where T = new(v[1], v[2], v[3])
 end
 
 """
@@ -635,7 +634,6 @@ function AABB(::Type{Sphere}, T::Transformation)
         Point(-1.0f0, -1.0f0, 1.0f0),
         Point(-1.0f0, -1.0f0, -1.0f0),
     )
-
     v2 = SVector{8, Point}([T*p for p in v1])
     P2 = Point(
         maximum([v2[i].v[1] for i in eachindex(v2)]),

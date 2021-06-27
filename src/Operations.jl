@@ -59,6 +59,7 @@ Base.:*(a::Vec, s::Real) = Vec(s*a.x, s*a.y, s*a.z)
 Base.:/(a::Vec, s::Real) = Vec(a.x/s, a.y/s, a.z/s)
 LinearAlgebra.:⋅(a::Vec, b::Vec) = a.x*b.x + a.y*b.y + a.z*b.z
 LinearAlgebra.:×(a::Vec, b::Vec) = Vec(a.y*b.z-a.z*b.y, b.x*a.z-a.x*b.z, a.x*b.y-a.y*b.x)
+Base.:/(p::Vec, v::Vec) = Point(p.x/v.x, p.y/v.y, p.z/v.z)
 
 # Operations for Normal
 Base.:-(a::Normal) = Normal(-a.x, -a.y, -a.z)
@@ -76,6 +77,7 @@ Base.:+(p::Point, v::Vec) = Point(p.v[1]+v.x, p.v[2]+v.y, p.v[3]+v.z)
 Base.:+(v::Vec, p::Point) = Point(p.v[1]+v.x, p.v[2]+v.y, p.v[3]+v.z)
 Base.:-(p::Point, v::Vec) = Point(p.v[1]-v.x, p.v[2]-v.y, p.v[3]-v.z)
 Base.:-(a::Point, b::Point) = Vec(a.v[1]-b.v[1], a.v[2]-b.v[2], a.v[3]-b.v[3])
+Base.:/(p::Point, v::Vec) = Point(p.v[1]/v.x, p.v[2]/v.y, p.v[3]/v.z)
 
 #=
 """
@@ -96,7 +98,8 @@ function Base.:*(t::Transformation, p::Point)
     res = t.M*PV
     #(res[end] == 1) || (res /= res[end])
     res /= res[4]
-    Point(res)
+#    println(res, " ", typeof(res))
+    Point(res...)
 
     #= metodo 2
         @inbounds q =  Point(t.M[1] * p.x + t.M[5] * p.y + t.M[9] * p.z +t.M[13],
