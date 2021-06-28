@@ -83,7 +83,7 @@ P_z \neq \frac{1}{2},  -\frac{1}{2}
 See also: [`Point`](@ref), [`Vec2d`](@ref), [`Cube`](@ref)
 """
 function cube_point_to_uv(point::Point)
-    X = point.v[1]
+#=    X = point.v[1]
     Y = point.v[2]
     Z = point.v[3]
 
@@ -96,7 +96,16 @@ function cube_point_to_uv(point::Point)
     else
         throw(ArgumentError("the given point do not belong to the unit cube."))
     end   
-
+=#
+if (abs(X) ≈ 0.5)
+    u, v  = point.v[2] + 0.5, point.v[2] + 0.5
+elseif (abs(Y) ≈ 0.5)
+    u, v  = point.v[1] + 0.5, point.v[2] + 0.5
+elseif (abs(Z) ≈ 0.5) 
+    u, v  = point.v[1] + 0.5, point.v[2] + 0.5 
+else
+    throw(ArgumentError("the given point do not belong to the unit cube."))
+end
     return Vec2d(u,v)
 end
 
@@ -145,7 +154,7 @@ See also: [`Triangle`](@ref), [`Vec2d`](@ref), [`Point`](@ref)
 """
 function triangle_point_to_uv(triangle::Triangle, point::Point)
     A, B, C = Tuple(P for P in triangle.vertexes)
-    P1 = point - A
+#=    P1 = point - A
     P2 = B-A
     P3 = C-A
 
@@ -156,9 +165,22 @@ function triangle_point_to_uv(triangle::Triangle, point::Point)
 
     γ_num = (P1.v[1])*(P2.v[2]) - (P1.v[2])*(P2.v[1])
     γ_den = (P3.v[1])*(P2.v[2]) - (P3.v[2])*(P2.v[1])
+=#
+#=    β_num = (point.v[1] - A.v[1])*(C.v[2]-B.v[2]) - (B.v[2]-A.v[2])*(C.v[1]-A.v[1])
+    β_den = (B.v[1]-A.v[1])*(C.v[2]-A.v[2]) - (B.v[2]-A.v[2])*(C.v[1]-A.v[1])
+    β = β_num/β_den
+
+    γ_num = (point.v[1] - A.v[1])*(B.v[2]-A.v[2]) - (B.v[2]-A.v[2])*(B.v[1]-A.v[1])
+    γ_den = (C.v[1]-A.v[1])*(B.v[2]-A.v[2]) - (C.v[2]-B.v[2])*(B.v[1]-A.v[1])
+
     γ = γ_num/γ_den
 
     Vec2d(β, γ)
+=#
+
+    Vec2d(((point.v[1] - A.v[1])*(C.v[2]-B.v[2]) - (B.v[2]-A.v[2])*(C.v[1]-A.v[1])) / ((B.v[1]-A.v[1])*(C.v[2]-A.v[2]) - (B.v[2]-A.v[2])*(C.v[1]-A.v[1])),
+          ((point.v[1] - A.v[1])*(B.v[2]-A.v[2]) - (B.v[2]-A.v[2])*(B.v[1]-A.v[1])) / ((C.v[1]-A.v[1])*(B.v[2]-A.v[2]) - (C.v[2]-B.v[2])*(B.v[1]-A.v[1]))
+    )
 end
 
 ##########################################################################################92

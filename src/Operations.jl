@@ -46,9 +46,9 @@ Base.:*(c::RGB{T}, scalar::Real) where {T} = scalar * c
 Base.:/(c::RGB{T}, scalar::Real) where {T} = RGB{T}(c.r/scalar , c.g/scalar, c.b/scalar)
 
 # Operations for Point
-Base.:*(s::Real, a::Point) = Point(s*a.v[1], s*a.v[2], s*a.v[3])
-Base.:*(a::Point, s::Real) = Point(s*a.v[1], s*a.v[2], s*a.v[3])
-Base.:/(a::Point, s::Real) = Point(a.v[1]/s, a.v[2]/s, a.v[3]/s)
+Base.:*(s::Real, a::Point) = Point(s*a.v)  # (s*a.v[1], s*a.v[2], s*a.v[3])
+Base.:*(a::Point, s::Real) = Point(s*a.v)  #(s*a.v[1], s*a.v[2], s*a.v[3])
+Base.:/(a::Point, s::Real) = Point(a.v/s)  #(a.v[1]/s, a.v[2]/s, a.v[3]/s)
 
 # Operations for Vec
 Base.:+(a::Vec, b::Vec) = Vec(a.x+b.x, a.y+b.y, a.z+b.z)
@@ -73,10 +73,10 @@ LinearAlgebra.:×(a::Normal, b::Vec) = Vec(a.y*b.z-a.z*b.y, b.x*a.z-a.x*b.z, a.x
 LinearAlgebra.:×(a::Vec, b::Normal) = Vec(a.y*b.z-a.z*b.y, b.x*a.z-a.x*b.z, a.x*b.y-a.y*b.x)
 
 # Operations between Vec and Point
-Base.:+(p::Point, v::Vec) = Point(p.v[1]+v.x, p.v[2]+v.y, p.v[3]+v.z)
-Base.:+(v::Vec, p::Point) = Point(p.v[1]+v.x, p.v[2]+v.y, p.v[3]+v.z)
-Base.:-(p::Point, v::Vec) = Point(p.v[1]-v.x, p.v[2]-v.y, p.v[3]-v.z)
-Base.:-(a::Point, b::Point) = Vec(a.v[1]-b.v[1], a.v[2]-b.v[2], a.v[3]-b.v[3])
+Base.:+(p::Point, v::Vec) = Point((p.v+SVector{3, Float32}(v.x, v.y, v.z))...)   # (p.v[1]+v.x, p.v[2]+v.y, p.v[3]+v.z)
+Base.:+(v::Vec, p::Point) = Point((p.v+SVector{3, Float32}(v.x, v.y, v.z))...)   #(p.v[1]+v.x, p.v[2]+v.y, p.v[3]+v.z)
+Base.:-(p::Point, v::Vec) = Point((p.v-SVector{3, Float32}(v.x, v.y, v.z))...)   # (p.v[1]-v.x, p.v[2]-v.y, p.v[3]-v.z)
+Base.:-(a::Point, b::Point) = Vec((a.v-b.v)...)   # (a.v[1]-b.v[1], a.v[2]-b.v[2], a.v[3]-b.v[3])
 Base.:/(p::Point, v::Vec) = Point(p.v[1]/v.x, p.v[2]/v.y, p.v[3]/v.z)
 
 #=

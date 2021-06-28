@@ -162,6 +162,7 @@ struct Vec
     Vec(x::Float32, y::Float32, z::Float32) = new(x, y, z)
     Vec() = new(0.0f0, 0.0f0, 0.0f0)
     Vec(P::Point) = new(P.v[1], P.v[2], P.v[3])
+    Vec(v::SVector{3, Float32}) = new(v[1], v[2], v[3])
     Vec(v::SVector{4, Float32}) = new(v[1], v[2], v[3])
     function Vec(x::T1, y::T2, z::T3) where {T1<:Number,T2<:Number, T3<:Number}
         Vec(convert(Float32, x), convert(Float32, y), convert(Float32, z))
