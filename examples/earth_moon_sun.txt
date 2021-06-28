@@ -9,16 +9,20 @@
 # Here we create an image of Earth, Moon and the Sun inside the Milky-Way.
 # In order to render this image, run in the CLI:
 #
-#    ./Raytracer.jl render --normalization=0.18 --gamma=1.0 --avg_lum=0.1 examples/earth_moon_sun.txt pointlight
+#    ./Raytracer.jl render --normalization=0.18 --gamma=1.0 --avg_lum=0.03 examples/earth_moon_sun.txt pointlight
 #
 # or in the Julia REPL
 #
-#    render("scenefile"=>"examples/earth_moon_sun.txt", "gamma"=>1.0, "avg_lum"=>0.1, "normalization"=>0.18, "%COMMAND%"=>"pointlight")
+#    render("scenefile"=>"examples/earth_moon_sun.txt", "gamma"=>1.0, "avg_lum"=>0.03, "normalization"=>0.18, "%COMMAND%"=>"pointlight")
 #
 # But, maybe you will be more interested in the animation of this...
-# Run the following command:
+# Run the following command in the CLI:
 #
-#    ./Raytracer.jl animation  --gamma=0.65 --function=earth_moon_sun --vec_variables="[moon_x,  moon_y, moon_z,  moon_rotang, earth_rotang]" --iterable=1:10 examples/earth_moon_sun.txt pointlight
+#    ./Raytracer.jl animation  --normalization=0.18 --gamma=1.0 --avg_lum=0.03 --function=earth_moon_sun --vec_variables="[moon_x,  moon_y, moon_z,  moon_rotang, earth_rotang]" --iterable=1:10 examples/earth_moon_sun.txt pointlight
+#
+# or in the Julia REPL:
+#
+#    render_animation("normalization"=>0.18, "gamma"=>1.0, "avg_lum"=>0.03, "function"=>"earth_moon_sun", "vec_variables"=>"[moon_x,  moon_y, moon_z,  moon_rotang, earth_rotang]", "iterable"=>"1:10", "scenefile"=>"examples/earth_moon_sun.txt", "%COMMAND%"=>"pointlight")
 #
 
 FLOAT moon_x(2.0)
@@ -37,7 +41,7 @@ STRING earth_path ("images/earth.jpg")
 BRDF earth_brdf (DIFFUSE(IMAGE(earth_path)))
 PIGMENT earth_emitted_pigment ( UNIFORM(<earth_lum,earth_lum,earth_lum>) )
 
-VECTOR moon_pos([moon_x, moon_y, moon_z])
+VECTOR moon_rel_pos([moon_x, moon_y, moon_z])
 FLOAT moon_radius(0.4)
 FLOAT moon_lum(0.000)
 STRING moon_path ("images/moon.jpg")
@@ -89,8 +93,8 @@ SPHERE(
      )
 
 TRANSFORMATION moon_trans(
-     TRANSLATION(earth_pos)
-     * TRANSLATION(moon_pos)
+     TRANSLATION(earth_pos + [0,1,0])
+     * TRANSLATION(moon_rel_pos)
      * SCALING([moon_radius, moon_radius, moon_radius])
      * ROTATION_Z(moon_rotang)
 )

@@ -454,7 +454,7 @@ function print_JSON_render_animation(
 
 
      data = Dict(
-          "function"=>func,
+          "function"=>string(func),
           "vector of variables" => vec_variables,
           "iterable" => iterable,
           "scene file" => scenefile,
@@ -559,8 +559,18 @@ function render_animation(
 			)
 
 
-	iter = ProgressBar(iterable_float)
-	for (index, value) in enumerate(iter)
+     #=
+     N = length(iterable_float)
+     p = ProgressBar(N)
+     update!(p,0)
+     jj = Threads.Atomic{Int}(0)
+     l = Threads.SpinLock()
+     =#
+
+	#Threads.@threads for index in 1:N
+     iter = ProgressBar(iterable_float)
+     for (index, value) in enumerate(iter)
+          #value = iterable_float[index]
           values = func(value)
           dict = Dict(x=>y for (x,y) in zip(vec_variables, values))
           new_declare_float = isnothing(declare_float) ? dict : merge(dict, declare_float)
@@ -573,6 +583,14 @@ function render_animation(
 					)
 		render(parse_render_settings(merge(dict_gen, dict_spec))...)
 		set_description(iter, string(@sprintf("Frame generated: ")))
+
+          #=
+          set_description(p, string(@sprintf("Frame generated: ")))
+          Threads.atomic_add!(jj, 1)
+          Threads.lock(l)
+          update(p, jj[])
+          Threads.unlock(l) 
+          =#
 	end
 
      #=
@@ -721,7 +739,7 @@ function render_animation(
           rendering_time_s,
      )
 
-     name_json = join(map(x->x*".", split(png_output,".")[1:end-1])) * "json"
+     name_json = join(map(x->x*".", split(anim_output,".")[1:end-1])) * "json"
      (bool_print==true) && println("\nJSON file \"$(name_json)\" correctly created.")
      (bool_print==true) && println("\nEND OF RENDERING\n")
 end
