@@ -32,17 +32,27 @@
         ],
         "projection": "orthogonal"
     },
+    "tonemapping": {
+        "input average luminosity": 0.05,
+        "gamma": 1.0,
+        "normalization": 0.18
+    },
     "declared float from Command Line": null,
     "scene file": "examples/earth_moon_sun.txt",
     "renderer": {
-        "algorithm": "Flat Renderer",
+        "algorithm": "Point-Light Renderer",
         "background color": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "color": {
             "r": 0.0,
             "g": 0.0,
             "b": 0.0
         }
     },
-    "rendering time (in s)": "12.736",
-    "time of start": "2021-6-27 : 18:14:45",
+    "rendering time (in s)": "5.761",
+    "time of start": "2021-6-28 : 13:7:58",
     "pfm output": "scene.pfm"
 }

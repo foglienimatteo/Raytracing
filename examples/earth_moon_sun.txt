@@ -9,7 +9,11 @@
 # Here we create an image of Earth, Moon and the Sun inside the Milky-Way.
 # In order to render this image, run in the CLI:
 #
-#    ./Raytracer.jl render --gamma=0.65 examples/earth_moon_sun.txt flat
+#    ./Raytracer.jl render --normalization=0.18 --gamma=1.0 --avg_lum=0.1 examples/earth_moon_sun.txt pointlight
+#
+# or in the Julia REPL
+#
+#    render("scenefile"=>"examples/earth_moon_sun.txt", "gamma"=>1.0, "avg_lum"=>0.1, "normalization"=>0.18, "%COMMAND%"=>"pointlight")
 #
 # But, maybe you will be more interested in the animation of this...
 # Run the following command:

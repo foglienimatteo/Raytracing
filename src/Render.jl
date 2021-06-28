@@ -16,6 +16,9 @@ function print_JSON_render(
      samples_per_side::Int64,
      declare_float::Union{Dict, Nothing},
      rendering_time_s::Float64,
+     a::Float64,
+     γ::Float64,
+     lum::Union{Number, Nothing},
      )
 
      dict_camera = if typeof(camera) == OrthogonalCamera
@@ -66,6 +69,12 @@ function print_JSON_render(
                )
           end
 
+     tonemapping = Dict(
+          "normalization" => a,
+          "gamma"=> γ,
+          "input average luminosity" => lum,
+     )
+
 
      data = Dict(
           "scene file" => scenefile,
@@ -74,10 +83,13 @@ function print_JSON_render(
           "pfm output" => pfm_output,
           "camera" => dict_camera, 
           "renderer" => dict_renderer,
+          "tonemapping" => tonemapping,
           "samples per pixel (0 means no antialiasing)" => samples_per_side^2,
           "declared float from Command Line" => declare_float,
           "rendering time (in s)"=> @sprintf("%.3f", rendering_time_s),
      )
+
+
 
      open( join(map(x->x*".", split(png_output,".")[1:end-1])) * "json","w") do f
           JSON.print(f, data, 4)
@@ -278,6 +290,7 @@ function render(
           samples_per_side,
           declare_float,
           rendering_time_s,
+          a, γ, lum,
      )
 
      name_json = join(map(x->x*".", split(png_output,".")[1:end-1])) * "json"
