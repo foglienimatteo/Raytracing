@@ -5,6 +5,29 @@
 # Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
 #
 
+@testset "test_parse_tonemapping_settings" begin
+     string="""./Raytracer.jl tonemapping --normalization=0.1 --gamma=1.0 --avg_lum=1.0 """*
+     """--ONLY_FOR_TESTS prova.pfm prova.png"""
+     args = Raytracing.from_CLI_to_vecstring(string)
+     parsed_arguments = ArgParse_command_line(args)
+	(isnothing(parsed_arguments)) && (return nothing)
+
+	parsed_command = parsed_arguments["%COMMAND%"]
+	parsed_settings = parsed_arguments[parsed_command]
+
+     if parsed_command == "tonemapping"
+          @test 1==1
+          tone_mapping(parse_tonemapping_settings(parsed_settings)...)
+          @test 1==1
+     else
+          @test 1==2
+     end
+end
+
+
+##########################################################################################92
+
+
 @testset "test_parse_demo_settings" begin
      string="""./Raytracer.jl demo --camera_type=per --camera_position="[1 , 2 , 3]" """*
      """--alpha=30. --width=40 --height=30 --normalization=0.1 --gamma=1.0 --avg_lum=1.0 """*
@@ -103,6 +126,7 @@ end
 
 
 ##########################################################################################92
+
 
 @testset "test_parse_demoanimation_settings" begin
      string="""./Raytracer.jl demo_animation --camera_type="per" --camera_position="[1 , 2 , 3]" """*

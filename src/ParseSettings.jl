@@ -30,6 +30,10 @@ A tuple `(pfm, png, a, γ, ONLY_FOR_TESTS)` containing:
 - `γ::Float64 = string2positive(dict["gamma"])` : gamma factor (default = 1.0); it's converted 
   through `string2positive` to a positive floating point number.
 
+- `lum::Union{Number, Nothing} = string2positive(dict["avg_lum"])` : average luminosity of the image; it's 
+  converted through `string2positive` to a positive floating point number. If not specified or equal to 0, 
+  it's calculated through [`avg_lum`](@ref)
+
 - `ONLY_FOR_TESTS::Bool = dict["ONLY_FOR_TESTS"]` : it's a bool variable conceived only to
   test the correct behaviour of the renderer for the input arguments; if set to `true`, 
   no rendering is made!
@@ -38,7 +42,7 @@ See also:  [`tone_mapping`](@ref), [`string2positive`](@ref)
 """
 function parse_tonemapping_settings(dict::Dict{String, T}) where {T}
 
-    keys = ["infile", "outfile", "normalization", "gamma", "ONLY_FOR_TESTS"]
+    keys = ["infile", "outfile", "normalization", "gamma", "avg_lum", "ONLY_FOR_TESTS"]
 
     for pair in dict
         if (pair[1] in keys) ==false
@@ -62,9 +66,11 @@ function parse_tonemapping_settings(dict::Dict{String, T}) where {T}
 
     γ::Float64 = haskey(dict, "gamma") ? string2positive(dict["gamma"]) : 1.0
 
+    lum::Union{Float64, Nothing} = haskey(dict, "avg_lum") ? string2positive(dict["avg_lum"]) : nothing
+
     ONLY_FOR_TESTS::Bool = haskey(dict, "ONLY_FOR_TESTS") ? dict["ONLY_FOR_TESTS"] : false
 
-    return (pfm, png, a, γ, ONLY_FOR_TESTS)
+    return (pfm, png, a, γ, lum, ONLY_FOR_TESTS)
 end
 
 

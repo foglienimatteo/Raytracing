@@ -514,9 +514,7 @@ like syntax with arbitrary order and comfort. See the documentation of
 - `lum::Union{Number, Nothing} = nothing ` : average luminosity of the image; iIf not specified or equal to 0, 
   it's calculated through [`avg_lum`](@ref)
 
-- `pfm_output::String = "demo.pfm"` : name of the output pfm file
-
-- `png_output::String = "demo.png"` : name of the output LDR file
+- `anim_output::String = "demo-animation.mp4"` : name of the output animation file
 
 - `samples_per_pixel::Int64 = 0` : number of rays per pixel to be used (antialiasing);
   it must be a perfect square positive integer (0, 1, 4, 9, ...) and if is set to

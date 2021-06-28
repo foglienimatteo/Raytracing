@@ -552,7 +552,7 @@ end
      string2function(string::String="") :: Function
 
 Checks if the input `string` is a function name defined in `Raytracing`
- with [`check_is_function`](@ref), and return it.
+with [`check_is_function`](@ref), and return it.
 """
 function string2function(string::String)
      if check_is_function(string)==false
@@ -567,6 +567,12 @@ end
 ##########################################################################################92
 
 
+"""
+     from_CLI_to_vecstring(string::String) :: Vector{String}
+
+Parse a `string` as it would be from the Command Line, and return the 
+`Vector{String}` that contains all the commands parsed.
+"""
 function from_CLI_to_vecstring(string::String)
      cmd = lstrip(rstrip(string))
      if lstrip(cmd) == ""

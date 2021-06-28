@@ -40,7 +40,7 @@ function ArgParse_command_line(arguments)
 
 	s.description = "Raytracer for the generation of photorealistic images in Julia."
 	#s.exc_handler = parse_commandline_error_handler
-	s.version = @project_version
+	#s.version = @project_version
 
 	@add_arg_table! s begin
 		"demo"
@@ -89,6 +89,12 @@ function ArgParse_command_line(arguments)
 			arg_type = Float64
 			range_tester = check_is_positive
 			default = 1.27
+          "--avg_lum"
+			help = "average luminosity of the resulting pfm image; if =0 (dafault value)"*
+                    "it will be calculated automatically with the built-in avg_lum function"
+			arg_type = Float64
+			range_tester = check_is_positive
+			default = 0.0
 		"--ONLY_FOR_TESTS"
 			help = "only for testing flag; do not use it"
 			action = :store_true
