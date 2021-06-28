@@ -49,8 +49,8 @@ BRDF moon_brdf (DIFFUSE(IMAGE(moon_path)))
 PIGMENT moon_emitted_pigment ( UNIFORM(<moon_lum,moon_lum,moon_lum>) )
 
 
-VECTOR sun_pos([3.0, 4.5, 0.0])
-FLOAT sun_radius(1.0)
+VECTOR sun_pos([5.0, 4.5, 0.0])
+FLOAT sun_radius(0.5)
 FLOAT sun_lum(0.0)
 STRING sun_path ("images/sun.jpg")
 BRDF sun_brdf (DIFFUSE(IMAGE(sun_path)))
@@ -93,7 +93,7 @@ SPHERE(
      )
 
 TRANSFORMATION moon_trans(
-     TRANSLATION(earth_pos + [0,1,0])
+     TRANSLATION(earth_pos)
      * TRANSLATION(moon_rel_pos)
      * SCALING([moon_radius, moon_radius, moon_radius])
      * ROTATION_Z(moon_rotang)

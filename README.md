@@ -117,7 +117,7 @@ and of the tone-map the resulting PFM
 ./Raytracer.jl tonemapping scene.pfm scene.png --normalization=0.18 --gamma=1.0
 ```
 
-Earth with FlatRenderer            | 
+earth_and_sun.txt with FlatRenderer| 
 :---------------------------------:|
 ![](examples/earth_and_sun.png) 
 
@@ -125,6 +125,10 @@ We show also an animation example of usage, which renders the [earth_moon_sun.tx
 ```bash
 ./Raytracer.jl animation  --normalization=0.18 --gamma=1.0 --avg_lum=0.025 --function=earth_moon_sun --vec_variables="[moon_x,  moon_y, moon_z,  moon_rotang, earth_rotang]" --iterable=1:100 examples/earth_moon_sun.txt pointlight
 ```
+
+earth_moon_sun.txt with PointLight | 
+:---------------------------------:|
+![](examples/earth_moon_sun.gif) 
 
 Refer to the latest [stable documentation](https://cosmofico97.github.io/Raytracing/stable) for explanation of the functions used.
 

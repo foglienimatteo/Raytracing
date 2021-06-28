@@ -1148,7 +1148,7 @@ function parse_render_animation_settings(dict::Dict{String, T}) where {T}
 
     lum::Union{Float64, Nothing} = haskey(dict, "avg_lum") ? string2positive(dict["avg_lum"]) : nothing
 
-    anim::String = haskey(dict, "set_anim_name") ? dict["set_anim_name"] : "animation.mp4"
+    anim::String = haskey(dict, "set_anim_name") ? dict["set_anim_name"] : "scene_animation.mp4"
 
     bool_print::Bool = haskey(dict, "bool_print") ?  dict["bool_print"] : true
 

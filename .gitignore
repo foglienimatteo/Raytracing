@@ -53,3 +53,5 @@ Manifest.toml
 *.jpg
 *.jpeg
 *.tiff
+*.json
+*.jlprof

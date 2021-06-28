@@ -482,7 +482,7 @@ end
 function render_animation(
           func::Function,
           vec_variables::Vector{String},
-          iterable::Any,
+          iterable::Any, 
           scenefile::String,
           renderer_model::Renderer = FlatRenderer(),
      	camera_type::Union{String, Nothing} = nothing,
@@ -559,18 +559,10 @@ function render_animation(
 			)
 
 
-     #=
      N = length(iterable_float)
-     p = ProgressBar(N)
-     update!(p,0)
-     jj = Threads.Atomic{Int}(0)
-     l = Threads.SpinLock()
-     =#
-
-	#Threads.@threads for index in 1:N
-     iter = ProgressBar(iterable_float)
-     for (index, value) in enumerate(iter)
-          #value = iterable_float[index]
+     iter = Progress(N, "Frame generated: ")
+     Threads.@threads for index in 1:N
+          value = iterable_float[index]
           values = func(value)
           dict = Dict(x=>y for (x,y) in zip(vec_variables, values))
           new_declare_float = isnothing(declare_float) ? dict : merge(dict, declare_float)
@@ -582,135 +574,8 @@ function render_animation(
                          "declare_float"=>new_declare_float,
 					)
 		render(parse_render_settings(merge(dict_gen, dict_spec))...)
-		set_description(iter, string(@sprintf("Frame generated: ")))
-
-          #=
-          set_description(p, string(@sprintf("Frame generated: ")))
-          Threads.atomic_add!(jj, 1)
-          Threads.lock(l)
-          update(p, jj[])
-          Threads.unlock(l) 
-          =#
+          next!(iter)
 	end
-
-     #=
-     iter = ProgressBar(iterable_float)
-     for (index, value) in enumerate(iter)
-          
-          values = func(value)
-          dict = Dict(x=>y for (x,y) in zip(vec_variables, values))
-
-          if ONLY_FOR_TESTS==false
-
-               scene = open(scenefile, "r") do stream
-                    if isnothing(declare_float)
-                         inputstream = InputStream(stream, scenefile)
-                         parse_scene(inputstream, dict)
-                    else
-                         inputstream = InputStream(stream, scenefile)
-                         parse_scene(inputstream, merge(dict, declare_float) )
-                    end
-               end
-
-               NNN = @sprintf "%03d" index
-               png_wip_output = ".wip_animation/image$(NNN).png"
-
-               renderer = copy(renderer_model)
-               renderer.world = scene.world
-
-               observer_vec = isnothing(camera_position) ?
-                    nothing :
-                    typeof(camera_position) == Point ?
-                    camera_position - Point(0., 0., 0.) :
-                    camera_position
-
-               if isnothing(camera_type) && isnothing(observer_vec) && isnothing(scene.camera) 
-                    camera = PerspectiveCamera(-1.0, 1.0, rotation_z(deg2rad(α)))
-
-               elseif isnothing(camera_type) && isnothing(observer_vec)
-                    camera = scene.camera 
-
-               elseif isnothing(camera_type) && isnothing(scene.camera) 
-                    camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec)
-                    camera = PerspectiveCamera(-1.0, 1.0, camera_tr)
-
-               elseif isnothing(observer_vec) && isnothing(scene.camera) 
-                    if camera_type == "per"
-                         (bool_print==true) && (println("Choosen perspective camera..."))
-                         camera = PerspectiveCamera(1., 1.0, rotation_z(deg2rad(α)))
-                    elseif camera_type == "ort"
-                         (bool_print==true) && (println("Choosen orthogonal camera..."))
-                         camera = OrthogonalCamera(1.0, rotation_z(deg2rad(α))) 
-                    else
-                         throw(ArgumentError("Unknown camera: \"$(camera_type)\""))
-                    end
-
-               elseif isnothing(camera_type)
-                    camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec) * scene.camera.T
-                    if typeof(scene.camera) == OrthogonalCamera
-                         (bool_print==true) && (println("Choosen perspective camera..."))
-                         camera = OrthogonalCamera(scene.camera.a, camera_tr)
-                    elseif typeof(scene.camera) == PerspectiveCamera
-                         (bool_print==true) && (println("Choosen orthogonal camera..."))
-                         camera = PerspectiveCamera(scene.camera.d, scene.camera.a, camera_tr)
-                    else
-                         throw(ArgumentError("Unknown camera: \"$(camera_type)\""))
-                    end
-
-               elseif isnothing(observer_vec)
-                    if camera_type == "per"
-                         (bool_print==true) && (println("Choosen perspective camera..."))
-                         camera = PerspectiveCamera(scene.camera.d, scene.camera.a, rotation_z(deg2rad(α)) * scene.camera.T)
-                    elseif camera_type == "ort"
-                         (bool_print==true) && (println("Choosen orthogonal camera..."))
-                         camera = OrthogonalCamera(scene.camera.a, rotation_z(deg2rad(α)) * scene.camera.T) 
-                    else
-                         throw(ArgumentError("Unknown camera: \"$(camera_type)\""))
-                    end
-
-               elseif isnothing(scene.camera)
-                    camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec)
-                    if camera_type == "per"
-                         (bool_print==true) && (println("Choosen perspective camera..."))
-                         camera = PerspectiveCamera(1.0, 1.0, camera_tr)
-                    elseif camera_type == "ort"
-                         (bool_print==true) && (println("Choosen orthogonal camera..."))
-                         camera = OrthogonalCamera(1.0, camera_tr) 
-                    else
-                         throw(ArgumentError("Unknown camera: \"$(camera_type)\""))
-                    end
-
-
-
-               else
-                    camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec) * scene.camera.T
-                    if camera_type == "per"
-                         (bool_print==true) && (println("Choosen perspective camera..."))
-                         camera = PerspectiveCamera(scene.camera.d, scene.camera.a, camera_tr)
-                    elseif camera_type == "ort"
-                         (bool_print==true) && (println("Choosen orthogonal camera..."))
-                         camera = OrthogonalCamera(scene.camera.a, camera_tr) 
-                    else
-                         throw(ArgumentError("Unknown camera: \"$(camera_type)\""))
-                    end
-
-               end
-
-               image = HDRimage(width, height)
-               tracer = ImageTracer(image, camera, samples_per_side)
-
-               fire_all_rays!(tracer, renderer)
-               img = tracer.img
-               
-               normalize_image!(img, a, lum)
-               clamp_image!(img)
-               γ_correction!(img, γ)
-               Images.save(File{format"PNG"}(png_wip_output), get_matrix(img))
-          end
-
-          set_description(iter, string(@sprintf("Frame generated: ")))
-     end
-     =#
 
      time_2 = time()
      rendering_time_s = time_2 - time_1
@@ -762,7 +627,7 @@ end
                a::Float64 = 0.18,
                γ::Float64 = 1.27,
                lum::Union{Number, Nothing} = nothing,
-               anim_output::String = "animation.mp4", 
+               anim_output::String = "scene_animation.mp4", 
                samples_per_pixel::Int64 = 0,
                bool_print::Bool = true,
                declare_float::Union{Dict{String,Float64}, Nothing} = nothing,

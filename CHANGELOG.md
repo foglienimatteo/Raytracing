@@ -3,7 +3,8 @@
 # VERSION 1.1.0
 
 - added the `render_animation` function and improved the CLI; now it's possible to read an animation from a file; see PR[#19](https://github.com/cosmofico97/Raytracing/pull/19)
-- 
+
+
 # VERSION 1.0.0
 
 - added the `render` function and implemented lexer and parser; now it's possible to read a scene from a file and render it; see PR[#18](https://github.com/cosmofico97/Raytracing/pull/18)

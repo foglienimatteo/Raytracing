@@ -10,7 +10,7 @@ using Base: Bool, String, Int64
 using Colors, Images, ImageIO, FileIO, Polynomials, Test, ArgParse
 using ColorTypes:RGB
 using LinearAlgebra, StaticArrays
-using Printf, ProgressBars
+using Printf, ProgressMeter
 using Documenter, DocStringExtensions, JSON, Dates,  Intervals
 
 import Base.:+; import Base.:-; import Base.:≈; import Base.:/; import Base.:*
