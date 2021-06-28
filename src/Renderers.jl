@@ -105,8 +105,7 @@ function (renderer::PointLightRenderer)(ray::Ray)
     !isnothing(hit_record) || (return renderer.background_color)
 
     hit_material = hit_record.shape.Material
-    result_color = renderer.ambient_color +
-        get_color(hit_material.emitted_radiance, hit_record.surface_point)
+    result_color = renderer.ambient_color 
 
     for cur_light in renderer.world.point_lights
         if is_point_visible(renderer.world, cur_light.position, hit_record.world_point)
@@ -129,6 +128,8 @@ function (renderer::PointLightRenderer)(ray::Ray)
                             hit_record.surface_point,
                         )
             result_color += (emitted_color + brdf_color) * cur_light.color * cos_theta * distance_factor
+        else
+            result_color += 0.05*get_color(hit_material.brdf.pigment, hit_record.surface_point)
         end
     end
 

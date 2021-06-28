@@ -60,10 +60,14 @@ end
      @test M1 ≈  Raytracing.get_matrix(img)
 end
 
+
+##########################################################################################92
+
+
 @testset "test_tone_mapping_inputs" begin
      @test_throws MethodError tone_mapping("abracadabra")
      @test_throws ArgumentError tone_mapping(["abracadabra"])
-     @test_throws ArgumentError tone_mapping(["a", "b", "c", "d", "e"])
+     @test_throws ArgumentError tone_mapping(["a", "b", "c", "d", "e", "f"])
 end
 
 
@@ -71,13 +75,14 @@ end
      @test isnothing(tone_mapping( 
                          "infile"=>"prova.pfm", 
                          "outfile"=>"prova.png", 
-                         "alpha"=>0.18,
+                         "normalization"=>0.18,
                          "gamma"=>1.0, 
+                         "avg_lum"=>1.0,
                          "ONLY_FOR_TESTS"=>true,
                     ))
 
      @test isnothing(tone_mapping( 
-                         "alpha"=>0.18,
+                         "normalization"=>0.18,
                          "infile"=>"prova.pfm", 
                          "ONLY_FOR_TESTS"=>true,
                          "outfile"=>"prova.png", 

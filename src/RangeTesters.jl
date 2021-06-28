@@ -11,7 +11,7 @@ function check_is_positive(string::String="")
 
 	!isnothing(tryparse(Float64, var)) || (return false)
 
-     return parse(Float64, var)>0 ? true : false
+     return parse(Float64, var)≥0.0 ? true : false
 end
 
 check_is_positive(number::Number) = check_is_positive(string(number))
@@ -348,8 +348,8 @@ Examples:
 ```
 """
 function check_is_declare_float(string::String="")
-	(string == "") && (return true)
 	string_without_spaces = filter(x -> !isspace(x), string)
+     (string_without_spaces == "") && (return true)
 
 	vec_nameval = split.(split(string_without_spaces, ","), ":" )
 	for declare_float ∈ vec_nameval
@@ -415,4 +415,205 @@ function string2stringoneof(string::String, vec::Vector{String})
      end
 
      return filter(x -> !isspace(x) && x≠"\"", string)
+end
+
+
+##########################################################################################92
+
+
+"""
+     check_is_iterable(string::String, type::Union{Type, Nothing} = nothing) :: Bool
+     check_is_iterable(object::T, type::Union{Type, Nothing} = nothing) where T<:Any 
+          = check_is_iterable(string(object), type)
+
+Checks if the input `string` can be parsed in a iterable object,
+returning `true` if it is, otherwise `false`.
+If specified an input `type`, check also if all the elements contained 
+in `object` are of a type `T` such that `T <: type`. 
+"""
+function check_is_iterable(string::String, type::Union{Type, Nothing} = nothing)
+     object = eval(Meta.parse(string))
+     #applicable(length, object) || (return false)
+     applicable(iterate, object) || (return false)
+
+     next = iterate(object)
+     while !isnothing(next)
+          (val, state) = next
+          
+          if !isnothing(type) 
+               (typeof(val) <: type) ||  (return false)
+          end
+
+          next = iterate(object, state)
+     end
+
+     return true
+end
+
+check_is_iterable(object::T, type::Union{Type, Nothing} = nothing) where T<:Any = check_is_iterable(string(object), type)
+
+"""
+     string2iterable(string::String="") :: Vector{String}
+
+Checks if the input `string` is a vector of variable names written
+as "[namevar1, namevar2, ...]" with [`check_is_vec_variables`](@ref), 
+and return a `Vector{String} = ["namevar1", "namevar2", ...]`.
+"""
+function string2iterable(string::String, type::Union{Type, Nothing} = nothing)
+     if check_is_iterable(string)==false
+          throw(ArgumentError(
+               "invalid input: it is not an iterable object"
+          ))
+     end
+
+     if check_is_iterable(string, Float64)==false && check_is_iterable(string, Int64)==false
+          throw(ArgumentError(
+               "invalid input iterable: its elements cannot be converted to Float64 "
+          ))
+     end
+
+	return eval(Meta.parse(string))
+end
+
+
+##########################################################################################92
+
+
+"""
+     check_is_vec_variables(string::String="") :: Bool
+
+Checks if the input `string` is a vector of variable names written
+as "[namevar1, namevar2, ...]".
+"""
+function check_is_vec_variables(string::String="")
+	vector = filter(x -> !isspace(x), string)
+     (vector == "") && (return true)
+
+	(vector[begin] == '[' && vector[end] == ']') || (return false)
+
+     ':' ∉ vector || (return false)
+
+	vector = vector[begin+1:end-1]
+	vector = split(vector, ",")
+	(length(vector)≥1) || (return false)
+
+	return true
+end
+
+"""
+     string2vector(string::String="") :: Union{Vector{String}, Nothing}
+
+Checks if the input `string` is a vector of variable names written
+as "[namevar1, namevar2, ...]" with [`check_is_vec_variables`](@ref), 
+and return a `Vector{String} = ["namevar1", "namevar2", ...]`.
+"""
+function string2vec_variables(string::String)
+     if check_is_vec_variables(string)==false
+          throw(ArgumentError(
+               "invalid vector of variables syntax; must be: [namevar1, namevar2, ...]\n"*
+               "Example: --vec_variables=\"[ namevar1 , namevar2 , ...]\" "
+          ))
+     end
+
+     vector = filter(x -> !isspace(x) && x≠"\"", string)
+     !(vector=="") || (return nothing)
+
+     vector = vector[begin+1:end-1]
+     vector = Vector{String}(split(vector, ","))
+     
+	return vector
+end
+
+
+##########################################################################################92
+
+
+"""
+     check_is_function(string::String="") :: Bool
+
+Checks if the input `string` is a function name defined in `Raytracing`.
+"""
+function check_is_function(string::String="")
+	name = filter(x -> !isspace(x), string)
+     (name == "") && (return false)
+
+     isdefined(Raytracing, Symbol(name)) || (return false)
+     isa(eval(Symbol(name)),  Function) || (return false)
+     try
+          func::Function = eval(Symbol(name))
+     catch
+          return false
+     end
+
+	return true
+end
+
+"""
+     string2function(string::String="") :: Function
+
+Checks if the input `string` is a function name defined in `Raytracing`
+with [`check_is_function`](@ref), and return it.
+"""
+function string2function(string::String)
+     if check_is_function(string)==false
+          throw(ArgumentError("$(string) is not a function defined in Raytracing module"))
+     end
+     
+	return  eval(Symbol(string))
+end
+
+
+
+##########################################################################################92
+
+
+"""
+     from_CLI_to_vecstring(string::String) :: Vector{String}
+
+Parse a `string` as it would be from the Command Line, and return the 
+`Vector{String}` that contains all the commands parsed.
+"""
+function from_CLI_to_vecstring(string::String)
+     cmd = lstrip(rstrip(string))
+     if lstrip(cmd) == ""
+          return Vector{String}()
+     end
+
+     arglist = Vector{String}()
+     parsestack = Vector{Char}()
+     insideliteral = false
+
+     for i in 1:length(cmd)
+          #global insideliteral
+          islast = i >= length(cmd)
+          if cmd[i] == ' ' && (insideliteral==true)
+               # Whitespace within literal is kept
+               push!(parsestack, cmd[i])
+          elseif cmd[i] == ' '
+               # Whitespace delimits arguments
+               push!(arglist, join(parsestack))
+               empty!(parsestack)
+          elseif !islast && cmd[i]  == '\\' && cmd[i+1] == '\"'
+               # Escaped double quote
+               push!(parsestack, cmd[i+1])
+               i+=1
+          elseif cmd[i] == '\"' && insideliteral==false
+               # Begin literal
+               insideliteral = true
+          elseif cmd[i]=='\"' && insideliteral==true
+               # End literal
+               insideliteral = false
+          else
+               push!(parsestack, cmd[i])
+          end
+     end
+     push!(arglist, join(parsestack))
+     empty!(parsestack)
+
+     println(arglist)
+     if arglist[1] == "./Raytracer.jl"
+          return arglist[begin+1:end]
+     else
+          throw(ArgumentError("first argument must be './Raytracer.jl', not $(vec[1])"))
+     end
 end

@@ -209,7 +209,10 @@ function demo(
 		camera_position::Union{Point, Vec} = Point(-1.,0.,0.), 
      	α::Float64 = 0., 
      	width::Int64 = 640, 
-     	height::Int64 = 480, 
+     	height::Int64 = 480,
+		a::Float64 = 0.18, 
+          γ::Float64 = 1.0,
+		lum::Union{Number, Nothing} = nothing,  
      	pfm_output::String = "demo.pfm", 
         	png_output::String = "demo.png",
 		samples_per_pixel::Int64 = 0, 
@@ -267,20 +270,9 @@ function demo(
 	(bool_print==true) && (println("\nHDR demo image written to $(pfm_output)\n"))
 
 	# Apply tone-mapping to the image
-	 if typeof(renderer) == OnOffRenderer
-		normalize_image!(img, 0.18, nothing)
-	elseif typeof(renderer) == FlatRenderer
-		normalize_image!(img, 0.18, 0.5)
-	elseif typeof(renderer) == PathTracer
-		normalize_image!(img, 0.18, 0.1)
-	elseif typeof(renderer) == PointLightRenderer
-          normalize_image!(img, 0.18, 0.1)
-	else
-		throw(ArgumentError("Unknown renderer: $(typeof(renderer))"))
-	end
-
+	normalize_image!(img, a, lum)
 	clamp_image!(img)
-	γ_correction!(img, 1.27)
+	γ_correction!(img, γ)
 
 	# Save the LDR image
 	if (typeof(query(png_output)) == File{DataFormat{:UNKNOWN}, String})
@@ -308,6 +300,9 @@ end
      	α::Float64 = 0., 
      	width::Int64 = 640, 
      	height::Int64 = 480, 
+		a::Float64=0.18, 
+          γ::Float64=1.0, 
+		lum::Union{Number, Nothing} = nothing,
      	pfm_output::String = "demo.pfm", 
         	png_output::String = "demo.png",
 		samples_per_pixel::Int64 = 0, 
@@ -363,6 +358,13 @@ like syntax with arbitrary order and comfort. See the documentation of
 - `width::Int64 = 640` and `height::Int64 = 480` : pixel dimensions of the demo image;
   they must be both even positive integers.
 
+- `a::Float64 = 0.18` : normalization scale factor for the tone mapping.
+
+- `γ::Float64 = 1.27` : gamma factor for the tone mapping.
+
+- `lum::Union{Number, Nothing} = nothing ` : average luminosity of the image; iIf not specified or equal to 0, 
+  it's calculated through [`avg_lum`](@ref)
+
 - `pfm_output::String = "demo.pfm"` : name of the output pfm file
 
 - `png_output::String = "demo.png"` : name of the output LDR file
@@ -403,6 +405,9 @@ function demo_animation(
 			camera_position::Union{Point, Vec} = Point(-1.,0.,0.), 
         		width::Int64 = 200, 
         		height::Int64 = 150,
+			a::Float64=0.18, 
+            	γ::Float64=1.0,
+			lum::Union{Number, Nothing} = nothing,
        		anim_output::String = "demo-animation.mp4",
 			samples_per_pixel::Int64 = 0,
 			world_type::String = "A", 
@@ -418,6 +423,9 @@ function demo_animation(
 			"renderer"=>renderer, 
 			"width"=>width,
 			"height"=>height,
+			"normalization"=>a,
+			"gamma"=>γ,
+			"avg_lum"=>lum,
 			"samples_per_pixel"=>samples_per_pixel,
 			"world_type" => world_type,
 			"set_pfm_name"=>".wip_animation/demo.pfm",
@@ -499,9 +507,14 @@ like syntax with arbitrary order and comfort. See the documentation of
 - `width::Int64 = 640` and `height::Int64 = 480` : pixel dimensions of the demo image;
   they must be both even positive integers.
 
-- `pfm_output::String = "demo.pfm"` : name of the output pfm file
+- `a::Float64 = 0.18` : normalization scale factor for the tone mapping.
 
-- `png_output::String = "demo.png"` : name of the output LDR file
+- `γ::Float64 = 1.27` : gamma factor for the tone mapping.
+
+- `lum::Union{Number, Nothing} = nothing ` : average luminosity of the image; iIf not specified or equal to 0, 
+  it's calculated through [`avg_lum`](@ref)
+
+- `anim_output::String = "demo-animation.mp4"` : name of the output animation file
 
 - `samples_per_pixel::Int64 = 0` : number of rays per pixel to be used (antialiasing);
   it must be a perfect square positive integer (0, 1, 4, 9, ...) and if is set to

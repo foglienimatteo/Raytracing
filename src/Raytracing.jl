@@ -7,10 +7,10 @@
 module Raytracing
 
 using Base: Bool, String, Int64
-using Colors, Images, ImageIO, FileIO, Polynomials, Test
+using Colors, Images, ImageIO, FileIO, Polynomials, Test, ArgParse
 using ColorTypes:RGB
 using LinearAlgebra, StaticArrays
-using Printf, ProgressBars
+using Printf, ProgressMeter
 using Documenter, DocStringExtensions, JSON, Dates,  Intervals
 
 import Base.:+; import Base.:-; import Base.:≈; import Base.:/; import Base.:*
@@ -32,15 +32,16 @@ export Renderer, OnOffRenderer, FlatRenderer, PathTracer, PointLightRenderer
 # from Operations.jl
 export are_close, squared_norm, norm, normalize #, normalized_dot
 # from ReadingWriting.jl
-export parse_command_line, parse_demo_settings
-export parse_tonemapping_settings, parse_demoanimation_settings
 export load_image, ldr2pfm
 # from RangeTesters.jl
 export check_is_positive, check_is_uint64, check_is_even_uint64
 export check_is_square, check_is_color, check_is_vector
-export check_is_declare_float, check_is_one_of
+export check_is_declare_float, check_is_one_of, check_is_iterable
+export check_is_function, check_is_vec_variables
 # from ParseSettings.jl
-export parse_render_settings 
+export parse_command_line, parse_demo_settings
+export parse_tonemapping_settings, parse_demoanimation_settings
+export parse_render_settings, parse_render_animation_settings
 # from ToneMapping.jl
 export normalize_image!,  clamp_image!, γ_correction!, tone_mapping
 # from Transformations.jl
@@ -63,11 +64,12 @@ export create_onb_from_z
 export scatter_ray
 #from Interpreter.jl
 # see the module Interpreter.jl
-
 #from Render.jl
-export render
+export render, render_animation
 # from PrintFunctions.jl
 export print_not_black
+# from ArgParse_CLI.jl
+export ArgParse_command_line, print_ArgParseSettings
 
 CAMERAS = ["ort", "per"]
 RENDERERS = ["onoff", "flat", "pathtracer", "pointlight"]
@@ -98,6 +100,7 @@ using .Interpreter
 
 include("Render.jl")
 include("PrintFunctions.jl")
+include("ArgParse_CLI.jl")
 
 # Here is were you can define your own functions to be used in
 # the scene-files!

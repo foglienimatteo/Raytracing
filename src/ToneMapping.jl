@@ -82,7 +82,7 @@ function normalize_image!(
             δ::Number=1e-10
             )
 
-    isnothing(lum) && (lum = avg_lum(img, δ))
+    (isnothing(lum) || lum≈0.0 ) && (lum = avg_lum(img, δ))
     img.rgb_m .= img.rgb_m .* a .* (1.0/lum)
     nothing
 end 
@@ -157,29 +157,31 @@ end
 function tone_mapping(
             infile::String, 
             outfile::String, 
-            a::Float64=0.18, 
-            γ::Float64=1.0, 
+            a::Float64 = 0.18, 
+            γ::Float64 = 1.0, 
+            lum::Union{Number, Nothing} = nothing,
             ONLY_FOR_TESTS::Bool=false
             )
     (ONLY_FOR_TESTS==false) || (return nothing)       
-    tone_mapping(["$(infile)", "$(outfile)", "$a", "$γ"])
+    tone_mapping(["$(infile)", "$(outfile)", "$a", "$γ", "$lum"])
 end
 
-function tone_mapping(args::Vector{String})
+function tone_mapping(args_lum::Vector{String})
     correct_usage =  
         "\ncorrect usage of tone mapping function for vector of string arguments:\n"*
         "julia>  tonemapping([\"infile\",\"outfile\" ])\n"*
         "julia>  tonemapping([\"infile\",\"outfile\", \"a\"])\n"*
         "julia>  tonemapping([\"infile\",\"outfile\",  \"a\",  \"γ\" ])\n\n"*
-        "default values are a=0.18 and γ=1.0\n\n"
-    if isempty(args) || length(args)==1 || length(args)>4
+        "julia>  tonemapping([\"infile\",\"outfile\",  \"a\",  \"γ\", \"lum\" ])\n\n"*
+        "default values are a=0.18, γ=1.0, lum=nothing\n\n"
+    if isempty(args_lum) || length(args_lum)==1 || length(args_lum)>5
         throw(ArgumentError(correct_usage))
 		return nothing
     end
 
 	parameters = nothing
 	try
-		parameters =  Parameters(parse_command_line(args)...)
+		parameters =  Parameters(parse_command_line(args_lum[begin:end-1])...)
 	catch e
 		println("Error: ", e)
         println(correct_usage)
@@ -190,7 +192,7 @@ function tone_mapping(args::Vector{String})
 	
 	println("\nfile $(parameters.infile) has been read from disk.\n")
 
-	normalize_image!(img, parameters.a)
+	normalize_image!(img, parameters.a, args_lum[end])
 	clamp_image!(img)
 	Raytracing.γ_correction!(img, parameters.γ)
 
@@ -206,7 +208,7 @@ end
 $(SIGNATURES)
 
 Tone-map the given input pfm file `infile` with luminosity
-normalisation `a` and gamma factor `γ`.
+normalisation `a`, gamma factor `γ` and average luminosity `lum`.
 Return a file with the input outfile name `outfile` and 
 of the specified LDR format, if possible.
 
@@ -216,7 +218,10 @@ following three function, called in the presented order:
 - `normalize_image!` : normalize the image colors
 - `clamp_image!` : adjust the color levels of the brightest pixels
 - `γ_correction!` : corrects the image using the `γ` factor
+- `avg_lum` : if not specified an average luminosity `lum` (or if it is =0),
+  it is calculated through this function
 
-See also: [`normalize_image!`](@ref), [`clamp_image!`](@ref), [`γ_correction!`](@ref)
+See also: [`normalize_image!`](@ref), [`clamp_image!`](@ref), 
+[`γ_correction!`](@ref), [`avg_lum`](@ref)
 """
 tone_mapping

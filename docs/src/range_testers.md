@@ -23,4 +23,11 @@ Raytracing.check_is_declare_float
 Raytracing.declare_float2dict
 Raytracing.check_is_one_of
 Raytracing.string2stringoneof
+Raytracing.check_is_iterable
+Raytracing.string2iterable
+Raytracing.check_is_vec_variables
+Raytracing.string2vec_variables
+Raytracing.check_is_function
+Raytracing.string2function
+Raytracing.from_CLI_to_vecstring
 ```

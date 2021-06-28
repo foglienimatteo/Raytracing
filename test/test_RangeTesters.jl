@@ -10,6 +10,7 @@
      @test Raytracing.check_is_positive("")
      @test Raytracing.check_is_positive("    ")
      @test Raytracing.check_is_positive(" 3 ")
+     @test Raytracing.check_is_positive(" 0.0 ")
      @test Raytracing.check_is_positive("3.0 ")
      @test !Raytracing.check_is_positive("-3.4")
      @test !Raytracing.check_is_positive(" -3")
@@ -19,6 +20,7 @@ end
      @test Raytracing.string2positive("") == 0.0
      @test Raytracing.string2positive("    ") == 0.0
      @test Raytracing.string2positive(" 3 ") == 3.0
+     @test Raytracing.string2positive(" 0.0 ") == 0.0
      @test Raytracing.string2positive("3.0 ") == 3.0
      @test_throws ArgumentError Raytracing.string2positive("-3.4")
      @test_throws ArgumentError Raytracing.string2positive("-3")
@@ -187,6 +189,32 @@ end
 end
 
 
+
+##########################################################################################92
+
+
+@testset "test_check_is_declare_float" begin
+     @test Raytracing.check_is_declare_float("")
+     @test Raytracing.check_is_declare_float("  ")
+     @test Raytracing.check_is_declare_float("nome1:1.01,nome2:3.14")
+     @test Raytracing.check_is_declare_float(" nome:    1.09013")
+     @test Raytracing.check_is_declare_float("var1 : 1, var2 : 2 , var3:5.64")
+     @test !Raytracing.check_is_declare_float("prova , 1")
+     @test !Raytracing.check_is_declare_float(" prova : 1 ,")
+     @test !Raytracing.check_is_declare_float("prova")
+end
+
+@testset "test_declare_float2dict" begin
+     @test isnothing(Raytracing.declare_float2dict(""))
+     @test isnothing(Raytracing.declare_float2dict("  "))
+     @test Raytracing.declare_float2dict("nome1:1.01,nome2:3.14") == Dict("nome1" => 1.01, "nome2" =>3.14)
+     @test Raytracing.declare_float2dict(" nome:    1.09013") == Dict("nome" =>  1.09013)
+     @test Raytracing.declare_float2dict("var1 : 1, var2 : 2 , var3:5.64")  == Dict("var1" => 1, "var2" =>2, "var3"=>5.64)
+     @test_throws ArgumentError Raytracing.declare_float2dict("prova , 1")
+     @test_throws ArgumentError Raytracing.declare_float2dict(" prova : 1 ,")
+     @test_throws ArgumentError Raytracing.declare_float2dict("prova")
+end
+
 ##########################################################################################92
 
 
@@ -209,3 +237,112 @@ end
      @test_throws ArgumentError Raytracing.string2stringoneof("   ", CAMERAS)
      @test_throws ArgumentError Raytracing.string2stringoneof("prova ", CAMERAS)
 end
+
+
+##########################################################################################92
+
+
+@testset "test_check_is_iterable_1" begin
+     @test Raytracing.check_is_iterable(1)
+     @test Raytracing.check_is_iterable(1:5)
+     @test Raytracing.check_is_iterable([0.1 , 2, 14])
+
+     @test Raytracing.check_is_iterable(1, Int64)
+     @test Raytracing.check_is_iterable(1, Number)
+     @test Raytracing.check_is_iterable(1:5, Int64)
+     @test Raytracing.check_is_iterable(1:5, Number)
+     @test Raytracing.check_is_iterable([0.1 , 2, 14], Float64)
+     @test Raytracing.check_is_iterable([0.1 , 2, 14], Number)
+
+     @test !Raytracing.check_is_iterable([0.1 , 2, 14], Int64)
+end
+
+@testset "test_check_is_iterable_2" begin
+     @test Raytracing.check_is_iterable("1")
+     @test Raytracing.check_is_iterable("1:5")
+     @test Raytracing.check_is_iterable("[0.1 , 2, 14]")
+
+     @test Raytracing.check_is_iterable("1", Int64)
+     @test Raytracing.check_is_iterable("1", Number)
+     @test Raytracing.check_is_iterable("1:5", Int64)
+     @test Raytracing.check_is_iterable("1:5", Number)
+     @test Raytracing.check_is_iterable("[0.1 , 2, 14]", Float64)
+     @test Raytracing.check_is_iterable("[0.1 , 2, 14]", Number)
+
+     @test !Raytracing.check_is_iterable("[0.1 , 2, 14]", Int64)
+end
+
+
+@testset "test_string2iterable" begin
+     @test Raytracing.string2iterable("1.0") == 1
+     @test Raytracing.string2iterable("1:5") == 1:5
+     @test Raytracing.string2iterable("[0.1 , 2, 14]") == [0.1, 2, 14]
+
+     @test Raytracing.string2iterable("1", Int64) == 1
+     @test Raytracing.string2iterable("1", Number) == 1
+     @test Raytracing.string2iterable("1:5", Int64) == 1:5
+     @test Raytracing.string2iterable("1:5", Number) == 1:5
+     @test Raytracing.string2iterable("[0.1 , 2, 14]", Float64) == [0.1, 2, 14]
+     @test Raytracing.string2iterable("[0.1 , 2, 14]", Number) == [0.1, 2, 14]
+end
+
+
+##########################################################################################92
+
+
+@testset "test_check_is_vec_variables" begin
+     @test Raytracing.check_is_vec_variables("")
+     @test Raytracing.check_is_vec_variables("  ")
+     @test Raytracing.check_is_vec_variables("[nome1,nome2]")
+     @test Raytracing.check_is_vec_variables("  [  nome  ]")
+     @test Raytracing.check_is_vec_variables("[var1 ,  var2 , var3    ]")
+     @test !Raytracing.check_is_vec_variables("prova , 1")
+     @test !Raytracing.check_is_vec_variables("[ prova : 1 ]")
+     @test !Raytracing.check_is_vec_variables("prova")
+end
+
+@testset "test_string2vec_variables" begin
+     @test isnothing(Raytracing.string2vec_variables(""))
+     @test isnothing(Raytracing.string2vec_variables("  "))
+     @test Raytracing.string2vec_variables("[nome1,nome2]") == ["nome1", "nome2"]
+     @test Raytracing.string2vec_variables("  [  nome  ]") == ["nome"]
+     @test Raytracing.string2vec_variables("[var1 ,  var2 , var3    ]") == ["var1", "var2", "var3"]
+     @test_throws ArgumentError Raytracing.string2vec_variables("prova , 1")
+     @test_throws ArgumentError Raytracing.string2vec_variables("[ prova : 1 ]")
+     @test_throws ArgumentError Raytracing.string2vec_variables("prova")
+end
+
+
+
+##########################################################################################92
+
+
+@testset "test_check_is_function" begin
+     @test !Raytracing.check_is_function("")
+     @test !Raytracing.check_is_function("  ")
+     @test !Raytracing.check_is_function("[nome1,nome2]")
+     @test Raytracing.check_is_function("check_is_function")
+     @test Raytracing.check_is_function("check_is_declare_float")
+end
+
+@testset "test_string2vec_variables" begin
+     @test_throws ArgumentError Raytracing.string2function("")
+     @test_throws ArgumentError Raytracing.string2function("  ")
+     @test_throws ArgumentError Raytracing.string2function("[nome1,nome2]")
+     @test Raytracing.string2function("check_is_declare_float") == check_is_declare_float
+end
+
+
+##########################################################################################92
+
+
+@testset "test_from_CLI_to_vecstring" begin
+     string="""./Raytracer.jl render --ONLY_FOR_TESTS pathtracer --background_color="<1,2,3>" """*
+     """--init_state=1 --init_seq=2 --num_of_rays=15 --max_depth=3 --russian_roulette_limit 1"""
+     vec_string = ["render", "--ONLY_FOR_TESTS", "pathtracer", "--background_color=<1,2,3>", 
+     "--init_state=1", "--init_seq=2", "--num_of_rays=15", "--max_depth=3", "--russian_roulette_limit", "1"]
+     @test Raytracing.from_CLI_to_vecstring(string) == vec_string
+end
+
+
+string="""./Raytracer.jl render --ONLY_FOR_TESTS pathtracer --background_color="<1,2,3>" --init_state=1 --init_seq=2 --num_of_rays=15 --max_depth=3 --russian_roulette_limit 1"""

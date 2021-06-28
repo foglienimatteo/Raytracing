@@ -70,6 +70,9 @@ The basic structure of a command in the CLI is the following:
 ```bash
 ./Raytracer.jl render [OPTIONS_FOR_THE_IMAGE] NAME_OF_THE_SCENEFILE {onoff|flat|pathtracer|pointlight}[OPTIONS_FOR_THE_RENDERER]
 ```
+```bash
+./Raytracer.jl animation --function=FUNCTION_NAME  --vec_variables="[NAMEVAR1, NAMEVAR2, ...]" --iterable=ITERABLE [OPTIONS_FOR_THE_IMAGE] NAME_OF_THE_SCENEFILE {onoff|flat|pathtracer|pointlight}[OPTIONS_FOR_THE_RENDERER]
+```
 
 There are four possible rendering algorithms; each of them is linked to different rules for the color of a pixel and the light ray that starts from that pixel and hits (or not) an object of the rendered scene:
 
@@ -88,16 +91,21 @@ The resulting files created at the end of the rendering are three:
 - the PFM image (`scene.pfm` is the default name, if none is specified from the command line)
 - the LDR image (`scene.png` is the default name, if none is specified from the command line)
 -  the JSON file, that saves some datas about input commands, rendering time etc. It has the same name of the LDR image and `.json` extention, so `scene.json` is the default name.
+
+The resulting files created at the end of the animation are intead two:
+- the animation (`scene_animation.mp4` is the default name, if none is specified from the command line)
+-  the JSON file; it has the same name of the animation and `.json` extention, so `scene_animation.json` is the default name.
   
 Probably, the LDR image will not be "correctly" converted with the standard values used in the `render` function to tone-map the PFM file; it's consequently appropriate
 to manually apply the tone mapping algorithm to the PFM image!
 The tonemapping command is simple:
 ```bash
-./Raytracer.jl tonemapping [-a ALPHA] [-g GAMMA] FILE_PFM_TO_BE_TONEMAPPED NAME_OF_THE_RESULTING_LDR
+./Raytracer.jl tonemapping [--normalization ALPHA] [-gamma GAMMA] [--avg_lum LUM]FILE_PFM_TO_BE_TONEMAPPED NAME_OF_THE_RESULTING_LDR
 ```
-where `ALPHA` is the scaling factor for the normalisation process (default `a=0.18`)
-and `GAMMA` is YOUR monitor gamma value (default `g=1.0`).
-Choose your `a` and `g` values without any fear to try again! This algorithm is indeed by far more efficient and computationally cheaper than the rendering.
+where `ALPHA` is the scaling factor for the normalisation process (default `a=0.18`), `GAMMA` is YOUR monitor gamma value (default `g=1.0`) and `LUM` is the average luminosity of the image (the default value is manually calculated for the image itself, but it's useful to specify manually this value for particularly dark images).
+Choose your `ALPHA` and `GAMMA` values without any fear to try again! This algorithm is indeed by far more efficient and computationally cheaper than the rendering.
+
+NOTE: you can also specify `ALPHA`, `GAMMA` and `LUM` in the render and animation command; it's fundamental for the latter case, because no "PFM-animation" that can be tonemappend exists!
 
 
 Here we show an example of usage, which renders the [earth_and_sun.txt](examples/earth_and_sun.txt) file
@@ -106,12 +114,21 @@ Here we show an example of usage, which renders the [earth_and_sun.txt](examples
 ```
 and of the tone-map the resulting PFM
 ```bash
-./Raytracer.jl tonemapping scene.pfm scene.png -a=0.18 -g=1.0
+./Raytracer.jl tonemapping scene.pfm scene.png --normalization=0.18 --gamma=1.0
 ```
 
-Earth with FlatRenderer            | 
+earth_and_sun.txt with FlatRenderer| 
 :---------------------------------:|
 ![](examples/earth_and_sun.png) 
+
+We show also an animation example of usage, which renders the [earth_moon_sun.txt](examples/earth_moon_sun.txt) file
+```bash
+./Raytracer.jl animation  --normalization=0.18 --gamma=1.0 --avg_lum=0.025 --function=earth_moon_sun --vec_variables="[moon_x,  moon_y, moon_z,  moon_rotang, earth_rotang]" --iterable=1:100 examples/earth_moon_sun.txt pointlight
+```
+
+earth_moon_sun.txt with PointLight | 
+:---------------------------------:|
+![](examples/earth_moon_sun.gif) 
 
 Refer to the latest [stable documentation](https://cosmofico97.github.io/Raytracing/stable) for explanation of the functions used.
 
@@ -140,6 +157,11 @@ render("scenefile"=>"examples/earth_and_sun.txt", "width"=>2880, "height"=>1880,
 and for tone-map it
 ```julia
 tone_mapping("infile"=>"scene.pfm", "outfile"=>"scene.png", "alpha"=>0.18, "gamma"=>0.6)
+```
+
+Finally, to create the  `examples/earth_moon_sun.txt` animation:
+```julia
+render_animation("normalization"=>0.18, "gamma"=>1.0, "avg_lum"=>0.025, "width"=>1440, "height"=>900, "function"=>"earth_moon_sun", "vec_variables"=>"[moon_x,  moon_y, moon_z,  moon_rotang, earth_rotang]", "iterable"=>"1:100", "scenefile"=>"examples/earth_moon_sun.txt", "%COMMAND%"=>"pointlight")
 ```
 
 ## Licence

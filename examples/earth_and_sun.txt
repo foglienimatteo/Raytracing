@@ -31,7 +31,7 @@
 #         It's very fast, and the images rendered are perfect for an astrophysical context or for
 #         very bright days of summer; it's, nevertheless, a simple solution in order to avoid
 #         the longer times needed for the pathtracer algorithm.
-
+FLOAT mult(1.0)
 
 # This type of image is very long to be rendered with "pathtracer"; use "pointlight"
 # or "flat" instead!
@@ -82,7 +82,7 @@ MATERIAL milky_way_material(
 
 TRANSFORMATION earth_trans(
      TRANSLATION(earth_pos)
-     * SCALING([earth_radius, earth_radius, earth_radius])
+     * SCALING([mult*earth_radius, mult* earth_radius, mult*earth_radius])
 )
 SPHERE(
      earth_material,
