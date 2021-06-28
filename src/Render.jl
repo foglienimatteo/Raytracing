@@ -493,7 +493,7 @@ function render_animation(
           a::Float64 = 0.18,
           γ::Float64 = 1.27,
           lum::Union{Number, Nothing} = nothing,
-     	anim_output::String = "animation.mp4", 
+     	anim_output::String = "scene_animation.mp4", 
           samples_per_pixel::Int64 = 0,
 		bool_print::Bool = true,
           declare_float::Union{Dict{String,Float64}, Nothing} = nothing,

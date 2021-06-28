@@ -25,7 +25,7 @@ end
 
 function earth_moon_sun(x::T) where {T<:Real}
      dist = 2.0
-     period = 20
+     period = 100
      moon_x = dist * cos(2 * π * x/period)
      moon_y =  dist * sin(2 * π * x/period)
      moon_z =  0.5*cos(2 * π * x/period)
