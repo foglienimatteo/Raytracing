@@ -117,17 +117,21 @@ SPHERE(
 # The definition of the CAMERA (i.e. the point of view) works like follows:
 # - first argument : choosen projection , PERSPECTIVE or ORTHOGONAL
 # - second argument : transformation defining the point of view and the orientation
-# The third and fourth argument depends on the choosen projection
+# The third argument depends on the choosen projection:
 # - for PERSPECTIVE, you must insert a float defining the distance from the screen
-#       and the aspect ratio of the image
-# - for ORTHOGONAL, only the aspect ratio must be specified (because the orthogonal 
+# - for ORTHOGONAL, nothing has to be further inserted (because the orthogonal 
 #       projection it's a specifical perspective projection with an infinite distance
 #       between the observer and the screen)
+#
+# NOTE: in previous versions, you have to specify the aspect ratio of the rendered image;
+# howeve, this created problems with the specification of the width and height pixel number
+# of the image (aaspect_ratio != width / height), so this value is from now on inferred
+# in the render function.
+#
 
 CAMERA(
     PERSPECTIVE, 
     TRANSLATION([-2, 0, 1]), 
-    1.0, 
     1.0
 )
 
@@ -136,7 +140,6 @@ CAMERA(
 #       PERSPECTIVE,
 #       TRANSLATION([-1, 0, 0]),
 #       1.0,
-#       1.0
 #   )
 
 # Last but not least, it's appropriate to define also a pointlight source.

@@ -18,23 +18,23 @@
 # But, maybe you will be more interested in the animation of this...
 # Run the following command in the CLI:
 #
-#    ./Raytracer.jl animation  --normalization=0.18 --gamma=1.0 --avg_lum=0.03 --function=earth_moon_sun --vec_variables="[moon_x,  moon_y, moon_z,  moon_rotang, earth_rotang]" --iterable=1:10 examples/earth_moon_sun.txt pointlight
+#    ./Raytracer.jl animation  --normalization=0.18 --gamma=1.0 --avg_lum=0.03 --function=earth_moon_sun --vec_variables="[moon_x,  moon_y, moon_z,  moon_rotang, earth_rotang]" --iterable=1:200 examples/earth_moon_sun.txt pointlight
 #
 # or in the Julia REPL:
 #
-#    render_animation("normalization"=>0.18, "gamma"=>1.0, "avg_lum"=>0.03, "function"=>"earth_moon_sun", "vec_variables"=>"[moon_x,  moon_y, moon_z,  moon_rotang, earth_rotang]", "iterable"=>"1:10", "scenefile"=>"examples/earth_moon_sun.txt", "%COMMAND%"=>"pointlight")
+#    render_animation("normalization"=>0.18, "gamma"=>1.0, "avg_lum"=>0.03, "function"=>"earth_moon_sun", "vec_variables"=>"[moon_x,  moon_y, moon_z,  moon_rotang, earth_rotang]", "iterable"=>"1:200", "scenefile"=>"examples/earth_moon_sun.txt", "%COMMAND%"=>"pointlight")
 #
 
-FLOAT moon_x(2.0)
-FLOAT moon_y(0.0)
+FLOAT moon_x(sqrt(3))
+FLOAT moon_y(sqrt(3))
 FLOAT moon_z(0.0)
 FLOAT moon_rotang(1.0)
 FLOAT earth_rotang(1.0)
 
 
-CAMERA(PERSPECTIVE, TRANSLATION([-2, 0, 1]), 1.0, 1.0)
+CAMERA(PERSPECTIVE, TRANSLATION([-2, 0, 1]), 1.0)
 
-VECTOR earth_pos([1.0, -3.0, 0.0])
+VECTOR earth_pos([0.2, -2.0, 0.0])
 FLOAT earth_radius(1.0)
 FLOAT earth_lum(0.000)
 STRING earth_path ("images/earth.jpg")
@@ -49,8 +49,8 @@ BRDF moon_brdf (DIFFUSE(IMAGE(moon_path)))
 PIGMENT moon_emitted_pigment ( UNIFORM(<moon_lum,moon_lum,moon_lum>) )
 
 
-VECTOR sun_pos([5.0, 4.5, 0.0])
-FLOAT sun_radius(0.5)
+VECTOR sun_pos([8.0, 13.0, 0.0])
+FLOAT sun_radius(0.7)
 FLOAT sun_lum(0.0)
 STRING sun_path ("images/sun.jpg")
 BRDF sun_brdf (DIFFUSE(IMAGE(sun_path)))
@@ -112,7 +112,8 @@ TRANSFORMATION sun_trans(
 SPHERE(
      sun_material,
      sun_trans,
-     sun
+     sun,
+     FALSE
      )
 
 
@@ -123,10 +124,12 @@ TRANSFORMATION milky_way_trans (
    
 SPHERE(
      milky_way_material,
-     milky_way_trans
+     milky_way_trans,
+     FALSE,
+     TRUE
      )
 
-FLOAT pl_lum(1.0)
+FLOAT pl_lum(1.6)
 COLOR sun_pointlight_lum(<pl_lum, pl_lum, pl_lum>)
 POINTLIGHT(
      sun_pos, 

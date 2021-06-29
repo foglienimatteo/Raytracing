@@ -37,7 +37,7 @@ FLOAT mult(1.0)
 # or "flat" instead!
 
 
-CAMERA(PERSPECTIVE, TRANSLATION([-2, 0, 1]), 1.0, 1.0)
+CAMERA(PERSPECTIVE, TRANSLATION([-2, 0, 1]), 1.0)
 
 VECTOR earth_pos([0.5, -1.0, 0.0])
 FLOAT earth_radius(1.0)
@@ -65,7 +65,10 @@ FLOAT milky_way_lum(0.00)
 STRING milky_way_path ("images/milky_way_HD.jpg")
 BRDF milky_way_brdf (DIFFUSE(IMAGE(milky_way_path)))
 PIGMENT milky_way_emitted_pigment ( UNIFORM(<milky_way_lum,milky_way_lum,milky_way_lum>) )
-
+BOOL milky_way(TRUE) # This bool for the milky way is again fundamental for the pointlight algorithm!
+# It allows to the background image (precisely the Milky Way) not to depend on the point-light
+# position of the image and/or on the position of the other objects (that would creates shadows on it!)
+# If you set this to FALSE or do not pass it, the milky will be dark behind the earth!
 
 MATERIAL earth_material( 
      earth_brdf, 
@@ -98,7 +101,8 @@ TRANSFORMATION sun_trans(
 SPHERE(
      sun_material,
      sun_trans,
-     sun
+     sun,      # the first bool is for the "flag_pointlight"
+     FALSE     # the second bool is for the "flag_background"
      )
 
 
@@ -109,7 +113,9 @@ TRANSFORMATION milky_way_trans (
    
 SPHERE(
      milky_way_material,
-     milky_way_trans
+     milky_way_trans,
+     FALSE,         # as before, but now we must invert the order!
+     milky_way      
      )
 
 FLOAT pl_lum(1.0)

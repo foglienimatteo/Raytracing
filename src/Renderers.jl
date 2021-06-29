@@ -105,10 +105,11 @@ function (renderer::PointLightRenderer)(ray::Ray)
     !isnothing(hit_record) || (return renderer.background_color)
 
     hit_material = hit_record.shape.Material
+    flag_bg = hit_record.shape.flag_background
     result_color = renderer.ambient_color 
 
     for cur_light in renderer.world.point_lights
-        if is_point_visible(renderer.world, cur_light.position, hit_record.world_point)
+        if is_point_visible(renderer.world, cur_light.position, hit_record.world_point) && flag_bg==false
             distance_vec = hit_record.world_point - cur_light.position
             distance = norm(distance_vec)
             in_dir = distance_vec * (1.0 / distance)
@@ -128,8 +129,10 @@ function (renderer::PointLightRenderer)(ray::Ray)
                             hit_record.surface_point,
                         )
             result_color += (emitted_color + brdf_color) * cur_light.color * cos_theta * distance_factor
+        elseif flag_bg==true
+            result_color += get_color(hit_material.brdf.pigment, hit_record.surface_point)
         else
-            result_color += 0.05*get_color(hit_material.brdf.pigment, hit_record.surface_point)
+            result_color += renderer.dark_parameter*get_color(hit_material.brdf.pigment, hit_record.surface_point)
         end
     end
 

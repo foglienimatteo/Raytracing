@@ -107,7 +107,7 @@ end
 
 @testset "test_parse_demo_pointlight_settings" begin
      string="""./Raytracer.jl demo --ONLY_FOR_TESTS pointlight --background_color="<1,2,3>" """*
-     """--ambient_color="<4,  5,  6>" """
+     """--ambient_color="<4,  5,  6>" --dark_parameter=0.01"""
      args = Raytracing.from_CLI_to_vecstring(string)
      parsed_arguments = ArgParse_command_line(args)
 	(isnothing(parsed_arguments)) && (return nothing)
@@ -207,7 +207,7 @@ end
 
 @testset "test_parse_demoanimation_pointlight_settings" begin
      string="""./Raytracer.jl demo_animation --ONLY_FOR_TESTS pointlight --background_color="<1,2,3>" """*
-     """--ambient_color="<4,  5,  6>" """
+     """--ambient_color="<4,  5,  6>" --dark_parameter=0.01 """
      args = Raytracing.from_CLI_to_vecstring(string)
      parsed_arguments = ArgParse_command_line(args)
 	(isnothing(parsed_arguments)) && (return nothing)
@@ -310,7 +310,7 @@ end
 
 @testset "test_parse_render_pointlight_settings" begin
      string="""./Raytracer.jl render --ONLY_FOR_TESTS examples/tutorial_basic_sintax.txt pointlight """*
-     """--background_color="<1,2,3>" --ambient_color="<4,  5,  6>" """
+     """--background_color="<1,2,3>" --ambient_color="<4,  5,  6>" --dark_parameter=0.01"""
      args = Raytracing.from_CLI_to_vecstring(string)
      parsed_arguments = ArgParse_command_line(args)
 	(isnothing(parsed_arguments)) && (return nothing)
@@ -427,7 +427,7 @@ end
      cd("..")
      string="""./Raytracer.jl animation --ONLY_FOR_TESTS --function=my_function --vec_variables=[float] --iterable=1:2 """*
      """examples/tutorial_basic_sintax.txt pointlight """*
-     """--background_color="<1,2,3>" --ambient_color="<4,  5,  6>" """
+     """--background_color="<1,2,3>" --ambient_color="<4,  5,  6>" --dark_parameter=0.01"""
      args = Raytracing.from_CLI_to_vecstring(string)
      parsed_arguments = ArgParse_command_line(args)
 	(isnothing(parsed_arguments)) && (return nothing)

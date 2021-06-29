@@ -272,6 +272,10 @@ function ArgParse_command_line(arguments)
           	arg_type = String
           	default = "<0,0,0>"
           	range_tester = check_is_color
+		"--dark_parameter"
+			help = "percentage of the retuned hit point color if it is not directly visible from a point-light source"
+			default = 0.05
+			range_tester = check_is_positive
 	end
 
 
@@ -425,6 +429,10 @@ function ArgParse_command_line(arguments)
           	arg_type = String
           	default = "<0,0,0>"
           	range_tester = check_is_color
+		"--dark_parameter"
+			help = "percentage of the retuned hit point color if it is not directly visible from a point-light source"
+			default = 0.05
+			range_tester = check_is_positive
 	end
 
 
@@ -600,6 +608,10 @@ function ArgParse_command_line(arguments)
           	arg_type = String
           	default = "<0,0,0>"
           	range_tester = check_is_color
+		"--dark_parameter"
+			help = "percentage of the retuned hit point color if it is not directly visible from a point-light source"
+			default = 0.05
+			range_tester = check_is_positive
 	end
 
 	#### RENDER_ANIMATION #########################################################################92
@@ -784,6 +796,10 @@ function ArgParse_command_line(arguments)
           	arg_type = String
           	default = "<0,0,0>"
           	range_tester = check_is_color
+		"--dark_parameter"
+			help = "percentage of the retuned hit point color if it is not directly visible from a point-light source"
+			default = 0.05
+			range_tester = check_is_positive
 	end
 
 

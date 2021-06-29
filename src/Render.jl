@@ -154,23 +154,26 @@ function render(
 		camera_position - Point(0., 0., 0.) :
 		camera_position
 
+     aspect_ratio = width / height   
+
      if isnothing(camera_type) && isnothing(observer_vec) && isnothing(scene.camera) 
-          camera = PerspectiveCamera(-1.0, 1.0, rotation_z(deg2rad(α)))
+          camera = PerspectiveCamera(-1.0, aspect_ratio, rotation_z(deg2rad(α)))
 
      elseif isnothing(camera_type) && isnothing(observer_vec)
           camera = scene.camera 
+          camera.a = aspect_ratio
 
      elseif isnothing(camera_type) && isnothing(scene.camera) 
           camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec)
-          camera = PerspectiveCamera(-1.0, 1.0, camera_tr)
+          camera = PerspectiveCamera(-1.0, aspect_ratio, camera_tr)
 
      elseif isnothing(observer_vec) && isnothing(scene.camera) 
           if camera_type == "per"
 		     (bool_print==true) && (println("Choosen perspective camera..."))
-		     camera = PerspectiveCamera(1., 1.0, rotation_z(deg2rad(α)))
+		     camera = PerspectiveCamera(1.0, aspect_ratio, rotation_z(deg2rad(α)))
 	     elseif camera_type == "ort"
 		     (bool_print==true) && (println("Choosen orthogonal camera..."))
-		     camera = OrthogonalCamera(1.0, rotation_z(deg2rad(α))) 
+		     camera = OrthogonalCamera(aspect_ratio, rotation_z(deg2rad(α))) 
 	     else
 		     throw(ArgumentError("Unknown camera: \"$(camera_type)\""))
 	     end
@@ -179,10 +182,10 @@ function render(
           camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec) * scene.camera.T
           if typeof(scene.camera) == OrthogonalCamera
                (bool_print==true) && (println("Choosen perspective camera..."))
-               camera = OrthogonalCamera(scene.camera.a, camera_tr)
+               camera = OrthogonalCamera(aspect_ratio, camera_tr)
           elseif typeof(scene.camera) == PerspectiveCamera
                (bool_print==true) && (println("Choosen orthogonal camera..."))
-               camera = PerspectiveCamera(scene.camera.d, scene.camera.a, camera_tr)
+               camera = PerspectiveCamera(scene.camera.d, aspect_ratio, camera_tr)
           else
 		     throw(ArgumentError("Unknown camera: \"$(camera_type)\""))
 	     end
@@ -190,10 +193,10 @@ function render(
      elseif isnothing(observer_vec)
           if camera_type == "per"
 		     (bool_print==true) && (println("Choosen perspective camera..."))
-		     camera = PerspectiveCamera(scene.camera.d, scene.camera.a, rotation_z(deg2rad(α)) * scene.camera.T)
+		     camera = PerspectiveCamera(scene.camera.d, aspect_ratio, rotation_z(deg2rad(α)) * scene.camera.T)
 	     elseif camera_type == "ort"
 		     (bool_print==true) && (println("Choosen orthogonal camera..."))
-		     camera = OrthogonalCamera(scene.camera.a, rotation_z(deg2rad(α)) * scene.camera.T) 
+		     camera = OrthogonalCamera(aspect_ratio, rotation_z(deg2rad(α)) * scene.camera.T) 
 	     else
 		     throw(ArgumentError("Unknown camera: \"$(camera_type)\""))
 	     end
@@ -202,10 +205,10 @@ function render(
           camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec)
           if camera_type == "per"
 		     (bool_print==true) && (println("Choosen perspective camera..."))
-		     camera = PerspectiveCamera(1.0, 1.0, camera_tr)
+		     camera = PerspectiveCamera(1.0, aspect_ratio, camera_tr)
 	     elseif camera_type == "ort"
 		     (bool_print==true) && (println("Choosen orthogonal camera..."))
-		     camera = OrthogonalCamera(1.0, camera_tr) 
+		     camera = OrthogonalCamera(aspect_ratio, camera_tr) 
 	     else
 		     throw(ArgumentError("Unknown camera: \"$(camera_type)\""))
 	     end
@@ -216,10 +219,10 @@ function render(
           camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec) * scene.camera.T
           if camera_type == "per"
 		     (bool_print==true) && (println("Choosen perspective camera..."))
-		     camera = PerspectiveCamera(scene.camera.d, scene.camera.a, camera_tr)
+		     camera = PerspectiveCamera(scene.camera.d, aspect_ratio, camera_tr)
 	     elseif camera_type == "ort"
 		     (bool_print==true) && (println("Choosen orthogonal camera..."))
-		     camera = OrthogonalCamera(scene.camera.a, camera_tr) 
+		     camera = OrthogonalCamera(aspect_ratio, camera_tr) 
 	     else
 		     throw(ArgumentError("Unknown camera: \"$(camera_type)\""))
 	     end

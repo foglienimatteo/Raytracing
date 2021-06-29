@@ -329,7 +329,7 @@ This class implements an observer seeing the world through an orthogonal project
 
 See also: [`Transformation`](@ref), [`Camera`](@ref)
 """
-struct OrthogonalCamera <: Camera
+mutable struct OrthogonalCamera <: Camera
     a::Float64 # aspect ratio
     T::Transformation
     OrthogonalCamera(a=1., T=Transformation()) = new(a, T)
@@ -358,7 +358,7 @@ This class implements an observer seeing the world through a perspective project
 
 See also: [`Transformation`](@ref), [`Camera`](@ref)
 """
-struct PerspectiveCamera <: Camera
+mutable struct PerspectiveCamera <: Camera
     d::Float64
     a::Float64
     T::Transformation
@@ -557,8 +557,10 @@ An abstract type with the following concrete sub-types,
 defining different types of shapes that can be created:
 
 - [`Sphere`](@ref)
-
 - [`Plane`](@ref)
+- [`Cube`](@ref)
+- [`Triangle`](@ref)
+- [`AABB`](@ref) (only for optimization purposes, it must not considered a real shape)
 """
 abstract type Shape end
 
@@ -597,6 +599,9 @@ end
     Sphere <: Shape(
         T::Transformation = Transformation(),
         Material::Material = Material()
+        flag_pointlight::Bool = false,
+        flag_background::Bool = false,
+        AABB::AABB = AABB(Sphere, T)
     )
 
 A 3D unit sphere, i.e. centered on the origin of the axes
@@ -608,19 +613,32 @@ and with radius 1.0.
 
 - `Material::Material` : material that constitutes the sphere.
 
+- `flag_pointlight::Bool` : flag for the [`PointLightRenderer`](@ref); if `true`,
+  a light ray can cross this shape as it would be transparent. It's perfect when a 
+  point-light source is centered in a shape (as the Sun...)
+
+- `flag_background::Bool` : flag for the [`PointLightRenderer`](@ref); if `true`,
+  it does not matter if a point on this shape is seen or not from the point-light
+  source. It's perfect to render the background of an image (as the Milky Way...)
+
+- `AABB::AABB` : the Axis Aligned Bounding Box that contains this shape; it is 
+  automatically inferred from the shape itself (i.e. from the input transoformation)
+  through an appropriate contructor of `AABB`, and cannot be manually modified.
+
 See also: [`Shape`](@ref), [`Transformation`](@ref), [`Material`](@ref)
 """
 struct Sphere <: Shape
     T::Transformation
     Material::Material
     flag_pointlight::Bool
+    flag_background::Bool
     AABB::AABB
     
-    Sphere(T::Transformation, M::Material, b::Bool=false) = new(T,M,b,AABB(Sphere, T))
-    Sphere(M::Material, T::Transformation, b::Bool=false) = new(T,M,b,AABB(Sphere, T))
-    Sphere(T::Transformation, b::Bool=false) = new(T, Material(), b, AABB(Sphere, T))
-    Sphere(M::Material, b::Bool=false) = new(Transformation(), M, b, AABB(Sphere, Transformation()))
-    Sphere(b::Bool=false) = new(Transformation(), Material(), b, AABB(Sphere, Transformation()) )
+    Sphere(T::Transformation, M::Material, b1::Bool=false,  b2::Bool=false) = new(T,M,b1,b2,AABB(Sphere, T))
+    Sphere(M::Material, T::Transformation, b1::Bool=false, b2::Bool=false) = new(T,M,b1,b2,AABB(Sphere, T))
+    Sphere(T::Transformation, b1::Bool=false, b2::Bool=false) = new(T, Material(), b1, b2, AABB(Sphere, T))
+    Sphere(M::Material, b1::Bool=false, b2::Bool=false) = new(Transformation(), M, b1, b2, AABB(Sphere, Transformation()))
+    Sphere(b1::Bool=false, b2::Bool=false) = new(Transformation(), Material(), b1, b2, AABB(Sphere, Transformation()) )
 end
 
 function AABB(::Type{Sphere}, T::Transformation)
@@ -664,18 +682,28 @@ A 3D unit plane, i.e. the x-y plane (set of 3D points with z=0).
 
 - `Material::Material` : material that constitutes the plane.
 
+- `flag_pointlight::Bool` : flag for the [`PointLightRenderer`](@ref); if `true`,
+  a light ray can cross this shape as it would be transparent. It's perfect when a 
+  point-light source is centered in a shape (as the Sun...)
+
+- `flag_background::Bool` : flag for the [`PointLightRenderer`](@ref); if `true`,
+  it does not matter if a point on this shape is seen or not from the point-light
+  source. It's perfect to render the background of an image (as the Milky Way...)
+
+
 See also: [`Shape`](@ref), [`Transformation`](@ref), [`Material`](@ref)
 """
 struct Plane <: Shape
     T::Transformation
     Material::Material
     flag_pointlight::Bool
-    
-    Plane(T::Transformation, M::Material, b::Bool=false) = new(T,M,b)
-    Plane(M::Material, T::Transformation, b::Bool=false) = new(T,M,b)
-    Plane(T::Transformation, b::Bool=false) = new(T, Material(), b)
-    Plane(M::Material, b::Bool=false) = new(Transformation(), M, b)
-    Plane(b::Bool=false) = new(Transformation(), Material(), b)
+    flag_background::Bool
+
+    Plane(T::Transformation, M::Material, b1::Bool=false,  b2::Bool=false) = new(T,M,b1,b2)
+    Plane(M::Material, T::Transformation, b1::Bool=false, b2::Bool=false) = new(T,M,b1,b2)
+    Plane(T::Transformation, b1::Bool=false, b2::Bool=false) = new(T, Material(), b1, b2)
+    Plane(M::Material, b1::Bool=false, b2::Bool=false) = new(Transformation(), M, b1, b2)
+    Plane(b1::Bool=false, b2::Bool=false) = new(Transformation(), Material(), b1, b2)
 end
 
 
@@ -693,19 +721,32 @@ A 3D unit cube, i.e. an axis aligned cube with side 1 centered in the origin.
 
 - `Material::Material` : material that constitutes the cube.
 
+- `flag_pointlight::Bool` : flag for the [`PointLightRenderer`](@ref); if `true`,
+  a light ray can cross this shape as it would be transparent. It's perfect when a 
+  point-light source is centered in a shape (as the Sun...)
+
+- `flag_background::Bool` : flag for the [`PointLightRenderer`](@ref); if `true`,
+  it does not matter if a point on this shape is seen or not from the point-light
+  source. It's perfect to render the background of an image (as the Milky Way...)
+
+- `AABB::AABB` : the Axis Aligned Bounding Box that contains this shape; it is 
+  automatically inferred from the shape itself (i.e. from the input transoformation)
+  through an appropriate contructor of `AABB`, and cannot be manually modified.
+
 See also: [`Shape`](@ref), [`Transformation`](@ref), [`Material`](@ref)
 """
 struct Cube <: Shape
     T::Transformation
     Material::Material
     flag_pointlight::Bool
+    flag_background::Bool
     AABB::AABB
-    
-    Cube(T::Transformation, M::Material, b::Bool=false) = new(T,M,b, AABB(Cube, T))
-    Cube(M::Material, T::Transformation, b::Bool=false) = new(T,M,b,  AABB(Cube, T))
-    Cube(T::Transformation, b::Bool=false) = new(T, Material(), b,  AABB(Cube, T))
-    Cube(M::Material, b::Bool=false) = new(Transformation(), M, b,  AABB(Cube, Transformation()))
-    Cube(b::Bool=false) = new(Transformation(), Material(), b, AABB(Cube, Transformation()))
+
+    Cube(T::Transformation, M::Material, b1::Bool=false,  b2::Bool=false) = new(T,M,b1,b2,AABB(Cube, T))
+    Cube(M::Material, T::Transformation, b1::Bool=false, b2::Bool=false) = new(T,M,b1,b2,AABB(Cube, T))
+    Cube(T::Transformation, b1::Bool=false, b2::Bool=false) = new(T, Material(), b1, b2, AABB(Cube, T))
+    Cube(M::Material, b1::Bool=false, b2::Bool=false) = new(Transformation(), M, b1, b2, AABB(Cube, Transformation()))
+    Cube(b1::Bool=false, b2::Bool=false) = new(Transformation(), Material(), b1, b2, AABB(Cube, Transformation()) )
 end
 
 
@@ -754,20 +795,33 @@ A 3D triangle.
 
 - `Material::Material` : material that constitutes the triangle.
 
+- `flag_pointlight::Bool` : flag for the [`PointLightRenderer`](@ref); if `true`,
+  a light ray can cross this shape as it would be transparent. It's perfect when a 
+  point-light source is centered in a shape (as the Sun...)
+
+- `flag_background::Bool` : flag for the [`PointLightRenderer`](@ref); if `true`,
+  it does not matter if a point on this shape is seen or not from the point-light
+  source. It's perfect to render the background of an image (as the Milky Way...)
+
+- `AABB::AABB` : the Axis Aligned Bounding Box that contains this shape; it is 
+  automatically inferred from the shape itself (i.e. from the input transoformation)
+  through an appropriate contructor of `AABB`, and cannot be manually modified.
+
 See also: [`Shape`](@ref), [`Material`](@ref)
 """
 struct Triangle <: Shape
     vertexes::SVector{3, Point}
     Material::Material
     flag_pointlight::Bool
+    flag_background::Bool
     
-    Triangle(v::SVector{3, Point}, M::Material, b::Bool=false) = new(v, M, b)
-    Triangle(P1::Point, P2::Point, P3::Point,  M::Material, b::Bool=false) = new(SVector{3}(P1,P2,P3), M, b)
-    Triangle(M::Material, v::SVector{3, Point}, b::Bool=false) = new(v, M, b)
-    Triangle(v::SVector{3, Point}, b::Bool=false) = new(v, Material(), b)
-    Triangle(P1::Point, P2::Point, P3::Point, b::Bool=false) = new(SVector{3}(P1,P2,P3), Material(), b)
-    Triangle(M::Material, b::Bool=false) = new(VERTEXES, M, b)
-    Triangle(b::Bool=false) = new(VERTEXES, Material(),b)
+    Triangle(v::SVector{3, Point}, M::Material, b1::Bool=false, b2::Bool=false) = new(v, M, b1, b2)
+    Triangle(P1::Point, P2::Point, P3::Point,  M::Material, b1::Bool=false, b2::Bool=false) = new(SVector{3}(P1,P2,P3), M, b1, b2)
+    Triangle(M::Material, v::SVector{3, Point}, b1::Bool=false, b2::Bool=false) = new(v, M, b1, b2)
+    Triangle(v::SVector{3, Point}, b1::Bool=false, b2::Bool=false) = new(v, Material(), b1, b2)
+    Triangle(P1::Point, P2::Point, P3::Point, b1::Bool=false, b2::Bool=false) = new(SVector{3}(P1,P2,P3), Material(), b1, b2)
+    Triangle(M::Material, b1::Bool=false, b2::Bool=false) = new(VERTEXES, M, b1, b2)
+    Triangle(b1::Bool=false, b2::Bool=false) = new(VERTEXES, Material(),b1, b2)
 end
 
 """
@@ -791,6 +845,14 @@ in `(0, 0, 0)` and axis parallel to the y-axis.
 
 - `R::Float64` : distance between the torus center and the section center.
 
+- `flag_pointlight::Bool` : flag for the [`PointLightRenderer`](@ref); if `true`,
+  a light ray can cross this shape as it would be transparent. It's perfect when a 
+  point-light source is centered in a shape (as the Sun...)
+
+- `flag_background::Bool` : flag for the [`PointLightRenderer`](@ref); if `true`,
+  it does not matter if a point on this shape is seen or not from the point-light
+  source. It's perfect to render the background of an image (as the Milky Way...)
+
 ```ditaa
 ^ ̂y                __-__
 |                 /     \\ 
@@ -808,7 +870,8 @@ struct Torus <: Shape
     r::Float64
     R::Float64
     flag_pointlight::Bool
-    Torus(T=Transformation(), M=Material(), r=0.5, R=1.0, b::Bool=false) = new(T, M, r, R, b)
+    flag_background::Bool
+    Torus(T=Transformation(), M=Material(), r=0.5, R=1.0, b1::Bool=false, b2::Bool=false) = new(T, M, r, R, b1,b2)
 end
 
 
@@ -1058,6 +1121,7 @@ end
         world::World,
         background_color::RGB{Float32} = RGB{Float32}(0., 0., 0.),
         ambient_color::RGB{Float32} = RGB{Float32}(0.1, 0.1, 0.1)
+        dark_parameter::Float64 = 0.05
     )
 
 A simple point-light tracing renderer.
@@ -1071,17 +1135,24 @@ A simple point-light tracing renderer.
 
 - `ambient_color::RGB{Float32}` : default ambient color 
 
+- `dark_parameter::Float64` : float that defines the retuned percentage
+  of the hit point color if it is not visible from any of the point-light
+  source of the image; a non-zero value allows to see also the not-directly
+  illuminated parts of the image.
+
 See also: [`Renderer`](@ref), [`World`](@ref)
 """
 mutable struct PointLightRenderer <: Renderer
     world::World
     background_color::RGB{Float32}
     ambient_color::RGB{Float32}
+    dark_parameter::Float64    
     PointLightRenderer(
             w::World = World(), 
             bc=RGB{Float32}(0., 0., 0.), 
-            ac=RGB{Float32}(0.1, 0.1, 0.1)
-        ) = new(w, bc, ac)
+            ac=RGB{Float32}(0.1, 0.1, 0.1),
+            dp=0.05
+        ) = new(w, bc, ac, dp)
 end
 
 function copy(renderer::PointLightRenderer)

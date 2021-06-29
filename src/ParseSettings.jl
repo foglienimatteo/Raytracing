@@ -316,13 +316,18 @@ A tuple `(World(), background_color, color, ONLY_FOR_TESTS)` containing the foll
   The input color value `dict["ambient_color"]` must be a `String` written in RGB
   components as `"< R , G , B >"`, and it's parsed with the `string2color` function.
 
+- `dark_parameter::Float64 = string2positive(dict["dark_parameter"])` : float that defines 
+  the retuned percentage of the hit point color if it is not visible from any of the point-light
+  source of the image; a non-zero value allows to see also the not-directly
+  illuminated parts of the image. The default value is 0.05.
+
 See also:  [`Renderer`](@ref), [`PointLightRenderer`](@ref), 
 [`World`](@ref), [`string2color`](@ref)
 """
 function parse_pointlight_settings(dict::Dict{String, T}) where {T}
 
     keys = [
-        "background_color", "ambient_color",
+        "background_color", "ambient_color", "dark_parameter"
     ]
 
     for pair in dict
@@ -343,7 +348,10 @@ function parse_pointlight_settings(dict::Dict{String, T}) where {T}
         string2color(dict["ambient_color"]) : 
         RGB{Float32}(0.0, 0.0, 0.0)
 
-    return (World(), background_color, ambient_color)
+    dark_parameter::Float64 = haskey(dict, "dark_parameter") ? 
+        string2positive(dict["dark_parameter"]) : 0.05
+
+    return (World(), background_color, ambient_color, dark_parameter)
 end
 
 

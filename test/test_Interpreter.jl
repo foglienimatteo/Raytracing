@@ -211,7 +211,7 @@ end
 
      SPHERE(sphere_material, TRANSLATION([0, 0, 1]))
 
-     CAMERA(PERSPECTIVE, ROTATION_Z(30) * TRANSLATION([-4, 0, 1]), 1.0, 2.0)
+     CAMERA(PERSPECTIVE, ROTATION_Z(30) * TRANSLATION([-4, 0, 1]), 2.0)
      """)
 
      scene = parse_scene(InputStream(stream, "test_parser"))
@@ -268,7 +268,6 @@ end
 
      @test isa(scene.camera, PerspectiveCamera)
      @test scene.camera.T ≈ rotation_z(30.0) * translation(Vec(-4, 0, 1))
-     @test 1.0 ≈ scene.camera.a
      @test 2.0 ≈ scene.camera.d
 end
 

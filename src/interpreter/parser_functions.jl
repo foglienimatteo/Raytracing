@@ -829,15 +829,18 @@ function parse_sphere(inputstream::InputStream, scene::Scene)
           unread_token(inputstream, token)
 
           expect_symbol(inputstream, ",")
-          bool = expect_bool(inputstream, scene)
+          flag_pointlight = expect_bool(inputstream, scene)
+          expect_symbol(inputstream, ",")
+          flag_background = expect_bool(inputstream, scene)
           expect_symbol(inputstream, ")")
      else
           unread_token(inputstream, token)
           expect_symbol(inputstream, ")")
-          bool = false
+          flag_pointlight = false
+          flag_background = false
      end
 
-     return Sphere(transformation, scene.materials[material_name], bool)
+     return Sphere(transformation, scene.materials[material_name], flag_pointlight, flag_background)
 end
 
 
@@ -865,9 +868,24 @@ function parse_plane(inputstream::InputStream, scene::Scene)
      end
      expect_symbol(inputstream, ",")
      transformation = parse_transformation(inputstream, scene)
-     expect_symbol(inputstream, ")")
 
-     return Plane(transformation, scene.materials[material_name])
+     token = read_token(inputstream)
+     if typeof(token.value) == SymbolToken && token.value.symbol == ","
+          unread_token(inputstream, token)
+
+          expect_symbol(inputstream, ",")
+          flag_pointlight = expect_bool(inputstream, scene)
+          expect_symbol(inputstream, ",")
+          flag_background = expect_bool(inputstream, scene)
+          expect_symbol(inputstream, ")")
+     else
+          unread_token(inputstream, token)
+          expect_symbol(inputstream, ")")
+          flag_pointlight = false
+          flag_background = false
+     end
+
+     return Plane(transformation, scene.materials[material_name], flag_pointlight, flag_background)
 end
 
 
@@ -893,16 +911,17 @@ function parse_camera(inputstream::InputStream, scene::Scene)
      type_kw = expect_keywords(inputstream, [ PERSPECTIVE,  ORTHOGONAL])
      expect_symbol(inputstream, ",")
      transformation = parse_transformation(inputstream, scene)
-     expect_symbol(inputstream, ",")
-     aspect_ratio = expect_number(inputstream, scene)
-     expect_symbol(inputstream, ",")
-     distance = expect_number(inputstream, scene)
-     expect_symbol(inputstream, ")")
 
      if type_kw ==  PERSPECTIVE
-          result = PerspectiveCamera(distance, aspect_ratio, transformation)
+          expect_symbol(inputstream, ",")
+          distance = expect_number(inputstream, scene)
+          expect_symbol(inputstream, ")")
+          result = PerspectiveCamera(distance, 1.0, transformation)
+
      elseif type_kw ==  ORTHOGONAL
-          result = OrthogonalCamera(aspect_ratio, transformation)
+          expect_symbol(inputstream, ")")
+          result = OrthogonalCamera(1.0, transformation)
+
      end
 
      return result
