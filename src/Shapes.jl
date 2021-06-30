@@ -97,11 +97,11 @@ function cube_point_to_uv(point::Point)
         throw(ArgumentError("the given point do not belong to the unit cube."))
     end   
 =#
-if (abs(X) ≈ 0.5)
+if (abs(point.v[1]) ≈ 0.5)
     u, v  = point.v[2] + 0.5, point.v[2] + 0.5
-elseif (abs(Y) ≈ 0.5)
+elseif (abs(point.v[2]) ≈ 0.5)
     u, v  = point.v[1] + 0.5, point.v[2] + 0.5
-elseif (abs(Z) ≈ 0.5) 
+elseif (abs(point.v[3]) ≈ 0.5) 
     u, v  = point.v[1] + 0.5, point.v[2] + 0.5 
 else
     throw(ArgumentError("the given point do not belong to the unit cube."))
@@ -198,7 +198,7 @@ direction with respect to the given `Vec` `ray_dir`.
 See also: [`Point`](@ref), [`Ray`](@ref), [`Normal`](@ref), [`Sphere`](@ref)
 """
 function sphere_normal(point::Point, ray_dir::Vec)
-    result = Normal(point.v[1], point.v[2], point.v[3])
+    result = Normal(point.v...) # (point.v[1], point.v[2], point.v[3])
     Vec(point) ⋅ ray_dir < 0.0 ? nothing : result = -result
     return result
 end
@@ -301,9 +301,9 @@ See also: [`Triangle`](@ref), [`Point`](@ref)
 """
 function triangle_barycenter(triangle::Triangle)
 #    A, B, C = Tuple(P for P in triangle.vertexes)
-    P = sum(triangle.vertexes)
+#    P = sum(triangle.vertexes)
 #    result = Point(A.v[1]+B.v[1]+C.v[1], A.v[2]+B.v[2]+C.v[2], A.v[3]+B.v[3]+C.v[3])*1/3
-    result = Point(P.v[1], P.v[2], P.v[3])*1/3
+    result = Point((sum(triangle.vertexes))...)*1/3
     return result
 end
 
@@ -335,17 +335,17 @@ Return `true` if intersection occurs, `false` otherwise.
 See also: [`Ray`](@ref), [`AABB`](@ref), [`HitRecord`](@ref)
 """
 function ray_intersection(AABB::AABB, ray::Ray)
-    P1 = (AABB.m - ray.origin) / ray.dir
-    P2 = (AABB.M - ray.origin) / ray.dir
+#    P1 = (AABB.m - ray.origin) / ray.dir
+#    P2 = (AABB.M - ray.origin) / ray.dir
     (tmin, tmax) = Tuple( sort( [ 
-#                        (AABB.m.v[1] - ray.origin.v[1]) / ray.dir.x, 
-#                        (AABB.M.v[1] - ray.origin.v[1]) / ray.dir.x
-                            P1.v[1], P2.v[1]
+                        (AABB.m.v[1] - ray.origin.v[1]) / ray.dir.v[1], 
+                        (AABB.M.v[1] - ray.origin.v[1]) / ray.dir.v[1]
+#                            P1.v[1], P2.v[1]
                     ]) )
     (tymin, tymax) = Tuple( sort( [ 
-#                        (AABB.m.v[2] - ray.origin.v[2]) / ray.dir.y, 
-#                        (AABB.M.v[2] - ray.origin.v[2]) / ray.dir.y
-                            P1.v[2], P2.v[2]
+                        (AABB.m.v[2] - ray.origin.v[2]) / ray.dir.v[2], 
+                        (AABB.M.v[2] - ray.origin.v[2]) / ray.dir.v[2]
+#                            P1.v[2], P2.v[2]
                     ]) )
  
     ((tmin > tymax) || (tymin > tmax)) && (return false)
@@ -354,9 +354,9 @@ function ray_intersection(AABB::AABB, ray::Ray)
     (tymax < tmax) && (tmax = tymax)
 
     (tzmin, tzmax) = Tuple( sort( [ 
-#                        (AABB.m.v[3] - ray.origin.v[3]) / ray.dir.z, 
-#                        (AABB.M.v[3] - ray.origin.v[3]) / ray.dir.z
-                            P1.v[3], P2.v[3]
+                        (AABB.m.v[3] - ray.origin.v[3]) / ray.dir.v[3], 
+                        (AABB.M.v[3] - ray.origin.v[3]) / ray.dir.v[3]
+#                            P1.v[3], P2.v[3]
                     ]) )
  
     ((tmin > tzmax) || (tzmin > tmax)) && (return false)
@@ -429,9 +429,9 @@ See also: [`Ray`](@ref), [`Plane`](@ref), [`HitRecord`](@ref)
 function ray_intersection(plane::Plane, ray::Ray)
     inv_ray = inverse(plane.T) * ray
 
-    !(inv_ray.dir.z ≈ 0.0f0) || (return nothing)
+    !(inv_ray.dir.v[3] ≈ 0.0f0) || (return nothing)
 
-    hit_t = - inv_ray.origin.v[3] / inv_ray.dir.z
+    hit_t = - inv_ray.origin.v[3] / inv_ray.dir.v[3]
 
     ( (hit_t > inv_ray.tmin) && (hit_t < inv_ray.tmax) ) || (return nothing)
 
@@ -466,15 +466,15 @@ function ray_intersection(cube::Cube, ray::Ray)
     d = inv_ray.dir
     O = inv_ray.origin
 
-    (tmin, tmax) = Tuple( sort( [ (-0.5f0 - O.v[1]) / d.x, (0.5f0 - O.v[1]) / d.x ]) )
-    (tymin, tymax) = Tuple( sort( [ (-0.5f0 - O.v[2]) / d.y, (0.5f0 - O.v[2]) / d.y ]) )
+    (tmin, tmax) = Tuple( sort( [ (-0.5f0 - O.v[1]) / d.v[1], (0.5f0 - O.v[1]) / d.v[1] ]) )
+    (tymin, tymax) = Tuple( sort( [ (-0.5f0 - O.v[2]) / d.v[2], (0.5f0 - O.v[2]) / d.v[2] ]) )
  
     ((tmin > tymax) || (tymin > tmax)) && (return false)
  
     (tymin > tmin) && (tmin = tymin)
     (tymax < tmax) && (tmax = tymax)
 
-    (tzmin, tzmax) = Tuple( sort( [ (-0.5f0 - O.v[3]) / d.z, (0.5f0 - O.v[3]) / d.z ]) )
+    (tzmin, tzmax) = Tuple( sort( [ (-0.5f0 - O.v[3]) / d.v[3], (0.5f0 - O.v[3]) / d.v[3] ]) )
  
     ((tmin > tzmax) || (tzmin > tmax)) && (return false)
  
@@ -587,12 +587,12 @@ function ray_intersection(triangle::Triangle, ray::Ray)
 
     A, B, C = Tuple(P for P in triangle.vertexes)
     m = [ray.origin.v[1]-A.v[1];  ray.origin.v[2]-A.v[2]; ray.origin.v[3]-A.v[3]]
-    P1 = B-A
-    P2 = C-A
+#    P1 = (B-A)
+#    P2 = (C-A)
     M = [
-        P1.x P2.x -ray.dir.x ;
-        P1.y P2.y -ray.dir.y ;
-        P1.z P2.z -ray.dir.z ;
+        (B.v[1]-A.v[1]) (C.v[1]-A.v[1]) -ray.dir.v[1] ;
+        (B.v[2]-A.v[2]) (C.v[2]-A.v[2]) -ray.dir.v[2] ;
+        (B.v[3]-A.v[3]) (C.v[3]-A.v[3]) -ray.dir.v[3] ;
     ]
 
     try
@@ -714,9 +714,9 @@ See also: [`Plane`](@ref), [`Ray`](@ref)
 """
 function quick_ray_intersection(plane::Plane, ray::Ray)
     inv_ray = inverse(plane.T) * ray
-    !(inv_ray.dir.z ≈ 0.0f0) || (return false)
+    !(inv_ray.dir.v[3] ≈ 0.0f0) || (return false)
 
-    t = -inv_ray.origin.v[3] / inv_ray.dir.z
+    t = -inv_ray.origin.v[3] / inv_ray.dir.v[3]
     return (inv_ray.tmin < t < inv_ray.tmax)
 end
 

@@ -117,7 +117,7 @@ function fire_all_rays!(
             ImTr::ImageTracer,
             func::Function,
             callback::Union{Nothing, Function} = nothing,
-            callback_time_s::Float32 = 2.0f0,
+            callback_time_s::Float32 = 0.2f0,
             callback_kwargs::Union{Nothing, String} = nothing                
             )
     last_call_time = time()  # use if @elapsed doesn't work propely for our pourpose

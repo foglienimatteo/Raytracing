@@ -28,8 +28,8 @@ function Base.:≈(a::HDRimage, b::HDRimage)
     (a.width == b.width) || return false
     return (a.rgb_m ≈ b.rgb_m)
 end
-Base.:≈(a::Vec, b::Vec) = are_close(a.x, b.x) && are_close(a.y, b.y) && are_close(a.z, b.z)
-Base.:≈(a::Normal, b::Normal) = are_close(a.x, b.x) && are_close(a.y, b.y) && are_close(a.z, b.z)
+Base.:≈(a::Vec, b::Vec) = are_close(a.v[1], b.v[1]) && are_close(a.v[2], b.v[2]) && are_close(a.v[3], b.v[3])  # are_close(a.x, b.x) && are_close(a.y, b.y) && are_close(a.z, b.z)
+Base.:≈(a::Normal, b::Normal) = are_close(a.v[1], b.v[1]) && are_close(a.v[2], b.v[2]) && are_close(a.v[3], b.v[3]) # are_close(a.x, b.x) && are_close(a.y, b.y) && are_close(a.z, b.z)
 Base.:≈(a::Point, b::Point) = are_close(a.v[1], b.v[1]) && are_close(a.v[2], b.v[2]) && are_close(a.v[3], b.v[3])
 Base.:≈(m1::SMatrix{4,4,Float64}, m2::SMatrix{4,4,Float64}) = (B = [are_close(m,n) for (m,n) in zip(m1,m2)] ; all(i->(i==true) , B) )
 Base.:≈(t1::Transformation, t2::Transformation) = (t1.M ≈ t2.M) && ( t1.invM ≈ t2.invM )
@@ -51,33 +51,33 @@ Base.:*(a::Point, s::Real) = Point(s*a.v)  #(s*a.v[1], s*a.v[2], s*a.v[3])
 Base.:/(a::Point, s::Real) = Point(a.v/s)  #(a.v[1]/s, a.v[2]/s, a.v[3]/s)
 
 # Operations for Vec
-Base.:+(a::Vec, b::Vec) = Vec(a.x+b.x, a.y+b.y, a.z+b.z)
-Base.:-(a::Vec, b::Vec) = Vec(a.x-b.x, a.y-b.y, a.z-b.z)
-Base.:-(a::Vec) = Vec(-a.x, -a.y, -a.z)
-Base.:*(s::Real, a::Vec) = Vec(s*a.x, s*a.y, s*a.z)
-Base.:*(a::Vec, s::Real) = Vec(s*a.x, s*a.y, s*a.z)
-Base.:/(a::Vec, s::Real) = Vec(a.x/s, a.y/s, a.z/s)
-LinearAlgebra.:⋅(a::Vec, b::Vec) = a.x*b.x + a.y*b.y + a.z*b.z
-LinearAlgebra.:×(a::Vec, b::Vec) = Vec(a.y*b.z-a.z*b.y, b.x*a.z-a.x*b.z, a.x*b.y-a.y*b.x)
-Base.:/(p::Vec, v::Vec) = Point(p.x/v.x, p.y/v.y, p.z/v.z)
+Base.:+(a::Vec, b::Vec) = Vec(a.v+b.v) #(a.x+b.x, a.y+b.y, a.z+b.z)
+Base.:-(a::Vec, b::Vec) = Vec(a.v-b.v)   #(a.x-b.x, a.y-b.y, a.z-b.z)
+Base.:-(a::Vec) = Vec(-a.v)
+Base.:*(s::Real, a::Vec) = Vec(s*a.v)
+Base.:*(a::Vec, s::Real) = Vec(s*a.v)
+Base.:/(a::Vec, s::Real) = Vec(a.v/s)
+LinearAlgebra.:⋅(a::Vec, b::Vec) = a.v ⋅ b.v    # a.x*b.x + a.y*b.y + a.z*b.z
+LinearAlgebra.:×(a::Vec, b::Vec) = a.v × b.v    # Vec(a.y*b.z-a.z*b.y, b.x*a.z-a.x*b.z, a.x*b.y-a.y*b.x)
+Base.:/(p::Vec, v::Vec) = Point(p.v[1]/v.v[1], p.v[2]/v.v[2], p.v[3]/v.v[3])
 
 # Operations for Normal
-Base.:-(a::Normal) = Normal(-a.x, -a.y, -a.z)
-Base.:*(a::Normal, b::Real) = Vec(b*a.x, b*a.y, b*a.z)
-Base.:*(b::Real, a::Normal) = Vec(b*a.x, b*a.y, b*a.z)
-LinearAlgebra.:⋅(a::Normal, b::Normal) = a.x*b.x + a.y*b.y + a.z*b.z
-LinearAlgebra.:⋅(a::Normal, b::Vec) = a.x*b.x + a.y*b.y + a.z*b.z
-LinearAlgebra.:⋅(a::Vec, b::Normal) = a.x*b.x + a.y*b.y + a.z*b.z
-LinearAlgebra.:×(a::Normal, b::Normal) = Vec(a.y*b.z-a.z*b.y, b.x*a.z-a.x*b.z, a.x*b.y-a.y*b.x)
-LinearAlgebra.:×(a::Normal, b::Vec) = Vec(a.y*b.z-a.z*b.y, b.x*a.z-a.x*b.z, a.x*b.y-a.y*b.x)
-LinearAlgebra.:×(a::Vec, b::Normal) = Vec(a.y*b.z-a.z*b.y, b.x*a.z-a.x*b.z, a.x*b.y-a.y*b.x)
+Base.:-(a::Normal) = Normal(-a.v...)   # (-a.x, -a.y, -a.z)
+Base.:*(a::Normal, b::Real) = Vec(b*a.v...) #(b*a.x, b*a.y, b*a.z)
+Base.:*(b::Real, a::Normal) = Vec(b*a.v...)    # (b*a.x, b*a.y, b*a.z)
+LinearAlgebra.:⋅(a::Normal, b::Normal) = a.v⋅b.v    # a.x*b.x + a.y*b.y + a.z*b.z
+LinearAlgebra.:⋅(a::Normal, b::Vec) = a.v⋅b.v   # a.x*b.x + a.y*b.y + a.z*b.z
+LinearAlgebra.:⋅(a::Vec, b::Normal) = a.v⋅b.v   # a.x*b.x + a.y*b.y + a.z*b.z
+LinearAlgebra.:×(a::Normal, b::Normal) = Vec(a.v×b.v...)    # (a.y*b.z-a.z*b.y, b.x*a.z-a.x*b.z, a.x*b.y-a.y*b.x)
+LinearAlgebra.:×(a::Normal, b::Vec) = Vec(a.v×b.v...)  # (a.y*b.z-a.z*b.y, b.x*a.z-a.x*b.z, a.x*b.y-a.y*b.x)
+LinearAlgebra.:×(a::Vec, b::Normal) = Vec(a.v×b.v...)  # (a.y*b.z-a.z*b.y, b.x*a.z-a.x*b.z, a.x*b.y-a.y*b.x)
 
 # Operations between Vec and Point
-Base.:+(p::Point, v::Vec) = Point((p.v+SVector{3, Float32}(v.x, v.y, v.z))...)   # (p.v[1]+v.x, p.v[2]+v.y, p.v[3]+v.z)
-Base.:+(v::Vec, p::Point) = Point((p.v+SVector{3, Float32}(v.x, v.y, v.z))...)   #(p.v[1]+v.x, p.v[2]+v.y, p.v[3]+v.z)
-Base.:-(p::Point, v::Vec) = Point((p.v-SVector{3, Float32}(v.x, v.y, v.z))...)   # (p.v[1]-v.x, p.v[2]-v.y, p.v[3]-v.z)
+Base.:+(p::Point, v::Vec) = Point((p.v+v.v)...) # SVector{3, Float32}(v.x, v.y, v.z))...)   # (p.v[1]+v.x, p.v[2]+v.y, p.v[3]+v.z)
+Base.:+(v::Vec, p::Point) = Point((p.v+v.v)...) # SVector{3, Float32}(v.x, v.y, v.z))...)   #(p.v[1]+v.x, p.v[2]+v.y, p.v[3]+v.z)
+Base.:-(p::Point, v::Vec) = Point((p.v-v.v)...) # SVector{3, Float32}(v.x, v.y, v.z))...)   # (p.v[1]-v.x, p.v[2]-v.y, p.v[3]-v.z)
 Base.:-(a::Point, b::Point) = Vec((a.v-b.v)...)   # (a.v[1]-b.v[1], a.v[2]-b.v[2], a.v[3]-b.v[3])
-Base.:/(p::Point, v::Vec) = Point(p.v[1]/v.x, p.v[2]/v.y, p.v[3]/v.z)
+Base.:/(p::Point, v::Vec) = Point(p.v[1]/v.v[1], p.v[2]/v.v[2], p.v[3]/v.v[3])
 
 #=
 """
@@ -119,9 +119,9 @@ function Base.:*(t::Transformation, p::Point)
     =#
 end
 function Base.:*(t::Transformation, p::Vec)
-    VV = SVector{4, Float32}(p.x, p.y, p.z, 0)
+    VV = SVector{4, Float32}(p.v[1], p.v[2], p.v[3], 0)    # (p.x, p.y, p.z, 0)
     res = t.M*VV
-    Vec(res)
+    Vec(res...)
     #=
         Vec(t.M[1] * p.x + t.M[5] * p.y + t.M[9]  * p.z, 
             t.M[2] * p.x + t.M[6] * p.y + t.M[10] * p.z, 
@@ -129,8 +129,8 @@ function Base.:*(t::Transformation, p::Vec)
     =#
 end
 function Base.:*(t::Transformation, n::Normal)
-    NV = SVector{4, Float32}(n.x, n.y, n.z, 0)
-    Normal(transpose(t.invM)*NV)
+    NV = SVector{4, Float32}(n.v[1], n.v[2], n.v[3], 0) # (n.x, n.y, n.z, 0)
+    Normal(transpose(t.invM)*NV...)
     #Normal(transpose(@view(t.invM[1:3,1:3])) * NV)
     #=
         Mat = transpose(t.invM)
@@ -146,6 +146,6 @@ Base.:*(r::Ray, t::Transformation) = t*r
 
 
 # Useful normalize functions
-squared_norm(v::Union{Vec,Point, Normal}) = v.x^2 + v.y^2 + v.z^2
+squared_norm(v::Union{Vec,Point, Normal}) = v.v[1]^2 + v.v[2]^2 + v.v[3]^2
 norm(v::Union{Vec,Point,Normal}) = √squared_norm(v)
 normalize(v::Union{Vec, Normal}) = v/norm(v)

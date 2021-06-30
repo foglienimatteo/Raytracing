@@ -129,11 +129,10 @@ A point in 3D space.
 """
 struct Point
     v::SVector{3, Float32}
-    Point(x, y, z) = new([x, y, z])
+    Point(x=0.0f0, y=0.0f0, z=0.0f0) = new([x, y, z])
     Point(x, y, z, w) = new([x, y, z])
-    Point() = new([0.0f0, 0.0f0, 0.0f0])
-    Point(v::SVector{3, T}) where T = new(v[1], v[2], v[3])
-    Point(v::SVector{4, T}) where T = new(v[1], v[2], v[3])
+    Point(v::SVector{3, T}) where T = new(Float32[v[1], v[2], v[3]])
+    Point(v::SVector{4, T}) where T = new(Float32[v[1], v[2], v[3]])
 end
 
 """
@@ -156,24 +155,25 @@ A 3D Vector
 See also: [`Normal`](@ref)
 """
 struct Vec
-    x::Float32
-    y::Float32
-    z::Float32
-    Vec(x::Float32, y::Float32, z::Float32) = new(x, y, z)
-    Vec() = new(0.0f0, 0.0f0, 0.0f0)
-    Vec(P::Point) = new(P.v[1], P.v[2], P.v[3])
-    Vec(v::SVector{3, Float32}) = new(v[1], v[2], v[3])
-    Vec(v::SVector{4, Float32}) = new(v[1], v[2], v[3])
-    function Vec(x::T1, y::T2, z::T3) where {T1<:Number,T2<:Number, T3<:Number}
-        Vec(convert(Float32, x), convert(Float32, y), convert(Float32, z))
-    end
+    v::SVector{3, Float32}
+#    x::Float32
+#    y::Float32
+#    z::Float32
+    Vec(x::Number=0.0f0, y::Number=0.0f0, z::Number=0.0f0) = new([x, y, z])
+    Vec(x::Number, y::Number, z::Number, w::Number) = new([x, y, z])
+    Vec(P::Point) = new((P.v))
+    Vec(v::SVector{3, T}) where T = new([v...])
+    Vec(v::SVector{4, T}) where T = new([v[1], v[2], v[3]])
+#    function Vec(x::T1, y::T2, z::T3) where {T1<:Number,T2<:Number, T3<:Number}
+#        Vec(convert(Float32, x), convert(Float32, y), convert(Float32, z))
+#    end
 end
 
 length(::Vec) = 3
 
-const VEC_X = Vec(1.0, 0.0, 0.0)
-const VEC_Y = Vec(0.0, 1.0, 0.0)
-const VEC_Z = Vec(0.0, 0.0, 1.0)
+const VEC_X = Vec(1.0f0, 0.0f0, 0.0f0)
+const VEC_Y = Vec(0.0f0, 1.0f0, 0.0f0)
+const VEC_Z = Vec(0.0f0, 0.0f0, 1.0f0)
 
 """
     Normal(x::Float64, y::Float64, z::Float64)
@@ -196,28 +196,38 @@ and its struct normalize them.
 See also: [`Vec`](@ref)
 """
 struct Normal
-    x::Float32
-    y::Float32
-    z::Float32
+    v::SVector{3, Float32}
+#    x::Float32
+#    y::Float32
+#    z::Float32
     function Normal(x, y, z)
         m = √(x^2+y^2+z^2)
-        new(x/m, y/m, z/m)
+        new(Float32[x/m, y/m, z/m])
+    end
+    function Normal(x, y, z, w)
+        m = √(x^2+y^2+z^2)
+        new(Float32[x/m, y/m, z/m])
     end
     function Normal(v::Vec)
-        m = √(v.x^2+v.y^2+v.z^2)
-        new(v.x/m, v.y/m, v.z/m)
+        m = √(v.v[1]^2+v.v[2]^2+v.v[3]^2)
+        new(Float32[v.v[1]/m, v.v[2]/m, v.v[3]/m])
     end
     function Normal(v::Vector{Float32})
         @assert length(v) == 3
         m = √(v[1]^2+v[2]^2+v[3]^2)
-        new(v[1]/m, v[2]/m, v[3]/m)
+        new(Float32[v[1]/m, v[2]/m, v[3]/m])
+    end
+    function Normal(v::SVector{Float32})
+        @assert length(v) == 3
+        m = √(v[1]^2+v[2]^2+v[3]^2)
+        new(Float32[v[1]/m, v[2]/m, v[3]/m])
     end
     function Normal(v::SVector{4,Float32})
         m = √(v[1]^2+v[2]^2+v[3]^2)
-        new(v[1]/m, v[2]/m, v[3]/m)
+        new(Float32[v[1]/m, v[2]/m, v[3]/m])
     end
 end
-Vec(N::Normal) = Vec(N.x, N.y, N.z)
+Vec(N::Normal) = Vec((N.v)...)
 
 
 ##########################################################################################92
