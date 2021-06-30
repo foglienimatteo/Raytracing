@@ -7,13 +7,6 @@
 #
 # EARTH AND SUN
 # Here we create an image of the earth and the Sun inside the Milky-Way.
-# In order to render this image, run in the CLI:
-#
-#    ./Raytracer.jl render examples/earth_and_sun.txt --width=1200 --height=900 flat
-#
-# or in the Julia REPL:
-#
-#    render("scenefile"=>"examples/earth_and_sun.txt", "width"=>1200, "height"=>900, "%COMMAND%"=>"flat")
 #
 # As you probably have already read in the README.md, there are four possible renderer algorithms.
 # Each of them connects with different rules the color of a pixel and the light ray that starts
@@ -35,31 +28,35 @@
 #         It's very fast, and the images rendered are perfect for an astrophysical context or for
 #         very bright days of summer; it's, nevertheless, a simple solution in order to avoid
 #         the longer times needed for the pathtracer algorithm.
-
+#
+# In order to render this image with the flat renderer, for example run in the CLI
+#
+#    ./Raytracer.jl render examples/earth_and_sun.txt --width=1200 --height=900 flat
+#
+# or in the Julia REPL
+#
+#    render("scenefile"=>"examples/earth_and_sun.txt", "width"=>1200, "height"=>900, "%COMMAND%"=>"flat")
+#
 # This type of image is very long to be rendered with "pathtracer"; moreover, for the
-# rendering of astrophysical images, it's useless; use "pointlight" renderer instead!
+# rendering of astrophysical images, it's useless; use "pointlight" renderer instead (or
+# flat renderer, with is good for all the cases)
 
 CAMERA(PERSPECTIVE, TRANSLATION([-2, 0, 1]), 1.0)
 
 VECTOR earth_pos([0.5, -1.0, 0.0])
 FLOAT earth_radius(1.0)
-FLOAT earth_lum(0.001)
+FLOAT earth_lum(0.0)
 STRING earth_path ("images/earth.jpg")
 BRDF earth_brdf (DIFFUSE(IMAGE(earth_path)))
 PIGMENT earth_emitted_pigment ( UNIFORM(<earth_lum,earth_lum,earth_lum>) )
 
 
-VECTOR sun_pos([4.0, 3.0, 0.0])
-FLOAT sun_radius(1.0)
+VECTOR sun_pos([4.0, 5.0, 0.0])
+FLOAT sun_radius(0.6)
 FLOAT sun_lum(0.0)
 STRING sun_path ("images/sun.jpg")
 BRDF sun_brdf (DIFFUSE(IMAGE(sun_path)))
 PIGMENT sun_emitted_pigment ( UNIFORM(<sun_lum, sun_lum, sun_lum>) )
-BOOL sun(TRUE) # This bool for the sun is fundamental for the pointlight algorithm!
-# It allows to the rays emitted from the pointlight (that is placed inside the sun
-# in this spatial configuration, see below) not to be stopped by the sun surface.
-# If you set this to FALSE or do not pass it, the image will be dark, except for
-# the sun itself.
 
 VECTOR milky_way_pos([0.0, 0.0, 0.0])
 FLOAT milky_way_radius(20.0)
@@ -67,10 +64,6 @@ FLOAT milky_way_lum(0.00)
 STRING milky_way_path ("images/milky_way_HD.jpg")
 BRDF milky_way_brdf (DIFFUSE(IMAGE(milky_way_path)))
 PIGMENT milky_way_emitted_pigment ( UNIFORM(<milky_way_lum,milky_way_lum,milky_way_lum>) )
-BOOL milky_way(TRUE) # This bool for the milky way is again fundamental for the pointlight algorithm!
-# It allows to the background image (precisely the Milky Way) not to depend on the point-light
-# position of the image and/or on the position of the other objects (that would creates shadows on it!)
-# If you set this to FALSE or do not pass it, the milky will be dark behind the earth!
 
 MATERIAL earth_material( 
      earth_brdf, 
@@ -88,7 +81,7 @@ MATERIAL milky_way_material(
 FLOAT mult(1.0)
 TRANSFORMATION earth_trans(
      TRANSLATION(earth_pos)
-     * SCALING([mult*earth_radius, mult* earth_radius, mult*earth_radius])
+     * SCALING([mult*earth_radius, mult*earth_radius, mult*earth_radius])
 )
 SPHERE(
      earth_material,
@@ -123,7 +116,7 @@ TRANSFORMATION sun_trans(
 SPHERE(
      sun_material,
      sun_trans,
-     sun,      # the first bool is for the "flag_pointlight"
+     TRUE,      # the first bool is for the "flag_pointlight"
      FALSE     # the second bool is for the "flag_background"
      )
 
@@ -137,10 +130,10 @@ SPHERE(
      milky_way_material,
      milky_way_trans,
      FALSE,         # as before, but now we must invert the order!
-     milky_way      
+     FALSE     
      )
 
-FLOAT pl_lum(1.0)
+FLOAT pl_lum(3.0)
 COLOR sun_pointlight_lum(<pl_lum, pl_lum, pl_lum>)
 POINTLIGHT(
      sun_pos, 

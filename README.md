@@ -116,11 +116,11 @@ NOTE: you can also specify `ALPHA`, `GAMMA` and `LUM` in the render and animatio
 
 Here we show an example of usage, which renders the [earth_and_sun.txt](examples/earth_and_sun.txt) file
 ```bash
-./Raytracer.jl render examples/earth_and_sun.txt --width=1200 --height=900 flat
+./Raytracer.jl render examples/earth_and_sun.txt --width=1200 --height=900 pointlight --dark_parameter=0.03
 ```
 and of the tone-map the resulting PFM (named "scene.pfm")
 ```bash
-./Raytracer.jl tonemapping scene.pfm scene.png --normalization=0.18 --gamma=1.0 --avg_lum=0.065
+./Raytracer.jl tonemapping scene.pfm scene.png --normalization=0.18 --gamma=1.0 --avg_lum=0.03
 ```
 
 earth_and_sun.txt with FlatRenderer| 
@@ -157,11 +157,11 @@ demo("world_type"=>"B", "camera_position"=>"[-1.0, 0.0, 1.0]", "samples_per_pixe
 
 Instead, for rendering the `examples/earth_and_sun.txt`
 ```julia
-render("scenefile"=>"examples/earth_and_sun.txt", "width"=>2880, "height"=>1880, "%COMMAND%"=>"flat")
+render("scenefile"=>"examples/earth_and_sun.txt", "width"=>1200, "height"=>900, "%COMMAND%"=>"pointlight", "pointlight"=>Dict("dark_parameter"=>0.03))
 ```
 and for tone-map it
 ```julia
-tone_mapping("infile"=>"scene.pfm", "outfile"=>"scene.png", "alpha"=>0.18, "gamma"=>1.0, "avg_lum"=>0.065)
+tone_mapping("infile"=>"scene.pfm", "outfile"=>"scene.png", "normalization"=>0.18, "gamma"=>1.0, "avg_lum"=>0.04)
 ```
 
 Finally, to create the  `examples/earth_moon_sun.txt` animation:

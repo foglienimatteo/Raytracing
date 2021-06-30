@@ -106,14 +106,16 @@ function (renderer::PointLightRenderer)(ray::Ray)
 
     hit_material = hit_record.shape.Material
     flag_bg = hit_record.shape.flag_background
+    flag_pl = hit_record.shape.flag_pointlight
     result_color = renderer.ambient_color 
 
     for cur_light in renderer.world.point_lights
-        if is_point_visible(renderer.world, cur_light.position, hit_record.world_point) && flag_bg==false
+        if is_point_visible(renderer.world, cur_light.position, hit_record.world_point) && flag_bg==false && flag_pl==false
             distance_vec = hit_record.world_point - cur_light.position
             distance = norm(distance_vec)
             in_dir = distance_vec * (1.0 / distance)
-            cos_theta = max(0.0, -normalize(ray.dir)⋅hit_record.normal) 
+            #cos_theta = max(0.0, -normalize(ray.dir)⋅hit_record.normal) 
+            cos_theta = max(0.0, -normalize(distance_vec)⋅hit_record.normal) 
 
             distance_factor =  
                 (cur_light.linear_radius > 0) ? 
@@ -129,8 +131,32 @@ function (renderer::PointLightRenderer)(ray::Ray)
                             hit_record.surface_point,
                         )
             result_color += (emitted_color + brdf_color) * cur_light.color * cos_theta * distance_factor
+
+        elseif flag_pl==true && flag_bg==false
+            distance_vec = hit_record.world_point - cur_light.position
+            distance = norm(distance_vec)
+            in_dir = distance_vec * (1.0 / distance)
+            cos_theta = max(0.0, -normalize(ray.dir)⋅hit_record.normal) 
+            #cos_theta = max(0.0, -normalize(distance_vec)⋅hit_record.normal) 
+
+            distance_factor =  
+                (cur_light.linear_radius > 0) ? 
+                (cur_light.linear_radius / distance)^2 : 
+                1.0
+
+            emitted_color = get_color(hit_material.emitted_radiance, hit_record.surface_point)
+            brdf_color = evaluate(
+                            hit_material.brdf,
+                            hit_record.normal,
+                            in_dir,
+                            -ray.dir,
+                            hit_record.surface_point,
+                        )
+            result_color += (emitted_color + brdf_color) * cur_light.color * cos_theta * distance_factor
+
         elseif flag_bg==true
             result_color += get_color(hit_material.brdf.pigment, hit_record.surface_point)
+
         else
             result_color += renderer.dark_parameter*get_color(hit_material.brdf.pigment, hit_record.surface_point)
         end

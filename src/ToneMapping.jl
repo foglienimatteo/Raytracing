@@ -192,7 +192,7 @@ function tone_mapping(args_lum::Vector{String})
 	
 	println("\nfile $(parameters.infile) has been read from disk.\n")
 
-	normalize_image!(img, parameters.a, args_lum[end])
+	normalize_image!(img, parameters.a, string2positive(args_lum[end]))
 	clamp_image!(img)
 	Raytracing.γ_correction!(img, parameters.γ)
 
