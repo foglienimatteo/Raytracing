@@ -270,9 +270,15 @@ function demo(
 	(bool_print==true) && (println("\nHDR demo image written to $(pfm_output)\n"))
 
 	# Apply tone-mapping to the image
-	normalize_image!(img, a, lum)
-	clamp_image!(img)
-	γ_correction!(img, γ)
+	if world_type=="A" && (isnothing(lum) || lum≈0.0)
+		normalize_image!(img, a, 0.1)
+		clamp_image!(img)
+		γ_correction!(img, γ)
+	else
+		normalize_image!(img, a, lum)
+		clamp_image!(img)
+		γ_correction!(img, γ)
+	end
 
 	# Save the LDR image
 	if (typeof(query(png_output)) == File{DataFormat{:UNKNOWN}, String})

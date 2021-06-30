@@ -1171,7 +1171,12 @@ mutable struct PointLightRenderer <: Renderer
 end
 
 function copy(renderer::PointLightRenderer)
-    return PointLightRenderer(World(), renderer.background_color, renderer.ambient_color)
+    return PointLightRenderer(
+        World(), 
+        renderer.background_color, 
+        renderer.ambient_color, 
+        renderer.dark_parameter
+    )
 end
 
 ##########################################################################################92
