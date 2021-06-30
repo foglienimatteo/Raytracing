@@ -1,5 +1,11 @@
 # HEAD
 
+# VERSION 1.1.1
+
+- fixed a bug in the point-light renderer algorithm;
+
+- modified the scenefile examples;
+  
 # VERSION 1.1.0
 
 - added the `render_animation` function and improved the CLI; now it's possible to read an animation from a file; see PR[#19](https://github.com/cosmofico97/Raytracing/pull/19)
