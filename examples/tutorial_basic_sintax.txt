@@ -63,9 +63,17 @@ BRDF my_specular( SPECULAR(UNIFORM(<1,1,1>)) )              # Specular BRDF, as 
 # and a Pigment (second argument) that describes the self-emitted radiance of the object
 MATERIAL my_material ( DIFFUSE(UNIFORM(<1,1,1>)) , UNIFORM(<0,0,0>) )
 
+# - Transformations, created from a concatenations of basic transformations (you will see
+# them in the next tutorial file "demo_world_B.txt") through the symbol "*"
+TRANSFORMATION my_trans(
+     TRANSLATION([1,0,1])
+     * SCALING([0.5, 0.5, 1.0])
+)
+
+
 # You can also define objects from pre-defined variables!
 MATERIAL my_second_material(my_diffuse, my_uniform)
-
+TRANSFORMATION my_second_trans( TRANSLATION(my_vec) )
 
 
 # Math operations are enabled between floats...

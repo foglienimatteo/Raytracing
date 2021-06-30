@@ -10,13 +10,23 @@
 # 
 # In order to check the correct behaviour of this file (i.e. that is correctly parsed,
 # without throwing exceptions, and render the demo image of the world type "B") run the 
-# following command in the CLI (or another equivalent):
+# following command in the CLI:
 #
 #    ./Raytracer.jl render examples/demo_world_B.txt pathtracer
+#
+# or in the Julia REPL:
+#
+#   render("scenefile"=>"examples/demo_world_B.txt", "%COMMAND%"=>"pathtracer")
 #
 # You should obtain the same image if you run the demo command with the world "B":
 #
 #   ./Raytracer.jl demo --world_type="B" --camera_position="[-2, 0, 1]" pathtracer 
+#
+# or in the Julia REPL:
+# 
+#   demo("world_type"=>"B", "camera_position"=>"[-2, 0, 1]",  "%COMMAND%"=>"pathtracer")
+#
+#
 #
 # And now let's start explaining how to define a scene!
 
@@ -130,6 +140,7 @@ TRIANGLE(
     triangle_material,
 	[2.0, 1.0, 0.0], [3.0, -1.0, 0.0], [2.5, 0.0, 1.0]
 )
+
 
 # The definition of the CAMERA (i.e. the point of view) works like follows:
 # - first argument : choosen projection , PERSPECTIVE or ORTHOGONAL
