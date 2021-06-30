@@ -17,14 +17,14 @@
     render("normalization"=>0.18, "gamma"=>1.0, "avg_lum"=>0.065, "width"=>1440, "height"=>900, 
           "scenefile"=>"examples/earth_moon_sun.txt", "%COMMAND%"=>"pointlight", "pointlight"=>Dict("dark_parameter"=>0.2))
 =#
-# But, maybe you will be more interested in the animation of this...
-# Run the following command in the CLI:
+# But, maybe you will be more interested in the animation of this scene...
+# Run the following command in the CLI
 #=
-     ./Raytracer.jl animation  --normalization=0.18 --gamma=1.0 --avg_lum=0.065 --width=1440 
+     ./Raytracer.jl animation  --normalization=0.18 --gamma=1.0 --avg_lum=0.065 --width=1200 
           --height=900 --function=earth_moon_sun --vec_variables="[moon_x,  moon_y, moon_z,  moon_rotang, earth_rotang]" 
-          --iterable=1:200 examples/earth_moon_sun.txt pointlight
+          --iterable=1:200 examples/earth_moon_sun.txt pointlight --dark_parameter=0.25
 =#
-# or in the Julia REPL:
+# or in the Julia REPL
 #=
      render_animation("normalization"=>0.18, "gamma"=>1.0, "avg_lum"=>0.065, 
           "width"=>1200, "height"=>900, "function"=>"earth_moon_sun", 

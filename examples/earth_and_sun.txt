@@ -9,9 +9,13 @@
 # Here we create an image of the earth and the Sun inside the Milky-Way.
 # In order to render this image, run in the CLI:
 #
-#    ./Raytracer.jl render examples/earth_and_sun.txt flat
+#    ./Raytracer.jl render examples/earth_and_sun.txt --width=1200 --height=900 flat
 #
-# As you probably have already understood, there are four possible renderer algorithms.
+# or in the Julia REPL:
+#
+#    render("scenefile"=>"examples/earth_and_sun.txt", "width"=>1200, "height"=>900, "%COMMAND%"=>"flat")
+#
+# As you probably have already read in the README.md, there are four possible renderer algorithms.
 # Each of them connects with different rules the color of a pixel and the light ray that starts
 # from that pixel and hit (or not) an object of the rendered scene:
 # - onoff : each pixel is set to the "background_color" if no shape is hitten by its light ray, 
@@ -31,11 +35,9 @@
 #         It's very fast, and the images rendered are perfect for an astrophysical context or for
 #         very bright days of summer; it's, nevertheless, a simple solution in order to avoid
 #         the longer times needed for the pathtracer algorithm.
-FLOAT mult(1.0)
 
-# This type of image is very long to be rendered with "pathtracer"; use "pointlight"
-# or "flat" instead!
-
+# This type of image is very long to be rendered with "pathtracer"; moreover, for the
+# rendering of astrophysical images, it's useless; use "pointlight" renderer instead!
 
 CAMERA(PERSPECTIVE, TRANSLATION([-2, 0, 1]), 1.0)
 
@@ -83,6 +85,7 @@ MATERIAL milky_way_material(
      milky_way_emitted_pigment
 )
 
+FLOAT mult(1.0)
 TRANSFORMATION earth_trans(
      TRANSLATION(earth_pos)
      * SCALING([mult*earth_radius, mult* earth_radius, mult*earth_radius])
@@ -97,6 +100,25 @@ TRANSFORMATION sun_trans(
      TRANSLATION(sun_pos)
      * SCALING([sun_radius, sun_radius, sun_radius])
 )
+
+# Here we see a new feature. For the pointlight renderer, it often useful to create
+# shapes in the scene that 
+# - "represents" a light source (as the Sun), and so that would "contain" a point-light; but we must
+#    then tell to the renderer that this shape does not hide all the shapes outside!
+# - "represents" a background object (as the Milky Way), and so that would not be interested
+#    if they are directly visible or not from any of the point-light sources; it's color is determinated
+#    only by their pigment. 
+#
+# In order to render this two patricular types of shapes, you can optionally specify in the
+# definition of a shape to render in a scene two bool variables:
+# - the first bool is for the "flag_pointlight", i.e. for prevent the darkening due to
+#    the hiding of this shape taht "cointains" a point-light
+# - the second bool is for the "flag_background", i.e. for prevent shadows on a shape that
+#    we want to use as background
+#
+# NOTE : when you define a shape, you can also not specify this bools (as in the previous cases),
+# and they will be automatically set both to "false"; however, you cannot specify one of them only:
+# both or no-one!
 
 SPHERE(
      sun_material,
@@ -126,4 +148,6 @@ POINTLIGHT(
      )
 
 
+# Last but not least, we give also an example of how to render an animation; see the
+# next scenefile example "examples/earth_moon_sun.txt"!
 

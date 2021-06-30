@@ -185,7 +185,7 @@ function render(
 	     end
 
      elseif isnothing(camera_type)
-          camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec) * scene.camera.T
+          camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec)
           if typeof(scene.camera) == OrthogonalCamera
                (bool_print==true) && (println("Choosen perspective camera..."))
                camera = OrthogonalCamera(aspect_ratio, camera_tr)
@@ -222,7 +222,7 @@ function render(
 
 
      else
-          camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec) * scene.camera.T
+          camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec)
           if camera_type == "per"
 		     (bool_print==true) && (println("Choosen perspective camera..."))
 		     camera = PerspectiveCamera(scene.camera.d, aspect_ratio, camera_tr)

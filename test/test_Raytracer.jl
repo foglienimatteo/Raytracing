@@ -233,7 +233,7 @@ end
      string="""./Raytracer.jl render --camera_type="per" --camera_position="[1 , 2 , 3]" """*
      """--alpha=30. --width=40 --height=30 --set_pfm_name="prova.pfm" """*
      """--set_png_name="prova.png" --samples_per_pixel=16 --ONLY_FOR_TESTS """*
-     """--normalization=0.1 --gamma=1.0 --avg_lum=1.0 examples/tutorial_basic_sintax.txt onoff """
+     """--normalization=0.1 --gamma=1.0 --avg_lum=1.0 examples/tutorial_basic_syntax.txt onoff """
      args = Raytracing.from_CLI_to_vecstring(string)
      parsed_arguments = ArgParse_command_line(args)
 	(isnothing(parsed_arguments)) && (return nothing)
@@ -252,7 +252,7 @@ end
 
 
 @testset "test_parse_render_onoff_settings" begin
-     string="""./Raytracer.jl render --ONLY_FOR_TESTS examples/tutorial_basic_sintax.txt onoff """*
+     string="""./Raytracer.jl render --ONLY_FOR_TESTS examples/tutorial_basic_syntax.txt onoff """*
      """--background_color="<1,2,3>" --color="<4,  5,  6>" """
      args = Raytracing.from_CLI_to_vecstring(string)
      parsed_arguments = ArgParse_command_line(args)
@@ -271,7 +271,7 @@ end
 end
 
 @testset "test_parse_render_flat_settings" begin
-     string="""./Raytracer.jl render --ONLY_FOR_TESTS examples/tutorial_basic_sintax.txt flat """*
+     string="""./Raytracer.jl render --ONLY_FOR_TESTS examples/tutorial_basic_syntax.txt flat """*
      """--background_color="<1,2,3>" """
      args = Raytracing.from_CLI_to_vecstring(string)
      parsed_arguments = ArgParse_command_line(args)
@@ -290,7 +290,7 @@ end
 end
 
 @testset "test_parse_render_pathtracer_settings" begin
-     string="""./Raytracer.jl render --ONLY_FOR_TESTS examples/tutorial_basic_sintax.txt pathtracer """*
+     string="""./Raytracer.jl render --ONLY_FOR_TESTS examples/tutorial_basic_syntax.txt pathtracer """*
      """--background_color="<1,2,3>" --init_state=1 --init_seq=2 --num_of_rays=15 --max_depth=3 --russian_roulette_limit=1"""
      args = Raytracing.from_CLI_to_vecstring(string)
      parsed_arguments = ArgParse_command_line(args)
@@ -309,7 +309,7 @@ end
 end
 
 @testset "test_parse_render_pointlight_settings" begin
-     string="""./Raytracer.jl render --ONLY_FOR_TESTS examples/tutorial_basic_sintax.txt pointlight """*
+     string="""./Raytracer.jl render --ONLY_FOR_TESTS examples/tutorial_basic_syntax.txt pointlight """*
      """--background_color="<1,2,3>" --ambient_color="<4,  5,  6>" --dark_parameter=0.01"""
      args = Raytracing.from_CLI_to_vecstring(string)
      parsed_arguments = ArgParse_command_line(args)
@@ -338,7 +338,7 @@ end
      """--alpha=30. --width=40 --height=30 --set_anim_name="prova.mp4" """*
      """--normalization=0.1 --gamma=1.0 --avg_lum=1.0 --samples_per_pixel=16 --ONLY_FOR_TESTS """*
      """--function=my_function --vec_variables=[float] --iterable=1:2 """*
-     """examples/tutorial_basic_sintax.txt onoff """
+     """examples/tutorial_basic_syntax.txt onoff """
      args = Raytracing.from_CLI_to_vecstring(string)
      parsed_arguments = ArgParse_command_line(args)
 	(isnothing(parsed_arguments)) && (return nothing)
@@ -360,7 +360,7 @@ end
 @testset "test_parse_animation_onoff_settings" begin
      cd("..")
      string="""./Raytracer.jl animation --ONLY_FOR_TESTS --function=my_function --vec_variables=[float] --iterable=1:2 """*
-     """examples/tutorial_basic_sintax.txt onoff """*
+     """examples/tutorial_basic_syntax.txt onoff """*
      """--background_color="<1,2,3>" --color="<4,  5,  6>" """
      args = Raytracing.from_CLI_to_vecstring(string)
      parsed_arguments = ArgParse_command_line(args)
@@ -382,7 +382,7 @@ end
 @testset "test_parse_animation_flat_settings" begin
      cd("..")
      string="""./Raytracer.jl animation --ONLY_FOR_TESTS --function=my_function --vec_variables=[float] --iterable=1:2 """*
-     """examples/tutorial_basic_sintax.txt flat """*
+     """examples/tutorial_basic_syntax.txt flat """*
      """--background_color="<1,2,3>" """
      args = Raytracing.from_CLI_to_vecstring(string)
      parsed_arguments = ArgParse_command_line(args)
@@ -404,7 +404,7 @@ end
 @testset "test_parse_animation_pathtracer_settings" begin
      cd("..")
      string="""./Raytracer.jl animation --ONLY_FOR_TESTS --function=my_function --vec_variables=[float] --iterable=1:2 """*
-     """examples/tutorial_basic_sintax.txt pathtracer """*
+     """examples/tutorial_basic_syntax.txt pathtracer """*
      """--background_color="<1,2,3>" --init_state=1 --init_seq=2 --num_of_rays=15 --max_depth=3 --russian_roulette_limit=1"""
      args = Raytracing.from_CLI_to_vecstring(string)
      parsed_arguments = ArgParse_command_line(args)
@@ -426,7 +426,7 @@ end
 @testset "test_parse_animation_pointlight_settings" begin
      cd("..")
      string="""./Raytracer.jl animation --ONLY_FOR_TESTS --function=my_function --vec_variables=[float] --iterable=1:2 """*
-     """examples/tutorial_basic_sintax.txt pointlight """*
+     """examples/tutorial_basic_syntax.txt pointlight """*
      """--background_color="<1,2,3>" --ambient_color="<4,  5,  6>" --dark_parameter=0.01"""
      args = Raytracing.from_CLI_to_vecstring(string)
      parsed_arguments = ArgParse_command_line(args)

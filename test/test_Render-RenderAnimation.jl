@@ -119,7 +119,7 @@ end
                          "function"=>"my_function",
                          "iterable"=>"1:3",
                          "vec_variables"=>"[float]",
-                         "scenefile"=>"examples/tutorial_basic_sintax.txt",
+                         "scenefile"=>"examples/tutorial_basic_syntax.txt",
                          
                          "%COMMAND%"=>"onoff",
                          "camera_type"=>"per",
@@ -141,7 +141,7 @@ end
                          "function"=>"my_function",
                          "iterable"=>"1:3",
                          "vec_variables"=>"[float]",
-                         "scenefile"=>"examples/tutorial_basic_sintax.txt"         ,
+                         "scenefile"=>"examples/tutorial_basic_syntax.txt"         ,
                           
                          "alpha"=>"30.",
                          "width"=>"40",
@@ -153,7 +153,7 @@ end
                          "function"=>"my_function",
                          "iterable"=>"1:3",
                          "vec_variables"=>"[float]",
-                         "scenefile"=>"examples/tutorial_basic_sintax.txt"         ,
+                         "scenefile"=>"examples/tutorial_basic_syntax.txt"         ,
                           "ONLY_FOR_TESTS"=>true))
 
      @test_throws ArgumentError render_animation("ONLY_FOR_TESTS"=>true)
@@ -161,43 +161,43 @@ end
                          "function"=>"my_function",
                          "iterable"=>"1:3",
                          "vec_variables"=>"[float]",
-                         "scenefile"=>"examples/tutorial_basic_sintax.txt"         ,
+                         "scenefile"=>"examples/tutorial_basic_syntax.txt"         ,
                           "camera_type"=>"new", "ONLY_FOR_TESTS"=>true)
      @test_throws ArgumentError render_animation(
                          "function"=>"my_function",
                          "iterable"=>"1:3",
                          "vec_variables"=>"[float]",
-                         "scenefile"=>"examples/tutorial_basic_sintax.txt"         ,
+                         "scenefile"=>"examples/tutorial_basic_syntax.txt"         ,
                           "camera_position"=>"[1 , 2 , 3" , "ONLY_FOR_TESTS"=>true)
      @test_throws ArgumentError render_animation(
                          "function"=>"my_function",
                          "iterable"=>"1:3",
                          "vec_variables"=>"[float]",
-                         "scenefile"=>"examples/tutorial_basic_sintax.txt"         ,
+                         "scenefile"=>"examples/tutorial_basic_syntax.txt"         ,
                           "alpha"=>"pi greco" , "ONLY_FOR_TESTS"=>true)
      @test_throws ArgumentError render_animation(
                          "function"=>"my_function",
                          "iterable"=>"1:3",
                          "vec_variables"=>"[float]",
-                         "scenefile"=>"examples/tutorial_basic_sintax.txt"         ,
+                         "scenefile"=>"examples/tutorial_basic_syntax.txt"         ,
                           "width"=>"13" , "ONLY_FOR_TESTS"=>true)
      @test_throws ArgumentError render_animation(
                          "function"=>"my_function",
                          "iterable"=>"1:3",
                          "vec_variables"=>"[float]",
-                         "scenefile"=>"examples/tutorial_basic_sintax.txt"         ,
+                         "scenefile"=>"examples/tutorial_basic_syntax.txt"         ,
                           "height"=>"14.5" , "ONLY_FOR_TESTS"=>true)
      @test_throws ArgumentError render_animation(
                          "function"=>"my_function",
                          "iterable"=>"1:3",
                          "vec_variables"=>"[float]",
-                         "scenefile"=>"examples/tutorial_basic_sintax.txt"         ,
+                         "scenefile"=>"examples/tutorial_basic_syntax.txt"         ,
                           "world_type"=>"B", "ONLY_FOR_TESTS"=>true)
      @test_throws ArgumentError render_animation(
                          "function"=>"my_function",
                          "iterable"=>"1:3",
                          "vec_variables"=>"[float]",
-                         "scenefile"=>"examples/tutorial_basic_sintax.txt"         ,
+                         "scenefile"=>"examples/tutorial_basic_syntax.txt"         ,
                           "samples_per_pixel"=>3 , "ONLY_FOR_TESTS"=>true)
      cd("test")
 end
@@ -209,7 +209,7 @@ end
                     "function"=>"my_function",
                     "iterable"=>"1:3",
                     "vec_variables"=>"[float]",
-                    "scenefile"=>"examples/tutorial_basic_sintax.txt",
+                    "scenefile"=>"examples/tutorial_basic_syntax.txt",
                     "%COMMAND%"=>"onoff",
                     "onoff"=>Dict(
                          "background_color"=>"<1,2,3>",
@@ -222,7 +222,7 @@ end
                     "function"=>"my_function",
                     "iterable"=>"1:3",
                     "vec_variables"=>"[float]",
-                    "scenefile"=>"examples/tutorial_basic_sintax.txt",
+                    "scenefile"=>"examples/tutorial_basic_syntax.txt",
                     "%COMMAND%"=>"flat",
                     "flat"=>Dict(
                          "background_color"=>"<1,2,3>",
@@ -233,7 +233,7 @@ end
                     "function"=>"my_function",
                     "iterable"=>"1:3",
                     "vec_variables"=>"[float]",
-                    "scenefile"=>"examples/tutorial_basic_sintax.txt",
+                    "scenefile"=>"examples/tutorial_basic_syntax.txt",
                     "ONLY_FOR_TESTS"=>true,
                     "%COMMAND%"=>"pathtracer",
                     "pathtracer"=>Dict(
@@ -251,7 +251,7 @@ end
                     "function"=>"my_function",
                     "iterable"=>"1:3",
                     "vec_variables"=>"[float]",
-                    "scenefile"=>"examples/tutorial_basic_sintax.txt",
+                    "scenefile"=>"examples/tutorial_basic_syntax.txt",
                     "%COMMAND%"=>"pointlight",
                     "pointlight"=>Dict(
                          "background_color"=>"<1,2,3>",
@@ -264,98 +264,98 @@ end
                          "function"=>"my_function",
                          "iterable"=>"1:3",
                          "vec_variables"=>"[float]",
-                         "scenefile"=>"examples/tutorial_basic_sintax.txt",
+                         "scenefile"=>"examples/tutorial_basic_syntax.txt",
                          "%COMMAND%"=>"onoff", "ONLY_FOR_TESTS"=>true))
      @test isnothing(render_animation(
                          "function"=>"my_function",
                          "iterable"=>"1:3",
                          "vec_variables"=>"[float]",
-                         "scenefile"=>"examples/tutorial_basic_sintax.txt",
+                         "scenefile"=>"examples/tutorial_basic_syntax.txt",
                          "%COMMAND%"=>"flat", "ONLY_FOR_TESTS"=>true))
      @test isnothing(render_animation(
                          "function"=>"my_function",
                          "iterable"=>"1:3",
                          "vec_variables"=>"[float]",
-                         "scenefile"=>"examples/tutorial_basic_sintax.txt",
+                         "scenefile"=>"examples/tutorial_basic_syntax.txt",
                          "%COMMAND%"=>"pathtracer", "ONLY_FOR_TESTS"=>true))
      @test isnothing(render_animation(
                          "function"=>"my_function",
                          "iterable"=>"1:3",
                          "vec_variables"=>"[float]",
-                         "scenefile"=>"examples/tutorial_basic_sintax.txt",
+                         "scenefile"=>"examples/tutorial_basic_syntax.txt",
                          "%COMMAND%"=>"pointlight", "ONLY_FOR_TESTS"=>true))
 
      @test_throws ArgumentError render_animation(
                          "function"=>"my_function",
                          "iterable"=>"1:3",
                          "vec_variables"=>"[float]",
-                         "scenefile"=>"examples/tutorial_basic_sintax.txt",
+                         "scenefile"=>"examples/tutorial_basic_syntax.txt",
                          "ONLY_FOR_TESTS"=>true, "%COMMAND%"=>"onoff", "onoff"=>Dict("background_color"=>"<1,2,3"))
      @test_throws ArgumentError render_animation(
                          "function"=>"my_function",
                          "iterable"=>"1:3",
                          "vec_variables"=>"[float]",
-                         "scenefile"=>"examples/tutorial_basic_sintax.txt"         ,
+                         "scenefile"=>"examples/tutorial_basic_syntax.txt"         ,
                          "ONLY_FOR_TESTS"=>true, "%COMMAND%"=>"onoff", "onoff"=>Dict("color"=>"[1,2,3]"))
      @test_throws ArgumentError render_animation(
                          "function"=>"my_function",
                          "iterable"=>"1:3",
                          "vec_variables"=>"[float]",
-                         "scenefile"=>"examples/tutorial_basic_sintax.txt",
+                         "scenefile"=>"examples/tutorial_basic_syntax.txt",
                          "ONLY_FOR_TESTS"=>true, "%COMMAND%"=>"flat", "flat"=>Dict("background_color"=>"<1,2,3"))
      @test_throws ArgumentError render_animation(
                          "function"=>"my_function",
                          "iterable"=>"1:3",
                          "vec_variables"=>"[float]",
-                         "scenefile"=>"examples/tutorial_basic_sintax.txt",
+                         "scenefile"=>"examples/tutorial_basic_syntax.txt",
                          "ONLY_FOR_TESTS"=>true, "%COMMAND%"=>"flat", "flat"=>Dict("background_color"=>"[1,2,3]"))
      @test_throws ArgumentError render_animation(
                          "function"=>"my_function",
                          "iterable"=>"1:3",
                          "vec_variables"=>"[float]",
-                         "scenefile"=>"examples/tutorial_basic_sintax.txt",
+                         "scenefile"=>"examples/tutorial_basic_syntax.txt",
                          "ONLY_FOR_TESTS"=>true, "%COMMAND%"=>"pathtracer", "pathtracer"=>Dict("background_color"=>"<1,2,3"))
      @test_throws ArgumentError render_animation(
                          "function"=>"my_function",
                          "iterable"=>"1:3",
                          "vec_variables"=>"[float]",
-                         "scenefile"=>"examples/tutorial_basic_sintax.txt",
+                         "scenefile"=>"examples/tutorial_basic_syntax.txt",
                          "ONLY_FOR_TESTS"=>true, "%COMMAND%"=>"pathtracer", "pathtracer"=>Dict("init_state"=>"3.14"))
      @test_throws ArgumentError render_animation(
                          "function"=>"my_function",
                          "iterable"=>"1:3",
                          "vec_variables"=>"[float]",
-                         "scenefile"=>"examples/tutorial_basic_sintax.txt",
+                         "scenefile"=>"examples/tutorial_basic_syntax.txt",
                          "ONLY_FOR_TESTS"=>true, "%COMMAND%"=>"pathtracer", "pathtracer"=>Dict("init_seq"=>-5))
      @test_throws ArgumentError render_animation(
                          "function"=>"my_function",
                          "iterable"=>"1:3",
                          "vec_variables"=>"[float]",
-                         "scenefile"=>"examples/tutorial_basic_sintax.txt",
+                         "scenefile"=>"examples/tutorial_basic_syntax.txt",
                          "ONLY_FOR_TESTS"=>true, "%COMMAND%"=>"pathtracer", "pathtracer"=>Dict("num_of_rays"=>-1))
      @test_throws ArgumentError render_animation(
                          "function"=>"my_function",
                          "iterable"=>"1:3",
                          "vec_variables"=>"[float]",
-                         "scenefile"=>"examples/tutorial_basic_sintax.txt",
+                         "scenefile"=>"examples/tutorial_basic_syntax.txt",
                          "ONLY_FOR_TESTS"=>true, "%COMMAND%"=>"pathtracer", "pathtracer"=>Dict("max_depth"=>π))
      @test_throws ArgumentError render_animation(
                          "function"=>"my_function",
                          "iterable"=>"1:3",
                          "vec_variables"=>"[float]",
-                         "scenefile"=>"examples/tutorial_basic_sintax.txt",
+                         "scenefile"=>"examples/tutorial_basic_syntax.txt",
                          "ONLY_FOR_TESTS"=>true, "%COMMAND%"=>"pathtracer", "pathtracer"=>Dict("russian_roulette_limit"=>-3))
      @test_throws ArgumentError render_animation(
                          "function"=>"my_function",
                          "iterable"=>"1:3",
                          "vec_variables"=>"[float]",
-                         "scenefile"=>"examples/tutorial_basic_sintax.txt",
+                         "scenefile"=>"examples/tutorial_basic_syntax.txt",
                          "ONLY_FOR_TESTS"=>true, "%COMMAND%"=>"pointlight", "pointlight"=>Dict("background_color"=>"<1,2,3"))
      @test_throws ArgumentError render_animation(
                          "function"=>"my_function",
                          "iterable"=>"1:3",
                          "vec_variables"=>"[float]",
-                         "scenefile"=>"examples/tutorial_basic_sintax.txt",
+                         "scenefile"=>"examples/tutorial_basic_syntax.txt",
                          "ONLY_FOR_TESTS"=>true, "%COMMAND%"=>"pointlight", "pointlight"=>Dict("ambient_color"=>"[1,2,3]"))
      cd("test")
 end

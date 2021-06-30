@@ -533,10 +533,8 @@ function parse_demo_settings(dict::Dict{String, T}) where {T}
     world_type::String = haskey(dict, "world_type") ? 
         string2stringoneof(dict["world_type"], DEMO_WORLD_TYPES) : "A"
 
-    samples_per_pixel::Int64 = haskey(dict, "samples_per_pixel") ? begin
-        check = string2rootint64(dict["samples_per_pixel"])
-        string2evenint64(dict["samples_per_pixel"]) 
-        end : 0
+    samples_per_pixel::Int64 = haskey(dict, "samples_per_pixel") ?
+        string2rootint64(dict["samples_per_pixel"])^2 : 0
 
     bool_print::Bool = haskey(dict, "bool_print") ?  dict["bool_print"] : true
     
@@ -710,10 +708,8 @@ function parse_demoanimation_settings(dict::Dict{String, T}) where {T}
 
     anim::String = haskey(dict, "set_anim_name") ? dict["set_anim_name"] : "demo_animation.mp4"
 
-    samples_per_pixel::Int64 = haskey(dict, "samples_per_pixel") ? begin
-        check = string2rootint64(dict["samples_per_pixel"])
-        string2evenint64(dict["samples_per_pixel"]) 
-        end : 0
+    samples_per_pixel::Int64 = haskey(dict, "samples_per_pixel") ?
+        string2rootint64(dict["samples_per_pixel"])^2 : 0
 
     world_type::String = haskey(dict, "world_type") ? 
         string2stringoneof(dict["world_type"], DEMO_WORLD_TYPES) : "A"
@@ -927,10 +923,8 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
     
     bool_savepfm::Bool = haskey(dict, "bool_savepfm") ? dict["bool_savepfm"] : true
 
-    samples_per_pixel::Int64 = haskey(dict, "samples_per_pixel") ? begin
-        check = string2rootint64(dict["samples_per_pixel"])
-        string2evenint64(dict["samples_per_pixel"]) 
-        end : 0
+    samples_per_pixel::Int64 = haskey(dict, "samples_per_pixel") ?
+        string2rootint64(dict["samples_per_pixel"])^2 : 0
 
     declare_float::Union{Dict{String, Float64}, Nothing} = haskey(dict, "declare_float") ?
         (typeof(dict["declare_float"]) == Dict{String, Float64} ? 
@@ -1160,10 +1154,8 @@ function parse_render_animation_settings(dict::Dict{String, T}) where {T}
 
     bool_print::Bool = haskey(dict, "bool_print") ?  dict["bool_print"] : true
 
-    samples_per_pixel::Int64 = haskey(dict, "samples_per_pixel") ? begin
-        check = string2rootint64(dict["samples_per_pixel"])
-        string2evenint64(dict["samples_per_pixel"]) 
-        end : 0
+    samples_per_pixel::Int64 = haskey(dict, "samples_per_pixel") ?
+        string2rootint64(dict["samples_per_pixel"])^2 : 0
 
     declare_float::Union{Dict{String, Float64}, Nothing} = haskey(dict, "declare_float") ?
         (typeof(dict["declare_float"]) == Dict{String, Float64} ? 

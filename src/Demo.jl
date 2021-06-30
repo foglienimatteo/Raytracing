@@ -553,4 +553,6 @@ ffmpeg -r 25 -f image2 -s 50x30 -i animazione/image%03d.png \
 
 ffmpeg -i demo/demo_anim_Flat_640x480x360.mp4 -t 14 
 	-pix_fmt rgb24 demo/demo_anim_Flat_640x480x360.gif
+
+ffmpeg -i file.mp4 -pix_fmt rgb24 file.gif
 =#

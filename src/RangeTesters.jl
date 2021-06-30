@@ -192,6 +192,7 @@ check_is_square
 
 
 function string2rootint64(string::String)
+     println(string)
      if check_is_square(string)==false
           throw(ArgumentError(
                "invalid number; it must be parsed as a squared positive Int64"

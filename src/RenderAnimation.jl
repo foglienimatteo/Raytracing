@@ -69,7 +69,7 @@ function print_JSON_render_animation(
      data = Dict(
           "function"=>string(func),
           "vector of variables" => vec_variables,
-          "iterable" => iterable,
+          "iterable" => string(iterable),
           "scene file" => scenefile,
           "time of start" => time_of_start,
           "animation output" => anim_output,

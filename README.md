@@ -62,8 +62,14 @@ It may takes few minutes to render the animation; you might also give smaller (i
 
 ## Usage from the Command Line Interface
 
-This software is able to read a file that describes a scene (i.e a set of objects, pigments, materials, etc. that we want  render).
-To understand how to write such a file, take a look at the [tutorial_basic_sintax.txt](examples/tutorial_basic_sintax.txt) and the [demo_world_B.txt](examples/demo_world_B.txt) files in the [examples](esamples) directory.
+This software is able to read a file that describes a scene (i.e a set of objects, pigments, materials, etc. that we want render).
+To understand how to write such a file, take a look at the files contained in the  [examples](esamples) directory, in the following order: 
+- [tutorial_basic_syntax.txt](examples/tutorial_basic_syntax.txt), which shows the basic syntax of how the scenefile must be written;
+- [demo_world_B.txt](examples/demo_world_B.txt), which shows the rendering of the world type B of the `demo`function;
+- [earth_and_sun.txt](examples/earth_and_sun.txt), which shows the rendering of a more complicated image with the point-light renderer;
+- [earth_moon_sun.txt](examples/earth_moon_sun.txt), which shows the rendering of an animation.
+  
+Each of these files contains also, in the initial description, the commands necessary to render the described image; if you want to learn this software in the most practical way, these files are perfect!
 
 The basic structure of a command in the CLI is the following:
 
@@ -105,16 +111,16 @@ The tonemapping command is simple:
 where `ALPHA` is the scaling factor for the normalisation process (default `a=0.18`), `GAMMA` is YOUR monitor gamma value (default `g=1.0`) and `LUM` is the average luminosity of the image (the default value is manually calculated for the image itself, but it's useful to specify manually this value for particularly dark images).
 Choose your `ALPHA` and `GAMMA` values without any fear to try again! This algorithm is indeed by far more efficient and computationally cheaper than the rendering.
 
-NOTE: you can also specify `ALPHA`, `GAMMA` and `LUM` in the render and animation command; it's fundamental for the latter case, because no "PFM-animation" that can be tonemappend exists!
+NOTE: you can also specify `ALPHA`, `GAMMA` and `LUM` in the render and animation command; it's fundamental for the latter case, because no "PFM-animation" that can be tonemapped exists!
 
 
 Here we show an example of usage, which renders the [earth_and_sun.txt](examples/earth_and_sun.txt) file
 ```bash
-./Raytracer.jl render examples/earth_and_sun.txt --width=2880 --height=1800 flat
+./Raytracer.jl render examples/earth_and_sun.txt --width=1200 --height=900 flat
 ```
-and of the tone-map the resulting PFM
+and of the tone-map the resulting PFM (named "scene.pfm")
 ```bash
-./Raytracer.jl tonemapping scene.pfm scene.png --normalization=0.18 --gamma=1.0
+./Raytracer.jl tonemapping scene.pfm scene.png --normalization=0.18 --gamma=1.0 --avg_lum=0.065
 ```
 
 earth_and_sun.txt with FlatRenderer| 
@@ -123,7 +129,7 @@ earth_and_sun.txt with FlatRenderer|
 
 We show also an animation example of usage, which renders the [earth_moon_sun.txt](examples/earth_moon_sun.txt) file
 ```bash
-./Raytracer.jl animation  --normalization=0.18 --gamma=1.0 --avg_lum=0.025 --function=earth_moon_sun --vec_variables="[moon_x,  moon_y, moon_z,  moon_rotang, earth_rotang]" --iterable=1:100 examples/earth_moon_sun.txt pointlight
+./Raytracer.jl animation  --normalization=0.18 --gamma=1.0 --avg_lum=0.065 --width=1200 --height=900 --function=earth_moon_sun --vec_variables="[moon_x,  moon_y, moon_z,  moon_rotang, earth_rotang]" --iterable=1:200 examples/earth_moon_sun.txt pointlight --dark_parameter=0.25
 ```
 
 earth_moon_sun.txt with PointLight | 
@@ -139,7 +145,6 @@ If you prefer to use the Julia REPL, first of all you need to include the softwa
 
 ```julia
 include("Raytracer.jl")
-
 ```
 
 You can obviously visualize the options for each function thanks to the help option (by typing `?`, than write the function name) and set the parameters in a dictionary-like sintax.
@@ -147,7 +152,7 @@ The only main difference is that in order to specify the renderer algorithm, the
 
 For example, in order to render the demo image B previously showed:
 ```julia
-demo("camera_type"=>"ort", "world_type"=>"B", "camera_position"=>"[-1, 0, 1]", "width"=>640, "height"=>480, "%COMMAND%"=>"flat")
+demo("world_type"=>"B", "camera_position"=>"[-1.0, 0.0, 1.0]", "samples_per_pixel"=>9, "%COMMAND%"=>"pathtracer")
 ```
 
 Instead, for rendering the `examples/earth_and_sun.txt`
@@ -156,12 +161,12 @@ render("scenefile"=>"examples/earth_and_sun.txt", "width"=>2880, "height"=>1880,
 ```
 and for tone-map it
 ```julia
-tone_mapping("infile"=>"scene.pfm", "outfile"=>"scene.png", "alpha"=>0.18, "gamma"=>0.6)
+tone_mapping("infile"=>"scene.pfm", "outfile"=>"scene.png", "alpha"=>0.18, "gamma"=>1.0, "avg_lum"=>0.065)
 ```
 
 Finally, to create the  `examples/earth_moon_sun.txt` animation:
 ```julia
-render_animation("normalization"=>0.18, "gamma"=>1.0, "avg_lum"=>0.025, "width"=>1440, "height"=>900, "function"=>"earth_moon_sun", "vec_variables"=>"[moon_x,  moon_y, moon_z,  moon_rotang, earth_rotang]", "iterable"=>"1:100", "scenefile"=>"examples/earth_moon_sun.txt", "%COMMAND%"=>"pointlight")
+render_animation("normalization"=>0.18, "gamma"=>1.0, "avg_lum"=>0.065, "width"=>1200, "height"=>900, "function"=>"earth_moon_sun", "vec_variables"=>"[moon_x,  moon_y, moon_z,  moon_rotang, earth_rotang]","iterable"=>"1:200", "scenefile"=>"examples/earth_moon_sun.txt", "%COMMAND%"=>"pointlight", "pointlight"=>Dict("dark_parameter"=>0.25))
 ```
 
 ## Licence

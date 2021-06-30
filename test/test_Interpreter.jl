@@ -406,10 +406,10 @@ end
 end
 
 
-@testset "test_tutorial_basic_sintax.txt" begin
+@testset "test_tutorial_basic_syntax.txt" begin
      cd("..")
-     open("examples/tutorial_basic_sintax.txt") do stream
-          scene = parse_scene(InputStream(stream, "tutorial_basic_sintax.txt"))
+     open("examples/tutorial_basic_syntax.txt") do stream
+          scene = parse_scene(InputStream(stream, "tutorial_basic_syntax.txt"))
           @test 1==1
      end
 

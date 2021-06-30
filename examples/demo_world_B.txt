@@ -12,19 +12,19 @@
 # without throwing exceptions, and render the demo image of the world type "B") run the 
 # following command in the CLI:
 #
-#    ./Raytracer.jl render examples/demo_world_B.txt pathtracer
+#    ./Raytracer.jl render examples/demo_world_B.txt --samples_per_pixel=4 pathtracer
 #
 # or in the Julia REPL:
 #
-#   render("scenefile"=>"examples/demo_world_B.txt", "%COMMAND%"=>"pathtracer")
+#   render("scenefile"=>"examples/demo_world_B.txt", "camera_position"=>"[-1, 0, 1]", "samples_per_pixel"=>4, "%COMMAND%"=>"pathtracer")
 #
 # You should obtain the same image if you run the demo command with the world "B":
 #
-#   ./Raytracer.jl demo --world_type="B" --camera_position="[-2, 0, 1]" pathtracer 
+#   ./Raytracer.jl demo --world_type="B" --camera_position="[-1, 0, 1]" --samples_per_pixel=4 pathtracer 
 #
 # or in the Julia REPL:
 # 
-#   demo("world_type"=>"B", "camera_position"=>"[-2, 0, 1]",  "%COMMAND%"=>"pathtracer")
+#   demo("world_type"=>"B", "camera_position"=>"[-2, 0, 1]", "samples_per_pixel"=>4, "%COMMAND%"=>"pathtracer")
 #
 #
 #
@@ -48,12 +48,12 @@ MATERIAL sphere_material (
 )
 
 MATERIAL mirror_material (
-        DIFFUSE( UNIFORM( to_RGB(232, 10, 10) ) ),
+        SPECULAR( UNIFORM( to_RGB(232, 10, 10) ) ),
         UNIFORM( <0, 0, 0> )
 )
 
 MATERIAL mirror_material_2 (
-        DIFFUSE( UNIFORM( to_RGB(178, 255, 102) ) ),
+        SPECULAR( UNIFORM( to_RGB(178, 255, 102) ) ),
         UNIFORM( <0, 0, 0> )
 )
 
@@ -130,7 +130,7 @@ SPHERE(
 
 CUBE(
     mirror_material,
-	TRANSLATION([0.3, -1.5, 0]) * SCALING([s2, s2, s2])
+	TRANSLATION([-0.3, -1.5, 0.3]) * SCALING([s2, s2, s2])
 )
 
 # For the triangle shape, you have to specify (after the material) the three points 
@@ -138,7 +138,7 @@ CUBE(
 # syntax
 TRIANGLE( 
     triangle_material,
-	[2.0, 1.0, 0.0], [3.0, -1.0, 0.0], [2.5, 0.0, 1.0]
+	[2.0, 1.0, 3.0], [3.0, 3.0, 1.0], [2.5, 0.0, 1.0]
 )
 
 
@@ -159,7 +159,7 @@ TRIANGLE(
 
 CAMERA(
     PERSPECTIVE, 
-    TRANSLATION([-2, 0, 1]), 
+    TRANSLATION([-0.5, 0, 0.7]), 
     1.0
 )
 
@@ -179,3 +179,7 @@ POINTLIGHT(
     [-1.0, 4.0, 2.0], 
     <1.0, 1.0, 1.0>
 )
+
+# NOTE: for the correct usage of the pointlight renderer, it's also opportune to take
+# to the third scenefile example "examples/earth_and_sun.txt", even if now you know the
+# basic structure of a scenefile for this software.
