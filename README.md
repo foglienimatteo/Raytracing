@@ -123,8 +123,8 @@ and of the tone-map the resulting PFM (named "scene.pfm")
 ./Raytracer.jl tonemapping scene.pfm scene.png --normalization=0.18 --gamma=1.0 --avg_lum=0.03
 ```
 
-earth_and_sun.txt with FlatRenderer| 
-:---------------------------------:|
+earth_and_sun.txt with Point-Light Renderer | 
+:------------------------------------------:|
 ![](examples/earth_and_sun.png) 
 
 We show also an animation example of usage, which renders the [earth_moon_sun.txt](examples/earth_moon_sun.txt) file
