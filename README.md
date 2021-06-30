@@ -44,7 +44,7 @@ To start off and check the correct behavior of this software run one of the foll
 ./Raytracer.jl demo_animation --camera_type=per --width=640 --height=480 flat
 ```
 ```bash
-./Raytracer.jl demo --world_type=B --camera_type=per --camera_position="[-1, 0, 1]" --width=640 --height=480 pathtracing 
+./Raytracer.jl demo --world_type=B --camera_type=per --camera_position="[-1, 0, 1]" --width=640 --height=480 --samples_per_pixel=9 pathtracing 
 ```
 and enjoy respectively the animation `demo/demo_anim_Flat_640x480x360.mp4` and the image `demo/demo_B_PathTracing_640x480.png`
 

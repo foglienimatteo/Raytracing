@@ -12,19 +12,19 @@
 # without throwing exceptions, and render the demo image of the world type "B") run the 
 # following command in the CLI:
 #
-#    ./Raytracer.jl render examples/demo_world_B.txt --samples_per_pixel=4 pathtracer
+#    ./Raytracer.jl render examples/demo_world_B.txt --camera_position="[-1, 0, 1]" --samples_per_pixel=9 pathtracer
 #
 # or in the Julia REPL:
 #
-#   render("scenefile"=>"examples/demo_world_B.txt", "camera_position"=>"[-1, 0, 1]", "samples_per_pixel"=>4, "%COMMAND%"=>"pathtracer")
+#   render("scenefile"=>"examples/demo_world_B.txt", "camera_position"=>"[-1, 0, 1]", "samples_per_pixel"=>9, "%COMMAND%"=>"pathtracer")
 #
 # You should obtain the same image if you run the demo command with the world "B":
 #
-#   ./Raytracer.jl demo --world_type="B" --camera_position="[-1, 0, 1]" --samples_per_pixel=4 pathtracer 
+#   ./Raytracer.jl demo --world_type="B" --camera_position="[-1, 0, 1]" --samples_per_pixel=9 pathtracer 
 #
 # or in the Julia REPL:
 # 
-#   demo("world_type"=>"B", "camera_position"=>"[-2, 0, 1]", "samples_per_pixel"=>4, "%COMMAND%"=>"pathtracer")
+#   demo("world_type"=>"B", "camera_position"=>"[-1, 0, 1]", "samples_per_pixel"=>9, "%COMMAND%"=>"pathtracer")
 #
 #
 #

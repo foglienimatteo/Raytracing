@@ -156,7 +156,7 @@ function second_world()
 	add_shape!(
 		world, 
 		Triangle( 
-			Point(2.0, 1.0, 0.0), Point(3.0, -1.0, 0.0), Point(2.5, 0.0, 1.0),
+			Point(2.0, 1.0, 3.0), Point(3.0, 3.0, 1.0), Point(2.5, 0.0, 1.0),
 			triangle_material
 		)
 	)
@@ -164,15 +164,15 @@ function second_world()
 	add_shape!(
 		world, 
 		Cube( 
-			translation(Vec(0.3, -1.5, 0)) * scaling(Vec(s2, s2, s2)),
+			translation(Vec(-0.3, -1.5, 0.3)) * scaling(Vec(s2, s2, s2)),
 			mirror_material
 		)
 	)
 
 	add_light!(
 		world, 
-		PointLight(Point(-1.0, 1.0, 1.0), 
-		RGB{Float32}(100.0, 100.0, 100.0))
+		PointLight(Point(-1.0, 4.0, 2.0), 
+		RGB{Float32}(1.0, 1.0, 1.0))
 	)
 
 	return world
