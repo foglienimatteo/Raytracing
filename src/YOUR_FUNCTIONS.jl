@@ -27,7 +27,7 @@ end
 function earth_moon_sun(x, P_rev_moon=200, P_rot_earth=50, d=3.0, v=1.0)
      moon_x = d * cos(2 * π * x/P_rev_moon)
      moon_y =  d * sin(2 * π * x/P_rev_moon)
-     moon_z =  v * cos(2 * π * x/P_rev_moon)
+     moon_z =  v * cos(2 * π * x/P_rev_moon) * 0.0
      moon_rotang = 2 * π * x/P_rev_moon
      earth_rotang = 2 * π * x/P_rot_earth
      return (moon_x, moon_y, moon_z, moon_rotang, earth_rotang)

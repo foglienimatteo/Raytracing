@@ -56,93 +56,97 @@ Enumeration for all the possible keywords recognized by the lexer:
 |                   |                   |                        |
 |:-----------------:|:-----------------:|:----------------------:|
 | PLANE = 61        | PRINT = 71        |                        |
-| SPHERE = 62       | ASSERT = 72         |                        |
-|                   |                   |                        |
-|                   |                   |                        |
+| SPHERE = 62       | ASSERT = 72       |                        |
+| CUBE = 63         |                   |                        |
+| TRIANGLE = 64     |                   |                        |
 |                   |                   |                        |
 |:-----------------:|:-----------------:|:----------------------:|
 ```
 """
 @enum KeywordEnum begin
-     NEW = 1
-     FLOAT = 2
-     STRING = 3
-     VECTOR = 4
-     COLOR = 5
-     MATERIAL = 6
-     POINTLIGHT = 7
+    NEW = 1
+    FLOAT = 2
+    STRING = 3
+    VECTOR = 4
+    COLOR = 5
+    MATERIAL = 6
+    POINTLIGHT = 7
 
-     BRDFS = 10
-     DIFFUSE = 11
-     SPECULAR = 12
+    BRDFS = 10
+    DIFFUSE = 11
+    SPECULAR = 12
 
-     PIGMENT = 20
-     UNIFORM = 21
-     CHECKERED = 22
-     IMAGE = 23
+    PIGMENT = 20
+    UNIFORM = 21
+    CHECKERED = 22
+    IMAGE = 23
 
-     CAMERA = 30
-     ORTHOGONAL = 31
-     PERSPECTIVE = 32
+    CAMERA = 30
+    ORTHOGONAL = 31
+    PERSPECTIVE = 32
 
-     TRANSFORMATION = 40
-     IDENTITY = 41
-     TRANSLATION = 42
-     ROTATION_X = 43
-     ROTATION_Y = 44
-     ROTATION_Z = 45
-     SCALING = 46
+    TRANSFORMATION = 40
+    IDENTITY = 41
+    TRANSLATION = 42
+    ROTATION_X = 43
+    ROTATION_Y = 44
+    ROTATION_Z = 45
+    SCALING = 46
 
-     BOOL = 50
-     TRUE = 51
-     FALSE = 52
+    BOOL = 50
+    TRUE = 51
+    FALSE = 52
 
-     PLANE = 61
-     SPHERE = 62
+    PLANE = 61
+    SPHERE = 62
+    CUBE = 63
+    TRIANGLE = 64
 
-     PRINT = 71
-     ASSERT = 72
+    PRINT = 71
+    ASSERT = 72
 end
 
 KEYWORDS = Dict{String, KeywordEnum}(
-     "NEW" => NEW,
-     "FLOAT" => FLOAT,
-     "STRING" => STRING,
-     "VECTOR" => VECTOR,
-     "COLOR" => COLOR,
-     "MATERIAL" => MATERIAL,
-     "POINTLIGHT" => POINTLIGHT,
+    "NEW" => NEW,
+    "FLOAT" => FLOAT,
+    "STRING" => STRING,
+    "VECTOR" => VECTOR,
+    "COLOR" => COLOR,
+    "MATERIAL" => MATERIAL,
+    "POINTLIGHT" => POINTLIGHT,
 
-     "BRDF" => BRDFS,
-     "DIFFUSE" => DIFFUSE,
-     "SPECULAR" => SPECULAR,
+    "BRDF" => BRDFS,
+    "DIFFUSE" => DIFFUSE,
+    "SPECULAR" => SPECULAR,
 
-     "PIGMENT" => PIGMENT,
-     "UNIFORM" => UNIFORM,
-     "CHECKERED" => CHECKERED,
-     "IMAGE" => IMAGE,
+    "PIGMENT" => PIGMENT,
+    "UNIFORM" => UNIFORM,
+    "CHECKERED" => CHECKERED,
+    "IMAGE" => IMAGE,
 
-     "CAMERA" => CAMERA,
-     "ORTHOGONAL" => ORTHOGONAL,
-     "PERSPECTIVE" => PERSPECTIVE,
+    "CAMERA" => CAMERA,
+    "ORTHOGONAL" => ORTHOGONAL,
+    "PERSPECTIVE" => PERSPECTIVE,
 
-     "TRANSFORMATION" => TRANSFORMATION,
-     "IDENTITY" => IDENTITY,
-     "TRANSLATION" => TRANSLATION,
-     "ROTATION_X" => ROTATION_X,
-     "ROTATION_Y" => ROTATION_Y,
-     "ROTATION_Z" => ROTATION_Z,
-     "SCALING" => SCALING,
+    "TRANSFORMATION" => TRANSFORMATION,
+    "IDENTITY" => IDENTITY,
+    "TRANSLATION" => TRANSLATION,
+    "ROTATION_X" => ROTATION_X,
+    "ROTATION_Y" => ROTATION_Y,
+    "ROTATION_Z" => ROTATION_Z,
+    "SCALING" => SCALING,
 
-     "BOOL" => BOOL,
-     "TRUE" => TRUE,
-     "FALSE" => FALSE,
+    "BOOL" => BOOL,
+    "TRUE" => TRUE,
+    "FALSE" => FALSE,
 
-     "PLANE" => PLANE,
-     "SPHERE" => SPHERE,
+    "PLANE" => PLANE,
+    "SPHERE" => SPHERE,
+    "CUBE" => CUBE,
+    "TRIANGLE" => TRIANGLE,
 
-     "PRINT" => PRINT,
-     "ASSERT" => ASSERT,
+    "PRINT" => PRINT,
+    "ASSERT" => ASSERT,
 )
 
 

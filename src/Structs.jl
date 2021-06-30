@@ -167,6 +167,7 @@ struct Vec
         Vec(convert(Float64, x), convert(Float64, y), convert(Float64, z))
     end
 end
+Point(v::Vec) = Point(v.x, v.y, v.z)
 
 length(::Vec) = 3
 
@@ -816,12 +817,26 @@ struct Triangle <: Shape
     flag_background::Bool
     
     Triangle(v::SVector{3, Point}, M::Material, b1::Bool=false, b2::Bool=false) = new(v, M, b1, b2)
-    Triangle(P1::Point, P2::Point, P3::Point,  M::Material, b1::Bool=false, b2::Bool=false) = new(SVector{3}(P1,P2,P3), M, b1, b2)
     Triangle(M::Material, v::SVector{3, Point}, b1::Bool=false, b2::Bool=false) = new(v, M, b1, b2)
+    Triangle(P1::Point, P2::Point, P3::Point,  M::Material=Material(), b1::Bool=false, b2::Bool=false) = new(SVector{3}(P1,P2,P3), M, b1, b2)
     Triangle(v::SVector{3, Point}, b1::Bool=false, b2::Bool=false) = new(v, Material(), b1, b2)
-    Triangle(P1::Point, P2::Point, P3::Point, b1::Bool=false, b2::Bool=false) = new(SVector{3}(P1,P2,P3), Material(), b1, b2)
     Triangle(M::Material, b1::Bool=false, b2::Bool=false) = new(VERTEXES, M, b1, b2)
     Triangle(b1::Bool=false, b2::Bool=false) = new(VERTEXES, Material(),b1, b2)
+
+    function Triangle(
+        P1::Union{Point,Vec}, 
+        P2::Union{Point,Vec}, 
+        P3::Union{Point,Vec},  
+        M::Material=Material(), 
+        b1::Bool=false, 
+        b2::Bool=false
+        ) 
+        p1 = typeof(P1) == Vec ? Point(P1) : P1
+        p2 = typeof(P2) == Vec ? Point(P2) : P2
+        p3 = typeof(P3) == Vec ? Point(P3) : P3
+        
+        new(SVector{3}(p1,p2,p3), M, b1, b2)
+    end
 end
 
 """

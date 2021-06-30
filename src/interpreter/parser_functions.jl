@@ -83,6 +83,10 @@ mutable struct Scene
      )
 end
 
+
+##########################################################################################92
+
+
 function expect_symbol(inputstream::InputStream, symbol::String)
      token = read_token(inputstream)
      if (typeof(token.value) ≠ SymbolToken) || (token.value.symbol ≠ symbol)
@@ -303,6 +307,11 @@ function expect_identifier(inputstream::InputStream)
 
      return token.value.identifier
 end
+
+
+
+##########################################################################################92
+
 
 
 """
@@ -758,6 +767,51 @@ function parse_transformation(inputstream::InputStream, scene::Scene)
 end
 
 
+
+"""
+     parse_camera(inputstream::InputStream, scene::Scene) :: Camera
+
+Parse a Camera from the given `inputstream` and return it.
+
+Call internally the following parsing functions:
+- [`expect_symbol`](@ref)
+- [`expect_keywords`](@ref)
+- [`expect_number`](@ref)
+- [`parse_transformation`](@ref)
+
+Call internally the following functions and structs of the program:
+- [`OrthogonalCamera`](@ref)
+- [`PerspectiveCamera`](@ref)
+
+See also: [`InputStream`](@ref), [`Scene`](@ref),  [`Camera`](@ref)
+"""
+function parse_camera(inputstream::InputStream, scene::Scene)
+     expect_symbol(inputstream, "(")
+     type_kw = expect_keywords(inputstream, [ PERSPECTIVE,  ORTHOGONAL])
+     expect_symbol(inputstream, ",")
+     transformation = parse_transformation(inputstream, scene)
+
+     if type_kw ==  PERSPECTIVE
+          expect_symbol(inputstream, ",")
+          distance = expect_number(inputstream, scene)
+          expect_symbol(inputstream, ")")
+          result = PerspectiveCamera(distance, 1.0, transformation)
+
+     elseif type_kw ==  ORTHOGONAL
+          expect_symbol(inputstream, ")")
+          result = OrthogonalCamera(1.0, transformation)
+
+     end
+
+     return result
+end
+
+
+
+##########################################################################################92
+
+
+
 """
      parse_pointlight(inputstream::InputStream, scene::Scene) :: PointLight
 
@@ -890,39 +944,95 @@ end
 
 
 """
-     parse_camera(inputstream::InputStream, scene::Scene) :: Camera
+     parse_cube(inputstream::InputStream, scene::Scene) :: Cube
 
-Parse a Camera from the given `inputstream` and return it.
+Parse a Cube from the given `inputstream` and return it.
+Throws `GrammarError` if the specified `Material` does not exist.
 
 Call internally the following parsing functions:
 - [`expect_symbol`](@ref)
-- [`expect_keywords`](@ref)
-- [`expect_number`](@ref)
+- [`expect_identifier`](@ref)
 - [`parse_transformation`](@ref)
 
-Call internally the following functions and structs of the program:
-- [`OrthogonalCamera`](@ref)
-- [`PerspectiveCamera`](@ref)
-
-See also: [`InputStream`](@ref), [`Scene`](@ref),  [`Camera`](@ref)
+See also: [`InputStream`](@ref), [`Scene`](@ref), [`Cube`](@ref)
+[`Material`](@ref)
 """
-function parse_camera(inputstream::InputStream, scene::Scene)
+function parse_cube(inputstream::InputStream, scene::Scene)
      expect_symbol(inputstream, "(")
-     type_kw = expect_keywords(inputstream, [ PERSPECTIVE,  ORTHOGONAL])
+
+     material_name = expect_identifier(inputstream)
+     if material_name ∉ keys(scene.materials)
+          # We raise the exception here because inputstream is pointing to the end of the wrong identifier
+          throw(GrammarError(inputstream.location, "unknown material $(material_name)"))
+     end
      expect_symbol(inputstream, ",")
      transformation = parse_transformation(inputstream, scene)
 
-     if type_kw ==  PERSPECTIVE
+     token = read_token(inputstream)
+     if typeof(token.value) == SymbolToken && token.value.symbol == ","
+          unread_token(inputstream, token)
+
           expect_symbol(inputstream, ",")
-          distance = expect_number(inputstream, scene)
+          flag_pointlight = expect_bool(inputstream, scene)
+          expect_symbol(inputstream, ",")
+          flag_background = expect_bool(inputstream, scene)
           expect_symbol(inputstream, ")")
-          result = PerspectiveCamera(distance, 1.0, transformation)
-
-     elseif type_kw ==  ORTHOGONAL
+     else
+          unread_token(inputstream, token)
           expect_symbol(inputstream, ")")
-          result = OrthogonalCamera(1.0, transformation)
-
+          flag_pointlight = false
+          flag_background = false
      end
 
-     return result
+     return Cube(transformation, scene.materials[material_name], flag_pointlight, flag_background)
 end
+
+
+"""
+     parse_triangle(inputstream::InputStream, scene::Scene) :: Triangle
+
+Parse a Triangle from the given `inputstream` and return it.
+Throws `GrammarError` if the specified `Material` does not exist.
+
+Call internally the following parsing functions:
+- [`expect_symbol`](@ref)
+- [`expect_identifier`](@ref)
+- [`parse_transformation`](@ref)
+
+See also: [`InputStream`](@ref), [`Scene`](@ref), [`Triangle`](@ref)
+[`Material`](@ref)
+"""
+function parse_triangle(inputstream::InputStream, scene::Scene)
+     expect_symbol(inputstream, "(")
+
+     material_name = expect_identifier(inputstream)
+     if material_name ∉ keys(scene.materials)
+          # We raise the exception here because inputstream is pointing to the end of the wrong identifier
+          throw(GrammarError(inputstream.location, "unknown material $(material_name)"))
+     end
+     expect_symbol(inputstream, ",")
+     p1 = parse_vector(inputstream, scene)
+     expect_symbol(inputstream, ",")
+     p2 = parse_vector(inputstream, scene)
+     expect_symbol(inputstream, ",")
+     p3 = parse_vector(inputstream, scene)
+
+     token = read_token(inputstream)
+     if typeof(token.value) == SymbolToken && token.value.symbol == ","
+          unread_token(inputstream, token)
+
+          expect_symbol(inputstream, ",")
+          flag_pointlight = expect_bool(inputstream, scene)
+          expect_symbol(inputstream, ",")
+          flag_background = expect_bool(inputstream, scene)
+          expect_symbol(inputstream, ")")
+     else
+          unread_token(inputstream, token)
+          expect_symbol(inputstream, ")")
+          flag_pointlight = false
+          flag_background = false
+     end
+
+     return Triangle(p1, p2, p3, scene.materials[material_name], flag_pointlight, flag_background)
+end
+

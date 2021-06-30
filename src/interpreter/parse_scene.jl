@@ -193,17 +193,23 @@ function parse_scene(inputstream::InputStream, variables::Dict{String, Float64} 
                name, material = parse_material(inputstream, scene)
                scene.materials[name] = material
 
+          elseif what.value.keyword == PRINT
+               println(inputstream, scene)
+
+          elseif what.value.keyword == ASSERT
+               assert(inputstream, scene)
+
           elseif what.value.keyword == SPHERE
                add_shape!(scene.world, parse_sphere(inputstream, scene))
 
           elseif what.value.keyword == PLANE
                add_shape!(scene.world, parse_plane(inputstream, scene))
 
-          elseif what.value.keyword == PRINT
-               println(inputstream, scene)
+          elseif what.value.keyword == CUBE
+               add_shape!(scene.world, parse_cube(inputstream, scene))
 
-          elseif what.value.keyword == ASSERT
-               assert(inputstream, scene)
+          elseif what.value.keyword == TRIANGLE
+               add_shape!(scene.world, parse_triangle(inputstream, scene))
           end
      end
 

@@ -62,10 +62,12 @@ export PCG, random
 export create_onb_from_z
 #from ScatterRay.jl
 export scatter_ray
-#from Interpreter.jl
+# from Interpreter.jl
 # see the module Interpreter.jl
-#from Render.jl
-export render, render_animation
+# from Render.jl
+export render
+# from RenderAnimation.jl
+export render_animation
 # from PrintFunctions.jl
 export print_not_black
 # from ArgParse_CLI.jl
@@ -99,6 +101,7 @@ include("Interpreter.jl")
 using .Interpreter
 
 include("Render.jl")
+include("RenderAnimation.jl")
 include("PrintFunctions.jl")
 include("ArgParse_CLI.jl")
 

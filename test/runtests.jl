@@ -119,8 +119,12 @@ end
 	include("test_Interpreter.jl")
 end
 
-@testset "test_Demo-Render" begin
-	include("test_Demo-Render.jl")
+@testset "test_Demo-DemoAnimation.jl" begin
+	include("test_Demo-DemoAnimation.jl")
+end
+
+@testset "test_Render-RenderAnimation.jl" begin
+	include("test_Render-RenderAnimation.jl")
 end
 
 @testset "test_Raytracer.jl" begin

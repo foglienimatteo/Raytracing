@@ -47,6 +47,11 @@ MATERIAL mirror_material_2 (
         UNIFORM( <0, 0, 0> )
 )
 
+MATERIAL triangle_material(
+	DIFFUSE(UNIFORM( to_RGB(190, 24, 120) ) ),
+    UNIFORM( <0, 0, 0> ) 
+)
+
 # All the shapes implemented in this program (exception made for triangles)
 # are created by default as "unitary", i.e. :
 # - the spheres are centered in the origin with radius 1
@@ -103,7 +108,6 @@ PLANE(
 FLOAT s1(0.6)
 FLOAT s2(1.0)
 
-
 SPHERE(
     sphere_material,
     TRANSLATION([0, 0, 0.3]) * SCALING([s1, s1, s1])
@@ -112,6 +116,19 @@ SPHERE(
 SPHERE(
     mirror_material,
     TRANSLATION([0.4, 1.5, 0]) * SCALING([s2, s2, s2])
+)
+
+CUBE(
+    mirror_material,
+	TRANSLATION([0.3, -1.5, 0]) * SCALING([s2, s2, s2])
+)
+
+# For the triangle shape, you have to specify (after the material) the three points 
+# that defines the triangle itself (instead of the transformation), in a vector-like
+# syntax
+TRIANGLE( 
+    triangle_material,
+	[2.0, 1.0, 0.0], [3.0, -1.0, 0.0], [2.5, 0.0, 1.0]
 )
 
 # The definition of the CAMERA (i.e. the point of view) works like follows:
