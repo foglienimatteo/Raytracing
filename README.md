@@ -7,10 +7,10 @@
 ![julia-version](https://img.shields.io/badge/julia_version-v1.6-9558B2?style=flat&logo=julia)
 ![status](https://img.shields.io/badge/project_status-🚧_work--in--progress-ba8a11?style=flat) 
 ![package-version](https://img.shields.io/badge/package_version-0.1-blue?style=flat)
-![CI-build](https://img.shields.io/github/workflow/status/cosmofico97/Raytracing/Unit%20tests)
-![size](https://img.shields.io/github/repo-size/cosmofico97/Raytracing) 
-![license]( https://img.shields.io/github/license/cosmofico97/Raytracing)
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://cosmofico97.github.io/Raytracing/stable)   
+![CI-build](https://img.shields.io/github/workflow/status/foglienimatteo/Raytracing/Unit%20tests)
+![size](https://img.shields.io/github/repo-size/foglienimatteo/Raytracing) 
+![license]( https://img.shields.io/github/license/foglienimatteo/Raytracing)
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://foglienimatteo.github.io/Raytracing/stable)   
 
 This software is a simple raytracing program written in the [Julia Programming Language](https://julialang.org).
 It's based on the lectures of the [*Numerical techniques for photorealistic image generation*]( https://www.unimi.it/en/education/degree-programme-courses/2021/numerical-tecniques-photorealistic-image-generation) curse (AY2020-2021), held by Associate Professor [Maurizio Tomasi](http://cosmo.fisica.unimi.it/persone/maurizio-tomasi) at University of Milan [Department of
@@ -30,9 +30,9 @@ Physics "Aldo Pontremoli"](http://eng.fisica.unimi.it/ecm/home).
 
 The simplest way to install this software is cloning the repository where it is built in. Run in the command line
 ```bash
-git clone https://github.com/cosmofico97/Raytracing
+git clone https://github.com/foglienimatteo/Raytracing
 ```
-or download the source code from the github repository https://github.com/cosmofico97/Raytracing
+or download the source code from the github repository https://github.com/foglienimatteo/Raytracing
 
 ## Animation Tutorial
 
