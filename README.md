@@ -5,13 +5,13 @@
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ![julia-version](https://img.shields.io/badge/julia_version-v1.6-9558B2?style=flat&logo=julia) 
-![package-version](https://img.shields.io/github/v/release/cosmofico97/Raytracing?include_prereleases)
-![CI-build](https://img.shields.io/github/workflow/status/cosmofico97/Raytracing/Unit%20tests)
-![size](https://img.shields.io/github/repo-size/cosmofico97/Raytracing) 
-![license]( https://img.shields.io/github/license/cosmofico97/Raytracing)
-[![codecov](https://codecov.io/gh/cosmofico97/Raytracing/branch/master/graph/badge.svg?token=67GIZ9RA8Y)](https://codecov.io/gh/cosmofico97/Raytracing)
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://cosmofico97.github.io/Raytracing/stable) 
-[![Dev](https://img.shields.io/badge/docs-dev-blue?style=flat)](https://cosmofico97.github.io/Raytracing/dev)  
+![package-version](https://img.shields.io/github/v/release/foglienimatteo/Raytracing?include_prereleases)
+![CI-build](https://img.shields.io/github/workflow/status/foglienimatteo/Raytracing/Unit%20tests)
+![size](https://img.shields.io/github/repo-size/foglienimatteo/Raytracing) 
+![license]( https://img.shields.io/github/license/foglienimatteo/Raytracing)
+[![codecov](https://codecov.io/gh/foglienimatteo/Raytracing/branch/master/graph/badge.svg?token=67GIZ9RA8Y)](https://codecov.io/gh/foglienimatteo/Raytracing)
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://foglienimatteo.github.io/Raytracing/stable) 
+[![Dev](https://img.shields.io/badge/docs-dev-blue?style=flat)](https://foglienimatteo.github.io/Raytracing/dev)  
 
 This software is a simple raytracing program written in the [Julia Programming Language](https://julialang.org).
 It's based on the lectures of the [*Numerical techniques for photorealistic image generation*]( https://www.unimi.it/en/education/degree-programme-courses/2021/numerical-tecniques-photorealistic-image-generation) course (AY2020-2021), held by Associate Professor [Maurizio Tomasi](http://cosmo.fisica.unimi.it/persone/maurizio-tomasi) at University of Milan [Department of
@@ -32,9 +32,9 @@ Physics "Aldo Pontremoli"](http://eng.fisica.unimi.it/ecm/home).
 
 The simplest way to install this software is cloning the repository where it is built in. Run in the command line
 ```bash
-git clone https://github.com/cosmofico97/Raytracing
+git clone https://github.com/foglienimatteo/Raytracing
 ```
-or download the source code from the github repository https://github.com/cosmofico97/Raytracing.
+or download the source code from the github repository https://github.com/foglienimatteo/Raytracing.
 
 
 ## Demo and Demo Animation
@@ -113,7 +113,7 @@ Earth with FlatRenderer            |
 :---------------------------------:|
 ![](examples/earth_and_sun.png) 
 
-Refer to the latest [stable documentation](https://cosmofico97.github.io/Raytracing/stable) for explanation of the functions used.
+Refer to the latest [stable documentation](https://foglienimatteo.github.io/Raytracing/stable) for explanation of the functions used.
 
 
 ## Usage from the REPL
