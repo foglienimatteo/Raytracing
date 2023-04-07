@@ -444,6 +444,11 @@ function parse_color(inputstream::InputStream, scene::Scene, open::Bool=false)
      token = read_token(inputstream)
      result = ""
 
+     if (typeof(token.value) == StringToken) && (token.value.string ∈ keys(SYM_COL))
+          result *= repr(SYM_COL[token.value.string])
+          read_token(inputstream)
+     end
+     
      if typeof(token.value) == SymbolToken && token.value.symbol == "("
           result *= "("*parse_vector(inputstream, scene, true)
           expect_symbol(inputstream, ")")
@@ -496,6 +501,8 @@ function parse_color(inputstream::InputStream, scene::Scene, open::Bool=false)
 
           elseif typeof(token.value) == LiteralNumberToken
                result *= repr(token.value.number)
+          elseif (typeof(token.value) == StringToken) && (token.value.string ∈ keys(SYM_COL))
+               result *= repr(SYM_COL[token.value.string])
           else
                unread_token(inputstream, token)
                break
