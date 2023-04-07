@@ -17,6 +17,8 @@ This software is a simple raytracing program written in the [Julia Programming L
 It's based on the lectures of the [*Numerical techniques for photorealistic image generation*]( https://www.unimi.it/en/education/degree-programme-courses/2021/numerical-tecniques-photorealistic-image-generation) course (AY2020-2021), held by Associate Professor [Maurizio Tomasi](http://cosmo.fisica.unimi.it/persone/maurizio-tomasi) at University of Milan [Department of
 Physics "Aldo Pontremoli"](http://eng.fisica.unimi.it/ecm/home).
 
+</br>
+
 ## Table of Contents
 
 - [Raytracing](#raytracing)
@@ -28,6 +30,8 @@ Physics "Aldo Pontremoli"](http://eng.fisica.unimi.it/ecm/home).
   - [Licence](#licence)
   - [Contributors ✨](#contributors-)
 
+</br>
+
 ## Installation
 
 The simplest way to install this software is cloning the repository where it is built in. Run in the command line
@@ -36,6 +40,7 @@ git clone https://github.com/foglienimatteo/Raytracing
 ```
 or download the source code from the github repository https://github.com/foglienimatteo/Raytracing.
 
+</br>
 
 ## Demo and Demo Animation
 
@@ -44,7 +49,7 @@ To start off and check the correct behavior of this software run one of the foll
 ./Raytracer.jl demo_animation --camera_type=per --width=640 --height=480 flat
 ```
 ```bash
-./Raytracer.jl demo --world_type=B --camera_type=per --camera_position="[-1, 0, 1]" --width=640 --height=480 --samples_per_pixel=9 pathtracing 
+./Raytracer.jl demo --world_type=B --camera_type=per --camera_position="[-1, 0, 1]" --width=640 --height=480 --samples_per_pixel=9 pathtracer 
 ```
 and enjoy respectively the animation `demo/demo_anim_Flat_640x480x360.mp4` and the image `demo/demo_B_PathTracing_640x480.png`
 
@@ -58,7 +63,7 @@ Demo Animation A  with FlatRenderer       | Demo Image B with PathTracing
 
 It may takes few minutes to render the animation; you might also give smaller (integer and even) values to `--width` and `--height` in order to obtain the same animation in a smaller amount of time (the price to pay is a worse definition of the animation itself).
 
-
+</br>
 
 ## Usage from the Command Line Interface
 
@@ -138,6 +143,7 @@ earth_moon_sun.txt with PointLight |
 
 Refer to the latest [stable documentation](https://foglienimatteo.github.io/Raytracing/stable) for explanation of the functions used.
 
+</br>
 
 ## Usage from the REPL
 
@@ -169,9 +175,12 @@ Finally, to create the  `examples/earth_moon_sun.txt` animation:
 render_animation("normalization"=>0.18, "gamma"=>1.0, "avg_lum"=>0.065, "width"=>1200, "height"=>900, "function"=>"earth_moon_sun", "vec_variables"=>"[moon_x,  moon_y, moon_z,  moon_rotang, earth_rotang]","iterable"=>"1:200", "scenefile"=>"examples/earth_moon_sun.txt", "%COMMAND%"=>"pointlight", "pointlight"=>Dict("dark_parameter"=>0.25))
 ```
 
+</br>
+
 ## Licence
 All the files in this repository are under a MIT license. See the file [LICENSE.md](./LICENSE.md)
 
+</br>
 
 ## Contributors ✨
 
