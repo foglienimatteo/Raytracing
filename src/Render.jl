@@ -25,14 +25,14 @@ function print_JSON_render(
 
      dict_camera = if typeof(camera) == OrthogonalCamera
                Dict(
-                    "projection" => "orthogonal",
+                    "projection" => "ort", #"orthogonal",
                     "aspect_ratio" => camera.a,
                     "transformation" => camera.T.M,
                )
 
           elseif typeof(camera) == PerspectiveCamera
                Dict(
-                    "projection" => "orthogonal",
+                    "projection" => "per", # "perspective",     #MODIFIED
                     "distance" => camera.d,
                     "aspect ratio" => camera.a,
                     "transformation" => camera.T.M,
@@ -223,6 +223,7 @@ function render(
 
      else
           camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec)
+          camera_type = "ort"                                                                            # BUG
           if camera_type == "per"
 		     (bool_print==true) && (println("Choosen perspective camera..."))
 		     camera = PerspectiveCamera(scene.camera.d, aspect_ratio, camera_tr)

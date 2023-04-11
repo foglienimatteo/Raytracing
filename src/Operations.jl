@@ -77,6 +77,14 @@ Base.:+(v::Vec, p::Point) = Point(p.x+v.x, p.y+v.y, p.z+v.z)
 Base.:-(p::Point, v::Vec) = Point(p.x-v.x, p.y-v.y, p.z-v.z)
 Base.:-(a::Point, b::Point) = Vec(a.x-b.x, a.y-b.y, a.z-b.z)
 
+# Operations for Vec2d
+Base.:+(a::Vec2d, b::Vec2d) = Vec2d(a.u+b.u - floor(a.u+b.u), a.v+b.v- floor(a.v+b.v))
+Base.:-(a::Vec2d, b::Vec2d) = Vec2d(a.u-b.u- floor(a.u+b.u), a.v-b.v- floor(a.v+b.v))
+Base.:-(a::Vec2d) = Vec2d(-a.x, -a.y, -a.z)
+Base.:*(s::Real, a::Vec2d) = Vec2d(s*a.u - floor(s*a.u), s*a.v- floor(s*a.v))
+Base.:*(a::Vec2d, s::Real) = Vec2d(s*a.u- floor(s*a.u), s*a.v- floor(s*a.v))
+Base.:/(a::Vec2d, s::Real) = Vec2d(a.u/s- floor(a.u/s), a.v/s- floor(a.v/s))
+
 #=
 """
 Apply the dot product to the two arguments after having normalized them.

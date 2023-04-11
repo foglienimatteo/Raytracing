@@ -5,6 +5,26 @@
 # Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
 #
 
+SYM_COL = Dict(
+    "BLACK" => RGB{Float32}(0., 0., 0.),
+    "WHITE" => RGB{Float32}(255., 255., 255.),
+    "RED" => RGB{Float32}(255., 0., 0.),
+    "LIME" => RGB{Float32}(0., 255., 0.),
+    "BLUE" => RGB{Float32}(0., 0., 255.),
+    "YELLOW" => RGB{Float32}(255., 255., 0.),
+    "CYAN" => RGB{Float32}(0., 255., 255.),
+    "MAGENTA" => RGB{Float32}(255., 0., 255.),
+    "SYLVER" => RGB{Float32}(192., 192., 192.),
+    "GRAY" => RGB{Float32}(128., 128., 128.),
+    "MAROON" => RGB{Float32}(128., 0., 0.),
+    "OLIVE" => RGB{Float32}(128., 128., 0.),
+    "GREEN" => RGB{Float32}(0., 128., 0.),
+    "PURPLE" => RGB{Float32}(128., 0., 128.),
+    "TEAL" => RGB{Float32}(0., 128., 128.),
+    "NAVY" => RGB{Float32}(0., 0., 128.),
+    "ORANGE" => RGB{Float32}(255., 165., 0.),
+    "GOLD" => RGB{Float32}(255., 215., 0.)
+)
 
 """
      Scene(
@@ -478,6 +498,10 @@ function parse_color(inputstream::InputStream, scene::Scene, open::Bool=false)
                elseif isdefined(Raytracing, Symbol(variable_name)) || isdefined(Base, Symbol(variable_name))
                     unread_token(inputstream, token)
                     result *= parse_function(inputstream, scene)
+               elseif (typeof(token.value) == StringToken) && (token.value.string ∈ keys(SYM_COL))  # aggiunto
+                    result *= repr(SYM_COL[token.value.string])                                     # aggiunto
+               elseif (typeof(token.value) == IdentifierToken) && (token.value.identifier ∈ keys(SYM_COL))  # aggiunto
+                    result *= repr(SYM_COL[token.value.identifier])                                     # aggiunto
                else
                     throw(GrammarError(token.location, "unknown float/color variable '$(token)'"))
                end
@@ -798,16 +822,16 @@ function parse_camera(inputstream::InputStream, scene::Scene)
      expect_symbol(inputstream, ",")
      transformation = parse_transformation(inputstream, scene)
 
-     if type_kw ==  PERSPECTIVE
+     if type_kw == PERSPECTIVE
           expect_symbol(inputstream, ",")
           distance = expect_number(inputstream, scene)
           expect_symbol(inputstream, ")")
           result = PerspectiveCamera(distance, 1.0, transformation)
 
-     elseif type_kw ==  ORTHOGONAL
+     elseif type_kw == ORTHOGONAL
           expect_symbol(inputstream, ")")
+          # result = OrthogonalCamera(1.0, transformation)
           result = OrthogonalCamera(1.0, transformation)
-
      end
 
      return result
@@ -1043,3 +1067,72 @@ function parse_triangle(inputstream::InputStream, scene::Scene)
      return Triangle(p1, p2, p3, scene.materials[material_name], flag_pointlight, flag_background)
 end
 
+
+"""
+     parse_totrus(inputstream::InputStream, scene::Scene) :: Torus
+
+Parse a Torus from the given `inputstream` and return it.
+Throws `GrammarError` if the specified `Material` does not exist.
+
+Call internally the following parsing functions:
+- [`expect_symbol`](@ref)
+- [`expect_identifier`](@ref)
+- [`parse_transformation`](@ref)
+
+See also: [`InputStream`](@ref), [`Scene`](@ref), [`Triangle`](@ref)
+[`Material`](@ref)
+"""
+function parse_torus(inputstream::InputStream, scene::Scene)
+     expect_symbol(inputstream, "(")
+ 
+     material_name = expect_identifier(inputstream)
+     if material_name ∉ keys(scene.materials)
+         # We raise the exception here because inputstream is pointing to the end of the wrong identifier
+         throw(GrammarError(inputstream.location, "unknown material $(material_name)"))
+     end
+     expect_symbol(inputstream, ",")
+     transformation = parse_transformation(inputstream, scene)
+ 
+     token = read_token(inputstream)
+     if typeof(token.value) == LiteralNumberToken
+         small_rad = token.value.number
+ 
+         read_token(inputstream)
+         if typeof(token.value) == SymbolToken && token.value.symbol == ","
+             expect_symbol(inputstream, ",")
+             read_token(inputstream)
+             if typeof(token.value) == LiteralNumberToken
+                 big_rad = token.value.number
+             else
+                 big_rad = 3 * small_rad
+             end
+ 
+         end
+ #        unread_token(inputstream, token)
+     else
+         small_rad = -1
+         big_rad = -1
+ #        unread_token(inputstream, token)
+     end
+    
+ #    token = read_token(inputstream)
+     if typeof(token.value) == SymbolToken && token.value.symbol == ","
+         expect_symbol(inputstream, ",")
+         flag_pointlight = expect_bool(inputstream, scene)
+         expect_symbol(inputstream, ",")
+         flag_background = expect_bool(inputstream, scene)
+         expect_symbol(inputstream, ")")
+     else
+         unread_token(inputstream, token)
+         expect_symbol(inputstream, ")")
+         flag_pointlight = false
+         flag_background = false
+     end
+ 
+     if small_rad<0 && big_rad<0
+         return Torus(transformation, scene.materials[material_name], flag_pointlight, flag_background)
+     else
+         return Torus(transformation, scene.materials[material_name], small_rad, big_rad, flag_pointlight, flag_background)
+
+     end
+end

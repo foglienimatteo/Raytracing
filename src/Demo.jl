@@ -145,6 +145,7 @@ function second_world()
 			sphere_material,
 		)
 	)
+
 	add_shape!(
 		world,
 		Sphere(
@@ -153,26 +154,85 @@ function second_world()
 		)
 	)
 
+	# add_shape!(
+	# 	world, 
+	# 	Triangle( 
+	# 		Point(2.0, 1.0, 3.0), Point(3.0, 3.0, 1.0), Point(2.5, 0.0, 1.0),
+	# 		triangle_material
+	# 	)
+	# )
+
+	# add_shape!(
+	# 	world, 
+	# 	Cube( 
+	# 		translation(Vec(-0.3, -1.5, 0.3)) * scaling(Vec(s2, s2, s2)),
+	# 		mirror_material
+	# 	)
+	# )
+
 	add_shape!(
-		world, 
-		Triangle( 
-			Point(2.0, 1.0, 3.0), Point(3.0, 3.0, 1.0), Point(2.5, 0.0, 1.0),
-			triangle_material
+		world,
+		Torus(translation(Vec(0.4, 1.5, 2.)) * rotation_y(pi/6) * rotation_x(pi/6) * scaling(Vec(0.1, 0.2, 0.3)),
+		Material(DiffuseBRDF(CheckeredPigment(SYM_COL["PURPLE"], SYM_COL["NAVY"], 8))),
+		1.0,
+		3.0
 		)
 	)
 
-	add_shape!(
-		world, 
-		Cube( 
-			translation(Vec(-0.3, -1.5, 0.3)) * scaling(Vec(s2, s2, s2)),
-			mirror_material
-		)
-	)
 
 	add_light!(
 		world, 
 		PointLight(Point(-1.0, 4.0, 2.0), 
 		RGB{Float32}(1.0, 1.0, 1.0))
+	)
+
+	return world
+end
+
+
+function third_world()
+	world = World()
+
+	donut_material = Material(DiffuseBRDF(CheckeredPigment(to_RGB(128, 0, 128),
+														   to_RGB(0, 255, 0),
+														   8)),
+							 CheckeredPigment(to_RGB(128, 0, 128), to_RGB(0, 255, 0),
+														   8)
+							)
+    sphere_material = Material(DiffuseBRDF(UniformPigment(to_RGB(0, 128, 240))))
+	# Create a world and populate it with a few shapes
+	
+	# add_shape!(world,
+	# 		Torus( 
+	# 			translation(Vec(20.0, 0, 0)) * scaling(Vec(0.1, 0.1, 0.1)),
+	# 			donut_material,
+	# 			1.0, 3.0
+	# 		)
+	# )
+
+	add_shape!(
+		world,
+		Torus(#translation(Vec(0.4, 1.5, 2.)) * rotation_y(pi/4) * rotation_x(pi/4),
+		translation(Vec(0.4, 1.5, 2.)) * rotation_z(pi/2),
+			Material(donut_material.brdf, donut_material.emitted_radiance),
+			1.0,
+			3.0
+		)
+	)
+
+	# s1, s2 = 0.6, 1.0
+	# add_shape!(
+	# 	world,
+	# 	Sphere(
+	# 		translation(Vec(0, 0, 0.3)) * scaling(Vec(s1, s1, s1)),
+	# 		sphere_material,
+	# 	)
+	# )
+
+	add_light!(
+		world, 
+		PointLight(Point(-10.0, 10.0, 10.0), 
+		RGB{Float32}(255,255,255))
 	)
 
 	return world
@@ -187,6 +247,7 @@ Select which demo world is used
 function select_world(type_world::String)
 	(type_world=="A") && (return first_world())
 	(type_world=="B") && (return second_world())
+	(type_world=="C") && (return third_world())
 
 	throw(ArgumentError("The input type of world $type does not exists"))
 end
@@ -211,10 +272,10 @@ function demo(
      	width::Int64 = 640, 
      	height::Int64 = 480,
 		a::Float64 = 0.18, 
-          γ::Float64 = 1.0,
+        γ::Float64 = 1.0,
 		lum::Union{Number, Nothing} = nothing,  
      	pfm_output::String = "demo.pfm", 
-        	png_output::String = "demo.png",
+        png_output::String = "demo.png",
 		samples_per_pixel::Int64 = 0, 
 		world_type::String = "A",
 		bool_print::Bool = true,
@@ -224,6 +285,7 @@ function demo(
 
     (ONLY_FOR_TESTS==false) || (return nothing)  
 
+	# println("\n", world_type, "\n")
 	renderer.world = select_world(world_type)
 
 	samples_per_side = string2rootint64(string(samples_per_pixel))
@@ -307,10 +369,10 @@ end
      	width::Int64 = 640, 
      	height::Int64 = 480, 
 		a::Float64=0.18, 
-          γ::Float64=1.0, 
+        γ::Float64=1.0, 
 		lum::Union{Number, Nothing} = nothing,
      	pfm_output::String = "demo.pfm", 
-        	png_output::String = "demo.png",
+        png_output::String = "demo.png",
 		samples_per_pixel::Int64 = 0, 
 		world_type::String = "A",
 		bool_print::Bool = true,
@@ -465,8 +527,8 @@ end
 	demo_animation( 
 			renderer::Renderer = FlatRenderer(),
 			camera_type::String = "per",
-        		width::Int64 = 200, 
-        		height::Int64 = 150,
+        	width::Int64 = 200, 
+        	height::Int64 = 150,
        		anim_output::String = "demo-animation.mp4",
 			samples_per_pixel::Int64 = 0,
 			world_type::String = "A", 

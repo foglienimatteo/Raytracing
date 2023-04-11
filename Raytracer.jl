@@ -38,6 +38,8 @@ function main(args)
 	parsed_command = parsed_arguments["%COMMAND%"]
 	parsed_settings = parsed_arguments[parsed_command]
 
+	# println("\n", parsed_command, "    ", parsed_arguments, "\n")
+
 	if parsed_command=="demo"
 		#println(parse_demo_settings(parsed_settings))
 		demo(parse_demo_settings(parsed_settings)...)

@@ -37,7 +37,7 @@ le forme, mancano!
 
 FARE TUTTI GLI ESEMPI ASTRATTI MA COMPLETI CON TUTTI GLI ARGOMENTI <-> TIPOLOGIA
 =#
-
+#=
 Note: the rendering typology (onoff/flat/pathtracer/pointlight) has to be selected from CLI
 or Julia REPL (see README.md), as width and height of the image.
 
@@ -132,30 +132,29 @@ There are some default values:
     * NAVY (<0., 0., 128.>)
     * ORANGE (<255., 165., 0.>)
     * GOLD (<255., 215., 0.>)
-
+=#
 
 ### src/Raytracing.jl #####################################################################################
 
 SYM_COL = Dict(
-    "BLACK" => RGB{Float32}(0., 0., 0.)
-    "WHITE" => RGB{Float32}(255., 255., 255.)
-    "RED" => RGB{Float32}(255., 0., 0.)
-    "LIME" => RGB{Float32}(0., 255., 0.)
-    "BLUE" => RGB{Float32}(0., 0., 255.)
-    "YELLOW" => RGB{Float32}(255., 255., 0.)
-    "CYAN" => RGB{Float32}(0., 255., 255.)
-    "MAGENTA" => RGB{Float32}(255., 0., 255.)
-    "SYLVER" => RGB{Float32}(192., 192., 192.)
-    "GRAY" => RGB{Float32}(128., 128., 128.)
-    "MAROON" => RGB{Float32}(128., 0., 0.)
-    "OLIVE" => RGB{Float32}(128., 128., 0.)
-    "GREEN" => RGB{Float32}(0., 128., 0.)
-    "PURPLE" => RGB{Float32}(128., 0., 128.)
-    "TEAL" => RGB{Float32}(0., 128., 128.)
-    "NAVY" => RGB{Float32}(0., 0., 128.)
-    "ORANGE" => RGB{Float32}(255., 165., 0.)
+    "BLACK" => RGB{Float32}(0., 0., 0.),
+    "WHITE" => RGB{Float32}(255., 255., 255.),
+    "RED" => RGB{Float32}(255., 0., 0.),
+    "LIME" => RGB{Float32}(0., 255., 0.),
+    "BLUE" => RGB{Float32}(0., 0., 255.),
+    "YELLOW" => RGB{Float32}(255., 255., 0.),
+    "CYAN" => RGB{Float32}(0., 255., 255.),
+    "MAGENTA" => RGB{Float32}(255., 0., 255.),
+    "SYLVER" => RGB{Float32}(192., 192., 192.),
+    "GRAY" => RGB{Float32}(128., 128., 128.),
+    "MAROON" => RGB{Float32}(128., 0., 0.),
+    "OLIVE" => RGB{Float32}(128., 128., 0.),
+    "GREEN" => RGB{Float32}(0., 128., 0.),
+    "PURPLE" => RGB{Float32}(128., 0., 128.),
+    "TEAL" => RGB{Float32}(0., 128., 128.),
+    "NAVY" => RGB{Float32}(0., 0., 128.),
+    "ORANGE" => RGB{Float32}(255., 165., 0.),
     "GOLD" => RGB{Float32}(255., 215., 0.)
-
 )
 
 
@@ -260,7 +259,7 @@ function parse_torus(inputstream::InputStream, scene::Scene)
         flag_background = false
     end
 
-    if small_rad<0 && big_rad<0:
+    if small_rad<0 && big_rad<0
         return Torus(transformation, scene.materials[material_name], flag_pointlight, flag_background)
     else
         return Torus(transformation, scene.materials[material_name], small_rad, big_rad, flag_pointlight, flag_background)
@@ -274,10 +273,28 @@ end
 ### Shapes.jl #####################################################################################
 
 function torus_point_to_uv(P::Point, r::Float64, R::Float64)
-    # metodo basato usando l'angolo alla circonferenza (Molinari) 
-    u = 2 * atan( P.y/( r - R + \sqrt(P.x^2+P.z^2) ) )
-    v = 2 * atan( P.z/(P.x + r + R) )
-    return Vec2d(u,v) / pi
+    # metodo basato usando l'angolo alla circonferenza (Molinari)
+    if (0 <= P.y < 1e-10) && (√(P.x^2+P.z^2) < R - r + 1e-10)
+        u = π/2 # π
+    elseif (- 1e-10 < P.y < 0) && (√(P.x^2+P.z^2) < R - r + 1e-10)
+        u = -π/2 #0
+    else
+        u = 2 * atan( P.y/( r - R + √(P.x^2+P.z^2) ) ) # +π/2
+    end
+
+
+    if (0 <= P.z < 1e-10) && (P.x < - R - r + 1e-10)
+        v = π/2 # π
+    elseif (- 1e-10 < P.z < 0) && (P.x < - R - r + 1e-10)
+        v = -π/2 #0
+    else
+        v = 2 * atan( P.z/(P.x + r + R) ) # +π/2
+    end
+
+    # u = 2 * atan( P.y/( r - R + √(P.x^2+P.z^2) ) ) # +π/2
+    # v = 2 * atan( P.z/(P.x + r + R) ) # +π/2
+
+    return Vec2d(u+π/2, v+π/2) / π
 end
 
 
@@ -296,7 +313,7 @@ function torus_normal(P::Point, ray_dir::Vec, r::Float64, R::Float64)
     =#
 
     # http://cosinekitty.com/raytrace/chapter13_torus.html
-    Q = R/\sqrt(P.x^2-P.z^2) * Point(P.x, 0, P.z)
+    Q = R/√(P.x^2-P.z^2) * Point(P.x, 0, P.z)
     N = Normal(P - Q)
     N ⋅ ray_dir < 0.0 ? nothing : N = -N
     return N
@@ -396,7 +413,7 @@ function quick_ray_intersection(torus::Torus, ray::Ray)
     t_ints = roots(Polynomial([c0, c1, c2, c3, c4]))
 
     # verifico esistenza di almeno una soluzione
-    (t_ints == nothing) && (return nothing)
+    t_ints == nothing && (return nothing)
 
     hit_ts = Vector{Float64}()
 
@@ -414,9 +431,9 @@ function quick_ray_intersection(torus::Torus, ray::Ray)
         end
     end
 
-    (length(hit_ts) == 0) ?return true : return nothing
+    length(hit_ts) == 0 ? return true : return false
 
-end
+end    # quick_ray_intersection
 
 
 ### interpreter/tokens.jl ##########################################################################################
@@ -434,12 +451,12 @@ end
 ### interpreter/parse_scene.jl #####################################################################################
 
 # riga 213 aggiungere:
-elseif what.value.keyword == TORUS
-  add_shape!(scene.world, parse_torus(inputstream, scene))
+# elseif what.value.keyword == TORUS
+#     add_shape!(scene.world, parse_torus(inputstream, scene))
 
 
 ### debug_torus.txt ################################################################################################
-
+#=
 CAMERA(ORTHOGONAL, TRANSLATION([-2, 0, 1]), 1.0)
 
 COLOR purple(<128, 0, 128>)
@@ -470,9 +487,9 @@ POINTLIGHT(
     [-3.5, +3.0, 0.0],
     <255, 255, 255>
 )
+=#
 
-
-### debug_torus.txt ################################################################################################
+### interpreter/parser_functions.jl ################################################################################################
 
 function parse_color(inputstream::InputStream, scene::Scene, open::Bool=false)
     token = read_token(inputstream)

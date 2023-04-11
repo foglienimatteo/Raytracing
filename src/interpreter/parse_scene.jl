@@ -210,6 +210,9 @@ function parse_scene(inputstream::InputStream, variables::Dict{String, Float64} 
 
           elseif what.value.keyword == TRIANGLE
                add_shape!(scene.world, parse_triangle(inputstream, scene))
+          
+          elseif what.value.keyword == TORUS
+               add_shape!(scene.world, parse_torus(inputstream, scene))
           end
      end
 
