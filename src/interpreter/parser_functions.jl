@@ -827,11 +827,11 @@ function parse_camera(inputstream::InputStream, scene::Scene)
           distance = expect_number(inputstream, scene)
           expect_symbol(inputstream, ")")
           result = PerspectiveCamera(distance, 1.0, transformation)
-
+          println("in parser_functions.jl/parse_camera->perspective")
      elseif type_kw == ORTHOGONAL
           expect_symbol(inputstream, ")")
-          # result = OrthogonalCamera(1.0, transformation)
           result = OrthogonalCamera(1.0, transformation)
+          println("in parser_functions.jl/parse_camera->orthogonal")
      end
 
      return result

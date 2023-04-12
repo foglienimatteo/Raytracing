@@ -1,13 +1,14 @@
-# CAMERA(ORTHOGONAL, TRANSLATION([-2, 0, 1]))
-CAMERA(ORTHOGONAL, TRANSLATION([-10, 0, 1]))
+# ./Raytracer.jl render torus_debug.txt --width=1200 --height=900
+
+CAMERA(ORTHOGONAL, TRANSLATION([-2.0, 0.0, 0.0]))
 
 COLOR purple(<128, 0, 128>)
 # COLOR lime(<0, 255, 0>)
 
-VECTOR donut_pos([50.0, 0.0, 0.0])
+VECTOR donut_pos([10.0, 0.0, 0.0])
 FLOAT small_r(0.5)
 FLOAT big_r(3.0)
-PIGMENT donut_pigment(CHECKERED(purple, LIME, 2))
+PIGMENT donut_pigment(CHECKERED(purple, LIME, 12))
 BRDF donut_brdf(DIFFUSE(donut_pigment))
 
 MATERIAL donut_material(

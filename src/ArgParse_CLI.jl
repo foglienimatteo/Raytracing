@@ -390,13 +390,13 @@ function ArgParse_command_line(arguments)
 	add_arg_group!(s["demo_animation"]["pathtracer"], "pathtracing renderer options");
 	@add_arg_table! s["demo_animation"]["pathtracer"] begin
 		"--init_state"
-    			help = "Initial seed for the random number generator (positive integer number)."
-    			default = 45
+			help = "Initial seed for the random number generator (positive integer number)."
+			default = 45
 			range_tester = check_is_uint64
-    		"--init_seq"
-    			help = "Identifier of the sequence produced by the "*
-			    "random number generator (positive integer number)."
-    			default = 54
+		"--init_seq"
+			help = "Identifier of the sequence produced by the "*
+			"random number generator (positive integer number)."
+			default = 54
 			range_tester = check_is_uint64
 		"--background_color"
 			help = "background color specified as '<R,G,B>' components. Example: --background_color=<1,2,3>"
@@ -471,7 +471,7 @@ function ArgParse_command_line(arguments)
 			help = "pixel number on the height of the resulting demo image."
 			default = 480
 			range_tester = check_is_even_uint64
-          "--normalization", "-a"
+        "--normalization", "-a"
 			help = "scaling factor for the normalization process; must be positive"
 			arg_type = Float64
 			range_tester = check_is_positive
@@ -481,7 +481,7 @@ function ArgParse_command_line(arguments)
 			arg_type = Float64
 			range_tester = check_is_positive
 			default = 1.27
-           "--avg_lum"
+        "--avg_lum"
 			help = "average luminosity of the resulting pfm image; if =0 (dafault value)"*
                     "it will be calculated automatically with the built-in avg_lum function"
 			arg_type = Float64
@@ -493,7 +493,7 @@ function ArgParse_command_line(arguments)
 					"If =0 (default value), antialiasing does not occurs."
      		default = 0
 			range_tester = check_is_square
-          "--set_pfm_name"
+        "--set_pfm_name"
 			help = "name of the pfm file to be saved"
 			nargs = '?'
 			arg_type = String
@@ -569,13 +569,13 @@ function ArgParse_command_line(arguments)
 	add_arg_group!(s["render"]["pathtracer"], "pathtracing renderer options");
 	@add_arg_table! s["render"]["pathtracer"] begin
 		"--init_state"
-    			help = "Initial seed for the random number generator (positive integer number)."
-    			default = 45
+			help = "Initial seed for the random number generator (positive integer number)."
+			default = 45
 			range_tester = check_is_uint64
-    		"--init_seq"
-    			help = "Identifier of the sequence produced by the "*
-			    "random number generator (positive integer number)."
-    			default = 54
+		"--init_seq"
+			help = "Identifier of the sequence produced by the "*
+			"random number generator (positive integer number)."
+			default = 54
 			range_tester = check_is_uint64
 		"--background_color"
 			help = "background color specified as '<R,G,B>' components. Example: --background_color=<1,2,3>"

@@ -289,11 +289,11 @@ function demo(
 	renderer.world = select_world(world_type)
 
 	samples_per_side = string2rootint64(string(samples_per_pixel))
-
+	
 	observer_vec = typeof(camera_position) == Point ?
 		camera_position - Point(0., 0., 0.) :
 		camera_position
-
+	
 	camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec)
 	aspect_ratio = width / height
 
@@ -302,11 +302,10 @@ function demo(
 		camera = PerspectiveCamera(1., aspect_ratio, camera_tr)
 	elseif camera_type == "ort"
 		(bool_print==true) && (println("Using orthogonal camera"))
-		camera = OrthogonalCamera(aspect_ratio, camera_tr) 
+		camera = OrthogonalCamera(aspect_ratio, camera_tr)
 	else
 		throw(ArgumentError("Unknown camera: $camera_type"))
 	end
-
 
 	if typeof(renderer) == OnOffRenderer
 		(bool_print==true) && (println("Using on/off renderer"))
@@ -315,7 +314,7 @@ function demo(
 	elseif typeof(renderer) == PathTracer
 		(bool_print==true) && (println("Using path tracing renderer"))
 	elseif typeof(renderer) == PointLightRenderer
-          (bool_print==true) && (println("Using point-light renderer"))
+        (bool_print==true) && (println("Using point-light renderer"))
 	else
 		throw(ArgumentError("Unknown renderer: $(typeof(renderer))"))
 	end
@@ -362,7 +361,7 @@ end
 
 """
 	demo(
-         	renderer::Renderer = FlatRenderer(),
+        renderer::Renderer = FlatRenderer(),
 		camera_type::String = "per",
 		camera_position::Union{Point, Vec} = Point(-1.,0.,0.), 
      	α::Float64 = 0., 
@@ -378,7 +377,7 @@ end
 		bool_print::Bool = true,
 		bool_savepfm::Bool = true,
 		ONLY_FOR_TESTS::Bool = false,
-          )
+        )
 
 	demo(x::(Pair{T1,T2} where {T1,T2})...) = 
 		demo( parse_demo_settings(  Dict( pair for pair in [x...]) )... )
@@ -471,10 +470,10 @@ function demo_animation(
 			renderer::Renderer = FlatRenderer(),
 			camera_type::String = "per",
 			camera_position::Union{Point, Vec} = Point(-1.,0.,0.), 
-        		width::Int64 = 200, 
-        		height::Int64 = 150,
+        	width::Int64 = 200, 
+        	height::Int64 = 150,
 			a::Float64=0.18, 
-            	γ::Float64=1.0,
+            γ::Float64=1.0,
 			lum::Union{Number, Nothing} = nothing,
        		anim_output::String = "demo-animation.mp4",
 			samples_per_pixel::Int64 = 0,

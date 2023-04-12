@@ -187,10 +187,10 @@ function torus_point_to_uv(P::Point, r::Float64, R::Float64)
 
     if abs(z/(r*cos(u)+R)) < 1
         x >= 0 ? v = asin(z/(r*cos(u)+R)) : v = π - asin(z/(r*cos(u)+R))
-    elseif abs(x/(r*cos(u)+R)) < 1
-        x >= 0 ? v = acos(x/(r*cos(u)+R)) : v = π - acos(z/(r*cos(u)+R))
+    # elseif abs(x/(r*cos(u)+R)) < 1
+    #     x >= 0 ? v = acos(x/(r*cos(u)+R)) : v = π - acos(x/(r*cos(u)+R))
     else
-        x >= 0 ? v = asin(z/(r+R)) : v = π - asin(z/(R+R))
+        x >= 0 ? v = asin(1) : v = π - asin(1)
     end
     # # METHOD 2
     # x = P.x
