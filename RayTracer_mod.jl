@@ -57,8 +57,10 @@ where TYPE_OF_PIGMENT can be:
 
 BRDF brdf_name(TYPE_OF_BRDF(arg::PIGMENT))
 where TYPE_OF_BRDF can be:
-- DIFFUSE(arg::PIGMENT);
-- SPECULAR(arg::PIGMENT).
+- DIFFUSE(arg1::PIGMENT, arg2::FLOAT)
+    * arg2: reflectance;
+- SPECULAR(arg::PIGMENT, arg2::FLOAT)
+    * arg2: theresold angle in rad.
 
 MATERIAL material_name(arg1::BRDF, arg2::PIGMENT)
 
@@ -413,7 +415,7 @@ function quick_ray_intersection(torus::Torus, ray::Ray)
     t_ints = roots(Polynomial([c0, c1, c2, c3, c4]))
 
     # verifico esistenza di almeno una soluzione
-    t_ints == nothing && (return nothing)
+    t_ints === nothing && (return nothing)
 
     hit_ts = Vector{Float64}()
 
@@ -431,7 +433,7 @@ function quick_ray_intersection(torus::Torus, ray::Ray)
         end
     end
 
-    length(hit_ts) == 0 ? return true : return false
+    length(hit_ts) == 0 ? (return true) : (return false)
 
 end    # quick_ray_intersection
 

@@ -223,7 +223,7 @@ function render(
 
      else
           camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec)
-          camera_type = "ort"                                                                            # BUG
+          # camera_type = "ort"                                                                            # BUG
           if camera_type == "per"
 		     (bool_print==true) && (println("Choosen perspective camera..."))
 		     camera = PerspectiveCamera(scene.camera.d, aspect_ratio, camera_tr)

@@ -79,9 +79,10 @@ DEMO_WORLD_TYPES = ["A", "B", "C"]
 
 SYM_NUM = Dict("e"=>ℯ, "pi"=>π)
 
+# Base.:/(c::RGB{T}, scalar::Real) where {T} = RGB{T}(c.r/scalar , c.g/scalar, c.b/scalar)
 SYM_COL = Dict(
-    "BLACK" => RGB{Float32}(0., 0., 0.)/255,
-    "WHITE" => RGB{Float32}(255., 255., 255.)/255,
+    # "BLACK" => RGB{Float32}(0., 0., 0.),
+    # "WHITE" => RGB{Float32}(255., 255., 255.)/255,
     "RED" => RGB{Float32}(255., 0., 0.)/255,
     "LIME" => RGB{Float32}(0., 255., 0.)/255,
     "BLUE" => RGB{Float32}(0., 0., 255.)/255,

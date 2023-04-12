@@ -671,6 +671,20 @@ function parse_brdf(inputstream::InputStream, scene::Scene)
      brdf_keyword = expect_keywords(inputstream, [ DIFFUSE,  SPECULAR])
      expect_symbol(inputstream, "(")
      pigment = parse_pigment(inputstream, scene)
+
+     if expect_symbol(inputstream, ",") === nothing
+          number = expect_number(inputstream, scene)
+          expect_symbol(inputstream, ")")
+
+          if (brdf_keyword ==  DIFFUSE)
+               return DiffuseBRDF(pigment, number)
+          elseif (brdf_keyword ==  SPECULAR)
+               return SpecularBRDF(pigment, number)
+          else
+               @assert false "This line should be unreachable"
+          end
+     end
+
      expect_symbol(inputstream, ")")
 
      if (brdf_keyword ==  DIFFUSE)
