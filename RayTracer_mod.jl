@@ -64,6 +64,11 @@ where TYPE_OF_BRDF can be:
 
 MATERIAL material_name(arg1::BRDF, arg2::PIGMENT)
 
+Fundamental note:
+the non-FLOATs arguments of every BRDF and MATERIAL object must be defined, in other words
+you must define previously those objects and pass them with their names.
+
+
 TRANSFORMATION trans_name(arg)
 where arg can be (a product of):
 - ROTATION_X(arg::FLOAT);    # arg is the angle of rotation in radiant
