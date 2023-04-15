@@ -19,7 +19,7 @@ PIGMENT donut_pigment(CHECKERED(purple, NAVY, 40))
 BRDF donut_brdf(DIFFUSE(donut_pigment))
 
 MATERIAL donut_material(
-    DIFFUSE(donut_pigment),
+    donut_brdf,
     donut_pigment
 )
 
@@ -34,40 +34,10 @@ TORUS(
     donut_material,
     donut_trans,
     1.0,
-    8.0
+    3.0
 )
 
 POINTLIGHT(
     [8.4, 1.5, -30.0],
     <25.5, 25.5, 25.5>
 )
-
-
-
-
-
-
-#function expect_bool(inputstream::InputStream, scene::Scene)
-#     token = read_token(inputstream)
-#     if typeof(token.value) == KeywordToken
-#          unread_token(inputstream, token)
-#          keyword = expect_keywords(inputstream, [ TRUE,  FALSE])
-#
-#          if keyword == TRUE
-#               return true
-#          elseif keyword == FALSE
-#               return false
-#          else
-#               throw(ArgumentError("how did you come here?"))
-#          end
-#
-#     elseif typeof(token.value) == IdentifierToken
-#          variable_name = token.value.identifier
-#  
-#          (variable_name ∈ keys(scene.bool_variables) ) ||
-#               throw(GrammarError(token.location, "unknown bool variable '$(token)'"))
-#          return scene.bool_variables[variable_name]
-#     else
-#          throw(GrammarError(token.location, "got '$(token)' instead of a bool variable"))
-#     end
-#end

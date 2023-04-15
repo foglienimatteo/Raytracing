@@ -1129,7 +1129,6 @@ function parse_torus(inputstream::InputStream, scene::Scene)
  
      token = read_token(inputstream)
     
-#    token = read_token(inputstream)
      # controllo se ci sono altri parametri oltre MATERIAL e TRANSFORMATION
      if typeof(token.value) == SymbolToken && token.value.symbol == ","
           # expect_symbol(inputstream, ",")
