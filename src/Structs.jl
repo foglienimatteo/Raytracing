@@ -338,7 +338,8 @@ mutable struct OrthogonalCamera <: Camera
     OrthogonalCamera(a::Float64, T::Transformation) = new(a, T)
     OrthogonalCamera(T::Transformation) = new(1.0, T)
     OrthogonalCamera(a::Float64) = new(a, Transformation())
-end
+    OrthogonalCamera() = new(16/9, Transformation())
+/end
 
 """
     PerspectiveCamera <: Camera (

@@ -321,7 +321,6 @@ See also: [`InputStream`](@ref), [`Scene`](@ref), [`IdentifierToken`](@ref),
 """
 function expect_identifier(inputstream::InputStream)
      token = read_token(inputstream)
-     println(token)
      if (typeof(token.value) ≠ IdentifierToken)
           throw(GrammarError(token.location, "got $(token) instead of an identifier"))
      end
@@ -658,7 +657,6 @@ See also: [`InputStream`](@ref), [`Scene`](@ref), [`BRDF`](@ref)
 """
 function parse_brdf(inputstream::InputStream, scene::Scene)
      token = read_token(inputstream)
-     println("    ", token)
      if typeof(token.value) == IdentifierToken
           variable_name = token.value.identifier
           if variable_name ∉ keys(scene.brdf_variables)
@@ -676,16 +674,12 @@ function parse_brdf(inputstream::InputStream, scene::Scene)
      # expect_symbol(inputstream, ")")
 
      try
-          # token = read_token(inputstream)
-          # println(token)
           expect_symbol(inputstream, ")")
-          println("\nBBBB\n")
           expect_symbol(inputstream, ",")
           number = expect_number(inputstream, scene)
           expect_symbol(inputstream, ")")
 
           if (brdf_keyword ==  DIFFUSE)
-               println("\nAAAA\n")
                return DiffuseBRDF(pigment, number)
           elseif (brdf_keyword ==  SPECULAR)
                return SpecularBRDF(pigment, number)
@@ -693,46 +687,10 @@ function parse_brdf(inputstream::InputStream, scene::Scene)
                @assert false "This line should be unreachable"
           end
      catch ERR
-          # unread_token(inputstream, token)
-          # println(token)
           nothing
      end
-
-     # if expect_symbol(inputstream, ",") === nothing
-     #      number = expect_number(inputstream, scene)
-     #      expect_symbol(inputstream, ")")
-
-     #      if (brdf_keyword ==  DIFFUSE)
-     #           println("\nAAAA\n")
-     #           return DiffuseBRDF(pigment, number)
-     #           println("\nBBBB\n")
-     #      elseif (brdf_keyword ==  SPECULAR)
-     #           return SpecularBRDF(pigment, number)
-     #      else
-     #           @assert false "This line should be unreachable"
-     #      end
-     # else
-     #      expect_symbol(inputstream, ")")
-
-     #      if (brdf_keyword ==  DIFFUSE)
-     #           return DiffuseBRDF(pigment)
-     #      elseif (brdf_keyword ==  SPECULAR)
-     #           return SpecularBRDF(pigment)
-     #      else
-     #           @assert false "This line should be unreachable"
-     #      end
-     # end
-     println("\nAAAB\n")
-     # expect_symbol(inputstream, ")")
-     # token = read_token(inputstream)
-     # println(token)
-     # unread_token(inputstream, token)
-     # println(token)
-     println("\nAABB\n")
-     # token = read_token(inputstream)
-     # println(token)
+     expect_symbol(inputstream, ")")
      if (brdf_keyword ==  DIFFUSE)
-          println("\nABBB\n")
           return DiffuseBRDF(pigment)
      elseif (brdf_keyword ==  SPECULAR)
           return SpecularBRDF(pigment)
@@ -764,7 +722,6 @@ function parse_material(inputstream::InputStream, scene::Scene)
 
      expect_symbol(inputstream, "(")
      brdf = parse_brdf(inputstream, scene)
-     println("    CCCC")
      expect_symbol(inputstream, ",")
      emitted_radiance = parse_pigment(inputstream, scene)
      expect_symbol(inputstream, ")")

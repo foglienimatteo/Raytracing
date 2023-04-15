@@ -43,7 +43,7 @@ Base.:-(a::RGB{T}, b::RGB{T}) where {T} = RGB{T}(a.r - b.r, a.g - b.g, a.b - b.b
 Base.:*(scalar::Real, c::RGB{T}) where {T} = RGB{T}(scalar*c.r , scalar*c.g, scalar*c.b)
 Base.:*(a::RGB{T}, b::RGB{T}) where {T} = RGB{T}(a.r*b.r, a.g*b.g, a.b*b.b)
 Base.:*(c::RGB{T}, scalar::Real) where {T} = scalar * c
-Base.:/(c::RGB{T}, scalar::Real) where {T} = RGB{T}(c.r/scalar , c.g/scalar, c.b/scalar)
+# Base.:/(c::RGB{T}, scalar::Real) where {T} = RGB{T}(c.r/scalar , c.g/scalar, c.b/scalar)
 
 # Operations for Point
 Base.:*(s::Real, a::Point) = Point(s*a.x, s*a.y, s*a.z)

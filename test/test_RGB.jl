@@ -22,4 +22,4 @@ err = 1e-11
 @test b-a ≈ RGB(0.4, 0.4-2err, 0.4)
 @test 2.0*a ≈ RGB(0.2 + err, 0.4, 0.6)
 @test b*0.5 ≈ RGB(0.25 + err, 0.3, 0.35)
-@test a/2. ≈ RGB(0.05, 0.1, 0.15 + 3*err)
+@test (a/2.) ≈ RGB(0.05, 0.1, 0.15 + 3*err)
