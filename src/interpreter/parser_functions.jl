@@ -270,7 +270,7 @@ function expect_bool(inputstream::InputStream, scene::Scene)
 
      elseif typeof(token.value) == IdentifierToken
           variable_name = token.value.identifier
-  
+          println("\nAAA    ", variable_name, "\n")
           (variable_name ∈ keys(scene.bool_variables) ) ||
                throw(GrammarError(token.location, "unknown bool variable '$(token)'"))
           return scene.bool_variables[variable_name]
@@ -673,12 +673,30 @@ function parse_brdf(inputstream::InputStream, scene::Scene)
      pigment = parse_pigment(inputstream, scene)
      # expect_symbol(inputstream, ")")
 
-     try
-          expect_symbol(inputstream, ")")
-          expect_symbol(inputstream, ",")
-          number = expect_number(inputstream, scene)
-          expect_symbol(inputstream, ")")
+     # try
+     #      expect_symbol(inputstream, ")")
+     #      expect_symbol(inputstream, ",")
+     #      number = expect_number(inputstream, scene)
+     #      expect_symbol(inputstream, ")")
 
+     #      if (brdf_keyword ==  DIFFUSE)
+     #           return DiffuseBRDF(pigment, number)
+     #      elseif (brdf_keyword ==  SPECULAR)
+     #           return SpecularBRDF(pigment, number)
+     #      else
+     #           @assert false "This line should be unreachable"
+     #      end
+     # catch GrammarError
+     #      unread_char(inputstream), ")"
+     #      # nothing
+     # end
+
+     token = read_token(inputstream)
+     if typeof(token.value) == SymbolToken && token.value.symbol == ","
+          expect_symbol(inputstream, ",")
+          token = read_toke(inputstream)
+          @assert typeof(token.value) == SymbolToken "Must be a number"
+          expect_symbol(inputstream, ")")
           if (brdf_keyword ==  DIFFUSE)
                return DiffuseBRDF(pigment, number)
           elseif (brdf_keyword ==  SPECULAR)
@@ -686,9 +704,8 @@ function parse_brdf(inputstream::InputStream, scene::Scene)
           else
                @assert false "This line should be unreachable"
           end
-     catch ERR
-          nothing
      end
+
      expect_symbol(inputstream, ")")
      if (brdf_keyword ==  DIFFUSE)
           return DiffuseBRDF(pigment)
@@ -1101,7 +1118,7 @@ See also: [`InputStream`](@ref), [`Scene`](@ref), [`Triangle`](@ref)
 """
 function parse_torus(inputstream::InputStream, scene::Scene)
      expect_symbol(inputstream, "(")
- 
+     println("\n",scene.bool_variables, "\n", scene.variable_names, "\n")
      material_name = expect_identifier(inputstream)
      if material_name ∉ keys(scene.materials)
          # We raise the exception here because inputstream is pointing to the end of the wrong identifier
@@ -1111,41 +1128,103 @@ function parse_torus(inputstream::InputStream, scene::Scene)
      transformation = parse_transformation(inputstream, scene)
  
      token = read_token(inputstream)
-     if typeof(token.value) == LiteralNumberToken
-         small_rad = token.value.number
- 
-         read_token(inputstream)
-         if typeof(token.value) == SymbolToken && token.value.symbol == ","
-             expect_symbol(inputstream, ",")
-             read_token(inputstream)
-             if typeof(token.value) == LiteralNumberToken
-                 big_rad = token.value.number
-             else
-                 big_rad = 3 * small_rad
-             end
- 
-         end
- #        unread_token(inputstream, token)
-     else
-         small_rad = -1
-         big_rad = -1
- #        unread_token(inputstream, token)
-     end
     
- #    token = read_token(inputstream)
+#    token = read_token(inputstream)
+     # controllo se ci sono altri parametri oltre MATERIAL e TRANSFORMATION
      if typeof(token.value) == SymbolToken && token.value.symbol == ","
-         expect_symbol(inputstream, ",")
-         flag_pointlight = expect_bool(inputstream, scene)
-         expect_symbol(inputstream, ",")
-         flag_background = expect_bool(inputstream, scene)
-         expect_symbol(inputstream, ")")
+          # expect_symbol(inputstream, ",")
+          token = read_token(inputstream)
+          # controllo se ho un numero come argomento
+          if typeof(token.value) == LiteralNumberToken || 
+                    (typeof(token.value) == IdentifierToken &&
+                    token.value.identifier ∉ keys(scene.bool_variables)
+                    )
+               unread_token(inputstream, token)
+               small_rad = expect_number(inputstream, scene)
+               token = read_token(inputstream)
+               # controllo se ho altri argomenti
+               if typeof(token.value) == SymbolToken && token.value.symbol == ","
+                    token = read_token(inputstream)
+                    # ho un altro argomento: controllo se ho un numero
+                    if typeof(token.value) == LiteralNumberToken || 
+                              (typeof(token.value) == IdentifierToken &&
+                              token.value.identifier ∉ keys(scene.bool_variables)
+                              )
+                         unread_token(inputstream, token)
+                         big_rad = expect_number(inputstream, scene)
+                         token = read_token(inputstream)
+                         # controllo se ho altri rgomenti
+                         if typeof(token.value) == SymbolToken && token.value.symbol == ","
+                              flag_pointlight = expect_bool(inputstream, scene)
+                              expect_symbol(inputstream, ",")
+                              flag_background = expect_bool(inputstream, scene)
+                              expect_symbol(inputstream, ")")
+                         else
+                              unread_token(inputstream, token)
+                              expect_symbol(inputstream, ")")
+                              flag_pointlight = false
+                              flag_background = false
+                         end
+                    # ho un altro argomento: controll ose ho dei booleani come argomenti
+                    elseif typeof(token.value) == KeywordToken || 
+                         (typeof(token.value) == IdentifierToken &&
+                         token.value.identifier ∈ keys(scene.bool_variables)
+                         )
+                         big_rad = 3 * small_rad
+                         unread_token(inputstream, token)
+                         flag_pointlight = expect_bool(inputstream, scene)
+                         expect_symbol(inputstream, ",")
+                         flag_background = expect_bool(inputstream, scene)
+                         expect_symbol(inputstream, ")")
+                    else
+                         @assert false "ERROR: argument must be number a number or two booleans"
+                    end
+               # ho un numero, non ho più argomenti
+               else 
+                    unread_token(inputstream, token)
+                    expect_symbol(inputstream, ")")
+                    big_rad = 3 * small_rad
+                    flag_pointlight = false
+                    flag_background = false
+               end
+          # hoargomento ma no numero => devono essere i booleani
+          else
+               small_rad = -1
+               big_rad = -1
+               unread_token(inputstream, token)
+               flag_pointlight = expect_bool(inputstream, scene)
+               expect_symbol(inputstream, ",")
+               flag_background = expect_bool(inputstream, scene)
+               expect_symbol(inputstream, ")")
+          end
+     
+     # non ho altri argomenti oltre MATERIAL e TRANSFORMATION
      else
-         unread_token(inputstream, token)
-         expect_symbol(inputstream, ")")
-         flag_pointlight = false
-         flag_background = false
+          unread_token(inputstream, token)
+          expect_symbol(inputstream, ")")
+          small_rad = -1
+          big_rad = -1
+          flag_pointlight = false
+          flag_background = false
      end
- 
+
+
+
+
+
+     # if typeof(token.value) == SymbolToken && token.value.symbol == ","
+     #      expect_symbol(inputstream, ",")
+     #      flag_pointlight = expect_bool(inputstream, scene)
+     #      expect_symbol(inputstream, ",")
+     #      flag_background = expect_bool(inputstream, scene)
+     #      expect_symbol(inputstream, ")")
+     # else
+     #      unread_token(inputstream, token)
+     #      expect_symbol(inputstream, ")")
+     #      flag_pointlight = false
+     #      flag_background = false
+     # end
+
      if small_rad<0 && big_rad<0
          return Torus(transformation, scene.materials[material_name], flag_pointlight, flag_background)
      else
