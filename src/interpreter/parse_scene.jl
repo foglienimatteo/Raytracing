@@ -136,7 +136,7 @@ function parse_scene(inputstream::InputStream, variables::Dict{String, Float64} 
                variable_loc = inputstream.location
                expect_symbol(inputstream, "(")
                variable_value = parse_brdf(inputstream, scene)
-#               expect_symbol(inputstream, ")")
+               expect_symbol(inputstream, ")")
 
                if (variable_name ∈ scene.variable_names) && !(variable_name ∈ scene.overridden_variables)
                     throw(GrammarError(variable_loc, "variable «$(variable_name)» cannot be redefined"))

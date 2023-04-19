@@ -11,17 +11,24 @@ VECTOR donut_pos([8.4, 1.5, 0.0])
 FLOAT small_r(0.5)
 FLOAT big_r(1.5)
 PIGMENT donut_pigment(CHECKERED(purple, NAVY, 40))
-# BRDF donut_brdf( DIFFUSE(CHECKERED(purple, NAVY, 40)))
-# BRDF donut_brdf( DIFFUSE(CHECKERED(purple, NAVY, 40)), 5.0)
-# BRDF donut_brdf( DIFFUSE(donut_pigment))
-# BRDF donut_brdf(DIFFUSE(UNIFORM(RED)), 1.0)
-# BRDF donut_brdf(DIFFUSE(donut_pigment), 30.0)
-BRDF donut_brdf(DIFFUSE(donut_pigment))
+BRDF donut_brdfa( DIFFUSE(CHECKERED(purple, NAVY, 40)))
+BRDF donut_brdfb( DIFFUSE(CHECKERED(purple, NAVY, 40)); 5.0)
+BRDF donut_brdfc( DIFFUSE(donut_pigment))
+BRDF donut_brdfd(DIFFUSE(UNIFORM(RED)); 1.0)
+BRDF donut_brdfe(DIFFUSE(donut_pigment); 30.0)
+BRDF donut_brdff(DIFFUSE(donut_pigment))
 
+MATERIAL donut_material3(
+    donut_brdfa,
+    donut_pigment)
+# la soluzione migliore sarebbe passare un booleano opzionale a parse_brdf che se true ci dice essere all'interno della definizione di un MATERIAL e posso usarlo come chck in un if-scope per trattare adeguatamente il symbol token "," 
 MATERIAL donut_material(
-    donut_brdf,
-    donut_pigment
-)
+    DIFFUSE(donut_pigment);
+    2.0,
+    donut_pigment)
+MATERIAL donut_material2(
+    DIFFUSE(donut_pigment),
+    donut_pigment)
 
 TRANSFORMATION donut_trans(
     TRANSLATION(donut_pos) * ROTATION_Z(pi/3) * SCALING([1.5, 3.0, 0.9])

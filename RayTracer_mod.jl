@@ -55,12 +55,13 @@ where TYPE_OF_PIGMENT can be:
 - CHECKERED(arg1::COLOR, arg2::COLOR, n::INT);
 - IMAGE(arg::STRING).   # here the argument is the path to the .jpg image file
 
-BRDF brdf_name(TYPE_OF_BRDF(arg::PIGMENT))
+BRDF brdf_name(TYPE_OF_BRDF(arg1::PIGMENT); arg2::FLOAT)
 where TYPE_OF_BRDF can be:
-- DIFFUSE(arg1::PIGMENT, arg2::FLOAT)
+- DIFFUSE(arg1::PIGMENT); arg2::FLOAT
     * arg2: reflectance;
-- SPECULAR(arg::PIGMENT, arg2::FLOAT)
+- SPECULAR(arg::PIGMENT); arg2::FLOAT)
     * arg2: theresold angle in rad.
+IMPORTANT NOTE: since arg2 is totally optional, it needs ";" before, not ",". 
 
 MATERIAL material_name(arg1::BRDF, arg2::PIGMENT)
 

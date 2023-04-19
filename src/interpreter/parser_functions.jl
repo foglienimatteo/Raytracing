@@ -655,58 +655,71 @@ Call internally the following functions and structs of the program:
     
 See also: [`InputStream`](@ref), [`Scene`](@ref), [`BRDF`](@ref)
 """
-function parse_brdf(inputstream::InputStream, scene::Scene)
+function parse_brdf(inputstream::InputStream, scene::Scene, inMAT::Bool=false)
      token = read_token(inputstream)
      if typeof(token.value) == IdentifierToken
           variable_name = token.value.identifier
           if variable_name ∉ keys(scene.brdf_variables)
                throw(GrammarError(token.location, "unknown BRDF '$(token)'"))
           end
-          # expect_symbol(inputstream, ")")
           return scene.brdf_variables[variable_name]
      else
           unread_token(inputstream, token)
      end
 
-     brdf_keyword = expect_keywords(inputstream, [ DIFFUSE,  SPECULAR])
+     brdf_keyword = expect_keywords(inputstream, [DIFFUSE, SPECULAR])
      expect_symbol(inputstream, "(")
      pigment = parse_pigment(inputstream, scene)
-     # expect_symbol(inputstream, ")")
 
-     # try
-     #      expect_symbol(inputstream, ")")
-     #      expect_symbol(inputstream, ",")
-     #      number = expect_number(inputstream, scene)
-     #      expect_symbol(inputstream, ")")
-
-     #      if (brdf_keyword ==  DIFFUSE)
-     #           return DiffuseBRDF(pigment, number)
-     #      elseif (brdf_keyword ==  SPECULAR)
-     #           return SpecularBRDF(pigment, number)
-     #      else
-     #           @assert false "This line should be unreachable"
-     #      end
-     # catch GrammarError
-     #      unread_char(inputstream), ")"
-     #      # nothing
-     # end
-
+     expect_symbol(inputstream, ")")
      token = read_token(inputstream)
-     if typeof(token.value) == SymbolToken && token.value.symbol == ","
-          expect_symbol(inputstream, ",")
-          token = read_toke(inputstream)
-          @assert typeof(token.value) == SymbolToken "Must be a number"
-          expect_symbol(inputstream, ")")
+     println(token)
+     if (typeof(token.value) == SymbolToken) && (token.value.symbol == ";")
+          # #expect_symbol(inputstream, ",")
+          # token = read_token(inputstream) # E' QUI CHE LEGGE IL TOKEN DI PIGMENT!!!
+          # # println("\n", token)
+          # # println(token.value)
+          # # println(token.value.identifier,"\n")
+          # (typeof(token.value) == KeywordToken) ? (BO1 = token.keyword ∈ [UNIFORM, CHECKERED, IMAGE]) : (BO1 = false)
+          # (typeof(token.value) == IdentifierToken) ? (BO2 = (token.value.identifier ∈ keys(scene.pigment_variables))) : (BO2 = false)
+          
+          # # println("\n", keys(scene.pigment_variables), "\n", scene.pigment_variables, "\n")
+          # # println(typeof(token.value.identifier), "    ", typeof(keys(scene.pigment_variables)))
+          # # println(BO1, "    ", BO2)
+          # if !BO1 && !BO2
+          #      unread_token(inputstream, token)
+          #      number = expect_number(inputstream, scene)
+          #      # expect_symbol(inputstream, ")")
+          #      if (brdf_keyword ==  DIFFUSE)
+          #           return DiffuseBRDF(pigment, number)
+          #      elseif (brdf_keyword ==  SPECULAR)
+          #           return SpecularBRDF(pigment, number)
+          #      else
+          #           @assert false "This line should be unreachable"
+          #      end
+          # else
+          #      unread_token(inputstream, token)
+          # end
+
+          # unread_token(inputstream, token)
+          n = expect_number(inputstream, scene)
+          println(n)
+          # expect_symbol(inputstream, ")")
           if (brdf_keyword ==  DIFFUSE)
-               return DiffuseBRDF(pigment, number)
+               return DiffuseBRDF(pigment, n)
           elseif (brdf_keyword ==  SPECULAR)
-               return SpecularBRDF(pigment, number)
+               return SpecularBRDF(pigment, n)
           else
                @assert false "This line should be unreachable"
           end
+     else
+          unread_token(inputstream, token)
      end
 
-     expect_symbol(inputstream, ")")
+     # if inMAT === true
+     #      expect_symbol(inputstream, ",")
+     # end
+
      if (brdf_keyword ==  DIFFUSE)
           return DiffuseBRDF(pigment)
      elseif (brdf_keyword ==  SPECULAR)
@@ -739,6 +752,7 @@ function parse_material(inputstream::InputStream, scene::Scene)
 
      expect_symbol(inputstream, "(")
      brdf = parse_brdf(inputstream, scene)
+     # token "," already readen in parse_brdf
      expect_symbol(inputstream, ",")
      emitted_radiance = parse_pigment(inputstream, scene)
      expect_symbol(inputstream, ")")
