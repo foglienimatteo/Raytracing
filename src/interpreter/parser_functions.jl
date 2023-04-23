@@ -270,7 +270,6 @@ function expect_bool(inputstream::InputStream, scene::Scene)
 
      elseif typeof(token.value) == IdentifierToken
           variable_name = token.value.identifier
-          println("\nAAA    ", variable_name, "\n")
           (variable_name ∈ keys(scene.bool_variables) ) ||
                throw(GrammarError(token.location, "unknown bool variable '$(token)'"))
           return scene.bool_variables[variable_name]
@@ -673,38 +672,8 @@ function parse_brdf(inputstream::InputStream, scene::Scene, inMAT::Bool=false)
 
      expect_symbol(inputstream, ")")
      token = read_token(inputstream)
-     println(token)
      if (typeof(token.value) == SymbolToken) && (token.value.symbol == ";")
-          # #expect_symbol(inputstream, ",")
-          # token = read_token(inputstream) # E' QUI CHE LEGGE IL TOKEN DI PIGMENT!!!
-          # # println("\n", token)
-          # # println(token.value)
-          # # println(token.value.identifier,"\n")
-          # (typeof(token.value) == KeywordToken) ? (BO1 = token.keyword ∈ [UNIFORM, CHECKERED, IMAGE]) : (BO1 = false)
-          # (typeof(token.value) == IdentifierToken) ? (BO2 = (token.value.identifier ∈ keys(scene.pigment_variables))) : (BO2 = false)
-          
-          # # println("\n", keys(scene.pigment_variables), "\n", scene.pigment_variables, "\n")
-          # # println(typeof(token.value.identifier), "    ", typeof(keys(scene.pigment_variables)))
-          # # println(BO1, "    ", BO2)
-          # if !BO1 && !BO2
-          #      unread_token(inputstream, token)
-          #      number = expect_number(inputstream, scene)
-          #      # expect_symbol(inputstream, ")")
-          #      if (brdf_keyword ==  DIFFUSE)
-          #           return DiffuseBRDF(pigment, number)
-          #      elseif (brdf_keyword ==  SPECULAR)
-          #           return SpecularBRDF(pigment, number)
-          #      else
-          #           @assert false "This line should be unreachable"
-          #      end
-          # else
-          #      unread_token(inputstream, token)
-          # end
-
-          # unread_token(inputstream, token)
           n = expect_number(inputstream, scene)
-          println(n)
-          # expect_symbol(inputstream, ")")
           if (brdf_keyword ==  DIFFUSE)
                return DiffuseBRDF(pigment, n)
           elseif (brdf_keyword ==  SPECULAR)
@@ -715,10 +684,6 @@ function parse_brdf(inputstream::InputStream, scene::Scene, inMAT::Bool=false)
      else
           unread_token(inputstream, token)
      end
-
-     # if inMAT === true
-     #      expect_symbol(inputstream, ",")
-     # end
 
      if (brdf_keyword ==  DIFFUSE)
           return DiffuseBRDF(pigment)
@@ -867,6 +832,7 @@ See also: [`InputStream`](@ref), [`Scene`](@ref),  [`Camera`](@ref)
 function parse_camera(inputstream::InputStream, scene::Scene)
      expect_symbol(inputstream, "(")
      type_kw = expect_keywords(inputstream, [ PERSPECTIVE,  ORTHOGONAL])
+
      expect_symbol(inputstream, ",")
      transformation = parse_transformation(inputstream, scene)
 
@@ -875,11 +841,11 @@ function parse_camera(inputstream::InputStream, scene::Scene)
           distance = expect_number(inputstream, scene)
           expect_symbol(inputstream, ")")
           result = PerspectiveCamera(distance, 1.0, transformation)
-          println("in parser_functions.jl/parse_camera->perspective")
+          println("    in parser_functions.jl/parse_camera -> perspective")
      elseif type_kw == ORTHOGONAL
           expect_symbol(inputstream, ")")
           result = OrthogonalCamera(1.0, transformation)
-          println("in parser_functions.jl/parse_camera->orthogonal")
+          println("    in parser_functions.jl/parse_camera -> orthogonal")
      end
 
      return result
@@ -1132,7 +1098,6 @@ See also: [`InputStream`](@ref), [`Scene`](@ref), [`Triangle`](@ref)
 """
 function parse_torus(inputstream::InputStream, scene::Scene)
      expect_symbol(inputstream, "(")
-     println("\n",scene.bool_variables, "\n", scene.variable_names, "\n")
      material_name = expect_identifier(inputstream)
      if material_name ∉ keys(scene.materials)
          # We raise the exception here because inputstream is pointing to the end of the wrong identifier

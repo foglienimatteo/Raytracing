@@ -1,47 +1,60 @@
-# ./Raytracer.jl render torus_debug.txt --width=1200 --height=900
+# ./Raytracer.jl render torus_debug.txt --width=1200 --height=900 pathtracer
 
-# CAMERA(ORTHOGONAL, TRANSLATION([-2.0, 0.0, 0.0]))
-CAMERA(PERSPECTIVE, TRANSLATION([-2.0, 0.0, 0.0]), 2.0)
+CAMERA(ORTHOGONAL, TRANSLATION([-1.0, 0.0, 0.0]))
+# CAMERA(PERSPECTIVE, TRANSLATION([-2.0, 0.0, 0.0]), 2.0)
 
 COLOR purple(<128, 0, 128>)
 # COLOR lime(<0, 255, 0>)
 # COLOR balck(BLACK)
 
-VECTOR donut_pos([8.4, 1.5, 0.0])
+VECTOR donut_pos([3.4, -0.6, 0.0])
 FLOAT small_r(0.5)
 FLOAT big_r(1.5)
 PIGMENT donut_pigment(CHECKERED(purple, NAVY, 40))
 BRDF donut_brdfa( DIFFUSE(CHECKERED(purple, NAVY, 40)))
-BRDF donut_brdfb( DIFFUSE(CHECKERED(purple, NAVY, 40)); 5.0)
-BRDF donut_brdfc( DIFFUSE(donut_pigment))
-BRDF donut_brdfd(DIFFUSE(UNIFORM(RED)); 1.0)
-BRDF donut_brdfe(DIFFUSE(donut_pigment); 30.0)
-BRDF donut_brdff(DIFFUSE(donut_pigment))
+#BRDF donut_brdfb( DIFFUSE(CHECKERED(purple, NAVY, 40)); 5.0)
+#BRDF donut_brdfc( DIFFUSE(donut_pigment))
+#BRDF donut_brdfd(DIFFUSE(UNIFORM(RED)); 1.0)
+#BRDF donut_brdfe(DIFFUSE(donut_pigment); 30.0)
+#BRDF donut_brdff(DIFFUSE(donut_pigment))
 
 MATERIAL donut_material3(
     donut_brdfa,
     donut_pigment)
-# la soluzione migliore sarebbe passare un booleano opzionale a parse_brdf che se true ci dice essere all'interno della definizione di un MATERIAL e posso usarlo come chck in un if-scope per trattare adeguatamente il symbol token "," 
-MATERIAL donut_material(
-    DIFFUSE(donut_pigment);
-    2.0,
-    donut_pigment)
-MATERIAL donut_material2(
-    DIFFUSE(donut_pigment),
-    donut_pigment)
 
-TRANSFORMATION donut_trans(
-    TRANSLATION(donut_pos) * ROTATION_Z(pi/3) * SCALING([1.5, 3.0, 0.9])
+MATERIAL sphere_material(
+    DIFFUSE(UNIFORM(SYLVER)), UNIFORM(RED)
 )
 
-BOOL flag1(TRUE)
-BOOL flag2(TRUE)
+#MATERIAL donut_material(
+#    DIFFUSE(donut_pigment);
+#    2.0,
+#    donut_pigment)
+#MATERIAL donut_material2(
+#    DIFFUSE(donut_pigment),
+#    donut_pigment)
+
+TRANSFORMATION donut_trans(
+    TRANSLATION(donut_pos) * ROTATION_Z(pi/3) * SCALING([0.5, 1.0, 0.3])
+)
+
+TRANSFORMATION sphere_trans(
+    TRANSLATION([-1.0, 1.0, 0.0]) * SCALING([0.1, 0.2, 0.3])
+)
+
+#BOOL flag1(TRUE)
+#BOOL flag2(TRUE)
 
 TORUS(
-    donut_material,
+    donut_material3,
     donut_trans,
-    1.0,
-    3.0
+    small_r,
+    big_r
+)
+
+SPHERE(
+    sphere_material,
+    sphere_trans
 )
 
 POINTLIGHT(

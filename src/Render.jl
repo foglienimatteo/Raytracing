@@ -148,20 +148,29 @@ function render(
           end
      end
 
+     if typeof(scene.camera) == OrthogonalCamera
+          camera_type = "ort"
+     elseif typeof(scene.camera) == PerspectiveCamera
+          camera_type = "per"
+     end
+
      (bool_print==true) && println("\nReaded and parsed \"$(scenefile)\", now initialize camera and renderer...\n")
 
      renderer.world = scene.world
      
      samples_per_side = string2rootint64(string(samples_per_pixel))
 
+     # if I have a value from command line I'll use it, else the one from the .txt file
      observer_vec = isnothing(camera_position) ?
           nothing :
-          typeof(camera_position) == Point ?
-		camera_position - Point(0., 0., 0.) :
-		camera_position
-
+          # typeof(camera_position) == Point ?
+		# camera_position - Point(0., 0., 0.) :
+		# camera_position
+          Vec(scene.camera.T * Point(0., 0., 0.))
+     
      aspect_ratio = width / height   
-
+     
+     
      if isnothing(camera_type) && isnothing(observer_vec) && isnothing(scene.camera) 
           camera = PerspectiveCamera(-1.0, aspect_ratio, rotation_z(deg2rad(α)))
 
@@ -223,7 +232,6 @@ function render(
 
      else
           camera_tr = rotation_z(deg2rad(α)) * translation(observer_vec)
-          # camera_type = "ort"                                                                            # BUG
           if camera_type == "per"
 		     (bool_print==true) && (println("Choosen perspective camera..."))
 		     camera = PerspectiveCamera(scene.camera.d, aspect_ratio, camera_tr)
@@ -234,6 +242,12 @@ function render(
 		     throw(ArgumentError("Unknown camera: \"$(camera_type)\""))
 	     end
 
+     end
+
+     if typeof(scene.camera) == OrthogonalCamera
+          camera_type = "ort"
+     elseif typeof(scene.camera) == PerspectiveCamera
+          camera_type = "per"
      end
     
    
