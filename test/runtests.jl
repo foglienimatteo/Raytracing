@@ -81,6 +81,10 @@ end
 	include("test_Triangle.jl")
 end
 
+@testset "test_Torus" begin
+	include("test_Torus.jl")
+end
+
 @testset "test_Shapes-World" begin
 	include("test_Shapes-World.jl")
 end

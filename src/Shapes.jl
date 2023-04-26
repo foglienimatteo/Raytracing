@@ -96,16 +96,6 @@ function cube_point_to_uv(point::Point)
     return Vec2d(u,v)
 end
 
-
-# function torus_point_to_uv(point::Point)
-#     len_point = norm(point)
-#     u = asin(point.y/len_point) / π
-#     v = atan(point.z, point.x) / (2.0 * π)
-#     v>=0 ? nothing : v+= 1.0
-#     u>=0 ? nothing : u+= 1.0
-#     return Vec2d(u,v)
-# end
-
 @doc raw"""
     plane_point_to_uv(P::Point) :: Vec2d
 Convert a 3D `point` ``P = (P_x, P_y, P_z)`` on the surface of the torus
@@ -117,91 +107,103 @@ v = \frac{\arctan \bigg(P_z / (P.x + r + R)}\bigg)+ \frac{\pi}{2}}{2\pi}
 ```
 See also: [`Point`](@ref), [`Vec2d`](@ref), [`Plane`](@ref)
 """
+# function torus_point_to_uv(P::Point, r::Float64, R::Float64)
+
+#     # # if (x^2+z^2 >= R^2)
+#     # #     #u = asin(y/r)
+#     # #     u = acos(y/r)
+#     # # else
+#     # #     u = 2*π - acos(y/r)
+#     # #     #u = π - asin(y/r)
+#     # # end
+
+#     # # if x>=0
+#     # #     v = atan(z/x)
+#     # # else
+#     # #     v = π - atan(z/r)
+#     # # end
+
+#     # # METHOD 1
+#     x = P.x
+#     y = P.y
+#     z = P.z
+
+#     # (x^2+z^2 >= R^2) ? u = asin(y/r) : u = π - asin(y/r)
+    
+#     if abs(y/r) <= 1
+#         (x^2+z^2 >= R^2) ? u = asin(y/r) : u = π/2 - asin(y/r)
+#     else
+#         (x^2+z^2 >= R^2) ? u = asin(1) : u = π/2 - asin(1)
+#     end
+    
+#     # x >= 0 ? v = atan(z/x) : v = π - atan(z/r)
+#     # if abs(z/(r*cos(u)+R)) > 1
+#     #     println("z = ", z, "    r = ", r, "\nu = ", u, "    cos(u) = ", cos(u), "\nR = ", R, "    op: ", z/(r*cos(u)+R))
+#     #     exit()
+#     # end
+
+#     if abs(z/(r*cos(u)+R)) <= 1
+#         x >= 0 ? v = asin(z/(r*cos(u)+R)) : v = π - asin(z/(r*cos(u)+R))
+#     # elseif abs(x/(r*cos(u)+R)) < 1
+#     #     x >= 0 ? v = acos(x/(r*cos(u)+R)) : v = π - acos(x/(r*cos(u)+R))
+#     else
+#         x >= 0 ? v = asin(1) : v = π - asin(1)
+#     end
+#     # # METHOD 2
+#     # x = P.x
+#     # y = P.y
+#     # z = P.z
+
+#     # (x^2+z^2 >= R^2) ? u = acos(y/r) : u = 2*π - acos(y/r)
+#     # x >= 0 ? v = atan(z/x) : v = π - atan(z/r)
+
+#     # u < 0 ? u += 1 : nothing
+#     # v < 0 ? v += 1 : nothing
+#     println(P)
+#     println("\nu: ",u,"    v:", v)
+    
+#     a = Vec2d(u, v) / (2*π)
+#     @assert 0 <= a.u <= 1
+#     @assert 0 <= a.v <= 1
+
+#     return a
+# end
+
 function torus_point_to_uv(P::Point, r::Float64, R::Float64)
-    # # metodo basato usando l'angolo alla circonferenza (Molinari)
-    # if (0 <= P.y < 1e-10) && (√(P.x^2+P.z^2) < R - r + 1e-10)
-    #     u = π/2 +π/2
-    # elseif (- 1e-10 < P.y < 0) && (√(P.x^2+P.z^2) < R - r + 1e-10)
-    #     u = -π/2 +π/2
-    # else
-    #     u = 2 * atan( P.y/( r - R + √(P.x^2+P.z^2) ) ) +π/2
-    # end
 
-    # if (0 <= P.z < 1e-10) && (P.x < - R - r + 1e-10)
-    #     v = π/2 # π
-    # elseif (- 1e-10 < P.z < 0) && (P.x < - R - r + 1e-10)
-    #     v = -π/2 #0
-    # else
-    #     v = 2 * atan( P.z/(P.x + r + R) ) # +π/2
-    # end
-
-    # # u = 2 * atan( P.y/( r - R + √(P.x^2+P.z^2) ) ) # +π/2
-    # # v = 2 * atan( P.z/(P.x + r + R) ) # +π/2
-
-    # # u = atan(P.y/P.x) / (2. * pi)
-    # # v = atan(P.z/(P.x^2 + P.y^2)^0.5) / (2. * pi)
-
-    # v>=0 ? nothing : v+= 1.0
-    # u>=0 ? nothing : u+= 1.0
-
-    # a = Vec2d(u, v) / (2*pi)
-    # @assert 0 <= a.u <= 1
-    # @assert 0 <= a.v <= 1
-
-    # return a
-
-    ################################################################################
-
-    # # if (x^2+z^2 >= R^2)
-    # #     #u = asin(y/r)
-    # #     u = acos(y/r)
-    # # else
-    # #     u = 2*π - acos(y/r)
-    # #     #u = π - asin(y/r)
-    # # end
-
-    # # if x>=0
-    # #     v = atan(z/x)
-    # # else
-    # #     v = π - atan(z/r)
-    # # end
-
-    # # METHOD 1
     x = P.x
     y = P.y
     z = P.z
-
-    # (x^2+z^2 >= R^2) ? u = asin(y/r) : u = π - asin(y/r)
     
-    if abs(y/r) <= 1
-        (x^2+z^2 >= R^2) ? u = asin(y/r) : u = π - asin(y/r)
+    if abs(z/r) <= 1
+        (x^2+y^2 >= R^2) ? u = asin(z/r) : u = π - asin(z/r)
+    elseif z > 0
+        u = π/2
+    elseif z < 0
+        u = 1.5*π
     else
-        (x^2+z^2 >= R^2) ? u = asin(1) : u = π - asin(1)
+        @assert false "This line should be unreachable, problem in estimating 'torus_point_to_uv', 'u' variable"
     end
-    
-    # x >= 0 ? v = atan(z/x) : v = π - atan(z/r)
-    # if abs(z/(r*cos(u)+R)) > 1
-    #     println("z = ", z, "    r = ", r, "\nu = ", u, "    cos(u) = ", cos(u), "\nR = ", R, "    op: ", z/(r*cos(u)+R))
-    #     exit()
+
+    if abs(x/(r*cos(u)+R)) <= 1
+        y >= 0 ? v = acos(x/(r*cos(u)+R)) : v = 2*π - acos(x/(r*cos(u)+R))
+    elseif x > 0
+        v = 0
+    elseif x < 0
+        v = π
+    else
+        @assert false "This line should be unreachable, problem in estimating 'torus_point_to_uv', 'v' variable"
+    end
+
+    # if abs(y/(r*cos(u)+R)) <= 1
+    #     y >= 0 ? v = π/2 + asin(y/(r*cos(u)+R)) : v = π - acos(y/(r*cos(u)+R))
+    # elseif y > 0
+    #     v = π/2
+    # elseif y < 0
+    #     v = 1.5 * π
+    # else
+    #     @assert false "This line should be unreachable, problem in estimating 'torus_point_to_uv', 'v' variable"
     # end
-
-    if abs(z/(r*cos(u)+R)) < 1
-        x >= 0 ? v = asin(z/(r*cos(u)+R)) : v = π - asin(z/(r*cos(u)+R))
-    # elseif abs(x/(r*cos(u)+R)) < 1
-    #     x >= 0 ? v = acos(x/(r*cos(u)+R)) : v = π - acos(x/(r*cos(u)+R))
-    else
-        x >= 0 ? v = asin(1) : v = π - asin(1)
-    end
-    # # METHOD 2
-    # x = P.x
-    # y = P.y
-    # z = P.z
-
-    # (x^2+z^2 >= R^2) ? u = acos(y/r) : u = 2*π - acos(y/r)
-    # x >= 0 ? v = atan(z/x) : v = π - atan(z/r)
-
-    # u < 0 ? u += 1 : nothing
-    # v < 0 ? v += 1 : nothing
     
     a = Vec2d(u, v) / (2*π)
     @assert 0 <= a.u <= 1
@@ -209,7 +211,6 @@ function torus_point_to_uv(P::Point, r::Float64, R::Float64)
 
     return a
 end
-
 
 @doc raw"""
     triangle_point_to_uv(triangle::Triangle, point::Point) :: Vec2d
@@ -330,62 +331,76 @@ The normal is computed for [`Point`](@ref) (a point on the surface of the
 torus), and it is chosen so that it is always in the opposite
 direction with respect to `ray_dir` ([`Vec`](@ref)).
 """
+# function torus_normal(P::Point, ray_dir::Vec, r::Float64, R::Float64)
+#     # R_z = copysign(R / √(1+(P.x/P.z)^2), P.z)
+#     # R_x = copysign(P.x / P.z * R_z, P.x)
+#     # R_p = Vec(R_x, 0, R_z)
+#     # result = Normal(Vec(P - R_p))
+#     # result ⋅ ray_dir < 0.0 ? nothing : result = -result
+#     # return result
+
+#     ##########################################################################################################
+
+#     # if abs((1 - (P.z/r)^2)) < 1e-8
+#     #     N_x = 0.
+#     #     N_y = 0.
+#     # else
+#     #     (abs(P.x) < 1e-6) ? (N_x = 0.) : (N_x = copysign( ((1 - (P.z/r)^2) / (1 + (P.y/P.x)^2))^0.5, P.x))
+#     #     (abs(P.y) < 1e-6) ? (N_y = 0.) : (N_y = copysign( ((1 - (P.z/r)^2) / (1 + (P.x/P.y)^2))^0.5, P.y))
+#     # end
+#     # N_z = P.z/r
+#     # result = Normal(N_x, N_y, N_z)
+#     # result ⋅ ray_dir < 0.0 ? nothing : result = -result
+#     # return result
+
+#     ###########################################################################################################
+
+#     # u e v mi danno gia' tutte le info che mi servono per la retta della normale, il verso ancora
+#     # dalla provenienza del raggio luce
+
+#     uv = torus_point_to_uv(P, r, R)
+#     u = uv.u
+#     v = uv.v
+#     # N = Normal(cos(2.0*u*pi)*cos(2.0*v*pi), cos(2.0*u*pi)*sin(2.0*v*pi), sin(2.0*v*pi))
+#     # N = Normal(cos(2.0*u*pi)*cos(2.0*v*pi), -sin(2.0*v*pi), sin(2.0*u*pi)*cos(2.0*v*pi))
+#     N = Normal(cos(2.0*u*pi)*cos(2.0*v*pi), sin(2.0*u*pi)*cos(2.0*v*pi), -sin(2.0*v*pi))
+#     N ⋅ ray_dir < 0.0 ? nothing : N = -N
+#     return N
+
+#     ###########################################################################################################
+#     # https://github.com/marcin-chwedczuk/ray_tracing_torus_js/blob/master/app/scripts/Torus.js
+
+#     # s = squared_norm(P)
+#     # a = R^2+r^2
+#     # N = Normal(s-a, s-a +2*R^2, s-a)
+
+#     # N ⋅ ray_dir < 0.0 ? nothing : N = -N
+#     # return N
+    
+#     ############################################################################################################
+
+#     # Q = R/√(P.x^2-P.z^2) * Point(P.x, 0, P.z)
+#     # M = Normal(P - Q)
+#     # M ⋅ ray_dir < 0.0 ? nothing : M = -M
+
+#     # # println("u = ", u, "     v = ", v)
+#     # # println(N, "    ", M)
+#     # # @assert M ≈ N
+
+#     # return M
+# end
+
 function torus_normal(P::Point, ray_dir::Vec, r::Float64, R::Float64)
-    # R_z = copysign(R / √(1+(P.x/P.z)^2), P.z)
-    # R_x = copysign(P.x / P.z * R_z, P.x)
-    # R_p = Vec(R_x, 0, R_z)
-    # result = Normal(Vec(P - R_p))
-    # result ⋅ ray_dir < 0.0 ? nothing : result = -result
-    # return result
-
-    ##########################################################################################################
-
-    # if abs((1 - (P.z/r)^2)) < 1e-10
-    #     N_x = 0.
-    #     N_y = 0.
-    # else
-    #     (abs(P.x) < 1e-6) ? (N_x = 0.) : (N_x = copysign( ((1 - (P.z/r)^2) / (1 + (P.y/P.x)^2))^0.5, P.x))
-    #     (abs(P.y) < 1e-6) ? (N_y = 0.) : (N_y = copysign( ((1 - (P.z/r)^2) / (1 + (P.x/P.y)^2))^0.5, P.y))
-    # end
-    # N_z = P.z/r
-    # result = Normal(N_x, N_y, N_z)
-    # result ⋅ ray_dir < 0.0 ? nothing : result = -result
-    # return result
-
-    ###########################################################################################################
-
     # u e v mi danno gia' tutte le info che mi servono per la retta della normale, il verso ancora
     # dalla provenienza del raggio luce
 
     uv = torus_point_to_uv(P, r, R)
-    u = uv.u # CONTROLLA!!
+    u = uv.u
     v = uv.v
-    # N = Normal(cos(2.0*u*pi)*cos(2.0*v*pi), cos(2.0*u*pi)*sin(2.0*v*pi), sin(2.0*v*pi))
-    N = Normal(cos(2.0*u*pi)*cos(2.0*v*pi), -sin(2.0*v*pi), sin(2.0*u*pi)*cos(2.0*v*pi))
+    # N = Normal(cos(2.0*u*pi)*cos(2.0*v*pi), sin(2.0*u*pi)*cos(2.0*v*pi), sin(2.0*v*pi))
+    N = Normal(cos(2.0*u*pi)*cos(2.0*v*pi), sin(2.0*v*pi)*cos(2.0*u*pi), sin(2.0*u*pi))
     N ⋅ ray_dir < 0.0 ? nothing : N = -N
     return N
-
-    ###########################################################################################################
-    # https://github.com/marcin-chwedczuk/ray_tracing_torus_js/blob/master/app/scripts/Torus.js
-
-    # s = squared_norm(P)
-    # a = R^2+r^2
-    # N = Normal(s-a, s-a +2*R^2, s-a)
-
-    # N ⋅ ray_dir < 0.0 ? nothing : N = -N
-    # return N
-    
-    ############################################################################################################
-
-    # Q = R/√(P.x^2-P.z^2) * Point(P.x, 0, P.z)
-    # M = Normal(P - Q)
-    # M ⋅ ray_dir < 0.0 ? nothing : M = -M
-
-    # # println("u = ", u, "     v = ", v)
-    # # println(N, "    ", M)
-    # # @assert M ≈ N
-
-    # return M
 end
 
 @doc raw"""
@@ -697,6 +712,83 @@ end
 # end
 
 
+### THE ONE DOWN WORKS BUT ERRORS IN EVALUATING u,v COORDS AND Normal
+### THIS ONE HAS ITS AXIS ALONG y DIRECTION
+
+# function ray_intersection(torus::Torus, ray::Ray)
+
+#     (ray_intersection(torus.AABB, ray) == true) || (return nothing)
+
+#     inv_ray = inverse(torus.T) * ray
+#     o = Vec(inv_ray.origin)
+#     d = inv_ray.dir
+#     norm2_d = squared_norm(d)
+#     norm2_o =  squared_norm(o)
+#     scalar_od = o ⋅ d
+#     r = torus.r
+#     R = torus.R
+#     # calc = norm2_o - r^2 - R^2
+#     calc = norm2_o - r^2 - R^2
+
+#     # coefficienti per calcolo soluzioniintersezione
+#     c4 = norm2_d^2
+#     c3 = 4 * norm2_d * scalar_od
+#     c2 = 2 * norm2_d * calc + 4 * scalar_od^2 + 4 * R^2 * d.y^2
+#     c1 = 4 * calc * scalar_od + 8 * R^2 * o.y * d.y
+#     c0 = calc^2 - 4 * R^2 * (r^2 - o.y^2)
+
+#     # calcolo soluzioni
+#     t_ints = roots(Polynomial([c0, c1, c2, c3, c4]))
+
+#     # verifico esistenza di almeno una soluzione
+#     (t_ints === nothing) && (return nothing)
+
+#     hit_ts = Vector{Float64}()
+
+#     # controllo che le soluzioni siano reali positive o che la parte immaginaria sia quasi nulla
+#     for i in t_ints
+#         if (typeof(i) == ComplexF64) && (abs(i.im) > 1e-8) #1e-8
+#             continue
+#         elseif ((typeof(i) == Float64) && (1e-8 < i < inv_ray.tmax))
+#             push!(hit_ts, i)
+#         elseif ((typeof(i) == ComplexF64) && (abs(i.im) < 1e-8) && (1e-8 < i.re < inv_ray.tmax)) 
+#             push!(hit_ts, i.re)
+#         else
+#             nothing
+#         end
+#     end
+
+#     (length(hit_ts) == 0) && return nothing
+#     # print(" OK ")
+#     real_ts = sort(hit_ts)
+
+#     first_hit_t = inv_ray.tmin - 1
+#     for i in real_ts
+#         if ((i > inv_ray.tmin) && (i < inv_ray.tmax))
+#             first_hit_t = i
+#             break
+#         end
+#     end
+
+#     if first_hit_t == inv_ray.tmin - 1
+#         return nothing
+#     end
+
+#     hit_point = at(inv_ray, first_hit_t)
+
+#     return HitRecord(
+#         torus.T * hit_point,
+#         torus.T * torus_normal(hit_point, inv_ray.dir, r, R),
+#         torus_point_to_uv(hit_point, r, R),
+#         first_hit_t,
+#         ray, 
+#         torus
+#     )
+# end
+
+
+### NEW TORUS, HAS ITS AXIS ALONG z DIRECTION
+
 function ray_intersection(torus::Torus, ray::Ray)
 
     (ray_intersection(torus.AABB, ray) == true) || (return nothing)
@@ -709,15 +801,14 @@ function ray_intersection(torus::Torus, ray::Ray)
     scalar_od = o ⋅ d
     r = torus.r
     R = torus.R
-    # calc = norm2_o - r^2 - R^2
     calc = norm2_o - r^2 - R^2
 
     # coefficienti per calcolo soluzioniintersezione
     c4 = norm2_d^2
     c3 = 4 * norm2_d * scalar_od
-    c2 = 2 * norm2_d * calc + 4 * scalar_od^2 + 4 * R^2 * d.y^2
-    c1 = 4 * calc * scalar_od + 8 * R^2 * o.y * d.y
-    c0 = calc^2 - 4 * R^2 * (r^2 - o.y^2)
+    c2 = 2 * norm2_d * calc + 4 * scalar_od^2 + 4 * R^2 * d.z^2
+    c1 = 4 * calc * scalar_od + 8 * R^2 * o.z * d.z
+    c0 = calc^2 - 4 * R^2 * (r^2 - o.z^2)
 
     # calcolo soluzioni
     t_ints = roots(Polynomial([c0, c1, c2, c3, c4]))
@@ -729,11 +820,11 @@ function ray_intersection(torus::Torus, ray::Ray)
 
     # controllo che le soluzioni siano reali positive o che la parte immaginaria sia quasi nulla
     for i in t_ints
-        if (typeof(i) == ComplexF64) && (abs(i.im) > 1e-8) #1e-8
+        if (typeof(i) == ComplexF64) && (abs(i.im) > 1e-15) #1e-8
             continue
-        elseif ((typeof(i) == Float64) && (1e-8 < i < inv_ray.tmax))
+        elseif ((typeof(i) == Float64) && (1e-15 < i < inv_ray.tmax))
             push!(hit_ts, i)
-        elseif ((typeof(i) == ComplexF64) && (abs(i.im) < 1e-8) && (1e-8 < i.re < inv_ray.tmax)) 
+        elseif ((typeof(i) == ComplexF64) && (abs(i.im) < 1e-15) && (1e-15 < i.re < inv_ray.tmax)) 
             push!(hit_ts, i.re)
         else
             nothing
@@ -741,7 +832,6 @@ function ray_intersection(torus::Torus, ray::Ray)
     end
 
     (length(hit_ts) == 0) && return nothing
-    # print(" OK ")
     real_ts = sort(hit_ts)
 
     first_hit_t = inv_ray.tmin - 1
@@ -968,9 +1058,9 @@ function quick_ray_intersection(torus::Torus, ray::Ray)
 
     # controllo che le soluzioni siano reali positive o che la parte immaginaria sia quasi nulla
     for i in t_ints
-        if (typeof(i) == ComplexF64) && (abs(i.im) > 1e-10) #1e-8
+        if (typeof(i) == ComplexF64) && (abs(i.im) > 1e-8) #1e-8
             continue
-        elseif ((typeof(i) == Float64) && (1e-5 < i < inv_ray.tmax)) || ((typeof(i) == ComplexF64) && (abs(i.im) < 1e-10) && (1e-5 < i.re < inv_ray.tmax)) 
+        elseif ((typeof(i) == Float64) && (1e-5 < i < inv_ray.tmax)) || ((typeof(i) == ComplexF64) && (abs(i.im) < 1e-8) && (1e-5 < i.re < inv_ray.tmax)) 
             (typeof(i) == Float64) && push!(hit_ts, i)
             continue
             (typeof(i) == ComplexF64) && push!(hit_ts, i.re)

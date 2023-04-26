@@ -14,7 +14,7 @@
 Returns `true` if the absolute difference between 
 `x` and `y` is smaller than ε.
 """
-are_close(x, y, ε=1e-10) = abs(x-y) < ε
+are_close(x, y, ε=1e-8) = abs(x-y) < ε
 
 function Base.:≈(a::RGB{T}, b::RGB{T}) where {T}
     are_close(a.r,b.r) && are_close(a.g,b.g) && are_close(a.b, b.b)

@@ -1,13 +1,13 @@
 # ./Raytracer.jl render torus_debug.txt --width=1200 --height=900 pathtracer
 
-CAMERA(ORTHOGONAL, TRANSLATION([-1.0, 0.0, 0.0]))
-# CAMERA(PERSPECTIVE, TRANSLATION([-2.0, 0.0, 0.0]), 2.0)
+# CAMERA(ORTHOGONAL, TRANSLATION([-1.0, 0.0, 0.0]))
+CAMERA(PERSPECTIVE, TRANSLATION([-2.0, 0.0, 0.0]), 2.0)
 
 COLOR purple(<128, 0, 128>)
 # COLOR lime(<0, 255, 0>)
 # COLOR balck(BLACK)
 
-VECTOR donut_pos([3.4, -0.6, 0.0])
+VECTOR donut_pos([0.4, 1., 0.0])
 FLOAT small_r(0.5)
 FLOAT big_r(1.5)
 PIGMENT donut_pigment(CHECKERED(purple, NAVY, 40))
@@ -35,7 +35,7 @@ MATERIAL sphere_material(
 #    donut_pigment)
 
 TRANSFORMATION donut_trans(
-    TRANSLATION(donut_pos) * ROTATION_Z(pi/3) * SCALING([0.5, 1.0, 0.3])
+    TRANSLATION(donut_pos) * ROTATION_Y(pi/3) * ROTATION_X(pi/4) * SCALING([0.5, 1.0, 0.3])
 )
 
 TRANSFORMATION sphere_trans(
@@ -52,10 +52,10 @@ TORUS(
     big_r
 )
 
-SPHERE(
-    sphere_material,
-    sphere_trans
-)
+#SPHERE(
+#    sphere_material,
+#    sphere_trans#
+#)
 
 POINTLIGHT(
     [8.4, 1.5, -30.0],

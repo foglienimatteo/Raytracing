@@ -898,10 +898,11 @@ struct Torus <: Shape
 
     Torus(T::Transformation, M::Material, b1::Bool = false, b2::Bool = false) = new(T, M, 1.0, 3.0, b1, b2, AABB(Torus, T, 1.0, 3.0))
     Torus(T::Transformation, b1::Bool = false, b2::Bool = false) = new(T, Material(), 1.0, 3.0, b1, b2, AABB(Torus, T, 1.0, 3.0))
-    Torus(M::Material, b1::Bool = false, b2::Bool = false) = new(Transformation(), M, 1.0, 3.0, b1, b2, AABB(Torus, T, 1.0, 3.0))
-    Torus(b1::Bool = false, b2::Bool = false) = new(Transformation(), Material(), 1.0, 3.0, b1, b2, AABB(Torus, T, 1.0, 3.0))
+    Torus(M::Material, b1::Bool = false, b2::Bool = false) = new(Transformation(), M, 1.0, 3.0, b1, b2, AABB(Torus, Transformation(), 1.0, 3.0))
+    Torus(b1::Bool = false, b2::Bool = false) = new(Transformation(), Material(), 1.0, 3.0, b1, b2, AABB(Torus, Transformation(), 1.0, 3.0))
     Torus(T::Transformation, M::Material, r::Float64, b1::Bool = false, b2::Bool = false) = new(T, M, r, 3*r, b1, b2, AABB(Torus, T, r, 3*r))
     Torus(T::Transformation, M::Material, r::Float64, R::Float64, b1::Bool = false, b2::Bool = false) = new(T, M, r, R, b1, b2, AABB(Torus, T, r, R))
+    # Torus() = new(Transformation(), Material(), 1.0, 3.0, false, false, AABB(Torus, Transformation(), 1.0, 3.0)) 
 
     # Torus(T::Transformation = Transformation(), M::Material = Material(), b1::Bool = false, b2::Bool = false) = new(T, M, 1.0, 3.0, b1, b2, AABB(Torus, T, 1.0, 3.0))
     # Torus(r::Float64, T::Transformation = Transformation(), M::Material = Material(), b1::Bool = false, b2::Bool = false) = new(T, M, r, 3*r, b1, b2, AABB(Torus, T, r, 3*r))
@@ -920,18 +921,48 @@ struct Torus <: Shape
     # end
 end
 
+### AABB for torus with axis along y
+
+# function AABB(::Type{Torus}, T::Transformation, r::Float64, R::Float64)
+#     S = R + r
+#     v1 = SVector{8, Point}(
+#         Point(S, r, S),
+#         Point(S, -r, S),
+#         Point(-S, r, S),
+#         Point(-S, -r, S),
+#         Point(S, r, -S),
+#         Point(S, -r, -S),
+#         Point(-S, r, -S),
+#         Point(-S, -r, -S),
+#     )
+
+#     v2 = SVector{8, Point}([T*p for p in v1])
+
+#     P2 = Point(
+#         maximum([v2[i].x for i in eachindex(v2)]),
+#         maximum([v2[i].y for i in eachindex(v2)]),
+#         maximum([v2[i].z for i in eachindex(v2)]) 
+#     )
+#     P1 = Point(
+#         minimum([v2[i].x for i in eachindex(v2)]),
+#         minimum([v2[i].y for i in eachindex(v2)]),
+#         minimum([v2[i].z for i in eachindex(v2)]) 
+#     )
+
+#     AABB(P1, P2)
+# end
 
 function AABB(::Type{Torus}, T::Transformation, r::Float64, R::Float64)
     S = R + r
     v1 = SVector{8, Point}(
-        Point(S, r, S),
-        Point(S, -r, S),
-        Point(-S, r, S),
-        Point(-S, -r, S),
-        Point(S, r, -S),
-        Point(S, -r, -S),
-        Point(-S, r, -S),
-        Point(-S, -r, -S),
+        Point(S, S, r),
+        Point(S, S, -r),
+        Point(-S, S, r),
+        Point(-S, S, -r),
+        Point(S, -S, r),
+        Point(S, -S, -r),
+        Point(-S, -S, r),
+        Point(-S, -S, -r),
     )
 
     v2 = SVector{8, Point}([T*p for p in v1])
@@ -949,7 +980,6 @@ function AABB(::Type{Torus}, T::Transformation, r::Float64, R::Float64)
 
     AABB(P1, P2)
 end
-
 
 ##########################################################################################92
 
