@@ -103,13 +103,14 @@ end
     @test typeof( ray_intersection(torus, Ray( Point(-10, 0, 0), -VEC_Z ) ) ) == Nothing
 end
 
-# @testset "test_Normals" begin
-#     torus = Torus(scaling(Vec(2.0, 2.0, 1.0)))
-#     ray = Ray(Point(1.0, 1.0, 0.0), Vec(-1.0, -1.0, 0.0))
-#     intersection = ray_intersection(sphere, ray)
+@testset "test_Normals" begin
+    torus = Torus(scaling(Vec(2.0, 1.0, 2.0)))
+    ray = Ray(Point(10.0, 0.0, 1.0), -VEC_X)
+    intersection = ray_intersection(torus, ray)
 
-#     @test intersection.normal ≈ Normal(1.0, 4.0, 0.0)
-# end
+    @test typeof(intersection) == HitRecord
+    @test intersection.normal ≈ Normal((√3)/2, 0.0, 1/2)
+end
 
 @testset "test_UV_Coordinates" begin
     torus = Torus()
