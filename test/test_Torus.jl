@@ -5,10 +5,6 @@
 # Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
 #
 
-using Raytracing, Raytracing.Interpreter
-using Test, LinearAlgebra, StaticArrays
-import ColorTypes:RGB
-
 @testset "test_Hit" begin
     torus = Torus()
     ray1 = Ray(Point(0, 0, 10), -VEC_Z)

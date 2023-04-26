@@ -33,13 +33,9 @@ When you create a variable you must follow a specific order:
 You can define variables of the followint types:
 
 - `FLOAT`: real number in Float64 Julia type
-
 - `BOOL`: a boolean variable,
-
 - `VECTOR`: a real 3D vector, numbers inside square brackets,
-
-- `STRING`: a simple string,
-
+- `STRING`: a simple string, text inside "...",
 - `COLOR`: a RGB color, each value must be between 0 and 255 and inside triangle brackets; can use also some defined color keywords (see below)
 
 Those are the simplest variables you can create, here a brief example to resume:
@@ -53,6 +49,38 @@ Those are the simplest variables you can create, here a brief example to resume:
    COLOR mycol1(<1, 2, 3>)
    COLOR mycol2(PURPLE)
 ```
+
+</br>
+
+## Default values
+
+There are some default numbers and colors that one can use.
+
+There :
+
+- ```FLOAT``` types:
+  - `pi`: stands for $\pi$;
+  - `e`: stands for Neper number;
+
+- ```COLOR``` types:
+  - `BLACK` (<0.0, 0.0, 0.0>);
+  - `WHITE` (<255.0, 255.0, 255.0>);
+  - `RED` (<255.0, 0.0, 0.0>);
+  - `LIME` (<0.0, 255.0, 0.0>);
+  - `BLUE` (<0.0, 0.0, 255.0>);
+  - `YELLOW` (<255.0, 255.0, 0.0>);
+  - `CYAN` (<0.0, 255.0, 255.0>);
+  - `MAGENTA` (<255.0, 0.0, 255.0>);
+  - `SYLVER` (<192.0, 192.0, 192.0>);
+  - `GRAY` (<128.0, 128.0, 128.0>);
+  - `MAROON` (<128.0, 0.0, 0.0>);
+  - `OLIVE` (<128.0, 128.0, 0.0>);
+  - `GREEN` (<0.0, 128.0, 0.0>);
+  - `PURPLE` (<128.0, 0.0, 128.0>);
+  - `TEAL` (<0.0, 128.0, 128.0>);
+  - `NAVY` (<0.0, 0.0, 128.0>);
+  - `ORANGE` (<255.0, 165.0, 0.0>);
+  - `GOLD` (<255.0, 215.0, 0.0>).
 
 </br>
 
@@ -126,7 +154,7 @@ where arg can be (a product of):
 - ```ROTATION_X(arg::FLOAT)```: rotates along the x axis, `arg` is the angle in radiant;
 - ```ROTATION_Y(arg::FLOAT)```: rotates along the y axis, `arg` is the angle in radiant;
 - ```ROTATION_Z(arg::FLOAT)```: rotates along the z axis, `arg` is the angle in radiant;
-- ```SCALING(arg::VECTOR)```: deforms along the three axises
+- ```SCALING(arg::VECTOR)```: deforms along the three axes;
 - ```TRANSLATION(arg::VECTOR)```: translates in the specified position; it is applied to the (bari-)center of each figure.
 
 </br>
@@ -187,7 +215,7 @@ where the arguments are:
 
 - ```arg1```: material of the cube;
 - ```arg2```: transformation for position and "reshape" of the figure;
-- ```b1```: optional argument, set to `true` if inside there is a [`POINTLIGHT`](#POINTLIGHT);
+- ```b1```: optional argument, set to `true` if inside there is a [`POINTLIGHT`](#pointlight);
 - ```b2```: optional argument, set to `true` if this is the shape of background.
 
 </br>
@@ -204,7 +232,7 @@ The arguments are:
 
 - ```arg1```: material of the cube;
 - ```arg2```: transformation for position and "reshape" of the figure;
-- ```b1```: optional argument, set to `true` if inside there is a [`POINTLIGHT`](#POINTLIGHT);
+- ```b1```: optional argument, set to `true` if inside there is a [`POINTLIGHT`](#pointlight);
 - ```b2```: optional argument, set to `true` if this is the shape of background.
 
 </br>
@@ -221,7 +249,7 @@ The arguments are:
 
 - ```arg1```: material of the cube;
 - ```arg2```: transformation for position and "reshape" of the figure;
-- ```b1```: optional argument, set to `true` if inside there is a [`POINTLIGHT`](#POINTLIGHT);
+- ```b1```: optional argument, set to `true` if inside there is a [`POINTLIGHT`](#pointlight);
 - ```b2```: optional argument, set to `true` if this is the shape of background.
 
 </br>
@@ -240,7 +268,7 @@ where the arguments are:
 - ```arg2```: transformation for position and "reshape" of the figure;
 - ```arg3```: minor radius of the torus, has default value of 1;
 - ```arg4```: major radius of the torus, has default value the triple of minor radius (arg3);
-- ```b1```: optional argument, set to `true` if inside there is a [`POINTLIGHT`](#POINTLIGHT);
+- ```b1```: optional argument, set to `true` if inside there is a [`POINTLIGHT`](#pointlight);
 - ```b2```: optional argument, set to `true` if this is the shape of background.
 
 </br>
@@ -257,37 +285,69 @@ where the arguments are:
 
 - ```arg1```: material of the cube;
 - ```arg2```, ```arg3```, ```arg4```: vertices of the triangle;
-- ```b1```: optional argument, set to `true` if inside there is a [`POINTLIGHT`](#POINTLIGHT);
+- ```b1```: optional argument, set to `true` if inside there is a [`POINTLIGHT`](#pointlight);
 - ```b2```: optional argument, set to `true` if this is the shape of background.
 
 </br>
 
-## Default values
+## Operations
 
-There are some default numbers and colors that one can use.
+You can also do operations between FLOATS, VECTOR and COLOR variables both while defining a new variable or when giving it to a function. The operations implemented are those inside the [Base Julia Mode](https://docs.julialang.org/en/v1/base/math/) or the Raytracing package.
 
-There :
+### Operations in Raytracing package
 
-- ```FLOAT``` types:
-  - `pi`: stands for $\pi$;
-  - `e`: stands for Neper number;
+Here a list of operations implemented in Raytracing package:
 
-- ```COLOR``` types:
-  - `BLACK` (<0.0, 0.0, 0.0>);
-  - `WHITE` (<255.0, 255.0, 255.0>);
-  - `RED` (<255.0, 0.0, 0.0>);
-  - `LIME` (<0.0, 255.0, 0.0>);
-  - `BLUE` 	(<0.0, 0.0, 255.0>);
-  - `YELLOW` (<255.0, 255.0, 0.0>);
-  - `CYAN` 	(<0.0, 255.0, 255.0>);
-  - `MAGENTA` (<255.0, 0.0, 255.0>);
-  - `SYLVER` (<192.0, 192.0, 192.0>);
-  - `GRAY` (<128.0, 128.0, 128.0>);
-  - `MAROON` (<128.0, 0.0, 0.0>);
-  - `OLIVE` (<128.0, 128.0, 0.0>);
-  - `GREEN` (<0.0, 128.0, 0.0>);
-  - `PURPLE` (<128.0, 0.0, 128.0>);
-  - `TEAL` (<0.0, 128.0, 128.0>);
-  - `NAVY` (<0.0, 0.0, 128.0>);
-  - `ORANGE` (<255.0, 165.0, 0.0>);
-  - `GOLD` (<255.0, 215.0, 0.0>).
+- `VECTOR` + `VECTOR`
+- `VECTOR` - `VECTOR`
+- `VECTOR` * `FLOAT`
+- `FLOAT` + `VECTOR`
+- `VECTOR` / `FLOAT`
+- \- `VECTOR`
+- `COLOR` + `COLOR`
+- `COLOR` - `COLOR`
+- `FLOAT` * `COLOR`
+- `COLOR` * `FLOAT`
+- `COLOR` / `FLOAT`
+- `COLOR` * `COLOR`
+
+</br>
+
+## Utilities
+
+There are some more functionalities that can be useful.
+
+### ASSERT
+
+You can check if a variable has a specific value or if it's greater than / less than another with the `ASSERT` keyword:
+
+```Julia
+ASSERT(1, 1)             # Checking that 1==1, throws AssertionError otherwise
+ASSERT(1, 1, "=")        # Checking that 1==1 again
+ASSERT(1, 1, "==")       # Checking that 1==1 again
+ASSERT(1, 1, "approx")   # Checking that 1 approx 1 
+ASSERT(1, 2, "<")        # Checking that 1<2
+ASSERT(1, 2, "<=")       # Checking that 1<=2
+ASSERT(3, 2, ">")        # Checking that 3>2
+ASSERT(3, 2, ">=")       # Checking that 3>=2
+ASSERT(value_my_function, 2)
+```
+
+</br>
+
+### PRINT
+
+You can also print the value of a variable or its identifier (name) with the `PRINT` keyword:
+
+```Julia
+PRINT(variable_name)
+```
+
+</br>
+
+### Comments
+
+You can insert comments in your text file; there are two methods:
+
+- `#`: with this char everithing that follows in the line is a commend and not parsed
+- `#=`*bla bla // bla*`=#`: in this way you can comment more lines, what's inside is commented and not parsed.
