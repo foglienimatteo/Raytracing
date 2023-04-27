@@ -1,22 +1,89 @@
 # INSTRUCTIONS TO PROPELY WRITE YOUR TEXT FILE AND GENERATE IMAGES
 
-This is a simple documentation where you can find instructions about the language you need to use
-when writing your .txt file containing the instructions to generate your world.
+This is a simple documentation where you can find instructions about the language you need to use when writing your .txt file containing the instructions to generate your world.
 
-#### Note
+You can generate a single image (in .png format) or also an animation (in .mp4 video format or .gif image one); you must choose which one you want to create using one of the following flag:
+
+- `render`: the text file is parsed to generate an image;
+- `animation`: the text file is parsed to generate an animation.
+
+## Note
 
 A first warning must be done: some variables can be passed both from command line (or Julia REPL) and inside the file;
 if you use CLI method, those values have priprity over those in the file.
 
 There are then instructions that you can specify and pass only through CLI (or Julia REPL):
 
-- rendering typology (onoff/flat/pathtracer/pointlight);
-
-- width and height of the image.
+- create an image (`render`) or an animation (`animation`);
+- image options;
+- width and height of the image;
+- rendering typology (`onoff`/`flat`/`pathtracer`/`pointlight`);
+- render options.
 
 ```console
 unsername@PathToProject:~$ ./Raytracer.jl render [OPTIONS_FOR_THE_IMAGE] my_file.txt --width=NUMBER --height=NUMBER {onoff|flat|pathtracer|pointlight}[OPTIONS_FOR_THE_RENDERER]
 ```
+
+```Julia
+julia> render("width"=>NUMBER, "height"=>NUMBER, my_file.txt, "%COMMAND%"=>"{onoff|flat|pathtracer|pointlight}", "{onoff|flat|pathtracer|pointlight}"=>Dict("OPTION"=>VALUE))
+```
+
+</br>
+
+### Options only from CLI/Julia repl
+
+There are some options that in this release it's possible to specify only in terminal, each one has obiouvsly its default value. Here the complete list for image generation:
+
+- ```--alpha```: camera angle of view around z-axis, in degrees;
+- ```--width```: pixel number on the width of the resulting image;
+- ```--height```: pixel number on the height of the resulting image;
+- ```--normalization```, ```-a```: scaling factor for the normalization process, must be positive;
+- ```--gamma```, ```-g```: gamma value for the tone mapping process, must be positive;
+- ```--avg_lum```: average luminosity of the resulting pfm image, if =0 (dafault value) it will be calculated automatically with the built-in avg_lum function;
+- ```--samples_per_pixel```: number of samples per pixel for the antialiasing algorithm, it must be an integer perfect square and if =0 (default value), antialiasing does not occurs;
+- ```--set_pfm_name```: name of the pfm file to be saved;
+- ```--set_png_name```: name of the png file to be saved;
+- ```--declare_float```: declare a variable, the syntax is «--declare-float=VAR:VALUE» (e.g. ```--declare_float=clock:150```);
+- render typology, can be:
+
+  - [```onoff```](#onoff): simply estimates if a ray hits the point;
+  - [```flat```](#flat): a bit more advanced than the previous, estimates the surface color;
+  - [```pathtracer```](#pathtracer): the "real" ray tracer;
+  - [```pointlight```](#pointlight): estimates the color depending on the light, doesn't use ray tracing algorithm.
+
+Each render type can have its own options.
+
+#### onoff
+
+- ```--background_color```: background color specified as <R,G,B> components (e.g. ```--background_color=<1,2,3>```);
+- ```--color```: hit color specified as <R,G,B> components (e.g. --ambient_color=<1,2,3>).
+
+#### flat
+
+- ```--background_color```: background color specified as <R,G,B> components (e.g. ```--background_color=<1,2,3>```).
+
+#### pathtracer
+
+- ```--background_color```: background color specified as <R,G,B> components (e.g. ```--background_color=<1,2,3>```);
+- ```--init_state```: nitial seed for the random number generator (positive integer number);
+- ```--init_seq```: identifier of the sequence produced by the random number generator (positive integer number);
+- ```--num_of_rays```: number of `Ray`s generated for each integral evaluation;
+- ```--max_depth```: maximal number recursive integrations;
+- ```--russian_roulette_limit```: depth at whitch the Russian Roulette algorithm begins.
+
+#### pointlight
+
+- ```--background_color```: background color specified as <R,G,B> components (e.g. ```--background_color=<1,2,3>```);
+- ```--ambient_color```: ambient color specified as '<R,G,B>' components (e.g. ```--ambient_color=<1,2,3>```);
+- ```--dark_parameter```: percentage of the retuned hit point color if it is not directly visible from a point-light source.
+
+</br>
+
+When generating an animation, you need to specify:
+
+- ```--function```: name of the function that will be used to render the animation, must have been defined in "src/YOUR_FUNCTIONS.jl" file;
+- ```--vec_variables```: vector of variable names that will change from frame to frame (those that give frame per frame the new position of the object(s), must be the same name as in the YOUR_FUNCTIONS.jl file), must be declared as:  ```--vec_variables= "[name1, name2, ...]"```;
+- ```--iterable```: iterable object from with the function will calcuate le variable values, it is defined as ```INITIAL_NUMBER:FINAL_NUMBER```.
 
 </br>
 
@@ -356,7 +423,7 @@ You can insert comments in your text file; there are two methods:
 
 ### Functions
 
-You can create your own functions inside the "src/YOUR_FUNCTIONS.jl" file and use them!
+You can create your own functions inside the "src/YOUR_FUNCTIONS.jl" file and use them! They are essential to give the movements instructions.
 
 ```Julia
 FLOAT value_my_function(my_function(1.0))   # "my_function" is defined in that file

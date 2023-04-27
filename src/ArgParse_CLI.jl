@@ -665,7 +665,7 @@ function ArgParse_command_line(arguments)
 			help = "pixel number on the height of the resulting demo image."
 			default = 480
 			range_tester = check_is_even_uint64
-          "--normalization", "-a"
+        "--normalization", "-a"
 			help = "scaling factor for the normalization process; must be positive"
 			arg_type = Float64
 			range_tester = check_is_positive
@@ -675,13 +675,13 @@ function ArgParse_command_line(arguments)
 			arg_type = Float64
 			range_tester = check_is_positive
 			default = 1.27
-           "--avg_lum"
+        "--avg_lum"
 			help = "average luminosity of the resulting pfm image; if =0 (dafault value)"*
                     "it will be calculated automatically with the built-in avg_lum function"
 			arg_type = Float64
 			range_tester = check_is_positive
 			default = 0.0
-          "--set_anim_name"
+    	"--set_anim_name"
 			help = "name of the animation file to be saved"
 			nargs = '?'
 			arg_type = String
