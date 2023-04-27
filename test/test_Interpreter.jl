@@ -408,8 +408,8 @@ end
 
 @testset "test_tutorial_basic_syntax.txt" begin
      # cd("..")
-     open("/home/runner/work/Raytracing/Raytracing/examples/tutorial_basic_syntax.txt") do stream
-     # open("./examples/tutorial_basic_syntax.txt") do stream
+     #open("/home/runner/work/Raytracing/Raytracing/examples/tutorial_basic_syntax.txt") do stream
+     open("./examples/tutorial_basic_syntax.txt") do stream
           scene = parse_scene(InputStream(stream, "tutorial_basic_syntax.txt"))
           @test 1==1
      end
@@ -420,8 +420,8 @@ end
 
 @testset "test_demo_world_B.txt" begin
      # cd("..")
-     open("/home/runner/work/Raytracing/Raytracing/examples/demo_world_B.txt") do stream
-     # open("./examples/demo_world_B.txt") do stream
+     #open("/home/runner/work/Raytracing/Raytracing/examples/demo_world_B.txt") do stream
+     open("./examples/demo_world_B.txt") do stream
           scene = parse_scene(InputStream(stream, "/home/runner/work/Raytracing/Raytracing/examples/demo_world_B.txt"))
           @test 1==1
      end
