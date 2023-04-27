@@ -42,8 +42,8 @@ Those are the simplest variables you can create, here a brief example to resume:
 
 ```Julia
    FLOAT name(000)
-   BOOL mybool(TRUE)
-   BOOL mybool(FALSE)
+   BOOL mybool_A(TRUE)
+   BOOL mybool_B(FALSE)
    VECTOR myvec([1, 2, 3])
    STRING mystr("let's create a string")
    COLOR mycol1(<1, 2, 3>)
@@ -215,8 +215,8 @@ where the arguments are:
 
 - ```arg1```: material of the cube;
 - ```arg2```: transformation for position and "reshape" of the figure;
-- ```b1```: optional argument, set to `true` if inside there is a [`POINTLIGHT`](#pointlight);
-- ```b2```: optional argument, set to `true` if this is the shape of background.
+- ```b1```: optional argument, set to `TRUE` if inside there is a [`POINTLIGHT`](#pointlight);
+- ```b2```: optional argument, set to `TRUE` if this is the shape of background.
 
 </br>
 
@@ -232,8 +232,8 @@ The arguments are:
 
 - ```arg1```: material of the cube;
 - ```arg2```: transformation for position and "reshape" of the figure;
-- ```b1```: optional argument, set to `true` if inside there is a [`POINTLIGHT`](#pointlight);
-- ```b2```: optional argument, set to `true` if this is the shape of background.
+- ```b1```: optional argument, set to `TRUE` if inside there is a [`POINTLIGHT`](#pointlight);
+- ```b2```: optional argument, set to `TRUE` if this is the shape of background.
 
 </br>
 
@@ -249,8 +249,8 @@ The arguments are:
 
 - ```arg1```: material of the cube;
 - ```arg2```: transformation for position and "reshape" of the figure;
-- ```b1```: optional argument, set to `true` if inside there is a [`POINTLIGHT`](#pointlight);
-- ```b2```: optional argument, set to `true` if this is the shape of background.
+- ```b1```: optional argument, set to `TRUE` if inside there is a [`POINTLIGHT`](#pointlight);
+- ```b2```: optional argument, set to `TRUE` if this is the shape of background.
 
 </br>
 
@@ -268,8 +268,8 @@ where the arguments are:
 - ```arg2```: transformation for position and "reshape" of the figure;
 - ```arg3```: minor radius of the torus, has default value of 1;
 - ```arg4```: major radius of the torus, has default value the triple of minor radius (arg3);
-- ```b1```: optional argument, set to `true` if inside there is a [`POINTLIGHT`](#pointlight);
-- ```b2```: optional argument, set to `true` if this is the shape of background.
+- ```b1```: optional argument, set to `TRUE` if inside there is a [`POINTLIGHT`](#pointlight);
+- ```b2```: optional argument, set to `TRUE` if this is the shape of background.
 
 </br>
 
@@ -285,8 +285,8 @@ where the arguments are:
 
 - ```arg1```: material of the cube;
 - ```arg2```, ```arg3```, ```arg4```: vertices of the triangle;
-- ```b1```: optional argument, set to `true` if inside there is a [`POINTLIGHT`](#pointlight);
-- ```b2```: optional argument, set to `true` if this is the shape of background.
+- ```b1```: optional argument, set to `TRUE` if inside there is a [`POINTLIGHT`](#pointlight);
+- ```b2```: optional argument, set to `TRUE` if this is the shape of background.
 
 </br>
 
@@ -349,5 +349,15 @@ PRINT(variable_name)
 
 You can insert comments in your text file; there are two methods:
 
-- `#`: with this char everithing that follows in the line is a commend and not parsed
+- `#`: with this char everithing that follows in the line is a commend and not parsed;
 - `#=`*bla bla // bla*`=#`: in this way you can comment more lines, what's inside is commented and not parsed.
+
+</br>
+
+### Functions
+
+You can create your own functions inside the "src/YOUR_FUNCTIONS.jl" file and use them!
+
+```Julia
+FLOAT value_my_function(my_function(1.0))   # "my_function" is defined in that file
+```
