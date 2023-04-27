@@ -74,7 +74,7 @@ end
      Raytracing.set_pixel(img, 2, 1, RGB(7.0e2, 8.0e2, 9.0e2))
 
      # Leggo file di rifeirmento
-     inpf = open("test/reference_le.pfm", "r") do file
+     inpf = open("/home/runner/work/Raytracing/Raytracing/test/reference_le.pfm", "r") do file
      # inpf = open("./test/reference_le.pfm", "r") do file	# read( ) legge già di base i bytes grezzi,
                read(file)							# opzioni da poter decidere sono solo "r" e "w" - specificando UInt8 legge solo il primo carattere
           end
@@ -194,10 +194,10 @@ end
 end
 
 @testset "test_read_pfm" begin
-     img_le = open("test/reference_le.pfm", "r") do file
+     img_le = open("/home/runner/work/Raytracing/Raytracing/test/reference_le.pfm", "r") do file
                Raytracing.read(file, Raytracing.HDRimage)
                end
-     img_be = open("test/reference_be.pfm", "r") do file
+     img_be = open("/home/runner/work/Raytracing/Raytracing/test/reference_be.pfm", "r") do file
                Raytracing.read(file, Raytracing.HDRimage)
                end 
 
