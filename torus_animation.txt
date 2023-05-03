@@ -1,0 +1,69 @@
+# ./Raytracer.jl animation --width=1280 --height=720 --function=torus_and_sphere --vec_variables="[first_torus_rot_Z, second_torus_rot_Z, first_sphere_trasl, first_sphere_rot]" --iterable=1:400 torus_animation.txt pointlight --dark_parameter=0.25
+
+#CAMERA(
+#    ORTHOGONAL,
+#    TRANSLATION([-1.0, 0.0, 0.0])
+#)
+
+CAMERA(
+    PERSPECTIVE,
+    TRANSLATION([-1.0, 0.0, 0.0]),
+    2.0
+)
+
+POINTLIGHT(
+    [0.4, 0.0, 100.0],
+    <2.0, 255, 100>
+)
+
+FLOAT sphere_Z_quote(2.5)
+FLOAT t_small_r(1.0)
+FLOAT t_big_r(3.0)
+FLOAT s_rad(1.0)
+VECTOR torus_position([0.4, 0., 0.0])
+
+PIGMENT torus_pigment(CHECKERED(<0.0, 0.0, 0.0>, NAVY, 40))
+PIGMENT sphere_pigment(CHECKERED(RED, GOLD, 10))
+
+BRDF torus_brdf(DIFFUSE(torus_pigment))
+BRDF sphere_brdf(DIFFUSE(sphere_pigment))
+
+MATERIAL torus_material(
+    torus_brdf,
+    torus_pigment
+)
+
+MATERIAL sphere_material(
+    sphere_brdf,
+    sphere_pigment
+)
+
+FLOAT first_torus_rot_Z(0)
+FLOAT second_torus_rot_Z(0)
+
+TRANSFORMATION torus_trans(
+    TRANSLATION(torus_position)
+    * ROTATION_Z(second_torus_rot_Z)
+    * ROTATION_X(pi/6)
+    * ROTATION_Z(first_torus_rot_Z)
+    * SCALING([0.2, 0.2, 0.2])
+)
+
+FLOAT first_sphere_trasl(2.5)
+FLOAT first_sphere_rot(0)
+
+TRANSFORMATION sphere_trans(
+    TRANSLATION(torus_position + [0.0, 0.0, first_sphere_trasl])
+    * ROTATION_Z(first_sphere_rot)
+    * SCALING([0.2, 0.2, 0.2])
+)
+
+TORUS(
+    torus_material,
+    torus_trans
+)
+
+SPHERE(
+    sphere_material,
+    sphere_trans
+)

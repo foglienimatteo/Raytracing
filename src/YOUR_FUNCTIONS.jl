@@ -33,3 +33,12 @@ function earth_moon_sun(x, P_rev_moon=200, P_rot_earth=50, d=3.0, v=1.0)
      return (moon_x, moon_y, moon_z, moon_rotang, earth_rotang)
 end
 
+##########################################################################################################
+
+function torus_and_sphere(t, P_rev_torus = 300, P_rot_torus = 100, P_oscill_sphere = 50, P_rot_sphere = 38, A = 0.5)
+     first_torus_rot_Z = 2 * π * t/P_rot_torus
+     second_torus_rot_Z = 2 * π * t/P_rev_torus
+     first_sphere_trasl = A * cos(2 * π * t/P_oscill_sphere)
+     first_sphere_rot = 2 * π * t/P_rot_sphere
+     return (first_torus_rot_Z, second_torus_rot_Z, first_sphere_trasl, first_sphere_rot)
+end
