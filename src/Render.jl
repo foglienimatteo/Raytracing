@@ -128,7 +128,7 @@ function render(
 		bool_print::Bool = true,
 		bool_savepfm::Bool = true,
           declare_float::Union{Dict{String,Float64}, Nothing} = nothing,
-          ONLY_FOR_TESTS::Bool = false,
+          ONLY_FOR_TESTS::Bool = false
      )
 
      (bool_print==true) && println("\n\nStarting the image rendering of \"$(scenefile)\"...")

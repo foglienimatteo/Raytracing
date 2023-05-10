@@ -12,7 +12,7 @@ You can generate a single image (in .png format) or also an animation (in .mp4 v
 A first warning must be done: some variables can be passed both from command line (or Julia REPL) and inside the file;
 if you use CLI method, those values have priprity over those in the file.
 
-There are then instructions that you can specify and pass only through CLI (or Julia REPL):
+There are then instructions that you can specify and pass only through CLI (or Julia REPL) in this exact order:
 
 - create an image (`render`) or an animation (`animation`);
 - image options;
@@ -32,7 +32,7 @@ julia> render("width"=>NUMBER, "height"=>NUMBER, my_file.txt, "%COMMAND%"=>"{ono
 
 ### Options only from CLI/Julia repl
 
-There are some options that in this release it's possible to specify only in terminal, each one has obiouvsly its default value. Here the complete list for image generation:
+There are some options that in this release it's possible to specify only in terminal, each one has obiouvsly its default value. Here the complete list for image generation; first the image options:
 
 - ```--alpha```: camera angle of view around z-axis, in degrees;
 - ```--width```: pixel number on the width of the resulting image;
@@ -43,15 +43,16 @@ There are some options that in this release it's possible to specify only in ter
 - ```--samples_per_pixel```: number of samples per pixel for the antialiasing algorithm, it must be an integer perfect square and if =0 (default value), antialiasing does not occurs;
 - ```--set_pfm_name```: name of the pfm file to be saved;
 - ```--set_png_name```: name of the png file to be saved;
-- ```--declare_float```: declare a variable, the syntax is «--declare-float=VAR:VALUE» (e.g. ```--declare_float=clock:150```);
-- render typology, can be:
+- ```--declare_float```: declare a variable, the syntax is «--declare-float=VAR:VALUE» (e.g. ```--declare_float=clock:150```).
 
-  - [```onoff```](#onoff): simply estimates if a ray hits the point;
-  - [```flat```](#flat): a bit more advanced than the previous, estimates the surface color;
-  - [```pathtracer```](#pathtracer): the "real" ray tracer;
-  - [```pointlight```](#pointlight): estimates the color depending on the light, doesn't use ray tracing algorithm.
+Second, renderer typology, can be:
 
-Each render type can have its own options.
+- [```onoff```](#onoff): simply estimates if a ray hits the point;
+- [```flat```](#flat): a bit more advanced than the previous, estimates the surface color;
+- [```pathtracer```](#pathtracer): the "real" ray tracer, uses the ray tracing equation;
+- [```pointlight```](#pointlight): estimates the color depending on the light, doesn't use ray tracing algorithm.
+
+And then, each renderer type can have its own options.
 
 #### onoff
 
@@ -79,7 +80,7 @@ Each render type can have its own options.
 
 </br>
 
-When generating an animation, you need to specify:
+When generating an animation, you must specify BEFORE the renderer command:
 
 - ```--function```: name of the function that will be used to render the animation, must have been defined in "src/YOUR_FUNCTIONS.jl" file;
 - ```--vec_variables```: vector of variable names that will change from frame to frame (those that give frame per frame the new position of the object(s), must be the same name as in the YOUR_FUNCTIONS.jl file), must be declared as:  ```--vec_variables= "[name1, name2, ...]"```;
@@ -103,7 +104,7 @@ You can define variables of the followint types:
 - `BOOL`: a boolean variable,
 - `VECTOR`: a real 3D vector, numbers inside square brackets,
 - `STRING`: a simple string, text inside "...",
-- `COLOR`: a RGB color, each value must be between 0 and 255 and inside triangle brackets; can use also some defined color keywords (see below)
+- `COLOR`: a RGB color, each value must be between 0 and 1 and inside triangle brackets or use the `to_RGB()` function to convert RGB colors (with componens between 0 and 255); can use also some defined color keywords (see below)
 
 Those are the simplest variables you can create, here a brief example to resume:
 
@@ -114,7 +115,7 @@ Those are the simplest variables you can create, here a brief example to resume:
    VECTOR myvec([1, 2, 3])
    STRING mystr("let's create a string")
    COLOR mycol1(<1, 2, 3>)
-   COLOR mycol2(PURPLE)
+   COLOR mycol2(WHITE)
 ```
 
 </br>
@@ -129,7 +130,7 @@ There :
   - `pi`: stands for $\pi$;
   - `e`: stands for Neper number;
 
-- ```COLOR``` types:
+- ```COLOR``` types (here in sRGB standard, in code normalized on 255):
   - `BLACK` (<0.0, 0.0, 0.0>);
   - `WHITE` (<255.0, 255.0, 255.0>);
   - `RED` (<255.0, 0.0, 0.0>);
@@ -166,11 +167,11 @@ PIGMENT pig_name(TYPE_OF_PIGMENT(args...))
 
 where `TYPE_OF_PIGMENT` can be:
 
-- ```UNIFORM(arg::COLOR)```;
+- ```UNIFORM(arg::COLOR)```: uniform color;
 
-- ```CHECKERED(arg1::COLOR, arg2::COLOR, n::INT)```;
+- ```CHECKERED(arg1::COLOR, arg2::COLOR, n::INT)```: checkered theme with the two specified colors, `n` steps per side;
 
-- ```IMAGE(arg::STRING)```; here the argument is the path to the .jpg image file
+- ```IMAGE(arg::STRING)```, here the argument is the path to the .jpg image file that covers the shape surface.
 
 </br>
 
@@ -203,7 +204,11 @@ where the `;` char means that `arg2` is oprional; don't use `,` to separate the 
 MATERIAL material_name(arg1::BRDF, arg2::PIGMENT)
 ```
 
-when you give the arguments you can both give an existing variable name or create inside the required object (without giving type keyword and name)
+when you give the arguments you can both give an existing variable name or create inside the required object (without giving type keyword and name); if using the `FLOAT` optional argument just add it with its `;` separator: e.g.
+
+```Julia
+MATERIAL name(DIFFUSE(UNIFORM(color)); float, pigment)
+```
 
 </br>
 

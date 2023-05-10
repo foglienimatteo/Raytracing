@@ -316,7 +316,7 @@ function ArgParse_command_line(arguments)
 			arg_type = Float64
 			range_tester = check_is_positive
 			default = 1.27
-          "--avg_lum"
+        "--avg_lum"
 			help = "average luminosity of the resulting pfm image; if =0 (dafault value)"*
                     "it will be calculated automatically with the built-in avg_lum function"
 			arg_type = Float64

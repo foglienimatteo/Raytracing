@@ -933,7 +933,6 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
 
     ONLY_FOR_TESTS::Bool = haskey(dict, "ONLY_FOR_TESTS") ? dict["ONLY_FOR_TESTS"] : false
 
-
     return (
             scenefile,
             renderer,
@@ -946,7 +945,7 @@ function parse_render_settings(dict::Dict{String, T}) where {T}
             samples_per_pixel, 
             bool_print, bool_savepfm, 
             declare_float,
-            ONLY_FOR_TESTS,
+            ONLY_FOR_TESTS
         )
 end
 

@@ -81,24 +81,24 @@ SYM_NUM = Dict("e"=>ℯ, "pi"=>π)
 
 # Base.:/(c::RGB{T}, scalar::Real) where {T} = RGB{T}(c.r/scalar , c.g/scalar, c.b/scalar)
 SYM_COL = Dict(
-    # "BLACK" => RGB{Float32}(0., 0., 0.),
-    # "WHITE" => RGB{Float32}(255., 255., 255.)/255,
-    "RED" => RGB{Float32}(255., 0., 0.)/255,
-    "LIME" => RGB{Float32}(0., 255., 0.)/255,
-    "BLUE" => RGB{Float32}(0., 0., 255.)/255,
-    "YELLOW" => RGB{Float32}(255., 255., 0.)/255,
-    "CYAN" => RGB{Float32}(0., 255., 255.)/255,
-    "MAGENTA" => RGB{Float32}(255., 0., 255.)/255,
-    "SYLVER" => RGB{Float32}(192., 192., 192.)/255,
-    "GRAY" => RGB{Float32}(128., 128., 128.)/255,
-    "MAROON" => RGB{Float32}(128., 0., 0.)/255,
-    "OLIVE" => RGB{Float32}(128., 128., 0.)/255,
-    "GREEN" => RGB{Float32}(0., 128., 0.)/255,
-    "PURPLE" => RGB{Float32}(128., 0., 128.)/255,
-    "TEAL" => RGB{Float32}(0., 128., 128.)/255,
-    "NAVY" => RGB{Float32}(0., 0., 128.)/255,
-    "ORANGE" => RGB{Float32}(255., 165., 0.)/255,
-    "GOLD" => RGB{Float32}(255., 215., 0.)/255
+    "BLACK" => RGB{Float32}(0, 0, 0),
+    "WHITE" => RGB{Float32}(1, 1, 1),
+    "RED" => RGB{Float32}(255.0/255, 0.0/255, 0.0/255),
+    "LIME" => RGB{Float32}(0.0, 255.0/255, 0.0/255),
+    "BLUE" => RGB{Float32}(0.0/255, 0.0/255, 255.0/255),
+    "YELLOW" => RGB{Float32}(255.0/255, 255.0/255, 0.0/255),
+    "CYAN" => RGB{Float32}(0.0/255, 255.0/255, 255.0/255),
+    "MAGENTA" => RGB{Float32}(255.0/255, 0.0/255, 255.0/255),
+    "SYLVER" => RGB{Float32}(192.0/255, 192.0/255, 192.0/255),
+    "GRAY" => RGB{Float32}(128.0/255, 128.0/255, 128.0/255),
+    "MAROON" => RGB{Float32}(128.0/255, 0.0/255, 0.0/255),
+    "OLIVE" => RGB{Float32}(128.0/255, 128.0/255, 0.0/255),
+    "GREEN" => RGB{Float32}(0.0/255, 128.0/255, 0.0/255),
+    "PURPLE" => RGB{Float32}(128.0/255, 0.0/255, 128.0/255),
+    "TEAL" => RGB{Float32}(0.0/255, 128.0/255, 128.0/255),
+    "NAVY" => RGB{Float32}(0.0/255, 0.0/255, 128.0/255),
+    "ORANGE" => RGB{Float32}(255.0/255, 165.0/255, 0.0/255),
+    "GOLD" => RGB{Float32}(255.0/255, 215.0/255, 0.0/255)
 )
 
 export CAMERAS, RENDERERS, DEMO_WORLD_TYPES

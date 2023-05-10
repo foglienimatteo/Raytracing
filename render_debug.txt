@@ -1,0 +1,67 @@
+# ./Raytracer.jl render render_debug.txt --width=1200 --height=900 pathtracer
+
+#CAMERA(
+#    ORTHOGONAL,
+#    TRANSLATION([-1.0, 0.0, 0.0])
+#)
+
+CAMERA(
+    PERSPECTIVE,
+    TRANSLATION([-0.5, 0.0, 1.0]),
+    1.0
+)
+
+MATERIAL ground_material (
+        DIFFUSE( CHECKERED( <0.3, 0.5, 0.1> ,  <0.1, 0.2, 0.5> , 2 ) ); 0.5,
+        # DIFFUSE( CHECKERED( NAVY ,  GREEN , 2 ) ),
+        UNIFORM( <0, 0, 0> )
+)
+
+MATERIAL ground_material2 (
+        DIFFUSE( CHECKERED( <0.3, 0.5, 0.1> ,  <0.1, 0.2, 0.5> , 2 ) ); 0.5,
+        # DIFFUSE( CHECKERED( <0.3, 0.5, 0.1> ,  <0.1, 0.2, 0.5> , 2 ) ),
+        UNIFORM( <0, 0, 0> )
+)
+
+MATERIAL sky_material (
+        DIFFUSE( UNIFORM(BLACK) ),
+        UNIFORM( <1.0, 0.9, 0.5> )      # This will be our light source for this scene!
+)
+
+SPHERE(
+    sky_material,   # material to be used
+    SCALING([50, 50, 50]) * TRANSLATION([0, 0, 0]) # transformations to apply on the shape
+)
+
+PLANE(
+    ground_material2,
+    IDENTITY 
+)
+
+VECTOR torus_position([0.5, 0., 0.5])
+# PIGMENT sphere_pigment(CHECKERED(RED*0.1, GOLD*0.1, 10))
+PIGMENT sphere_pigment(CHECKERED(<0.5, 0.3, 0.3> ,  <0.8, 0.2, 0.5> , 10))
+# BRDF sphere_brdf(DIFFUSE(UNIFORM(<0.1,0.1,0.1>)))
+BRDF sphere_brdf(DIFFUSE(sphere_pigment); 0.8)
+MATERIAL sphere_material(
+    sphere_brdf,
+    sphere_pigment
+)
+
+TRANSFORMATION sphere_trans(
+    TRANSLATION(torus_position)
+    * SCALING([0.5, 0.5, 0.5])
+)
+
+SPHERE(
+    sphere_material,
+    sphere_trans
+)
+
+
+VECTOR pl_pos(torus_position + [0., 10., 10])
+POINTLIGHT(
+    pl_pos,
+    #<1.0, 1.0, 1.0>
+    WHITE
+)
