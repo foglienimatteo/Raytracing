@@ -18,7 +18,7 @@ FLOAT s_rad(1.0)
 VECTOR torus_position([1.4, 0., 0.0])
 VECTOR light_pos([1,0,1])
 
-PIGMENT torus_pigment(CHECKERED(BLACK, NAVY, 25))
+PIGMENT torus_pigment(CHECKERED(BLACK, NAVY, 22))
 PIGMENT sphere_pigment(CHECKERED(RED, GOLD, 12))
 
 #BRDF torus_brdf(DIFFUSE(torus_pigment))
