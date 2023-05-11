@@ -21,4 +21,3 @@ Raytracing.parse_pointlight_settings
 Raytracing.render_animation
 Raytracing.parse_render_animation_settings
 ```
-

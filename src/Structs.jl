@@ -856,7 +856,7 @@ end
     )
 
 A 3D unit torus, a ring with circular section; has origin 
-in `(0, 0, 0)` and axis parallel to the y-axis.
+in `(0, 0, 0)` and axis parallel to the z-axis.
 
 ## Arguments
 
@@ -875,15 +875,6 @@ in `(0, 0, 0)` and axis parallel to the y-axis.
 - `flag_background::Bool` : flag for the [`PointLightRenderer`](@ref); if `true`,
   it does not matter if a point on this shape is seen or not from the point-light
   source. It's perfect to render the background of an image (as the Milky Way...)
-
-```ditaa
-^ ̂y                __-__
-|                 /     \\ 
-|---O------------(---o---)
-|                 \\__ __/
-|                    -
-      <--------R------><-r->
-```
 
 See also: [`Shape`](@ref), [`Transformation`](@ref), [`Material`](@ref)
 """

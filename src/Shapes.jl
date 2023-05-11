@@ -251,7 +251,7 @@ function cube_normal(point::Point, ray_dir::Vec)
     return result
 end
 
-"""
+@doc raw"""
     torus_normal(p::Point, ray_dir::Vec, R::Float64) -> Normal
 
 Compite the [`Normal`](@ref) of a torus

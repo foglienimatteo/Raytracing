@@ -10,7 +10,7 @@
 ![size](https://img.shields.io/github/repo-size/foglienimatteo/Raytracing) 
 ![license]( https://img.shields.io/github/license/foglienimatteo/Raytracing)
 [![codecov](https://codecov.io/gh/foglienimatteo/Raytracing/branch/master/graph/badge.svg?token=67GIZ9RA8Y)](https://codecov.io/gh/foglienimatteo/Raytracing)
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://foglienimatteo.github.io/Raytracing/stable) 
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://foglienimatteo.github.io/Raytracing/stable)
 [![Dev](https://img.shields.io/badge/docs-dev-blue?style=flat)](https://foglienimatteo.github.io/Raytracing/dev)  
 
 This software is a simple raytracing program written in the [Julia Programming Language](https://julialang.org).
