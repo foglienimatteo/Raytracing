@@ -25,14 +25,14 @@ function print_JSON_render(
 
      dict_camera = if typeof(camera) == OrthogonalCamera
                Dict(
-                    "projection" => "orthogonal",
+                    "projection" => "ort", #"orthogonal",
                     "aspect_ratio" => camera.a,
                     "transformation" => camera.T.M,
                )
 
           elseif typeof(camera) == PerspectiveCamera
                Dict(
-                    "projection" => "orthogonal",
+                    "projection" => "per", # "perspective",     #MODIFIED
                     "distance" => camera.d,
                     "aspect ratio" => camera.a,
                     "transformation" => camera.T.M,
@@ -128,7 +128,7 @@ function render(
 		bool_print::Bool = true,
 		bool_savepfm::Bool = true,
           declare_float::Union{Dict{String,Float64}, Nothing} = nothing,
-          ONLY_FOR_TESTS::Bool = false,
+          ONLY_FOR_TESTS::Bool = false
      )
 
      (bool_print==true) && println("\n\nStarting the image rendering of \"$(scenefile)\"...")
@@ -148,20 +148,29 @@ function render(
           end
      end
 
+     if typeof(scene.camera) == OrthogonalCamera
+          camera_type = "ort"
+     elseif typeof(scene.camera) == PerspectiveCamera
+          camera_type = "per"
+     end
+
      (bool_print==true) && println("\nReaded and parsed \"$(scenefile)\", now initialize camera and renderer...\n")
 
      renderer.world = scene.world
      
      samples_per_side = string2rootint64(string(samples_per_pixel))
 
+     # if I have a value from command line I'll use it, else the one from the .txt file
      observer_vec = isnothing(camera_position) ?
           nothing :
-          typeof(camera_position) == Point ?
-		camera_position - Point(0., 0., 0.) :
-		camera_position
-
+          # typeof(camera_position) == Point ?
+		# camera_position - Point(0., 0., 0.) :
+		# camera_position
+          Vec(scene.camera.T * Point(0., 0., 0.))
+     
      aspect_ratio = width / height   
-
+     
+     
      if isnothing(camera_type) && isnothing(observer_vec) && isnothing(scene.camera) 
           camera = PerspectiveCamera(-1.0, aspect_ratio, rotation_z(deg2rad(α)))
 
@@ -233,6 +242,12 @@ function render(
 		     throw(ArgumentError("Unknown camera: \"$(camera_type)\""))
 	     end
 
+     end
+
+     if typeof(scene.camera) == OrthogonalCamera
+          camera_type = "ort"
+     elseif typeof(scene.camera) == PerspectiveCamera
+          camera_type = "per"
      end
     
    

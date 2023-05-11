@@ -17,6 +17,7 @@ from the ray's origin is equal to `t`, measured in units of the length of `Vec.d
 See also: [`Ray`](@ref), [`Point`](@ref), [`Vec`](@ref)
 """
 at(r::Ray, t::Float64) = r.origin + r.dir * t
+at(r::Ray, t::Type{Union{Nothing, Float64}}) = r.origin + r.dir * t
 
 ##########################################################################################92
 

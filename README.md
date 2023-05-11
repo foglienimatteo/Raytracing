@@ -10,7 +10,7 @@
 ![size](https://img.shields.io/github/repo-size/foglienimatteo/Raytracing) 
 ![license]( https://img.shields.io/github/license/foglienimatteo/Raytracing)
 [![codecov](https://codecov.io/gh/foglienimatteo/Raytracing/branch/master/graph/badge.svg?token=67GIZ9RA8Y)](https://codecov.io/gh/foglienimatteo/Raytracing)
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://foglienimatteo.github.io/Raytracing/stable) 
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://foglienimatteo.github.io/Raytracing/stable)
 [![Dev](https://img.shields.io/badge/docs-dev-blue?style=flat)](https://foglienimatteo.github.io/Raytracing/dev)  
 
 This software is a simple raytracing program written in the [Julia Programming Language](https://julialang.org).
@@ -35,22 +35,38 @@ Physics "Aldo Pontremoli"](http://eng.fisica.unimi.it/ecm/home).
 ## Installation
 
 The simplest way to install this software is cloning the repository where it is built in. Run in the command line
+
 ```bash
 git clone https://github.com/foglienimatteo/Raytracing
 ```
+
 or download the source code from the github repository https://github.com/foglienimatteo/Raytracing.
+
+If you want to use this package in Julia repl, simply copy and paste the following commands:
+
+```Julia
+using Pkg
+Pkg.activate(normpath(@__DIR__))
+using Colors, Images, ImageIO, ArgParse, Polynomials, Documenter
+using ColorTypes:RGB
+import FileIO: @format_str, query
+using Raytracing
+```
 
 </br>
 
 ## Demo and Demo Animation
 
 To start off and check the correct behavior of this software run one of the following command inside the main directory
+
 ```bash
 ./Raytracer.jl demo_animation --camera_type=per --width=640 --height=480 flat
 ```
+
 ```bash
 ./Raytracer.jl demo --world_type=B --camera_type=per --camera_position="[-1, 0, 1]" --width=640 --height=480 --samples_per_pixel=9 pathtracer 
 ```
+
 and enjoy respectively the animation `demo/demo_anim_Flat_640x480x360.mp4` and the image `demo/demo_B_PathTracing_640x480.png`
 
 <!---
@@ -68,7 +84,8 @@ It may takes few minutes to render the animation; you might also give smaller (i
 ## Usage from the Command Line Interface
 
 This software is able to read a file that describes a scene (i.e a set of objects, pigments, materials, etc. that we want render).
-To understand how to write such a file, take a look at the files contained in the  [examples](esamples) directory, in the following order: 
+To understand how to write such a file, take a look at the files contained in the [examples](esamples) directory, in the following order:
+
 - [tutorial_basic_syntax.txt](examples/tutorial_basic_syntax.txt), which shows the basic syntax of how the scenefile must be written;
 - [demo_world_B.txt](examples/demo_world_B.txt), which shows the rendering of the world type B of the `demo`function;
 - [earth_and_sun.txt](examples/earth_and_sun.txt), which shows the rendering of a more complicated image with the point-light renderer;
@@ -76,11 +93,14 @@ To understand how to write such a file, take a look at the files contained in th
   
 Each of these files contains also, in the initial description, the commands necessary to render the described image; if you want to learn this software in the most practical way, these files are perfect!
 
+If you are looking for a more complete and general documentation about how to write your text file and the CLI/repl options, you can find it in [LangDoc.md](./LangDoc.md).
+
 The basic structure of a command in the CLI is the following:
 
 ```bash
 ./Raytracer.jl render [OPTIONS_FOR_THE_IMAGE] NAME_OF_THE_SCENEFILE {onoff|flat|pathtracer|pointlight}[OPTIONS_FOR_THE_RENDERER]
 ```
+
 ```bash
 ./Raytracer.jl animation --function=FUNCTION_NAME  --vec_variables="[NAMEVAR1, NAMEVAR2, ...]" --iterable=ITERABLE [OPTIONS_FOR_THE_IMAGE] NAME_OF_THE_SCENEFILE {onoff|flat|pathtracer|pointlight}[OPTIONS_FOR_THE_RENDERER]
 ```
@@ -88,7 +108,7 @@ The basic structure of a command in the CLI is the following:
 There are four possible rendering algorithms; each of them is linked to different rules for the color of a pixel and the light ray that starts from that pixel and hits (or not) an object of the rendered scene:
 
 - `onoff` : each pixel is set to the `background_color` if no shape is hit by its light ray, otherwise is set to `color`; this renderer exists only for debugging purposes.
- 
+
 - `flat` : each pixel is set to the `background_color` if no shape is hitten by its light ray, otherwise is set to the color of the hitted shape point.
   This renderer is very efficient, but it does not solve the rendering equation, and consequently no shadows or brightness are rendered.
 
@@ -99,31 +119,37 @@ There are four possible rendering algorithms; each of them is linked to differen
   It's very efficient, and the images rendered are perfect for an astrophysical context or for very bright days of summer. Nevertheless it's a simple solution in order to avoid the longer times needed for the pathtracer algorithm.
 
 The resulting files created at the end of the rendering are three:
+
 - the PFM image (`scene.pfm` is the default name, if none is specified from the command line)
 - the LDR image (`scene.png` is the default name, if none is specified from the command line)
--  the JSON file, that saves some datas about input commands, rendering time etc. It has the same name of the LDR image and `.json` extention, so `scene.json` is the default name.
+- the JSON file, that saves some datas about input commands, rendering time etc. It has the same name of the LDR image and `.json` extention, so `scene.json` is the default name.
 
 The resulting files created at the end of the animation are intead two:
+
 - the animation (`scene_animation.mp4` is the default name, if none is specified from the command line)
--  the JSON file; it has the same name of the animation and `.json` extention, so `scene_animation.json` is the default name.
+- the JSON file; it has the same name of the animation and `.json` extention, so `scene_animation.json` is the default name.
   
 Probably, the LDR image will not be "correctly" converted with the standard values used in the `render` function to tone-map the PFM file; it's consequently appropriate
 to manually apply the tone mapping algorithm to the PFM image!
 The tonemapping command is simple:
+
 ```bash
 ./Raytracer.jl tonemapping [--normalization ALPHA] [-gamma GAMMA] [--avg_lum LUM]FILE_PFM_TO_BE_TONEMAPPED NAME_OF_THE_RESULTING_LDR
 ```
+
 where `ALPHA` is the scaling factor for the normalisation process (default `a=0.18`), `GAMMA` is YOUR monitor gamma value (default `g=1.0`) and `LUM` is the average luminosity of the image (the default value is manually calculated for the image itself, but it's useful to specify manually this value for particularly dark images).
 Choose your `ALPHA` and `GAMMA` values without any fear to try again! This algorithm is indeed by far more efficient and computationally cheaper than the rendering.
 
 NOTE: you can also specify `ALPHA`, `GAMMA` and `LUM` in the render and animation command; it's fundamental for the latter case, because no "PFM-animation" that can be tonemapped exists!
 
-
 Here we show an example of usage, which renders the [earth_and_sun.txt](examples/earth_and_sun.txt) file
+
 ```bash
 ./Raytracer.jl render examples/earth_and_sun.txt --width=1200 --height=900 pointlight --dark_parameter=0.03
 ```
+
 and of the tone-map the resulting PFM (named "scene.pfm")
+
 ```bash
 ./Raytracer.jl tonemapping scene.pfm scene.png --normalization=0.18 --gamma=1.0 --avg_lum=0.03
 ```
@@ -133,6 +159,7 @@ earth_and_sun.txt with Point-Light Renderer |
 ![](examples/earth_and_sun.png) 
 
 We show also an animation example of usage, which renders the [earth_moon_sun.txt](examples/earth_moon_sun.txt) file
+
 ```bash
 ./Raytracer.jl animation  --normalization=0.18 --gamma=1.0 --avg_lum=0.065 --width=1200 --height=900 --function=earth_moon_sun --vec_variables="[moon_x,  moon_y, moon_z,  moon_rotang, earth_rotang]" --iterable=1:200 examples/earth_moon_sun.txt pointlight --dark_parameter=0.25
 ```
@@ -157,20 +184,25 @@ You can obviously visualize the options for each function thanks to the help opt
 The only main difference is that in order to specify the renderer algorithm, the key is the not-so-intuitive string `%COMMAND%` (due to the [`ArgParse.jl`](https://github.com/carlobaldassi/ArgParse.jl) package used for the command line parsing operation).
 
 For example, in order to render the demo image B previously showed:
+
 ```julia
 demo("world_type"=>"B", "camera_position"=>"[-1.0, 0.0, 1.0]", "samples_per_pixel"=>9, "%COMMAND%"=>"pathtracer")
 ```
 
 Instead, for rendering the `examples/earth_and_sun.txt`
+
 ```julia
 render("scenefile"=>"examples/earth_and_sun.txt", "width"=>1200, "height"=>900, "%COMMAND%"=>"pointlight", "pointlight"=>Dict("dark_parameter"=>0.03))
 ```
+
 and for tone-map it
+
 ```julia
 tone_mapping("infile"=>"scene.pfm", "outfile"=>"scene.png", "normalization"=>0.18, "gamma"=>1.0, "avg_lum"=>0.04)
 ```
 
 Finally, to create the  `examples/earth_moon_sun.txt` animation:
+
 ```julia
 render_animation("normalization"=>0.18, "gamma"=>1.0, "avg_lum"=>0.065, "width"=>1200, "height"=>900, "function"=>"earth_moon_sun", "vec_variables"=>"[moon_x,  moon_y, moon_z,  moon_rotang, earth_rotang]","iterable"=>"1:200", "scenefile"=>"examples/earth_moon_sun.txt", "%COMMAND%"=>"pointlight", "pointlight"=>Dict("dark_parameter"=>0.25))
 ```
@@ -203,4 +235,3 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
-

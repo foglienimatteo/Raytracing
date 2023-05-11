@@ -42,7 +42,6 @@ function parse_scene(inputstream::InputStream, variables::Dict{String, Float64} 
      while true
           what = read_token(inputstream)
           isa(what.value, StopToken) && (break)
-
           if !isa(what.value, KeywordToken)
                throw(GrammarError(what.location, "expected a keyword instead of '$(what)'"))
           end
@@ -210,6 +209,9 @@ function parse_scene(inputstream::InputStream, variables::Dict{String, Float64} 
 
           elseif what.value.keyword == TRIANGLE
                add_shape!(scene.world, parse_triangle(inputstream, scene))
+          
+          elseif what.value.keyword == TORUS
+               add_shape!(scene.world, parse_torus(inputstream, scene))
           end
      end
 

@@ -16,6 +16,7 @@ function to_RGB(r::Float64, g::Float64, b::Float64)
     return RGB{Float32}(r/255., g/255., b/255.)
 end
 
+
 mutable struct mutable_for_test
     num_rays::Int64
 end
@@ -331,10 +332,14 @@ This class implements an observer seeing the world through an orthogonal project
 See also: [`Transformation`](@ref), [`Camera`](@ref)
 """
 mutable struct OrthogonalCamera <: Camera
-    a::Float64 # aspect ratio
+    a::Float64  # aspect ratio
     T::Transformation
-    OrthogonalCamera(a=1., T=Transformation()) = new(a, T)
-end
+    # OrthogonalCamera(a::Float64=1., T::Transformation=Transformation()) = new(a, T)
+    OrthogonalCamera(a::Float64, T::Transformation) = new(a, T)
+    OrthogonalCamera(T::Transformation) = new(1.0, T)
+    OrthogonalCamera(a::Float64) = new(a, Transformation())
+    OrthogonalCamera() = new(16/9, Transformation())
+/end
 
 """
     PerspectiveCamera <: Camera (
@@ -743,7 +748,7 @@ struct Cube <: Shape
     flag_background::Bool
     AABB::AABB
 
-    Cube(T::Transformation, M::Material, b1::Bool=false,  b2::Bool=false) = new(T,M,b1,b2,AABB(Cube, T))
+    Cube(T::Transformation, M::Material, b1::Bool=false, b2::Bool=false) = new(T,M,b1,b2,AABB(Cube, T))
     Cube(M::Material, T::Transformation, b1::Bool=false, b2::Bool=false) = new(T,M,b1,b2,AABB(Cube, T))
     Cube(T::Transformation, b1::Bool=false, b2::Bool=false) = new(T, Material(), b1, b2, AABB(Cube, T))
     Cube(M::Material, b1::Bool=false, b2::Bool=false) = new(Transformation(), M, b1, b2, AABB(Cube, Transformation()))
@@ -843,12 +848,15 @@ end
     Torus <: Shape(
         T::Transformation = Transformation()
         Material::Material = Material()
-        r::Float64 = 0.5
-        R::Float64 = 1.0
+        r::Float64 = 1.0
+        R::Float64 = 3.0
+        flag_pointlight::Bool
+        flag_background::Bool
+        AABB::AABB
     )
 
 A 3D unit torus, a ring with circular section; has origin 
-in `(0, 0, 0)` and axis parallel to the y-axis.
+in `(0, 0, 0)` and axis parallel to the z-axis.
 
 ## Arguments
 
@@ -868,15 +876,6 @@ in `(0, 0, 0)` and axis parallel to the y-axis.
   it does not matter if a point on this shape is seen or not from the point-light
   source. It's perfect to render the background of an image (as the Milky Way...)
 
-```ditaa
-^ ̂y                __-__
-|                 /     \\ 
-|---O------------(---o---)
-|                 \\__ __/
-|                    -
-      <--------R------><-r->
-```
-
 See also: [`Shape`](@ref), [`Transformation`](@ref), [`Material`](@ref)
 """
 struct Torus <: Shape
@@ -886,9 +885,92 @@ struct Torus <: Shape
     R::Float64
     flag_pointlight::Bool
     flag_background::Bool
-    Torus(T=Transformation(), M=Material(), r=0.5, R=1.0, b1::Bool=false, b2::Bool=false) = new(T, M, r, R, b1,b2)
+    AABB::AABB
+
+    Torus(T::Transformation, M::Material, b1::Bool = false, b2::Bool = false) = new(T, M, 1.0, 3.0, b1, b2, AABB(Torus, T, 1.0, 3.0))
+    Torus(T::Transformation, b1::Bool = false, b2::Bool = false) = new(T, Material(), 1.0, 3.0, b1, b2, AABB(Torus, T, 1.0, 3.0))
+    Torus(M::Material, b1::Bool = false, b2::Bool = false) = new(Transformation(), M, 1.0, 3.0, b1, b2, AABB(Torus, Transformation(), 1.0, 3.0))
+    Torus(b1::Bool = false, b2::Bool = false) = new(Transformation(), Material(), 1.0, 3.0, b1, b2, AABB(Torus, Transformation(), 1.0, 3.0))
+    Torus(T::Transformation, M::Material, r::Float64, b1::Bool = false, b2::Bool = false) = new(T, M, r, 3*r, b1, b2, AABB(Torus, T, r, 3*r))
+    Torus(T::Transformation, M::Material, r::Float64, R::Float64, b1::Bool = false, b2::Bool = false) = new(T, M, r, R, b1, b2, AABB(Torus, T, r, R))
+    # Torus() = new(Transformation(), Material(), 1.0, 3.0, false, false, AABB(Torus, Transformation(), 1.0, 3.0)) 
+
+    # Torus(T::Transformation = Transformation(), M::Material = Material(), b1::Bool = false, b2::Bool = false) = new(T, M, 1.0, 3.0, b1, b2, AABB(Torus, T, 1.0, 3.0))
+    # Torus(r::Float64, T::Transformation = Transformation(), M::Material = Material(), b1::Bool = false, b2::Bool = false) = new(T, M, r, 3*r, b1, b2, AABB(Torus, T, r, 3*r))
+    # Torus(T::Transformation = Transformation(), M::Material = Material(), r::Float64 = 1.0, R::Float64 = 3.0) = new(T, M, r, R, false, false, AABB(Torus, T, r, R))
+    # Torus(r::Float64, R::Float64, T::Transformation = Transformation(), M::Material = Material(), b1::Bool = false, b2::Bool = false) = new(T, M, r, R, b1, b2, AABB(Torus, T, r, R))
+    # # function Torus(
+    #     T::Transformation = Transformation(),
+    #     Material::Material = Material(),
+    #     r::Float64 = 0.5,
+    #     R::Float64 = 3*r,
+    #     b1::Bool = false,
+    #     b2::Bool = false
+    #     )
+    #     #    @assert r<R
+    #     new(T, M, r, R, b1, b2, AABB(Torus, T, r, R), b1, b2)
+    # end
 end
 
+### AABB for torus with axis along y
+
+# function AABB(::Type{Torus}, T::Transformation, r::Float64, R::Float64)
+#     S = R + r
+#     v1 = SVector{8, Point}(
+#         Point(S, r, S),
+#         Point(S, -r, S),
+#         Point(-S, r, S),
+#         Point(-S, -r, S),
+#         Point(S, r, -S),
+#         Point(S, -r, -S),
+#         Point(-S, r, -S),
+#         Point(-S, -r, -S),
+#     )
+
+#     v2 = SVector{8, Point}([T*p for p in v1])
+
+#     P2 = Point(
+#         maximum([v2[i].x for i in eachindex(v2)]),
+#         maximum([v2[i].y for i in eachindex(v2)]),
+#         maximum([v2[i].z for i in eachindex(v2)]) 
+#     )
+#     P1 = Point(
+#         minimum([v2[i].x for i in eachindex(v2)]),
+#         minimum([v2[i].y for i in eachindex(v2)]),
+#         minimum([v2[i].z for i in eachindex(v2)]) 
+#     )
+
+#     AABB(P1, P2)
+# end
+
+function AABB(::Type{Torus}, T::Transformation, r::Float64, R::Float64)
+    S = R + r
+    v1 = SVector{8, Point}(
+        Point(S, S, r),
+        Point(S, S, -r),
+        Point(-S, S, r),
+        Point(-S, S, -r),
+        Point(S, -S, r),
+        Point(S, -S, -r),
+        Point(-S, -S, r),
+        Point(-S, -S, -r),
+    )
+
+    v2 = SVector{8, Point}([T*p for p in v1])
+
+    P2 = Point(
+        maximum([v2[i].x for i in eachindex(v2)]),
+        maximum([v2[i].y for i in eachindex(v2)]),
+        maximum([v2[i].z for i in eachindex(v2)]) 
+    )
+    P1 = Point(
+        minimum([v2[i].x for i in eachindex(v2)]),
+        minimum([v2[i].y for i in eachindex(v2)]),
+        minimum([v2[i].z for i in eachindex(v2)]) 
+    )
+
+    AABB(P1, P2)
+end
 
 ##########################################################################################92
 

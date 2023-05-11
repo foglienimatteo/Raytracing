@@ -96,22 +96,56 @@ function cube_point_to_uv(point::Point)
     return Vec2d(u,v)
 end
 
+@doc raw"""
+    torus_point_to_uv(P::Point, r::Float64, R::Float64) :: Vec2d
+Convert a 3D `point` ``P = (P_x, P_y, P_z)`` on the surface of the torus
+into a 2D `Vec2d` using the following periodical coordinates:
+```math
+u = \asin\bigg(\frac{z}{r}\bigg) \quad \text{for: } x^2+y^2 \leq R^2\\
+u = \pi - \asin\bigg(\frac{z}{r}\bigg) \quad \text{for: } x^2+y^2 \req R^2\\
+v = \acos\Bigg( \frac{x}{r\cdot \cos(u) + R} \Bigg) \quad \text{for: } y \leq 0\\
+v = 2\pi - \acos\Bigg( \frac{x}{r\cdot \cos(u) + R} \Bigg) \quad \text{for: } y \req 0
+```
+See also: [`Point`](@ref), [`Vec2d`](@ref), [`Plane`](@ref)
+"""
+function torus_point_to_uv(P::Point, r::Float64, R::Float64)
 
-function torus_point_to_uv(point::Point)
-    len_point = norm(point)
-    u = asin(point.y/len_point) / π
-    v = atan(point.z, point.x) / (2.0 * π)
-    v>=0 ? nothing : v+= 1.0
-    u>=0 ? nothing : u+= 1.0
-    return Vec2d(u,v)
+    x = P.x
+    y = P.y
+    z = P.z
+    
+    if abs(z/r) <= 1
+        (x^2+y^2 >= R^2) ? u = asin(z/r) : u = π - asin(z/r)
+    elseif z > 0
+        u = π/2
+    elseif z < 0
+        u = 1.5*π
+    else
+        @assert false "This line should be unreachable, problem in estimating 'torus_point_to_uv', 'u' variable"
+    end
+
+    if abs(x/(r*cos(u)+R)) <= 1
+        y >= 0 ? v = acos(x/(r*cos(u)+R)) : v = 2*π - acos(x/(r*cos(u)+R))
+    elseif x > 0
+        v = 0
+    elseif x < 0
+        v = π
+    else
+        @assert false "This line should be unreachable, problem in estimating 'torus_point_to_uv', 'v' variable"
+    end
+    
+    a = Vec2d(u, v) / (2*π)
+    @assert 0 <= a.u <= 1
+    @assert 0 <= a.v <= 1
+
+    return a
 end
-
 
 @doc raw"""
     triangle_point_to_uv(triangle::Triangle, point::Point) :: Vec2d
 
 Return the barycentic coordinates of the given `point` for the input
-`triangle`.
+`triangle`.
 
 If the triangle is made of the vertexes ``(A,B,C)`` (memorized in this order),
 then the point ``P`` has coordinates ``(u,v) = (\beta, \gamma)`` such that:
@@ -217,7 +251,7 @@ function cube_normal(point::Point, ray_dir::Vec)
     return result
 end
 
-"""
+@doc raw"""
     torus_normal(p::Point, ray_dir::Vec, R::Float64) -> Normal
 
 Compite the [`Normal`](@ref) of a torus
@@ -226,13 +260,73 @@ The normal is computed for [`Point`](@ref) (a point on the surface of the
 torus), and it is chosen so that it is always in the opposite
 direction with respect to `ray_dir` ([`Vec`](@ref)).
 """
-function torus_normal(p::Point, ray_dir::Vec, R::Float64)
-    R_z = copysign(R / √(1+(p.x/p.z)^2), p.z)
-    R_x = copysign(p.x / p.z * R_z, p.x)
-    R_p = Vec(R_x, 0, R_z)
-    result = Normal(Vec(p - R_p))
-    result ⋅ ray_dir < 0.0 ? nothing : result = -result
-    return result
+# function torus_normal(P::Point, ray_dir::Vec, r::Float64, R::Float64)
+#     # R_z = copysign(R / √(1+(P.x/P.z)^2), P.z)
+#     # R_x = copysign(P.x / P.z * R_z, P.x)
+#     # R_p = Vec(R_x, 0, R_z)
+#     # result = Normal(Vec(P - R_p))
+#     # result ⋅ ray_dir < 0.0 ? nothing : result = -result
+#     # return result
+
+#     ##########################################################################################################
+
+#     # if abs((1 - (P.z/r)^2)) < 1e-8
+#     #     N_x = 0.
+#     #     N_y = 0.
+#     # else
+#     #     (abs(P.x) < 1e-6) ? (N_x = 0.) : (N_x = copysign( ((1 - (P.z/r)^2) / (1 + (P.y/P.x)^2))^0.5, P.x))
+#     #     (abs(P.y) < 1e-6) ? (N_y = 0.) : (N_y = copysign( ((1 - (P.z/r)^2) / (1 + (P.x/P.y)^2))^0.5, P.y))
+#     # end
+#     # N_z = P.z/r
+#     # result = Normal(N_x, N_y, N_z)
+#     # result ⋅ ray_dir < 0.0 ? nothing : result = -result
+#     # return result
+
+#     ###########################################################################################################
+
+#     # u e v mi danno gia' tutte le info che mi servono per la retta della normale, il verso ancora
+#     # dalla provenienza del raggio luce
+
+#     uv = torus_point_to_uv(P, r, R)
+#     u = uv.u
+#     v = uv.v
+#     # N = Normal(cos(2.0*u*pi)*cos(2.0*v*pi), cos(2.0*u*pi)*sin(2.0*v*pi), sin(2.0*v*pi))
+#     # N = Normal(cos(2.0*u*pi)*cos(2.0*v*pi), -sin(2.0*v*pi), sin(2.0*u*pi)*cos(2.0*v*pi))
+#     N = Normal(cos(2.0*u*pi)*cos(2.0*v*pi), sin(2.0*u*pi)*cos(2.0*v*pi), -sin(2.0*v*pi))
+#     N ⋅ ray_dir < 0.0 ? nothing : N = -N
+#     return N
+
+#     ###########################################################################################################
+#     # https://github.com/marcin-chwedczuk/ray_tracing_torus_js/blob/master/app/scripts/Torus.js
+
+#     # s = squared_norm(P)
+#     # a = R^2+r^2
+#     # N = Normal(s-a, s-a +2*R^2, s-a)
+
+#     # N ⋅ ray_dir < 0.0 ? nothing : N = -N
+#     # return N
+    
+#     ############################################################################################################
+
+#     # Q = R/√(P.x^2-P.z^2) * Point(P.x, 0, P.z)
+#     # M = Normal(P - Q)
+#     # M ⋅ ray_dir < 0.0 ? nothing : M = -M
+
+#     # # println("u = ", u, "     v = ", v)
+#     # # println(N, "    ", M)
+#     # # @assert M ≈ N
+
+#     # return M
+# end
+
+function torus_normal(P::Point, ray_dir::Vec, r::Float64, R::Float64)
+    # using (u, v) coordinates
+    uv = torus_point_to_uv(P, r, R)
+    u = uv.u
+    v = uv.v
+    N = Normal(cos(2.0*u*pi)*cos(2.0*v*pi), sin(2.0*v*pi)*cos(2.0*u*pi), sin(2.0*u*pi))
+    N ⋅ ray_dir < 0.0 ? nothing : N = -N
+    return N
 end
 
 @doc raw"""
@@ -303,25 +397,54 @@ Return `true` if intersection occurs, `false` otherwise.
 
 See also: [`Ray`](@ref), [`AABB`](@ref), [`HitRecord`](@ref)
 """
+# function ray_intersection(AABB::AABB, ray::Ray)
+#     (tmin, tmax) = Tuple( sort( [ 
+#                         (AABB.m.x - ray.origin.x) / ray.dir.x, 
+#                         (AABB.M.x - ray.origin.x) / ray.dir.x
+#                     ]) )
+#     (tymin, tymax) = Tuple( sort( [ 
+#                         (AABB.m.y - ray.origin.y) / ray.dir.y, 
+#                         (AABB.M.y - ray.origin.y) / ray.dir.y
+#                     ]) )
+ 
+#     ((tmin > tymax) || (tymin > tmax)) && (return false)
+ 
+#     (tymin > tmin) && (tmin = tymin)
+#     (tymax < tmax) && (tmax = tymax)
+
+#     (tzmin, tzmax) = Tuple( sort( [ 
+#                         (AABB.m.z - ray.origin.z) / ray.dir.z, 
+#                         (AABB.M.z - ray.origin.z) / ray.dir.z
+#                     ]) )
+ 
+#     ((tmin > tzmax) || (tzmin > tmax)) && (return false)
+ 
+#     (tzmin > tmin) && (tmin = tzmin)
+#     (tzmax < tmax) && (tmax = tzmax)
+ 
+#     if (ray.tmin ≤ tmin ≤ ray.tmax) || ( ray.tmin ≤ tmax ≤ ray.tmax)
+#         return true
+#     else
+#         return false
+#     end
+# end
+
 function ray_intersection(AABB::AABB, ray::Ray)
-    (tmin, tmax) = Tuple( sort( [ 
-                        (AABB.m.x - ray.origin.x) / ray.dir.x, 
-                        (AABB.M.x - ray.origin.x) / ray.dir.x
-                    ]) )
-    (tymin, tymax) = Tuple( sort( [ 
-                        (AABB.m.y - ray.origin.y) / ray.dir.y, 
-                        (AABB.M.y - ray.origin.y) / ray.dir.y
-                    ]) )
+
+    m = AABB.m
+    M = AABB.M
+    O = ray.origin
+    D = ray.dir
+
+    (tmin, tmax) = Tuple( sort([(m.x- O.x)/ D.x, (M.x- O.x)/ D.x]))
+    (tymin, tymax) = Tuple( sort([(m.y - O.y)/ D.y, (M.y - O.y)/ D.y]))
  
     ((tmin > tymax) || (tymin > tmax)) && (return false)
  
     (tymin > tmin) && (tmin = tymin)
     (tymax < tmax) && (tmax = tymax)
 
-    (tzmin, tzmax) = Tuple( sort( [ 
-                        (AABB.m.z - ray.origin.z) / ray.dir.z, 
-                        (AABB.M.z - ray.origin.z) / ray.dir.z
-                    ]) )
+    (tzmin, tzmax) = Tuple( sort([(m.z- O.z)/ D.z, (M.z- O.z)/ D.z])) 
  
     ((tmin > tzmax) || (tzmin > tmax)) && (return false)
  
@@ -334,7 +457,6 @@ function ray_intersection(AABB::AABB, ray::Ray)
         return false
     end
 end
-
 
 """
     ray_intersection(sphere::Sphere, ray::Ray) :: Union{HitRecord, Nothing}
@@ -433,14 +555,16 @@ function ray_intersection(cube::Cube, ray::Ray)
     (tmin, tmax) = Tuple( sort( [ (-0.5 - O.x) / d.x, (0.5 - O.x) / d.x ]) )
     (tymin, tymax) = Tuple( sort( [ (-0.5 - O.y) / d.y, (0.5 - O.y) / d.y ]) )
  
-    ((tmin > tymax) || (tymin > tmax)) && (return false)
+    #((tmin > tymax) || (tymin > tmax)) && (return false)
+    ((tmin > tymax) || (tymin > tmax)) && (return nothing)
  
     (tymin > tmin) && (tmin = tymin)
     (tymax < tmax) && (tmax = tymax)
 
     (tzmin, tzmax) = Tuple( sort( [ (-0.5 - O.z) / d.z, (0.5 - O.z) / d.z ]) )
  
-    ((tmin > tzmax) || (tzmin > tmax)) && (return false)
+    # ((tmin > tzmax) || (tzmin > tmax)) && (return false)
+    ((tmin > tzmax) || (tzmin > tmax)) && (return nothing)
  
     (tzmin > tmin) && (tmin = tzmin)
     (tzmax < tmax) && (tmax = tzmax)
@@ -471,49 +595,162 @@ function ray_intersection(cube::Cube, ray::Ray)
 end
 
 
-function ray_intersection(torus::Torus, ray::Ray)
-    inv_ray = inverse(torus.T) * ray
+### THE ONE DOWN WORKS BUT ERRORS IN EVALUATING u,v COORDS AND Normal
+### THIS ONE HAS ITS AXIS ALONG y DIRECTION
 
-    d = normalize(inv_ray.dir)
-    o = inv_ray.origin
-    norm²_d = squared_norm(d)
-    norm²_o = squared_norm(Vec(o))
+# function ray_intersection(torus::Torus, ray::Ray)
+
+#     (ray_intersection(torus.AABB, ray) == true) || (return nothing)
+
+#     inv_ray = inverse(torus.T) * ray
+#     o = Vec(inv_ray.origin)
+#     d = inv_ray.dir
+#     norm2_d = squared_norm(d)
+#     norm2_o =  squared_norm(o)
+#     scalar_od = o ⋅ d
+#     r = torus.r
+#     R = torus.R
+#     # calc = norm2_o - r^2 - R^2
+#     calc = norm2_o - r^2 - R^2
+
+#     # coefficienti per calcolo soluzioniintersezione
+#     c4 = norm2_d^2
+#     c3 = 4 * norm2_d * scalar_od
+#     c2 = 2 * norm2_d * calc + 4 * scalar_od^2 + 4 * R^2 * d.y^2
+#     c1 = 4 * calc * scalar_od + 8 * R^2 * o.y * d.y
+#     c0 = calc^2 - 4 * R^2 * (r^2 - o.y^2)
+
+#     # calcolo soluzioni
+#     t_ints = roots(Polynomial([c0, c1, c2, c3, c4]))
+
+#     # verifico esistenza di almeno una soluzione
+#     (t_ints === nothing) && (return nothing)
+
+#     hit_ts = Vector{Float64}()
+
+#     # controllo che le soluzioni siano reali positive o che la parte immaginaria sia quasi nulla
+#     for i in t_ints
+#         if (typeof(i) == ComplexF64) && (abs(i.im) > 1e-8) #1e-8
+#             continue
+#         elseif ((typeof(i) == Float64) && (1e-8 < i < inv_ray.tmax))
+#             push!(hit_ts, i)
+#         elseif ((typeof(i) == ComplexF64) && (abs(i.im) < 1e-8) && (1e-8 < i.re < inv_ray.tmax)) 
+#             push!(hit_ts, i.re)
+#         else
+#             nothing
+#         end
+#     end
+
+#     (length(hit_ts) == 0) && return nothing
+#     # print(" OK ")
+#     real_ts = sort(hit_ts)
+
+#     first_hit_t = inv_ray.tmin - 1
+#     for i in real_ts
+#         if ((i > inv_ray.tmin) && (i < inv_ray.tmax))
+#             first_hit_t = i
+#             break
+#         end
+#     end
+
+#     if first_hit_t == inv_ray.tmin - 1
+#         return nothing
+#     end
+
+#     hit_point = at(inv_ray, first_hit_t)
+
+#     return HitRecord(
+#         torus.T * hit_point,
+#         torus.T * torus_normal(hit_point, inv_ray.dir, r, R),
+#         torus_point_to_uv(hit_point, r, R),
+#         first_hit_t,
+#         ray, 
+#         torus
+#     )
+# end
+
+
+### NEW TORUS, HAS ITS AXIS ALONG z DIRECTION
+
+"""
+    ray_intersection(torus::Torus, ray::Ray) :: Union{HitRecord, Nothing}
+
+Check if the `ray` intersects the `torus`.
+Return a `HitRecord`, or `nothing` if no intersection is found.
+
+See also: [`Ray`](@ref), [`Torus`](@ref), [`HitRecord`](@ref)
+"""
+function ray_intersection(torus::Torus, ray::Ray)
+
+    # AABB control
+    (ray_intersection(torus.AABB, ray) == true) || (return nothing)
+
+    inv_ray = inverse(torus.T) * ray
+    o = Vec(inv_ray.origin)
+    d = inv_ray.dir
+    norm2_d = squared_norm(d)
+    norm2_o =  squared_norm(o)
+    scalar_od = o ⋅ d
     r = torus.r
     R = torus.R
-    c4 = norm²_d^2
-    c3 = 4 * norm²_d * (Vec(o) ⋅ d)
-    c2 = 2 * norm²_d * (norm²_o - r^2 - R^2) + 4 * (Vec(o) ⋅ d)^2 + 4 * R^2 * (d.y)^2
-    c1 = 4 * (norm²_o - r^2 - R^2) *  (Vec(o) ⋅ d) + 8 * R^2 * o.y * d.y
-    c0 = (norm²_o - r^2 - R^2)^2 - 4 * R^2 * (r^2 - (o.y)^2)
+    calc = norm2_o - r^2 - R^2
 
+    # coefficients needed to evaluate intersections
+    c4 = norm2_d^2
+    c3 = 4 * norm2_d * scalar_od
+    c2 = 2 * norm2_d * calc + 4 * scalar_od^2 + 4 * R^2 * d.z^2
+    c1 = 4 * calc * scalar_od + 8 * R^2 * o.z * d.z
+    c0 = calc^2 - 4 * R^2 * (r^2 - o.z^2)
+
+    # solutions
     t_ints = roots(Polynomial([c0, c1, c2, c3, c4]))
 
-    hit_t = Union{Float64, Nothing}
-    hit_t = nothing
+    # does solutions exixt?
+    (t_ints === nothing) && (return nothing)
+
+    hit_ts = Vector{Float64}()
+
+    # I need solutions in Real space or in the Complex one with a very small imaginary component
     for i in t_ints
-        if typeof(i) == Float64
-            if (i > inv_ray.tmin) && (i < inv_ray.tmax)
-                hit_t = i
-            end
+        if (typeof(i) == ComplexF64) && (abs(i.im) > 1e-15) #1e-8
+            continue
+        elseif ((typeof(i) == Float64) && (1e-15 < i < inv_ray.tmax))
+            push!(hit_ts, i)
+        elseif ((typeof(i) == ComplexF64) && (abs(i.im) < 1e-15) && (1e-15 < i.re < inv_ray.tmax)) 
+            push!(hit_ts, i.re)
+        else
+            nothing
         end
     end
 
-    if hit_t == nothing
+    # are all solutions complex?
+    (length(hit_ts) == 0) && return nothing
+    
+    # sorting solutions, searching the nearest one
+    real_ts = sort(hit_ts)
+    first_hit_t = inv_ray.tmin - 1
+    for i in real_ts
+        if ((i > inv_ray.tmin) && (i < inv_ray.tmax))
+            first_hit_t = i
+            break
+        end
+    end
+
+    if first_hit_t == inv_ray.tmin - 1
         return nothing
     end
-    
-    hit_point = at(inv_ray, hit_t)
+
+    hit_point = at(inv_ray, first_hit_t)
 
     return HitRecord(
         torus.T * hit_point,
-        torus.T * torus_normal(hit_point, inv_ray.dir, torus.R),
-        torus_point_to_uv(hit_point), # manca la funzione
-        hit_t,
+        torus.T * torus_normal(hit_point, inv_ray.dir, r, R),
+        torus_point_to_uv(hit_point, r, R),
+        first_hit_t,
         ray, 
         torus
     )
 end
-
 
 @doc raw"""
     ray_intersection(triangle::Triangle, ray::Ray) :: Union{HitRecord, Nothing}
@@ -593,6 +830,13 @@ function ray_intersection(world::World, ray::Ray)
 
         # The ray missed this shape, skip to the next one
         !(isnothing(intersection)) || continue
+
+        if typeof(intersection) === Bool || typeof(closest) === Bool
+            println("A:\n", shape)
+            println("\nB:\n", intersection)
+            println("\nC:\n", closest)
+            exit()
+        end
 
         # There was a hit, and it was closer than any other hit found before
         ( isnothing(closest) || (intersection.t < closest.t) ) &&  (closest = intersection)
@@ -681,6 +925,60 @@ function quick_ray_intersection(plane::Plane, ray::Ray)
     t = -inv_ray.origin.z / inv_ray.dir.z
     return (inv_ray.tmin < t < inv_ray.tmax)
 end
+
+
+function quick_ray_intersection(torus::Torus, ray::Ray)
+
+    inv_ray = inverse(torus.T) * ray
+    o = Vec(inv_ray.origin)
+    d = inv_ray.dir
+    norm2_d = squared_norm(d)
+    norm2_o =  squared_norm(o)
+    scalar_od = o ⋅ d
+    r = torus.r
+    R = torus.R
+    calc = norm2_o - r^2 - R^2
+
+    # coefficienti per calcolo soluzioniintersezione
+    c4 = norm2_d^2
+    c3 = 4 * norm2_d * scalar_od
+    # c2 = 4 * scalar_od^2 + 2 * norm2_d * norm2_o - 4 * R^2 * (norm2_d - d.z^2) + 2 * norm2_d * (R^2 - r^2)
+    c2 = 2 * norm2_d * calc + 4 * scalar_od^2 + 4 * R^2 * d.y^2
+    # c1 = 4 * norm2_o * scalar_od + 4 * scalar_od * (R^2 - r^2) - 8 * R^2 * (scalar_od - (o.z * d.z))
+    c1 = 4 * calc * scalar_od + 8 * R^2 * o.y * d.y
+    # c0 = norm2_o^2 + (R^2 - r^2)^2 + 2 * norm2_o * (R^2 - r^2) - 4 * R^2 * (norm2_o - o.z^2)
+    c0 = calc^2 - 4 * R^2 * (r^2 - o.y^2)
+
+    # calcolo soluzioni
+    t_ints = roots(Polynomial([c0, c1, c2, c3, c4]))
+
+    # verifico esistenza di almeno una soluzione
+    (length(t_ints) == 0) && (return nothing)
+
+    hit_ts = Vector{Float64}()
+
+    # controllo che le soluzioni siano reali positive o che la parte immaginaria sia quasi nulla
+    for i in t_ints
+        if (typeof(i) == ComplexF64) && (abs(i.im) > 1e-8) #1e-8
+            continue
+        elseif ((typeof(i) == Float64) && (1e-5 < i < inv_ray.tmax)) || ((typeof(i) == ComplexF64) && (abs(i.im) < 1e-8) && (1e-5 < i.re < inv_ray.tmax)) 
+            (typeof(i) == Float64) && push!(hit_ts, i)
+            continue
+            (typeof(i) == ComplexF64) && push!(hit_ts, i.re)
+        else
+            nothing
+        end
+    end
+
+    if (length(hit_ts) == 0 )
+        return false
+    else
+        return true
+    end
+# end
+    # (length(hit_ts) == 0 ) ? (return true) : (return false)
+
+end    # quick_ray_intersection
 
 
 """

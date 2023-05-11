@@ -59,7 +59,7 @@ Enumeration for all the possible keywords recognized by the lexer:
 | SPHERE = 62       | ASSERT = 72       |                        |
 | CUBE = 63         |                   |                        |
 | TRIANGLE = 64     |                   |                        |
-|                   |                   |                        |
+| TORUS = 65        |                   |                        |
 |:-----------------:|:-----------------:|:----------------------:|
 ```
 """
@@ -101,6 +101,7 @@ Enumeration for all the possible keywords recognized by the lexer:
     SPHERE = 62
     CUBE = 63
     TRIANGLE = 64
+    TORUS = 65
 
     PRINT = 71
     ASSERT = 72
@@ -144,6 +145,7 @@ KEYWORDS = Dict{String, KeywordEnum}(
     "SPHERE" => SPHERE,
     "CUBE" => CUBE,
     "TRIANGLE" => TRIANGLE,
+    "TORUS" => TORUS,
 
     "PRINT" => PRINT,
     "ASSERT" => ASSERT,

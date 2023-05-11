@@ -20,7 +20,6 @@ Raytracing.sphere_normal
 Raytracing.ray_intersection(::Sphere, ::Ray)
 ```
 
-
 ## Plane
 
 ```@docs
@@ -29,7 +28,6 @@ Raytracing.plane_point_to_uv
 Raytracing.plane_normal
 Raytracing.ray_intersection(::Plane, ::Ray)
 ```
-
 
 ## Torus
 

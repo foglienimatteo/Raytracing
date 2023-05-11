@@ -34,9 +34,10 @@ function main(args)
 	parsed_arguments = ArgParse_command_line(args) # the result is a Dict{String,Any}
 	(isnothing(parsed_arguments)) && (return nothing)
 	#print_ArgParseSettings(parsed_arguments)
-
 	parsed_command = parsed_arguments["%COMMAND%"]
 	parsed_settings = parsed_arguments[parsed_command]
+
+	# println("\n", parsed_command, "    ", parsed_arguments, "\n")
 
 	if parsed_command=="demo"
 		#println(parse_demo_settings(parsed_settings))
