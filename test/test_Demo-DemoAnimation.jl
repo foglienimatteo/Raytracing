@@ -40,9 +40,9 @@
      @test_throws ArgumentError demo("alpha"=>"pi greco" , "ONLY_FOR_TESTS"=>true)
      @test_throws ArgumentError demo("width"=>"13" , "ONLY_FOR_TESTS"=>true)
      @test_throws ArgumentError demo("height"=>"14.5" , "ONLY_FOR_TESTS"=>true)
-     @test_throws ArgumentError demo("world_type"=>"C", "ONLY_FOR_TESTS"=>true)
+     @test_throws ArgumentError demo("world_type"=>"Z", "ONLY_FOR_TESTS"=>true)
      @test_throws ArgumentError demo("samples_per_pixel"=>3 , "ONLY_FOR_TESTS"=>true)
-     @test_throws ArgumentError demo("world_type"=>"C", "ONLY_FOR_TESTS"=>true)
+     @test_throws ArgumentError demo("world_type"=>"Z", "ONLY_FOR_TESTS"=>true)
 end
 
 
@@ -142,9 +142,9 @@ end
      @test_throws ArgumentError demo_animation("alpha"=>"pi greco" , "ONLY_FOR_TESTS"=>true)
      @test_throws ArgumentError demo_animation("width"=>"13" , "ONLY_FOR_TESTS"=>true)
      @test_throws ArgumentError demo_animation("height"=>"14.5" , "ONLY_FOR_TESTS"=>true)
-     @test_throws ArgumentError demo_animation("world_type"=>"C", "ONLY_FOR_TESTS"=>true)
+     @test_throws ArgumentError demo_animation("world_type"=>"Z", "ONLY_FOR_TESTS"=>true)
      @test_throws ArgumentError demo_animation("samples_per_pixel"=>3 , "ONLY_FOR_TESTS"=>true)
-     @test_throws ArgumentError demo_animation("world_type"=>"C", "ONLY_FOR_TESTS"=>true)
+     @test_throws ArgumentError demo_animation("world_type"=>"Z", "ONLY_FOR_TESTS"=>true)
 end
 
 
