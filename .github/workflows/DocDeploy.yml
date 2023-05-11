@@ -16,7 +16,7 @@ jobs:
         with:
           version: '1.6' #modified, before: 1.4
       - name: Install dependencies
-        run: julia --project=docs/ -e '
+        run: julia --project=docs -e '
               using Pkg
               Pkg.develop(PackageSpec(path=pwd()))
               Pkg.instantiate()'
