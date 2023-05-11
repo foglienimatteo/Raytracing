@@ -22,6 +22,7 @@
 #     (tzmin > tmin) && (tmin = tzmin)
 #     (tzmax < tmax) && (tmax = tzmax)
  
+
 #     if (ray.tmin ≤ tmin ≤ ray.tmax) || ( ray.tmin ≤ tmax ≤ ray.tmax)
 #         return true
 #     else
@@ -38,6 +39,7 @@
 # FARE TUTTI GLI ESEMPI ASTRATTI MA COMPLETI CON TUTTI GLI ARGOMENTI <-> TIPOLOGIA
 # =#
 # #=
+
 # Note: the rendering typology (onoff/flat/pathtracer/pointlight) has to be selected from CLI
 # or Julia REPL (see README.md), as width and height of the image.
 
@@ -68,7 +70,6 @@
 # Fundamental note:
 # the non-FLOATs arguments of every BRDF and MATERIAL object must be defined, in other words
 # you must define previously those objects and pass them with their names.
-
 
 # TRANSFORMATION trans_name(arg)
 # where arg can be (a product of):
@@ -421,7 +422,9 @@
 #     t_ints = roots(Polynomial([c0, c1, c2, c3, c4]))
 
 #     # verifico esistenza di almeno una soluzione
+
 #     t_ints === nothing && (return nothing)
+
 
 #     hit_ts = Vector{Float64}()
 
@@ -438,6 +441,7 @@
 #             nothing
 #         end
 #     end
+
 
 #     length(hit_ts) == 0 ? (return true) : (return false)
 
@@ -465,6 +469,7 @@
 
 # ### debug_torus.txt ################################################################################################
 # #=
+
 # CAMERA(ORTHOGONAL, TRANSLATION([-2, 0, 1]), 1.0)
 
 # COLOR purple(<128, 0, 128>)
@@ -495,9 +500,11 @@
 #     [-3.5, +3.0, 0.0],
 #     <255, 255, 255>
 # )
+
 # =#
 
 # ### interpreter/parser_functions.jl ################################################################################################
+
 
 # function parse_color(inputstream::InputStream, scene::Scene, open::Bool=false)
 #     token = read_token(inputstream)

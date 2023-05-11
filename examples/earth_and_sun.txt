@@ -61,7 +61,7 @@ PIGMENT sun_emitted_pigment ( UNIFORM(<sun_lum, sun_lum, sun_lum>) )
 VECTOR milky_way_pos([0.0, 0.0, 0.0])
 FLOAT milky_way_radius(20.0)
 FLOAT milky_way_lum(0.00)
-STRING milky_way_path ("images/milky_way_HD.jpg")
+STRING milky_way_path ("images/Milky_Way_HD.jpg")
 BRDF milky_way_brdf (DIFFUSE(IMAGE(milky_way_path)))
 PIGMENT milky_way_emitted_pigment ( UNIFORM(<milky_way_lum,milky_way_lum,milky_way_lum>) )
 
