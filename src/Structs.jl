@@ -855,7 +855,7 @@ end
         AABB::AABB
     )
 
-A 3D unit torus, a ring with circular section; has origin 
+A 3D torus, a ring of ray `R` with circular section of ray `r`; has origin 
 in `(0, 0, 0)` and axis parallel to the z-axis.
 
 ## Arguments

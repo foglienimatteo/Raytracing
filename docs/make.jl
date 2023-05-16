@@ -1,7 +1,7 @@
 push!(LOAD_PATH,"../src/")
 
 using Documenter
-# using Raytracing
+using Raytracing
 # using Pkg
 # Pkg.activate(normpath(@__DIR__))
 
