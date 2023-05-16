@@ -75,7 +75,7 @@ end
 
      # Leggo file di rifeirmento
      # inpf = open("/home/runner/work/Raytracing/Raytracing/test/reference_le.pfm", "r") do file    # GITHUB
-     inpf = open("test/reference_le.pfm", "r") do file	# read( ) legge già di base i bytes grezzi,
+     inpf = open("./test/reference_le.pfm", "r") do file	# read( ) legge già di base i bytes grezzi,
                read(file)							# opzioni da poter decidere sono solo "r" e "w" - specificando UInt8 legge solo il primo carattere
           end
 
