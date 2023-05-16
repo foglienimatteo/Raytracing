@@ -17,7 +17,9 @@
 # IN THE SOFTWARE.
 
 using Raytracing, Raytracing.Interpreter
-using Test, LinearAlgebra, StaticArrays
+using Test
+using StaticArrays
+using LinearAlgebra
 import ColorTypes:RGB
 
 

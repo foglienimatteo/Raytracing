@@ -20,7 +20,7 @@
 
 using Pkg
 Pkg.activate(normpath(@__DIR__))
-
+Pkg.add("LinearAlgebra")
 using Colors, Images, ImageIO, ArgParse, Polynomials, Documenter, LinearAlgebra
 using ColorTypes:RGB
 import FileIO: @format_str, query
