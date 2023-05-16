@@ -55,3 +55,10 @@ Manifest.toml
 *.tiff
 *.json
 *.jlprof
+
+# Local files used to test and/or generate renders and animations
+cornell_box_coy.txt
+cornell_box.txt
+render_debug.txt
+torus_animation.txt
+torus_debug.txt

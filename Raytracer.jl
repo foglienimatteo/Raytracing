@@ -21,7 +21,7 @@
 using Pkg
 Pkg.activate(normpath(@__DIR__))
 
-using Colors, Images, ImageIO, ArgParse, Polynomials, Documenter
+using Colors, Images, ImageIO, ArgParse, Polynomials, Documenter, LinearAlgebra
 using ColorTypes:RGB
 import FileIO: @format_str, query
 using Raytracing

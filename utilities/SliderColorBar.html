@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Maurizio Tomasi maurizio.tomasi@unimi.it">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="https://unpkg.com/reveal.js@^4//dist/reset.css">
+  <link rel="stylesheet" href="https://unpkg.com/reveal.js@^4//dist/reveal.css">
+  
+  <body style="background-color:black;">
+    
+    <style>
+        div.column{display: inline-block; vertical-align: top; width: 50%;}
+        div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+        
+        h1 {text-align: center;}
+        p {text-align: center;}
+        div {text-align: center;}
+        td {text-align: center;}
+        body {text-align: center;}
+    </style>
+
+    <section id="colori-rgb" class="slide level1" data-state="rgb-colors-1.0">
+        <h1 style="color:white;" data-state="rgb-colors-1.0">RGB COLORS</h1>
+        <center>
+        <table style="width:60%;">
+            <tr>
+            <th style="color:white;">
+            Red
+            </th>
+            <th style="color:white;">
+            Green
+            </th>
+            <th style="color:white;">
+            Blue
+            </th>
+            </tr>
+            <tr>
+            <td style="color:white;" id="val1Red">
+            </td>
+            <td style="color:white;"id="val1Green">
+            </td>
+            <td style="color:white;" id="val1Blue">
+            </td>
+            </tr>
+            <tr>
+            <td id="red" style="height:50px;background-color:red">
+            </td>
+            <td id="green" style="background-color:green">
+            </td>
+            <td id="blue" style="background-color:blue">
+            </td>
+            </tr>
+            <tr>
+            <td>
+            <input oninput="rgb1ChangeRed(this.value)" onchange="rgb1ChangeRed(this.value)" type="range" id="slideRed" name="slideRed" min="0" max="255" value="0">
+            </td>
+            <td>
+            <input oninput="rgb1ChangeGreen(this.value)" onchange="rgb1ChangeGreen(this.value)" type="range" id="slideGreen" name="slideGreen" min="0" max="255" value="0">
+            </td>
+            <td>
+            <input oninput="rgb1ChangeBlue(this.value)" onchange="rgb1ChangeBlue(this.value)" type="range" id="slideBlue" name="slideBlue" min="0" max="255" value="0">
+            </td>
+            </tr>
+        </table>
+        </center>
+        <div id="rgb1Change" style="margin:auto;width:50%;height:50px">
+
+        </div>
+        <script>
+            function roundComponent(value) {
+                return Math.round(value * 1000) / 1000
+            }
+
+            function rgb1ChangeRed(value) {
+                document.getElementById('val1Red').innerHTML = roundComponent(value / 255.0);
+                rgb1ChangeAll();
+            }
+            function rgb1ChangeGreen(value) {
+                document.getElementById('val1Green').innerHTML = roundComponent(value / 255.0);
+                rgb1ChangeAll();
+            }
+            function rgb1ChangeBlue(value) {
+                document.getElementById('val1Blue').innerHTML = roundComponent(value / 255.0);
+                rgb1ChangeAll();
+            }
+            function rgb1ChangeAll() {
+                var r = Math.round(document.getElementById('val1Red').innerHTML * 255);
+                var g = Math.round(document.getElementById('val1Green').innerHTML * 255);
+                var b = Math.round(document.getElementById('val1Blue').innerHTML * 255);
+                document.getElementById('rgb1Change').style.backgroundColor = 
+                    "rgb(" + r.toString() + "," + g.toString() + "," + b.toString() + ")";
+            }
+
+            document.addEventListener('rgb-colors-1.0', function() {
+                document.getElementById('val1Red').innerHTML = 0;
+                document.getElementById('val1Green').innerHTML = 0;
+                document.getElementById('val1Blue').innerHTML = 0;
+                rgb1ChangeAll();
+            });
+        </script>
+    </section>
+</body>
+</head>
+</html>

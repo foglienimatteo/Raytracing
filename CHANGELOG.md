@@ -1,17 +1,21 @@
 # HEAD
 
-# VERSION 1.1.1
+## VERSION 1.2.0
+
+- fixed bug in camera settings (conflicts between CLI command-default and file parsing)
+- added Torus as new shape
+
+## VERSION 1.1.1
 
 - fixed a bug in the point-light renderer algorithm;
 
 - modified the scenefile examples;
   
-# VERSION 1.1.0
+## VERSION 1.1.0
 
 - added the `render_animation` function and improved the CLI; now it's possible to read an animation from a file; see PR[#19](https://github.com/cosmofico97/Raytracing/pull/19)
 
-
-# VERSION 1.0.0
+## VERSION 1.0.0
 
 - added the `render` function and implemented lexer and parser; now it's possible to read a scene from a file and render it; see PR[#18](https://github.com/cosmofico97/Raytracing/pull/18)
 
@@ -21,21 +25,19 @@
 
 - Added the shape Triangle, see PR[#20](https://github.com/cosmofico97/Raytracing/pull/20)
 
-# VERSION 0.5.0
+## VERSION 0.5.0
 
 - Added a third demo world and modified `sphere_to_point_uv`
 
-# VERSION 0.4.0
+## VERSION 0.4.0
 
 - Added point-light tracing algorithm, see PR[#17](https://github.com/cosmofico97/Raytracing/pull/17)
 
-
-# VERSION 0.3.0
+## VERSION 0.3.0
 
 - Added antialiasing algorithm, see PR[#16](https://github.com/cosmofico97/Raytracing/pull/16)
 
-
-# VERSION 0.2.0
+## VERSION 0.2.0
 
 - Feature: it's possible to create animations of `demo` (required [ffmpeg](https://www.ffmpeg.org) software)
   
@@ -59,8 +61,7 @@
   
 - Implemented a first main interface
 
-
-# VERSION 0.1.0
+## VERSION 0.1.0
 
 - Added feature: now can convert from a .pfm image to .png and .tiff one 
 
