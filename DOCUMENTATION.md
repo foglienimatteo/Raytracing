@@ -104,7 +104,7 @@ You can define variables of the followint types:
 - `BOOL`: a boolean variable,
 - `VECTOR`: a real 3D vector, numbers inside square brackets,
 - `STRING`: a simple string, text inside "...",
-- `COLOR`: a RGB color, each value must be between 0 and 1 and inside triangle brackets or use the `to_RGB()` function to convert RGB colors (with componens between 0 and 255); can use also some defined color keywords (see below). You can use a [simple RGB color slide](utilities/SliderColorBar.html)bar to check your costum color.
+- `COLOR`: a RGB color, each value must be between 0 and 1 and inside triangle brackets or use the `to_RGB()` function to convert RGB colors (with componens between 0 and 255); can use also some defined color keywords (see below). You can use a [simple RGB color slide](utilities/SliderColorBar.html) bar to check your costum color.
 
 Those are the simplest variables you can create, here a brief example to resume:
 

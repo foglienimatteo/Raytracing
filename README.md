@@ -47,9 +47,6 @@ If you want to use this package in Julia repl, simply copy and paste the followi
 ```Julia
 using Pkg
 Pkg.activate(normpath(@__DIR__))
-using Colors, Images, ImageIO, ArgParse, Polynomials, Documenter
-using ColorTypes:RGB
-import FileIO: @format_str, query
 using Raytracing
 ```
 

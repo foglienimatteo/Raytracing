@@ -154,26 +154,26 @@ function second_world()
 		)
 	)
 
-	# add_shape!(
-	# 	world, 
-	# 	Triangle( 
-	# 		Point(2.0, 1.0, 3.0), Point(3.0, 3.0, 1.0), Point(2.5, 0.0, 1.0),
-	# 		triangle_material
-	# 	)
-	# )
+	add_shape!(
+	 	world, 
+		Triangle( 
+			Point(2.0, 1.0, 3.0), Point(3.0, 3.0, 1.0), Point(2.5, 0.0, 1.0),
+			triangle_material
+		)
+	)
 
-	# add_shape!(
-	# 	world, 
-	# 	Cube( 
-	# 		translation(Vec(-0.3, -1.5, 0.3)) * scaling(Vec(s2, s2, s2)),
-	# 		mirror_material
-	# 	)
-	# )
+	add_shape!(
+		world, 
+		Cube( 
+			translation(Vec(-0.3, -1.5, 0.3)) * scaling(Vec(s2, s2, s2)),
+			mirror_material
+		)
+	)
 
 	add_shape!(
 		world,
-		Torus(translation(Vec(0.4, 1.5, 2.)) * rotation_y(pi/6) * rotation_x(pi/6) * scaling(Vec(0.1, 0.2, 0.3)),
-		Material(DiffuseBRDF(CheckeredPigment(SYM_COL["PURPLE"], SYM_COL["NAVY"], 8))),
+		Torus(translation(Vec(0.4, -0.5, 2.2)) * rotation_y(pi/6) * rotation_x(pi/3) * scaling(Vec(0.2, 0.3, 0.12)),
+		Material(DiffuseBRDF(CheckeredPigment(SYM_COL["PURPLE"], SYM_COL["NAVY"], 24))),
 		1.0,
 		3.0
 		)
