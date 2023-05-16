@@ -130,25 +130,25 @@ There :
   - `pi`: stands for $\pi$;
   - `e`: stands for Neper number;
 
-- ```COLOR``` types (here in sRGB standard, in code normalized on 255):
-  - `BLACK` (<0.0, 0.0, 0.0>);
-  - `WHITE` (<255.0, 255.0, 255.0>);
-  - `RED` (<255.0, 0.0, 0.0>);
-  - `LIME` (<0.0, 255.0, 0.0>);
-  - `BLUE` (<0.0, 0.0, 255.0>);
-  - `YELLOW` (<255.0, 255.0, 0.0>);
-  - `CYAN` (<0.0, 255.0, 255.0>);
-  - `MAGENTA` (<255.0, 0.0, 255.0>);
-  - `SYLVER` (<192.0, 192.0, 192.0>);
-  - `GRAY` (<128.0, 128.0, 128.0>);
-  - `MAROON` (<128.0, 0.0, 0.0>);
-  - `OLIVE` (<128.0, 128.0, 0.0>);
-  - `GREEN` (<0.0, 128.0, 0.0>);
-  - `PURPLE` (<128.0, 0.0, 128.0>);
-  - `TEAL` (<0.0, 128.0, 128.0>);
-  - `NAVY` (<0.0, 0.0, 128.0>);
-  - `ORANGE` (<255.0, 165.0, 0.0>);
-  - `GOLD` (<255.0, 215.0, 0.0>).
+- ```COLOR``` types (here in sRGB standard, in code normalized on 255 in RGB standard):
+  - <span style="color:black">BLACK</span> (<0.0, 0.0, 0.0>);
+  - <span style="color:white">WHITE</span> (<255.0, 255.0, 255.0>);
+  - <span style="color:red">RED</span> (<255.0, 0.0, 0.0>);
+  - <span style="color:lime">LIME</span> (<0.0, 255.0, 0.0>);
+  - <span style="color:blue">BLUE</span> (<0.0, 0.0, 255.0>);
+  - <span style="color:yellow">YELLOW</span> (<255.0, 255.0, 0.0>);
+  - <span style="color:cyan">CYAN</span> (<0.0, 255.0, 255.0>);
+  - <span style="color:magenta">MAGENTA</span> (<255.0, 0.0, 255.0>);
+  - <span style="color:sylver">SYLVER</span> (<192.0, 192.0, 192.0>);
+  - <span style="color:grat">GRAY</span> (<128.0, 128.0, 128.0>);
+  - <span style="color:maroon">MAROON</span> (<128.0, 0.0, 0.0>);
+  - <span style="color:olive">OLIVE</span> (<128.0, 128.0, 0.0>);
+  - <span style="color:green">GREEN</span> (<0.0, 128.0, 0.0>);
+  - <span style="color:purple">PURPLE</span> (<128.0, 0.0, 128.0>);
+  - <span style="color:teal">TEAL</span> (<0.0, 128.0, 128.0>);
+  - <span style="color:navy">NAVY</span> (<0.0, 0.0, 128.0>);
+  - <span style="color:orange">ORANGE</span> (<255.0, 165.0, 0.0>);
+  - <span style="color:gold">GOLD</span> (<255.0, 215.0, 0.0>).
 
 </br>
 
