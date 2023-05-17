@@ -5,6 +5,9 @@
 # Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
 #
 
+using Printf
+using ProgressMeter, ProgressBars
+
 
 """
 	first_world() :: World
