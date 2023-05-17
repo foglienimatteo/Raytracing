@@ -42,14 +42,6 @@ git clone https://github.com/foglienimatteo/Raytracing
 
 or download the source code from the github repository https://github.com/foglienimatteo/Raytracing.
 
-If you want to use this package in Julia repl, simply copy and paste the following commands:
-
-```Julia
-using Pkg
-Pkg.activate(normpath(@__DIR__))
-using Raytracing
-```
-
 </br>
 
 ## Demo and Demo Animation
@@ -90,7 +82,7 @@ To understand how to write such a file, take a look at the files contained in th
   
 Each of these files contains also, in the initial description, the commands necessary to render the described image; if you want to learn this software in the most practical way, these files are perfect!
 
-If you are looking for a more complete and general documentation about how to write your text file and the CLI/repl options, you can find it in [LangDoc.md](./LangDoc.md).
+If you are looking for a more complete and general documentation about how to write your text file and the CLI/repl options, you can find it in [DOCUMENTATION.md](./DOCUMENTATION.md).
 
 The basic structure of a command in the CLI is the following:
 
