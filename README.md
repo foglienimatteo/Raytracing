@@ -72,7 +72,7 @@ and enjoy respectively the animation `demo/demo_anim_Flat_640x480x360.mp4` and t
 
 Demo Animation A  with FlatRenderer       | Demo Image B with PathTracing
 :----------------------------------------:|:-------------------------:
-![](demo/demo_anim_Flat_640x480x360.gif)  |  ![](demo/demo_B_PT_good.png)
+![](demo/demo_animation_FHD.gif)  |  ![](demo/demo_B_PT_good.png)
 
 It may takes few minutes to render the animation; you might also give smaller (integer and even) values to `--width` and `--height` in order to obtain the same animation in a smaller amount of time (the price to pay is a worse definition of the animation itself).
 
