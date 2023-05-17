@@ -64,7 +64,7 @@ To start off and check the correct behavior of this software run one of the foll
 ./Raytracer.jl demo --world_type=B --camera_type=per --camera_position="[-1, 0, 1]" --width=640 --height=480 --samples_per_pixel=9 pathtracer 
 ```
 
-and enjoy respectively the animation `demo/demo_animation_FHD.mp4` and the image `demo/demo_B_PatthTracing_FHD.png` (these are renders of better quality then those specified in the two CLI commands above, you can compare your results with [demo_anim_Flat_640x480x360.mp4](demo/demo_anim_Flat_640x480x360.mp4) and [demo_B_PathTracing_640x480.png](demo/demo_B_PathTracing_640x480.png))
+and enjoy respectively the animation `demo/demo_animation_FHD.mp4` and the image `demo/demo_B_PathTracing_FHD.png` (these are renders of better quality then those specified in the two CLI commands above, you can compare your results with [demo_anim_Flat_640x480x360.mp4](demo/demo_anim_Flat_640x480x360.mp4) and [demo_B_PathTracing_640x480.png](demo/demo_B_PathTracing_640x480.png))
 
 <!---
 <video width="640" height="480"  type="video/mp4" "src="https://user-images.githubusercontent.com/79974922/119556147-ef2b3200-bd9e-11eb-956f-17de6ea6bdda.mp4"  autoplay loop> </video>"
@@ -72,7 +72,7 @@ and enjoy respectively the animation `demo/demo_animation_FHD.mp4` and the image
 
 Demo Animation A  with FlatRenderer       | Demo Image B with PathTracing
 :----------------------------------------:|:-------------------------:
-![](demo/demo_animation_FHD.gif)  |  ![](demo/demo_B_PatthTracing_FHD.png)
+![](demo/demo_animation_FHD.gif)  |  ![](demo/demo_B_PathTracing_FHD.png)
 
 It may takes few minutes to render the animation; you might also give smaller (integer and even) values to `--width` and `--height` in order to obtain the same animation in a smaller amount of time (the price to pay is a worse definition of the animation itself).
 
