@@ -77,18 +77,23 @@ end
      # inpf = open("/home/runner/work/Raytracing/Raytracing/test/reference_le.pfm", "r") do file    # GITHUB
      
      try
-          inpf = open("./test/reference_le.pfm", "r") do file	# read( ) legge già di base i bytes grezzi,
+          global inpf = open("./test/reference_le.pfm", "r") do file	# read( ) legge già di base i bytes grezzi,
                read(file)							# opzioni da poter decidere sono solo "r" e "w" - specificando UInt8 legge solo il primo carattere
           end
+          println("   AAA")
      catch SystemError
-          run(`ls`)
-          println(" FORCED EXIT")
+          #run(`ls`)
+          #println(" FORCED EXIT")
+          global inpf = open("reference_le.pfm", "r") do file	# read( ) legge già di base i bytes grezzi,
+               read(file)							# opzioni da poter decidere sono solo "r" e "w" - specificando UInt8 legge solo il primo carattere
+          end
+          println("   BBB")
           exit()
      end
 
      # inpf = open("./test/reference_le.pfm", "r") do file	# read( ) legge già di base i bytes grezzi,
      #           read(file)							# opzioni da poter decidere sono solo "r" e "w" - specificando UInt8 legge solo il primo carattere
-     #      end
+     # end
 
      # Variabile stream
      io = IOBuffer(UInt8[], read=true, write=true)	# read, write = true opzionali, lo sono già di default
