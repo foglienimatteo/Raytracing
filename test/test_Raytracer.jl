@@ -408,8 +408,21 @@ end
 
 @testset "test_parse_animation_flat_settings" begin
      # cd("..")
+
+     try
+          file = open("./examples/tutorial_basic_syntax.txt", "r") do file	# read( ) legge già di base i bytes grezzi,
+               read(file)
+          end
+          global tut_file_name_5 = """./examples/tutorial_basic_syntax.txt"""
+
+     catch SystemError
+
+          global tut_file_name_5 = """tutorial_basic_syntax.txt"""
+
+     end
+
      string="""./Raytracer.jl animation --ONLY_FOR_TESTS --function=my_function --vec_variables=[float] --iterable=1:2 """*
-     """examples/tutorial_basic_syntax.txt flat """*
+     tut_file_name_5 * """ flat """*
      """--background_color="<1,2,3>" """
      args = Raytracing.from_CLI_to_vecstring(string)
      parsed_arguments = ArgParse_command_line(args)
@@ -430,8 +443,22 @@ end
 
 @testset "test_parse_animation_pathtracer_settings" begin
      # cd("..")
+
+     try
+          file = open("./examples/tutorial_basic_syntax.txt", "r") do file	# read( ) legge già di base i bytes grezzi,
+               read(file)
+          end
+          global tut_file_name_6 = """./examples/tutorial_basic_syntax.txt"""
+
+     catch SystemError
+
+          global tut_file_name_6 = """tutorial_basic_syntax.txt"""
+     
+     end
+
+
      string="""./Raytracer.jl animation --ONLY_FOR_TESTS --function=my_function --vec_variables=[float] --iterable=1:2 """*
-     """examples/tutorial_basic_syntax.txt pathtracer """*
+     tut_file_name_6 * """ pathtracer """*
      """--background_color="<1,2,3>" --init_state=1 --init_seq=2 --num_of_rays=15 --max_depth=3 --russian_roulette_limit=1"""
      args = Raytracing.from_CLI_to_vecstring(string)
      parsed_arguments = ArgParse_command_line(args)
@@ -452,8 +479,21 @@ end
 
 @testset "test_parse_animation_pointlight_settings" begin
      # cd("..")
+
+     try
+          file = open("./examples/tutorial_basic_syntax.txt", "r") do file	# read( ) legge già di base i bytes grezzi,
+               read(file)
+          end
+          global tut_file_name_7 = """./examples/tutorial_basic_syntax.txt"""
+
+     catch SystemError
+
+          global tut_file_name_7 = """tutorial_basic_syntax.txt"""
+     
+     end
+
      string="""./Raytracer.jl animation --ONLY_FOR_TESTS --function=my_function --vec_variables=[float] --iterable=1:2 """*
-     """examples/tutorial_basic_syntax.txt pointlight """*
+     tut_file_name_7 * """ pointlight """*
      """--background_color="<1,2,3>" --ambient_color="<4,  5,  6>" --dark_parameter=0.01"""
      args = Raytracing.from_CLI_to_vecstring(string)
      parsed_arguments = ArgParse_command_line(args)
