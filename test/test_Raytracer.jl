@@ -339,6 +339,7 @@ end
      """--normalization=0.1 --gamma=1.0 --avg_lum=1.0 --samples_per_pixel=16 --ONLY_FOR_TESTS """*
      """--function=my_function --vec_variables=[float] --iterable=1:2 """*
      """examples/tutorial_basic_syntax.txt onoff """
+     #"""tutorial_basic_syntax.txt onoff """
      args = Raytracing.from_CLI_to_vecstring(string)
      parsed_arguments = ArgParse_command_line(args)
 	(isnothing(parsed_arguments)) && (return nothing)
