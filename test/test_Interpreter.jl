@@ -409,9 +409,22 @@ end
 @testset "test_tutorial_basic_syntax.txt" begin
      # cd("..")
      #open("/home/runner/work/Raytracing/Raytracing/examples/tutorial_basic_syntax.txt") do stream
-     open("./examples/tutorial_basic_syntax.txt") do stream
-          scene = parse_scene(InputStream(stream, "tutorial_basic_syntax.txt"))
-          @test 1==1
+
+     # open("./examples/tutorial_basic_syntax.txt") do stream
+     #      scene = parse_scene(InputStream(stream, "tutorial_basic_syntax.txt"))
+     #      @test 1==1
+     # end
+
+     try
+          open("./examples/tutorial_basic_syntax.txt") do stream
+               scene = parse_scene(InputStream(stream, "tutorial_basic_syntax.txt"))
+               @test 1==1
+          end
+     catch SystemError
+          open("tutorial_basic_syntax.txt") do stream
+               scene = parse_scene(InputStream(stream, "tutorial_basic_syntax.txt"))
+               @test 1==1
+          end
      end
 
      @test 1==1
@@ -421,9 +434,21 @@ end
 @testset "test_demo_world_B.txt" begin
      # cd("..")
      #open("/home/runner/work/Raytracing/Raytracing/examples/demo_world_B.txt") do stream
-     open("./examples/demo_world_B.txt") do stream
-          scene = parse_scene(InputStream(stream, "/home/runner/work/Raytracing/Raytracing/examples/demo_world_B.txt"))
-          @test 1==1
+     # open("./examples/demo_world_B.txt") do stream
+     #      scene = parse_scene(InputStream(stream, "/home/runner/work/Raytracing/Raytracing/examples/demo_world_B.txt"))
+     #      @test 1==1
+     # end
+
+     try
+          open("./examples/demo_world_B.txt") do stream
+               scene = parse_scene(InputStream(stream, "./examples/demo_world_B.txt"))
+               @test 1==1
+          end
+     catch SystemError
+          open("demo_world_B.txt") do stream
+               scene = parse_scene(InputStream(stream, "demo_world_B.txt"))
+               @test 1==1
+          end
      end
 
      @test 1==1
