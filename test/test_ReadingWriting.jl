@@ -88,7 +88,6 @@ end
                read(file)							# opzioni da poter decidere sono solo "r" e "w" - specificando UInt8 legge solo il primo carattere
           end
           println("   BBB")
-          exit()
      end
 
      # inpf = open("./test/reference_le.pfm", "r") do file	# read( ) legge già di base i bytes grezzi,
@@ -217,7 +216,23 @@ end
      # img_be = open("/home/runner/work/Raytracing/Raytracing/test/reference_be.pfm", "r") do file    # GITHUB
      img_be = open("./test/reference_be.pfm", "r") do file
                Raytracing.read(file, Raytracing.HDRimage)
-               end 
+               end
+
+     try
+          global img_le = open("./test/reference_le.pfm", "r") do file
+               Raytracing.read(file, Raytracing.HDRimage)
+               end
+          global img_be = open("./test/reference_be.pfm", "r") do file
+               Raytracing.read(file, Raytracing.HDRimage)
+               end
+     catch SystemError
+          global img_le = open("reference_le.pfm", "r") do file
+               Raytracing.read(file, Raytracing.HDRimage)
+               end
+          global img_be = open("reference_be.pfm", "r") do file
+               Raytracing.read(file, Raytracing.HDRimage)
+               end
+     end
 
      @test img_le.width == 3
      @test img_le.height == 2
