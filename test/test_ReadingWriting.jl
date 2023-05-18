@@ -80,14 +80,12 @@ end
           global inpf = open("./test/reference_le.pfm", "r") do file	# read( ) legge già di base i bytes grezzi,
                read(file)							# opzioni da poter decidere sono solo "r" e "w" - specificando UInt8 legge solo il primo carattere
           end
-          println("   AAA")
      catch SystemError
           #run(`ls`)
           #println(" FORCED EXIT")
           global inpf = open("reference_le.pfm", "r") do file	# read( ) legge già di base i bytes grezzi,
                read(file)							# opzioni da poter decidere sono solo "r" e "w" - specificando UInt8 legge solo il primo carattere
           end
-          println("   BBB")
      end
 
      # inpf = open("./test/reference_le.pfm", "r") do file	# read( ) legge già di base i bytes grezzi,
