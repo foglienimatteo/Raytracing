@@ -81,7 +81,8 @@ end
                read(file)							# opzioni da poter decidere sono solo "r" e "w" - specificando UInt8 legge solo il primo carattere
           end
      catch SystemError
-          run(`pwd`)
+          run(`ls`)
+          println(" FORCED EXIT")
           exit()
      end
 
