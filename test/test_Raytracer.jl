@@ -334,11 +334,24 @@ end
 
 @testset "test_parse_render_animation_settings" begin
      # cd("..")
+
+     try
+          file = open("./examples/tutorial_basic_syntax.txt", "r") do file	# read( ) legge già di base i bytes grezzi,
+               read(file)
+          end
+          global tut_file_name_3 = """./examples/tutorial_basic_syntax.txt"""
+
+     catch SystemError
+
+          global tut_file_name_3 = """tutorial_basic_syntax.txt"""
+
+     end
+
      string="""./Raytracer.jl animation --camera_type="per" --camera_position="[1 , 2 , 3]" """*
      """--alpha=30. --width=40 --height=30 --set_anim_name="prova.mp4" """*
      """--normalization=0.1 --gamma=1.0 --avg_lum=1.0 --samples_per_pixel=16 --ONLY_FOR_TESTS """*
      """--function=my_function --vec_variables=[float] --iterable=1:2 """*
-     """examples/tutorial_basic_syntax.txt onoff """
+     tut_file_name_3 * """ onoff """
      #"""tutorial_basic_syntax.txt onoff """
      args = Raytracing.from_CLI_to_vecstring(string)
      parsed_arguments = ArgParse_command_line(args)
@@ -360,8 +373,21 @@ end
 
 @testset "test_parse_animation_onoff_settings" begin
      # cd("..")
+
+     try
+          file = open("./examples/tutorial_basic_syntax.txt", "r") do file	# read( ) legge già di base i bytes grezzi,
+               read(file)
+          end
+          global tut_file_name_4 = """./examples/tutorial_basic_syntax.txt"""
+
+     catch SystemError
+
+          global tut_file_name_4 = """tutorial_basic_syntax.txt"""
+
+     end
+
      string="""./Raytracer.jl animation --ONLY_FOR_TESTS --function=my_function --vec_variables=[float] --iterable=1:2 """*
-     """examples/tutorial_basic_syntax.txt onoff """*
+     tut_file_name_4 * """ onoff """*
      """--background_color="<1,2,3>" --color="<4,  5,  6>" """
      args = Raytracing.from_CLI_to_vecstring(string)
      parsed_arguments = ArgParse_command_line(args)
