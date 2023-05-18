@@ -34,9 +34,9 @@ end
 	include("test_HDRimage.jl")
 end
 
-# @testset "test_ReadingWriting" begin
-# 	include("test_ReadingWriting.jl")
-# end
+@testset "test_ReadingWriting" begin
+	include("test_ReadingWriting.jl")
+end
 
 
 @testset "test_ToneMapping" begin
