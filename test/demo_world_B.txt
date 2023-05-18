@@ -1,0 +1,185 @@
+# -*- encoding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright © 2021 Matteo Foglieni and Riccardo Gervasoni
+#
+# DEMO WORLD B
+# This is a simple tutorial scene-file that explains the basic syntax
+# of how scene can be defined for this program.
+# 
+# In order to check the correct behaviour of this file (i.e. that is correctly parsed,
+# without throwing exceptions, and render the demo image of the world type "B") run the 
+# following command in the CLI:
+#
+#    ./Raytracer.jl render examples/demo_world_B.txt --camera_position="[-1, 0, 1]" --samples_per_pixel=9 pathtracer
+#
+# or in the Julia REPL:
+#
+#   render("scenefile"=>"examples/demo_world_B.txt", "camera_position"=>"[-1, 0, 1]", "samples_per_pixel"=>9, "%COMMAND%"=>"pathtracer")
+#
+# You should obtain the same image if you run the demo command with the world "B":
+#
+#   ./Raytracer.jl demo --world_type="B" --camera_position="[-1, 0, 1]" --samples_per_pixel=9 pathtracer 
+#
+# or in the Julia REPL:
+# 
+#   demo("world_type"=>"B", "camera_position"=>"[-1, 0, 1]", "samples_per_pixel"=>9, "%COMMAND%"=>"pathtracer")
+#
+#
+#
+# And now let's start explaining how to define a scene!
+
+
+# First of all, let's define the materials of the objects
+MATERIAL sky_material (
+        DIFFUSE( UNIFORM(<0, 0, 0>) ),
+        UNIFORM( <1.0, 0.9, 0.5> )      # This will be our light source for this scene!
+)
+
+MATERIAL ground_material (
+        DIFFUSE( CHECKERED( <0.3, 0.5, 0.1> ,  <0.1, 0.2, 0.5> , 2 ) ),
+        UNIFORM( <0, 0, 0> )
+)
+
+MATERIAL sphere_material (
+        DIFFUSE( UNIFORM( to_RGB(0, 128, 240) ) ),
+        UNIFORM( <0, 0, 0> )
+)
+
+MATERIAL mirror_material (
+        SPECULAR( UNIFORM( to_RGB(232, 10, 10) ) ),
+        UNIFORM( <0, 0, 0> )
+)
+
+MATERIAL mirror_material_2 (
+        SPECULAR( UNIFORM( to_RGB(178, 255, 102) ) ),
+        UNIFORM( <0, 0, 0> )
+)
+
+MATERIAL triangle_material(
+	DIFFUSE(UNIFORM( to_RGB(190, 24, 120) ) ),
+    UNIFORM( <0, 0, 0> ) 
+)
+
+# All the shapes implemented in this program (exception made for triangles)
+# are created by default as "unitary", i.e. :
+# - the spheres are centered in the origin with radius 1
+# - the cubes are axis-aligned, centered in the origin with side 1
+# - the planes are created as the x-y plane (i.e. all the 3D point with z-component =0)
+# In order to create an arbitrary sized-placed-oriented shape, you must apply to the
+# unitary shape the appropriate sequence of transformations!
+
+# The transformations defined in this software are:
+# - IDENTITY : the identity transformation
+# - SCALING : a scaling transformation, must take as input a 3D vector defining the scaling
+# - ROTATION_X : a left-handed rotation around the x axis; it must take as
+#        input a float number defining the rotation angle IN RADIANTS 
+# - ROTATION_Y : a left-handed rotation around the you axis; it must take as
+#        input a float number defining the rotation angle IN RADIANTS 
+# - ROTATION_Z : a left-handed rotation around the z axis; it must take as
+#        input a float number defining the rotation angle IN RADIANTS 
+
+# The Coordinate System is defined as follows, for a default camera (placed in [-1,0,0],
+# i.e  X = -1, Y = 0, Z = 0, see later):
+# - the positive x-axis is entering in the display of the observer;
+# - the positive x-axis is oriented on the left of the observer;
+# - the positive z-axis is oriented on the top of the observer;
+
+# The positive sign for the rotations of all the three axis is given, as already said,
+# the right-hand rule, therefore a clockwise rotation for entering (x,y,z)-axis 
+# corresponds to a positive input rotation angle. 
+
+# You can concatenate an arbitrary number of transformations through the star symbol "*";
+# the application order for the transformations is FROM RIGHT TO LEFT! 
+
+# Now let's define an object!
+SPHERE(
+    sky_material,   # material to be used
+    SCALING([50, 50, 50]) * TRANSLATION([0, 0, 0]) # transformations to apply on the shape
+)
+
+# for the previous sphere, first is applied a TRANSLATION of a vector [0,0,0] (i.e.
+# no translation) and therefore a SCALING of 50 on all the three axes (i.e. the sphere
+# it's made bigger with a factor of 50 on the radius)
+
+# All the other shapes are defined in the same manner!
+
+PLANE(
+    ground_material,
+    IDENTITY 
+)
+
+PLANE(
+    mirror_material_2,
+    TRANSLATION([0., -2., 0]) * ROTATION_Z(pi/6.) * ROTATION_X(pi/2.) 
+)
+
+FLOAT s1(0.6)
+FLOAT s2(1.0)
+
+SPHERE(
+    sphere_material,
+    TRANSLATION([0, 0, 0.3]) * SCALING([s1, s1, s1])
+)
+
+SPHERE(
+    mirror_material,
+    TRANSLATION([0.4, 1.5, 0]) * SCALING([s2, s2, s2])
+)
+
+CUBE(
+    mirror_material,
+	TRANSLATION([-0.3, -1.5, 0.3]) * SCALING([s2, s2, s2])
+)
+
+# For the triangle shape, you have to specify (after the material) the three points 
+# that defines the triangle itself (instead of the transformation), in a vector-like
+# syntax
+TRIANGLE( 
+    triangle_material,
+	[2.0, 1.0, 3.0], [3.0, 3.0, 1.0], [2.5, 0.0, 1.0]
+)
+
+
+# The definition of the CAMERA (i.e. the point of view) works like follows:
+# - first argument : choosen projection , PERSPECTIVE or ORTHOGONAL
+# - second argument : transformation defining the point of view and the orientation
+# The third argument depends on the choosen projection:
+# - for PERSPECTIVE, you must insert a float defining the distance from the screen
+# - for ORTHOGONAL, nothing has to be further inserted (because the orthogonal 
+#       projection it's a specifical perspective projection with an infinite distance
+#       between the observer and the screen)
+#
+# NOTE: in previous versions, you have to specify the aspect ratio of the rendered image;
+# howeve, this created problems with the specification of the width and height pixel number
+# of the image (aaspect_ratio != width / height), so this value is from now on inferred
+# in the render function.
+#
+
+CAMERA(
+    PERSPECTIVE, 
+    TRANSLATION([-0.5, 0, 0.7]), 
+    1.0
+)
+
+# If you do not define a camera, the following default one will be used:
+#   CAMERA(
+#       PERSPECTIVE,
+#       TRANSLATION([-1, 0, 0]),
+#       1.0,
+#   )
+
+# Last but not least, it's appropriate to define also a pointlight source.
+# This source does matter only if you choose to render the image with
+# the `pointlight` renderer algorithm, but in such case is required
+# (otherwise all the image would appear black!)
+
+POINTLIGHT(
+    [-1.0, 4.0, 2.0], 
+    <1.0, 1.0, 1.0>
+)
+
+# NOTE: for the correct usage of the pointlight renderer, it's also opportune to take
+# to the third scenefile example "examples/earth_and_sun.txt", even if now you know the
+# basic structure of a scenefile for this software.
