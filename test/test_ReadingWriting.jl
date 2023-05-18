@@ -209,14 +209,14 @@ end
 end
 
 @testset "test_read_pfm" begin
-     # img_le = open("/home/runner/work/Raytracing/Raytracing/test/reference_le.pfm", "r") do file    # GITHUB
-     img_le = open("./test/reference_le.pfm", "r") do file
-               Raytracing.read(file, Raytracing.HDRimage)
-               end
-     # img_be = open("/home/runner/work/Raytracing/Raytracing/test/reference_be.pfm", "r") do file    # GITHUB
-     img_be = open("./test/reference_be.pfm", "r") do file
-               Raytracing.read(file, Raytracing.HDRimage)
-               end
+     # # img_le = open("/home/runner/work/Raytracing/Raytracing/test/reference_le.pfm", "r") do file    # GITHUB
+     # img_le = open("./test/reference_le.pfm", "r") do file
+     #           Raytracing.read(file, Raytracing.HDRimage)
+     #           end
+     # # img_be = open("/home/runner/work/Raytracing/Raytracing/test/reference_be.pfm", "r") do file    # GITHUB
+     # img_be = open("./test/reference_be.pfm", "r") do file
+     #           Raytracing.read(file, Raytracing.HDRimage)
+     #           end
 
      try
           global img_le = open("./test/reference_le.pfm", "r") do file
